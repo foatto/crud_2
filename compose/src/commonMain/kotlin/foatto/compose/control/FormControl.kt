@@ -10,7 +10,18 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
@@ -18,8 +29,43 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDefaults
+import androidx.compose.material3.TimePickerSelectionMode
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -40,7 +86,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.darkrockstudios.libraries.mpfilepicker.FilePicker
-import foatto.compose.*
+import foatto.compose.AppControl
+import foatto.compose.Root
+import foatto.compose.alertDialogShape
+import foatto.compose.colorBottomBar
+import foatto.compose.colorCheckBox
+import foatto.compose.colorControlBack
+import foatto.compose.colorDatePicker
+import foatto.compose.colorFormBack
+import foatto.compose.colorIconButton
+import foatto.compose.colorOutlinedTextInput
+import foatto.compose.colorRadioButton
+import foatto.compose.colorScrollBarBack
+import foatto.compose.colorScrollBarFore
+import foatto.compose.colorTextButton
+import foatto.compose.colorTextButtonDefault
+import foatto.compose.colorTimePicker
 import foatto.compose.composable.FileLinkLifeTimeInputDialog
 import foatto.compose.composable.ImageOrTextFromNameControl
 import foatto.compose.composable.StardartDialog
@@ -54,6 +115,11 @@ import foatto.compose.control.model.form.cell.FormDateTimeCellClient
 import foatto.compose.control.model.form.cell.FormFileCellClient
 import foatto.compose.control.model.form.cell.FormLabelCellClient
 import foatto.compose.control.model.form.cell.FormSimpleCellClient
+import foatto.compose.getStyleOtherIconNameSuffix
+import foatto.compose.invokeRequest
+import foatto.compose.invokeUploadFormFile
+import foatto.compose.singleButtonShape
+import foatto.compose.styleOtherIconSize
 import foatto.compose.utils.maxDp
 import foatto.core.IconName
 import foatto.core.model.AppAction
@@ -112,6 +178,7 @@ class FormControl(
 
     private val hmFormCellVisible = mutableMapOf<String, MutableMap<String, FormCellVisibleInfo>>()
     private val hmFormCellCaption = mutableMapOf<String, MutableMap<String, List<FormCellCaptionInfo>>>()
+    private val hmFormCellComboValues = mutableMapOf<String, MutableMap<String, List<Pair<Set<String>, List<Pair<String, String>>>>>>()
 
     private var formSaveActionType: String? = null
     private var formExitActionType: String? = null
@@ -455,11 +522,11 @@ class FormControl(
                                                                     }
                                                                 ),
                                                             colors = colorCheckBox ?: CheckboxDefaults.colors(),
-                                                            checked = gridData.current.value,
+                                                            checked = gridData.current,
                                                             onCheckedChange = { newState ->
                                                                 if (gridData.data.isEditable) {
-                                                                    gridData.current.value = newState
-                                                                    doVisibleAndCaptionChange(gridData)
+                                                                    gridData.current = newState
+                                                                    doVisibleAndCaptionAndComboChange(gridData)
                                                                 }
                                                             },
                                                         )
@@ -592,14 +659,14 @@ class FormControl(
                                                         Column(
                                                             modifier = Modifier.selectableGroup(),
                                                         ) {
-                                                            for ((value, descr) in gridData.data.values) {
+                                                            for ((value, descr) in gridData.values) {
                                                                 Row(
                                                                     modifier = Modifier.selectable(
-                                                                        selected = gridData.current.value == value,
+                                                                        selected = gridData.current == value,
                                                                         onClick = {
                                                                             if (gridData.data.isEditable) {
-                                                                                gridData.current.value = value
-                                                                                doVisibleAndCaptionChange(gridData)
+                                                                                gridData.current = value
+                                                                                doVisibleAndCaptionAndComboChange(gridData)
                                                                             }
                                                                         }
                                                                     ),
@@ -607,11 +674,11 @@ class FormControl(
                                                                 ) {
                                                                     RadioButton(
                                                                         colors = colorRadioButton ?: RadioButtonDefaults.colors(),
-                                                                        selected = gridData.current.value == value,
+                                                                        selected = gridData.current == value,
                                                                         onClick = {
                                                                             if (gridData.data.isEditable) {
-                                                                                gridData.current.value = value
-                                                                                doVisibleAndCaptionChange(gridData)
+                                                                                gridData.current = value
+                                                                                doVisibleAndCaptionAndComboChange(gridData)
                                                                             }
                                                                         }
                                                                     )
@@ -619,6 +686,12 @@ class FormControl(
                                                                         text = descr,
                                                                     )
                                                                 }
+                                                            }
+                                                            gridData.error?.let { error ->
+                                                                Text(
+                                                                    text = error,
+                                                                    color = Color.Red,
+                                                                )
                                                             }
                                                         }
 //                                            gridData.alComboData.forEachIndexed { index, comboData ->
@@ -648,8 +721,8 @@ class FormControl(
                                                                     }
                                                                 ),
                                                             colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
-                                                            value = gridData.data.values.find { (value, _) ->
-                                                                gridData.current.value == value
+                                                            value = gridData.values.find { (value, _) ->
+                                                                gridData.current == value
                                                             }?.second ?: "(неизвестное значение)",
                                                             onValueChange = {},
                                                             readOnly = !gridData.data.isEditable,
@@ -694,15 +767,15 @@ class FormControl(
                                                             expanded = isExpanded,
                                                             onDismissRequest = { isExpanded = false },
                                                         ) {
-                                                            for ((value, descr) in gridData.data.values) {
+                                                            for ((value, descr) in gridData.values) {
                                                                 DropdownMenuItem(
                                                                     text = {
                                                                         Text(text = descr)
                                                                     },
                                                                     onClick = {
-                                                                        gridData.current.value = value
+                                                                        gridData.current = value
                                                                         isExpanded = false
-                                                                        doVisibleAndCaptionChange(gridData)
+                                                                        doVisibleAndCaptionAndComboChange(gridData)
                                                                     },
                                                                     //contentPadding = PaddingValues(start = getMenuPadding(level), end = 16.dp),
                                                                 )
@@ -1039,6 +1112,8 @@ class FormControl(
                 if (formCell is FormBooleanCell || formCell is FormComboCell) {
                     hmFormCellVisible[formCell.name] = mutableMapOf()
                     hmFormCellCaption[formCell.name] = mutableMapOf()
+                    hmFormCellComboValues[formCell.name] = mutableMapOf()
+
                     alFormCellMasterPreAction.add(formGridData)
                 }
             } else {
@@ -1105,6 +1180,8 @@ class FormControl(
                     is FormBooleanCell, is FormComboCell -> {
                         hmFormCellVisible[formCell.name] = mutableMapOf()
                         hmFormCellCaption[formCell.name] = mutableMapOf()
+                        hmFormCellComboValues[formCell.name] = mutableMapOf()
+
                         alFormCellMasterPreAction.add(formGridData)
                     }
 
@@ -1140,6 +1217,14 @@ class FormControl(
                     }
                 }
 
+                //--- определим comboValue-зависимости
+                (formCell as? FormComboCell)?.let { formComboCell ->
+                    formComboCell.formCellComboDependedValues?.let { formCellComboDependedValues ->
+                        val hmFCCV = hmFormCellComboValues.getOrPut(formCellComboDependedValues.name) { mutableMapOf() }
+                        hmFCCV[formCell.name] = formCellComboDependedValues.values
+                    }
+                }
+
                 maxColCount = max(maxColCount, colIndex - 1)
             }
         }
@@ -1148,7 +1233,7 @@ class FormControl(
 
         //--- начальные установки видимости и caption-зависимостей
         for (gridData in alFormCellMasterPreAction) {
-            doVisibleAndCaptionChange(gridData)
+            doVisibleAndCaptionAndComboChange(gridData)
         }
 
 //        autoFocusId?.let { afId ->
@@ -1354,6 +1439,9 @@ class FormControl(
                     align = align,
                     data = formCell,
                 ).apply {
+                    values.clear()
+                    values.addAll(formCell.values)
+
                     if (formCell.asRadioButtons) {
                         formCell.values.indices.forEach { i ->
                             alSubFocusId.add(i)
@@ -1393,12 +1481,12 @@ class FormControl(
         }
     }
 
-    private fun doVisibleAndCaptionChange(gdMaster: FormBaseCellClient) {
+    private fun doVisibleAndCaptionAndComboChange(gdMaster: FormBaseCellClient) {
         //--- определение контрольного значения
         val controlValue =
             when (gdMaster) {
-                is FormBooleanCellClient -> gdMaster.current.value.toString()
-                is FormComboCellClient -> gdMaster.current.value
+                is FormBooleanCellClient -> gdMaster.current.toString()
+                is FormComboCellClient -> gdMaster.current
                 else -> "null"
             }
 
@@ -1428,6 +1516,28 @@ class FormControl(
                                     }
                                 }
                                 gd.current.value = caption
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        hmFormCellComboValues[gdMaster.cellName]?.let { hmFCCV ->
+            alGridRows.forEach { alGridRow ->
+                alGridRow.forEach { gdSlave ->
+                    gdSlave?.let {
+                        hmFCCV[gdSlave.cellName]?.let { alFCVV ->
+                            (gdSlave as? FormComboCellClient)?.let { gd ->
+                                var resultValues = gd.data.values
+                                for ((controlValues, values) in alFCVV) {
+                                    if (controlValue in controlValues) {
+                                        resultValues = values
+                                        break
+                                    }
+                                }
+                                gdSlave.values.clear()
+                                gdSlave.values.addAll(resultValues)
                             }
                         }
                     }
@@ -1625,7 +1735,7 @@ class FormControl(
             is FormBooleanCellClient -> {
                 formActionData += gridData.data.name to FormActionData(
                     booleanValue = if (withNewValues) {
-                        gridData.current.value
+                        gridData.current
                     } else {
                         gridData.data.value
                     }
@@ -1645,7 +1755,7 @@ class FormControl(
             is FormComboCellClient -> {
                 formActionData += gridData.data.name to FormActionData(
                     stringValue = if (withNewValues) {
-                        gridData.current.value
+                        gridData.current
                     } else {
                         gridData.data.value
                     }

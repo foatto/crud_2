@@ -1,6 +1,7 @@
 package foatto.core.model.response.form.cells
 
 import foatto.core.model.response.form.FormCellCaption
+import foatto.core.model.response.form.FormCellComboDependedValues
 import foatto.core.model.response.form.FormCellVisibility
 import kotlinx.serialization.Serializable
 import foatto.core.model.response.form.FormPinMode
@@ -19,4 +20,5 @@ class FormComboCell(
     val value: String,
     val values: List<Pair<String, String>>,
     val asRadioButtons: Boolean = false,
+    val formCellComboDependedValues: FormCellComboDependedValues? = null,
 ) : FormBaseCell()

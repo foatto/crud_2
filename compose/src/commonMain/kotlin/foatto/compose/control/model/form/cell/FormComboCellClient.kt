@@ -2,7 +2,10 @@ package foatto.compose.control.model.form.cell
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import foatto.core.model.response.form.cells.FormComboCell
 
 class FormComboCellClient(
@@ -17,5 +20,6 @@ class FormComboCellClient(
     align = align,
     isVisible = isVisible,
 ) {
-    val current: MutableState<String> = mutableStateOf(data.value)
+    val values = mutableStateListOf<Pair<String, String>>()
+    var current by mutableStateOf(data.value)
 }

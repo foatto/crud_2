@@ -49,7 +49,6 @@ class FileStoreController(
 
     @GetMapping(value = ["/"])
     fun downloadRoot(response: HttpServletResponse) {
-        //!!! после удаления старой версии переименовать в index.html
         download(response, "${rootDirName}/web_2/index.html")
     }
 

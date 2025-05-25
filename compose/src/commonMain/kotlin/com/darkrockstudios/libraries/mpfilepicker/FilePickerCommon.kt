@@ -4,7 +4,10 @@ package com.darkrockstudios.libraries.mpfilepicker
 
 import androidx.compose.runtime.Composable
 
-expect class PlatformFile
+expect class PlatformFile {
+    fun getName(): String
+    fun readBytes(): ByteArray
+}
 
 typealias FileSelected = (PlatformFile?) -> Unit
 

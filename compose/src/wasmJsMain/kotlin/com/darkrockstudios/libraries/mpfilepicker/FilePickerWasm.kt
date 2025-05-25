@@ -19,7 +19,10 @@ import kotlin.coroutines.suspendCoroutine
 
 actual data class PlatformFile(
     val file: File,
-)
+) {
+    actual fun getName(): String = file.name
+    actual fun readBytes(): ByteArray = ByteArray(0)    //!!! как взять ByteArray из wasm-target/platform-File
+}
 
 @Composable
 actual fun FilePicker(

@@ -2,65 +2,66 @@ package foatto.compose
 
 import com.darkrockstudios.libraries.mpfilepicker.PlatformFile
 import foatto.compose.control.model.form.cell.FormFileCellClient
-import foatto.compose.utils.SETTINGS_SERVER_ADDRESS
-import foatto.compose.utils.SETTINGS_SERVER_PORT
-import foatto.compose.utils.SETTINGS_SERVER_PROTOCOL
 import foatto.compose.utils.applicationDispatcher
-import foatto.compose.utils.settings
-import foatto.core.model.request.BaseRequest
-import foatto.core.model.response.BaseResponse
+import foatto.core.ApiUrl
+import foatto.core.model.emptyAction
+import foatto.core.model.response.form.FormFileUploadParams
 import foatto.core.model.response.form.FormFileUploadResponse
-import io.ktor.client.*
+import foatto.core.model.response.form.cells.FormFileData
+import foatto.core.util.getRandomInt
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-//WASM!!! временно, до появления всеобщего ktor-client (в т.ч. для wasm)
-private val httpClient = HttpClient {
-    install(HttpTimeout)
-    install(ContentNegotiation) {
-        json()
-    }
-    defaultRequest {
-        url.protocol = settings.getStringOrNull(SETTINGS_SERVER_PROTOCOL)?.let { protocolName ->
-            URLProtocol.byName[protocolName]
-        } ?: URLProtocol.HTTP
-        host = settings.getString(SETTINGS_SERVER_ADDRESS, "")
-        port = settings.getInt(SETTINGS_SERVER_PORT, 80)
-    }
-}
+internal actual fun getDefaultServerAddress(): String? = "192.168.0.44"
+internal actual fun getDefaultServerPort(): Int? = 19998
 
 @OptIn(DelicateCoroutinesApi::class)
-internal actual inline fun <reified IN : BaseRequest, reified OUT : BaseResponse> invokeRequest(
-    requestData: IN,
-    crossinline onSuccess: suspend (responseData: OUT) -> Unit,
-) {
-    GlobalScope.launch(applicationDispatcher) {
-        requestData.sessionId = sessionId
-
-        val responseData: OUT = httpClient.post {
-            url(requestData.url)
-            contentType(ContentType.Application.Json)
-            setBody(requestData)
-            timeout {
-                socketTimeoutMillis = 60_000
-            }
-        }.body()
-
-        onSuccess(responseData)
-    }
-}
-
 internal actual fun invokeUploadFormFile(
     gridData: FormFileCellClient,
     platformFiles: List<PlatformFile>,
     onSuccess: (responseData: FormFileUploadResponse) -> Unit,
 ) {
-    //!!! реализовать на ktor-client
+    GlobalScope.launch(applicationDispatcher) {
+        val responseData: FormFileUploadResponse = httpClient.post {
+            url(ApiUrl.UPLOAD_FORM_FILE)
+            //contentType(ContentType.MultiPart.FormData) ???
+            setBody(
+                MultiPartFormDataContent(
+                    parts = formData {
+                        for (platformFile in platformFiles) {
+                            val id = -getRandomInt()
+
+                            gridData.files.add(FormFileData(id, 0, emptyAction(), platformFile.getName()))
+                            gridData.addFiles[id] = platformFile.getName()
+
+                            append(
+                                key = FormFileUploadParams.FORM_FILE_IDS,
+                                value = id.toString(),
+                            )
+                            append(
+                                key = FormFileUploadParams.FORM_FILE_BLOBS,
+                                value = platformFile.readBytes(),   //.toString(),
+                                headers = Headers.build {
+                                    append(HttpHeaders.ContentType, ContentType.Application.OctetStream)//"application/octet-stream")
+                                    append(HttpHeaders.ContentDisposition, "filename=\"${platformFile.getName()}\"")
+                                }
+                            )
+                        }
+                    },
+//                append(
+//                    "document",
+//                    ChannelProvider(
+//                        size = some.length()) { some.readChannel() },
+//                        Headers.build { ...
+                )
+            )
+        }.body()
+
+        onSuccess(responseData)
+    }
 }

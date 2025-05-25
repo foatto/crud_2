@@ -8,10 +8,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.core.net.toFile
 
 actual data class PlatformFile(
     val uri: Uri,
-)
+) {
+    actual fun getName(): String = uri.toString()
+    actual fun readBytes(): ByteArray = uri.toFile().readBytes()
+}
 
 @Composable
 actual fun FilePicker(

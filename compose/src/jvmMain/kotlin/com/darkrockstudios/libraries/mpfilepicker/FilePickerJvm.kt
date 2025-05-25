@@ -10,7 +10,10 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 actual data class PlatformFile(
     val file: File,
-)
+) {
+    actual fun getName(): String = file.name
+    actual fun readBytes(): ByteArray = file.readBytes()
+}
 
 @Composable
 actual fun FilePicker(

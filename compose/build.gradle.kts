@@ -77,33 +77,22 @@ kotlin {
             api("com.russhwolf:multiplatform-settings-no-arg:$multiplatformSettingsVersion")
             api("media.kamel:kamel-image-default:$kamelImageVersion")
 
-//api("io.ktor:ktor-client-core:$ktorVersion")
+            api("io.ktor:ktor-client-cio:${ktorVersion}")
             api("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
-// io.ktor:ktor-client-serialization
-// libs.ktor.client.logging
             api("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
 
             api(project(":common"))
         }
         androidMain.dependencies {
-//            api("androidx.compose.ui:ui-tooling-preview:$composeVersion") - теперь не надо?
             api("androidx.activity:activity-compose:${androidxActivityComposeVersion}")
-                    }
+        }
         jvmMain.dependencies {
             api(compose.desktop.currentOs)  //!!! linux, windows
 
             api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:${kotlinxCoroutinesVersion}")
-            api("io.ktor:ktor-client-cio-jvm:${ktorVersion}")        }
+        }
     }
 }
-/*
-Варианты вместо CIO:
-
-ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" } - как альтернатива ktor-client-android
-ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" } - подойдёт ли для wasm?
-ktor-client-curl = { module = "io.ktor:ktor-client-curl", version.ref = "ktor" }
-ktor-client-winhttp = { module = "io.ktor:ktor-client-winhttp", version.ref = "ktor" }
-*/
 
 android {
     namespace = "foatto.compose"

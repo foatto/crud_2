@@ -17,6 +17,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+internal actual fun getDefaultServerProtocol(): URLProtocol? = URLProtocol.HTTP
 internal actual fun getDefaultServerAddress(): String? = "192.168.0.44"
 internal actual fun getDefaultServerPort(): Int? = 19998
 

@@ -8,10 +8,12 @@ import foatto.core.model.response.form.FormFileUploadParams
 import foatto.core.model.response.form.FormFileUploadResponse
 import foatto.core.model.response.form.cells.FormFileData
 import foatto.core.util.getRandomInt
+import io.ktor.http.URLProtocol
 import kotlinx.browser.window
 import kotlinx.serialization.json.Json
 import org.w3c.xhr.XMLHttpRequest
 
+internal actual fun getDefaultServerProtocol(): URLProtocol? = null
 internal actual fun getDefaultServerAddress(): String? = null
 internal actual fun getDefaultServerPort(): Int? = null
 

@@ -30,9 +30,11 @@ internal val httpClient = HttpClient /* (CIO) - не работает в wasm-ta
         json()
     }
     defaultRequest {
-        url.protocol = settings.getStringOrNull(SETTINGS_SERVER_PROTOCOL)?.let { protocolName ->
-            URLProtocol.byName[protocolName]
-        } ?: URLProtocol.HTTP
+        getDefaultServerProtocol()?.let { defaultProtocol ->
+            url.protocol = settings.getStringOrNull(SETTINGS_SERVER_PROTOCOL)?.let { protocolName ->
+                URLProtocol.byName[protocolName] ?: defaultProtocol
+            } ?: defaultProtocol
+        }
         getDefaultServerAddress()?.let { defaultAddress ->
             host = settings.getString(SETTINGS_SERVER_ADDRESS, defaultAddress)
         }
@@ -42,6 +44,7 @@ internal val httpClient = HttpClient /* (CIO) - не работает в wasm-ta
     }
 }
 
+internal expect fun getDefaultServerProtocol(): URLProtocol?
 internal expect fun getDefaultServerAddress(): String?
 internal expect fun getDefaultServerPort(): Int?
 

@@ -17,6 +17,7 @@ val ktorVersion: String by project
 
 val multiplatformSettingsVersion: String by project
 val kamelImageVersion: String by project
+val fileKitVersion: String by project
 
 val androidxActivityComposeVersion: String by project
 
@@ -73,13 +74,17 @@ kotlin {
 
             api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
 
+            api("io.ktor:ktor-client-cio:${ktorVersion}")
+            api("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+            api("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+
             api("com.russhwolf:multiplatform-settings:$multiplatformSettingsVersion")
             api("com.russhwolf:multiplatform-settings-no-arg:$multiplatformSettingsVersion")
             api("media.kamel:kamel-image-default:$kamelImageVersion")
 
-            api("io.ktor:ktor-client-cio:${ktorVersion}")
-            api("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
-            api("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+            api("io.github.vinceglb:filekit-core:${fileKitVersion}")
+            api("io.github.vinceglb:filekit-dialogs-compose:${fileKitVersion}")
+            //api("io.github.vinceglb:filekit-coil:$fileKitVersion") - пока не нужно
 
             api(project(":common"))
         }

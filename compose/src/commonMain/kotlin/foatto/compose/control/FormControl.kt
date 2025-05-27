@@ -66,6 +66,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -85,7 +86,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.alertDialogShape
@@ -146,12 +146,68 @@ import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getLocalDateTime
 import foatto.core.util.getRandomLong
 import foatto.core.util.getTimeZone
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import kotlin.math.max
 import kotlin.math.min
+
+var filePickerDialogSettings: FileKitDialogSettings = FileKitDialogSettings.createDefault()
+var formComboCellPreSetFun: ((formCell: FormComboCell) -> Unit)? = null
+/*
+        formComboCellPreSetFun = { formCell: FormComboCell ->
+            if (formCell.name == EquipActionParameters.FIELD_PORT_SELECT) {
+                val portList = getPortList()
+                if (portList.isNotEmpty()) {
+                    formCell.value = portList.first().first
+                    formCell.values = portList
+                } else {
+                    formCell.value = ""
+                    formCell.values = listOf("" to "COM-порты не обнаружены")
+                }
+            }
+        }
+ */
+var formSelectorPreCall: ((selectorAction: AppAction, alGridRows: SnapshotStateList<MutableList<FormBaseCellClient?>>) -> Boolean)? = null
+/*
+        formSelectorPreCall = { selectorAction, alGridRows ->
+            if (selectorAction.type == ActionTypeLicense.PIN_CODE_GENERATE) {
+                val pinCode = generatePinCode()
+
+                selectorAction.selectorPath.forEach { (_, toField) ->
+                    alGridRows.forEach { alGridRow ->
+                        alGridRow.forEach { gridData ->
+                            val toCell = gridData as? FormSimpleCellClient
+                            if (toCell?.data?.name == toField) {
+                                toCell.current.value = pinCode.toString()
+                            }
+                        }
+                    }
+                }
+                true
+            } else {
+                false
+            }
+        }
+ */
+var formActionPreInvokeFun: ((formButton: FormButton, formActionData: MutableMap<String, FormActionData>) -> Map<String, String>?)? = null
+/*
+        formActionPreInvokeFun = { formButton, formActionData ->
+            if (formButton.params.contains(EquipActionParameters.PARAM_RUN_SCRIPT)) {
+                val errors = runScript(formActionData)
+errors?.forEach { entry ->
+    println("'${entry.key}' = '${entry.value}'")
+}
+                errors
+            }
+            else {
+                null
+            }
+        }
+ */
 
 class FormControl(
     private val root: Root,
@@ -208,7 +264,19 @@ class FormControl(
         val clipboardManager = LocalClipboardManager.current
         val coroutineScope = rememberCoroutineScope()
 
-        var isFilePickerVisible by remember { mutableStateOf(false) }
+        val filePickerLauncher = rememberFilePickerLauncher(
+            title = "Выбор файла",
+            dialogSettings = filePickerDialogSettings,
+        ) { platformFile ->
+            platformFile?.let {
+                isFileAddInProgress = true
+                fileGridData?.let { formFileCellClient ->
+                    invokeUploadFormFile(formFileCellClient, listOf(platformFile)) {
+                        isFileAddInProgress = false
+                    }
+                }
+            }
+        }
         val datePickerState = rememberDatePickerState(
             initialDisplayMode = DisplayMode.Picker,
         )
@@ -310,24 +378,6 @@ class FormControl(
                     }
                 },
             )
-        }
-
-        FilePicker(
-            show = isFilePickerVisible,
-            fileExtensions = listOf("*.*"),
-        ) { platformFile ->
-            isFilePickerVisible = false
-
-            if (platformFile != null) {
-                isFileAddInProgress = true
-                coroutineScope.launch {
-                    fileGridData?.let { formFileCellClient ->
-                        invokeUploadFormFile(formFileCellClient, listOf(platformFile)) {
-                            isFileAddInProgress = false
-                        }
-                    }
-                }
-            }
         }
 
         if (showDialog) {
@@ -799,7 +849,7 @@ class FormControl(
                                                                         colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
                                                                         onClick = {
                                                                             fileGridData = gridData
-                                                                            isFilePickerVisible = true
+                                                                            filePickerLauncher.launch()
                                                                         }
 //                                                    onKeyUp { syntheticKeyboardEvent ->
 //                                                        doKeyUp(gridData, syntheticKeyboardEvent)
@@ -1434,6 +1484,7 @@ class FormControl(
             }
 
             is FormComboCell -> {
+                formComboCellPreSetFun?.invoke(formCell)
                 FormComboCellClient(
                     cellName = formCell.name,
                     minWidth = formCell.minWidth,
@@ -1678,6 +1729,11 @@ class FormControl(
             }
         }
 
+        formActionPreInvokeFun?.invoke(formButton, formActionData)?.let { errors ->
+            prepareErrors(errors)
+            return
+        }
+
         invokeRequest(
             FormActionRequest(
                 action = formAction.copy(
@@ -1693,18 +1749,7 @@ class FormControl(
             when (formActionResponse.responseCode) {
                 ResponseCode.ERROR -> {
                     formActionResponse.errors?.let { errors ->
-                        alGridRows.forEach { alGridRow ->
-                            alGridRow.forEach { gridData ->
-                                gridData?.error = when (gridData) {
-                                    is FormSimpleCellClient -> errors[gridData.data.name]
-                                    is FormBooleanCellClient -> errors[gridData.data.name]
-                                    is FormDateTimeCellClient -> errors[gridData.data.name]
-                                    is FormComboCellClient -> errors[gridData.data.name]
-                                    is FormFileCellClient -> errors[gridData.data.name]
-                                    else -> null
-                                }
-                            }
-                        }
+                        prepareErrors(errors)
                     }
                 }
 
@@ -1781,7 +1826,26 @@ class FormControl(
         }
     }
 
+    private fun prepareErrors(errors: Map<String, String>) {
+        alGridRows.forEach { alGridRow ->
+            alGridRow.forEach { gridData ->
+                gridData?.error = when (gridData) {
+                    is FormSimpleCellClient -> errors[gridData.data.name]
+                    is FormBooleanCellClient -> errors[gridData.data.name]
+                    is FormDateTimeCellClient -> errors[gridData.data.name]
+                    is FormComboCellClient -> errors[gridData.data.name]
+                    is FormFileCellClient -> errors[gridData.data.name]
+                    else -> null
+                }
+            }
+        }
+    }
+
     private suspend fun callSelector(selectorAction: AppAction) {
+        if (formSelectorPreCall?.invoke(selectorAction, alGridRows) == true) {
+            return
+        }
+
         root.setWait(true)
 
         val selectorFunId = getRandomLong()

@@ -30,7 +30,6 @@ internal actual fun invokeUploadFormFile(
     GlobalScope.launch(applicationDispatcher) {
         val responseData: FormFileUploadResponse = httpClient.post {
             url(ApiUrl.UPLOAD_FORM_FILE)
-            //contentType(ContentType.MultiPart.FormData) ???
             setBody(
                 MultiPartFormDataContent(
                     parts = formData {

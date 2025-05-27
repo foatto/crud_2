@@ -313,7 +313,8 @@ class FormControl(
         }
 
         FilePicker(
-            isFilePickerVisible,
+            show = isFilePickerVisible,
+            fileExtensions = listOf("*.*"),
         ) { platformFile ->
             isFilePickerVisible = false
 

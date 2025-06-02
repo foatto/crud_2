@@ -34,12 +34,14 @@ import foatto.compose.composable.MainMenu
 import foatto.compose.composable.PasswordChangeDialog
 import foatto.compose.composable.StardartDialog
 import foatto.compose.composable.TabPanel
-import foatto.compose.composable.getClientSubMenu
+import foatto.compose.composable.getClientSubMenus
 import foatto.compose.control.TableControl
+import foatto.compose.i18n.lang
 import foatto.compose.model.MenuDataClient
 import foatto.compose.model.TabInfo
 import foatto.compose.utils.*
 import foatto.core.ActionType
+import foatto.core.i18n.LanguageEnum
 import foatto.core.model.AppAction
 import foatto.core.model.AppUserConfig
 import foatto.core.model.request.ChangePasswordRequest
@@ -67,6 +69,7 @@ import kotlinx.coroutines.launch
         AppControl(root, startAppParam, tabId)
     }
 */
+var defaultStartModule: String? = null
 
 open class Root {
 
@@ -238,7 +241,7 @@ open class Root {
     }
 
     suspend fun start() {
-        settings.getStringOrNull(SETTINGS_START_MODULE)?.let { startModule ->
+        defaultStartModule?.let { startModule ->
             addTabComp(
                 AppAction(
                     type = ActionType.MODULE_TABLE,
@@ -254,16 +257,6 @@ open class Root {
                 action.url?.let { fileUrl ->
                     openFileByUrl(fileUrl)
                 }
-            }
-
-            ActionType.SET_START_MODULE -> {
-                action.module?.let { module ->
-                    settings.putString(SETTINGS_START_MODULE, module)
-                }
-            }
-
-            ActionType.CLEAR_START_MODULE -> {
-                settings.remove(SETTINGS_START_MODULE)
             }
 
             ActionType.CHANGE_PASSWORD -> {
@@ -286,6 +279,13 @@ open class Root {
                     alControl.clear()
 
                     start()
+                }
+            }
+
+            ActionType.SET_LANGUAGE -> {
+                action.module?.let { module ->
+                    lang = LanguageEnum.valueOf(module)
+                    settings.putString(SETTINGS_LANGUAGE, module)
                 }
             }
 
@@ -347,7 +347,7 @@ open class Root {
 
         alMenuDataClient.clear()
         alMenuDataClient.addAll(alMenuData)
-        alMenuDataClient.add(getClientSubMenu(appUserConfig, scaledWindowWidth, scaleKoef))
+        alMenuDataClient.addAll(getClientSubMenus(appUserConfig, scaledWindowWidth, scaleKoef))
 
         isTabPanelVisible = true
     }

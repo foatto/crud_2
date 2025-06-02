@@ -7,9 +7,7 @@ object ActionType {
 
     const val CHANGE_PASSWORD: String = "CHANGE_PASSWORD"
     const val LOGOFF: String = "LOGOFF"
-
-    const val SET_START_MODULE: String = "SET_START_MODULE"
-    const val CLEAR_START_MODULE: String = "CLEAR_START_MODULE"
+    const val SET_LANGUAGE: String = "SET_LANGUAGE"
 
     const val MODULE_TABLE: String = "MODULE_TABLE"
     const val MODULE_FORM: String = "MODULE_FORM"

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import foatto.compose.model.MenuDataClient
 import foatto.core.ActionType
+import foatto.core.i18n.LanguageEnum
 import foatto.core.model.AppAction
 import foatto.core.model.AppUserConfig
 
@@ -90,11 +91,11 @@ internal fun GenerateMenuBody(
 
 private fun getMenuPadding(level: Int) = ((1 + level) * 16).dp
 
-internal fun getClientSubMenu(
+internal fun getClientSubMenus(
     appUserConfig: AppUserConfig,
     scaledWindowWidth: Int,
     scaleKoef: Float,
-): MenuDataClient {
+): List<MenuDataClient> {
     val alClientSubMenu = mutableListOf<MenuDataClient>()
 
     alClientSubMenu += MenuDataClient(caption = "Пользователь: ${appUserConfig.currentUserName}")
@@ -114,5 +115,10 @@ internal fun getClientSubMenu(
 //    alClientSubMenu.add(MenuDataClient(url = "", text = "touch screen = ${getStyleIsTouchScreen()}"))
     }
 
-    return MenuDataClient(caption = "Дополнительно", alSubMenu = alClientSubMenu)
+    alClientSubMenu += MenuDataClient(caption = "")
+    LanguageEnum.entries.forEach { lang ->
+        alClientSubMenu += MenuDataClient(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
+    }
+
+    return alClientSubMenu
 }

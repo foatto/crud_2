@@ -1,13 +1,35 @@
 package foatto.compose_mms
 
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import foatto.compose.*
+import foatto.compose.Root
+import foatto.compose.colorCheckBox
+import foatto.compose.colorCompositeMovedBlockBack
+import foatto.compose.colorDatePicker
+import foatto.compose.colorIconButton
+import foatto.compose.colorMainText
+import foatto.compose.colorOutlinedTextInput
+import foatto.compose.colorRadioButton
+import foatto.compose.colorTabSelected
+import foatto.compose.colorTabUnselected
+import foatto.compose.colorTableCurrentRow
+import foatto.compose.colorTextButton
+import foatto.compose.colorTextButtonDefault
+import foatto.compose.colorTimePicker
+import foatto.compose.colorWait
+import foatto.compose.colorWaitTrack
+import foatto.compose.defaultStartModule
 import foatto.compose.utils.SETTINGS_SERVER_ADDRESS
 import foatto.compose.utils.SETTINGS_SERVER_PORT
 import foatto.compose.utils.SETTINGS_SERVER_PROTOCOL
-import foatto.compose.utils.SETTINGS_START_MODULE
 import foatto.compose.utils.settings
 import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.addAppModuleUrls
@@ -37,9 +59,7 @@ class MMSRoot : Root() {
         settings.putString(SETTINGS_SERVER_ADDRESS, "192.168.0.44")
         settings.putInt(SETTINGS_SERVER_PORT, 19998)
 
-//        if (settings.getStringOrNull(SETTINGS_START_MODULE) == null) {
-        settings.putString(SETTINGS_START_MODULE, AppModuleMMS.OBJECT)
-//        }
+        defaultStartModule = AppModuleMMS.OBJECT
 
         addAppModuleUrls()
     }
@@ -76,7 +96,6 @@ class MMSRoot : Root() {
         colorCheckBox = CheckboxDefaults.colors().copy(
             checkedBoxColor = darkBlueColor,
             checkedBorderColor = darkBlueColor,
-
         )
         colorRadioButton = RadioButtonDefaults.colors().copy(
             selectedColor = darkBlueColor,

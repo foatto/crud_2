@@ -102,11 +102,6 @@ internal fun getClientSubMenus(
     alClientSubMenu += MenuDataClient(caption = "Сменить пароль", action = AppAction(ActionType.CHANGE_PASSWORD))
     alClientSubMenu += MenuDataClient(caption = "Выход из системы", action = AppAction(ActionType.LOGOFF))
 
-//    alClientSubMenu += MenuDataClient(caption = "")
-//
-//    alClientSubMenu += MenuDataClient(caption = "Установить вкладку как стартовую", action = AppAction(ActionType.SET_START_MODULE))
-//    alClientSubMenu += MenuDataClient(caption = "Очистить установку стартовой", action = AppAction(ActionType.CLEAR_START_MODULE))
-
     if (appUserConfig.isAdmin) {
         alClientSubMenu += MenuDataClient(caption = "")
 
@@ -115,10 +110,10 @@ internal fun getClientSubMenus(
 //    alClientSubMenu.add(MenuDataClient(url = "", text = "touch screen = ${getStyleIsTouchScreen()}"))
     }
 
-    alClientSubMenu += MenuDataClient(caption = "")
-    LanguageEnum.entries.forEach { lang ->
-        alClientSubMenu += MenuDataClient(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
-    }
+//    alClientSubMenu += MenuDataClient(caption = "")
+//    LanguageEnum.entries.forEach { lang ->
+//        alClientSubMenu += MenuDataClient(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
+//    }
 
     return alClientSubMenu
 }

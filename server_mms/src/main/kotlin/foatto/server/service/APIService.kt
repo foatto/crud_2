@@ -1,7 +1,6 @@
 package foatto.server.service
 
 import foatto.core.ActionType
-import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
 import foatto.server.OrgType
 import foatto.server.entity.UserEntity
@@ -63,7 +62,7 @@ class APIService(
         sensorRepository.findByObj(objectEntity).forEach { sensorEntity ->
             val data = mutableListOf<Map<String, String>>()
 
-            SensorService.checkAndCreateAggTable(entityManager, sensorEntity.id)
+            SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
             ApplicationService.queryNativeSql(
                 entityManager,

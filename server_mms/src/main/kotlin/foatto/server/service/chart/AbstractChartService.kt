@@ -159,7 +159,7 @@ abstract class AbstractChartService(
         colorIndexFun: (value: Double) -> ChartColorIndex,
         lines: ChartElement,
     ) {
-        SensorService.checkAndCreateAggTable(entityManager, sensorEntity.id)
+        SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
         ApplicationService.withConnection(entityManager) { conn ->
             val rs = conn.executeQuery(

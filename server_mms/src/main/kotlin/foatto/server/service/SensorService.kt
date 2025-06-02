@@ -129,26 +129,26 @@ class SensorService(
 
         private const val FIELD_CALIBRATION = "_calibration" // псевдополе для калибровки/тарировки
 
-        fun checkAndCreateAggTable(conn: CoreAdvancedConnection, sensorId: Int) {
+        fun checkAndCreateSensorTables(conn: CoreAdvancedConnection, sensorId: Int) {
             if (!checkAggTableIsExists(conn, sensorId)) {
                 createAggTable(conn, sensorId)
             }
+            if (!checkTextTableIsExists(conn, sensorId)) {
+                createTextTable(conn, sensorId)
+            }
         }
 
-        fun checkAndCreateAggTable(entityManager: EntityManager, sensorId: Int) {
+        fun checkAndCreateSensorTables(entityManager: EntityManager, sensorId: Int) {
             if (!checkAggTableIsExists(entityManager, sensorId)) {
                 createAggTable(entityManager, sensorId)
+            }
+            if (!checkTextTableIsExists(entityManager, sensorId)) {
+                createTextTable(entityManager, sensorId)
             }
         }
 
         private fun checkAggTableIsExists(conn: CoreAdvancedConnection, sensorId: Int): Boolean {
-            val rs = conn.executeQuery(
-                """
-                    SELECT tablename FROM pg_tables
-                    WHERE schemaname = 'public' 
-                    AND tablename = 'mms_agg_$sensorId'
-                """
-            )
+            val rs = conn.executeQuery(getAggTableIsExistsSql(sensorId))
             val result = rs.next()
             rs.close()
 
@@ -157,57 +157,94 @@ class SensorService(
 
         private fun checkAggTableIsExists(entityManager: EntityManager, sensorId: Int): Boolean {
             var result = false
-
-            queryNativeSql(
-                entityManager,
-                """
-                    SELECT tablename FROM pg_tables
-                    WHERE schemaname = 'public' 
-                    AND tablename = 'mms_agg_$sensorId'
-                """
-            ) { rs: ResultSet ->
+            queryNativeSql(entityManager, getAggTableIsExistsSql(sensorId)) { rs: ResultSet ->
                 result = rs.next()
             }
 
             return result
         }
 
+        private fun getAggTableIsExistsSql(sensorId: Int): String =
+            """
+                SELECT tablename FROM pg_tables
+                WHERE schemaname = 'public' 
+                AND tablename = 'mms_agg_$sensorId'
+            """
+
+        private fun checkTextTableIsExists(conn: CoreAdvancedConnection, sensorId: Int): Boolean {
+            val rs = conn.executeQuery(getTextTableIsExistsSql(sensorId))
+            val result = rs.next()
+            rs.close()
+
+            return result
+        }
+
+        private fun checkTextTableIsExists(entityManager: EntityManager, sensorId: Int): Boolean {
+            var result = false
+            queryNativeSql(entityManager, getTextTableIsExistsSql(sensorId)) { rs: ResultSet ->
+                result = rs.next()
+            }
+
+            return result
+        }
+
+        private fun getTextTableIsExistsSql(sensorId: Int): String =
+            """
+                SELECT tablename FROM pg_tables
+                WHERE schemaname = 'public' 
+                AND tablename = 'mms_text_$sensorId'
+            """
+
         private fun createAggTable(conn: CoreAdvancedConnection, sensorId: Int) {
-            conn.executeUpdate(
-                """
-                    CREATE TABLE MMS_agg_$sensorId (
-                        ontime_0        INT NOT NULL,
-                        ontime_1        INT,         
-                        type_0          INT,
-                        value_0         FLOAT8,
-                        value_1         FLOAT8,
-                        value_2         FLOAT8,
-                        value_3         FLOAT8
-                    )
-                """
-            )
-            conn.executeUpdate(" CREATE INDEX MMS_agg_${sensorId}_ontime_0 ON MMS_agg_$sensorId ( ontime_0 ) ")
-            conn.executeUpdate(" CREATE INDEX MMS_agg_${sensorId}_ontime_1 ON MMS_agg_$sensorId ( ontime_1 ) ")
+            getCreateAggTableSqls(sensorId).forEach { sql ->
+                conn.executeUpdate(sql)
+            }
         }
 
         private fun createAggTable(entityManager: EntityManager, sensorId: Int) {
-            executeNativeSql(
-                entityManager,
-                """
-                    CREATE TABLE MMS_agg_$sensorId (
-                        ontime_0        INT NOT NULL,
-                        ontime_1        INT,         
-                        type_0          INT,
-                        value_0         FLOAT8,
-                        value_1         FLOAT8,
-                        value_2         FLOAT8,
-                        value_3         FLOAT8
-                    )
-                """,
-                " CREATE INDEX MMS_agg_${sensorId}_ontime_0 ON MMS_agg_$sensorId ( ontime_0 ) ",
-                " CREATE INDEX MMS_agg_${sensorId}_ontime_1 ON MMS_agg_$sensorId ( ontime_1 ) ",
-            )
+            executeNativeSql(entityManager, *getCreateAggTableSqls(sensorId))
         }
+
+        private fun getCreateAggTableSqls(sensorId: Int): Array<String> = arrayOf(
+            """
+                CREATE TABLE MMS_agg_$sensorId (
+                    ontime_0        INT NOT NULL,
+                    ontime_1        INT,         
+                    type_0          INT,
+                    value_0         FLOAT8,
+                    value_1         FLOAT8,
+                    value_2         FLOAT8,
+                    value_3         FLOAT8
+                )
+            """,
+            " CREATE INDEX MMS_agg_${sensorId}_ontime_0 ON MMS_agg_$sensorId ( ontime_0 ) ",
+            " CREATE INDEX MMS_agg_${sensorId}_ontime_1 ON MMS_agg_$sensorId ( ontime_1 ) ",
+        )
+
+        private fun createTextTable(conn: CoreAdvancedConnection, sensorId: Int) {
+            getCreateTextTableSqls(sensorId).forEach { sql ->
+                conn.executeUpdate(sql)
+            }
+        }
+
+        private fun createTextTable(entityManager: EntityManager, sensorId: Int) {
+            executeNativeSql(entityManager, *getCreateTextTableSqls(sensorId))
+        }
+
+        private fun getCreateTextTableSqls(sensorId: Int): Array<String> = arrayOf(
+            """
+                CREATE TABLE MMS_text_$sensorId (
+                    ontime_0        INT NOT NULL,
+                    ontime_1        INT,         
+                    type_0          INT,
+                    code_0          INT,
+                    message_0       VARCHAR(250),
+                    text_0          TEXT
+                )
+            """,
+            " CREATE INDEX MMS_text_${sensorId}_ontime_0 ON MMS_text_$sensorId ( ontime_0 ) ",
+            " CREATE INDEX MMS_text_${sensorId}_ontime_1 ON MMS_text_$sensorId ( ontime_1 ) ",
+        )
 
         fun deleteSensor(
             entityManager: EntityManager,
@@ -218,6 +255,7 @@ class SensorService(
             sensorCalibrationRepository.deleteBySensorId(sensorId)
             sensorRepository.deleteById(sensorId)
             executeNativeSql(entityManager, " DROP TABLE MMS_agg_$sensorId ")
+            executeNativeSql(entityManager, " DROP TABLE MMS_text_$sensorId ")
         }
     }
 
@@ -423,7 +461,6 @@ class SensorService(
             }
         } ?: ""
 
-        val signalSensorType = setOf(SensorConfig.SENSOR_SIGNAL).map { it.toString() }.toSet()
         val geoSensorType = setOf(SensorConfig.SENSOR_GEO).map { it.toString() }.toSet()
         val workSensorType = setOf(SensorConfig.SENSOR_WORK).map { it.toString() }.toSet()
 
@@ -432,8 +469,6 @@ class SensorService(
             SensorConfig.SENSOR_MASS_ACCUMULATED,
             SensorConfig.SENSOR_VOLUME_ACCUMULATED,
         ).map { it.toString() }.toSet()
-
-        val counterStateSensorType = setOf(SensorConfig.SENSOR_LIQUID_USING_COUNTER_STATE).map { it.toString() }.toSet()
 
         val energoSummarySensorTypes = setOf(
             SensorConfig.SENSOR_ENERGO_COUNT_AD,
@@ -666,7 +701,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = workSensorType + signalSensorType,
+                values = workSensorType,
             ),
         )
         formCells += FormComboCell(
@@ -682,7 +717,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = workSensorType + signalSensorType,
+                values = workSensorType,
             ),
         )
         formCells += FormSimpleCell(
@@ -693,7 +728,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = workSensorType + signalSensorType,
+                values = workSensorType,
             ),
         )
 
@@ -753,7 +788,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = false,
-                values = geoSensorType + counterStateSensorType,
+                values = geoSensorType,
             ),
         )
         formCells += FormSimpleCell(
@@ -764,7 +799,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = false,
-                values = geoSensorType + counterStateSensorType,
+                values = geoSensorType,
             ),
         )
 
@@ -1123,7 +1158,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = false,
-                values = signalSensorType + geoSensorType + workSensorType + counterStateSensorType,
+                values = geoSensorType + workSensorType,
             ),
         )
 
@@ -1244,7 +1279,7 @@ class SensorService(
         }
         sensorCalibrationRepository.flush()
 
-        checkAndCreateAggTable(entityManager, recordId)
+        checkAndCreateSensorTables(entityManager, recordId)
 
         return FormActionResponse(responseCode = ResponseCode.OK)
     }

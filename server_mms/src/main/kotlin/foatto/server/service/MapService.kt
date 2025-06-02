@@ -246,7 +246,7 @@ class MapService(
 
         objectRepository.findByIdOrNull(appAction.id)?.let { objectEntity ->
             sensorRepository.findByObjAndSensorType(objectEntity, SensorConfig.SENSOR_GEO).firstOrNull()?.let { sensorEntity ->
-                SensorService.checkAndCreateAggTable(entityManager, sensorEntity.id)
+                SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
                 ApplicationService.withConnection(entityManager) { conn ->
                     val rs = conn.executeQuery(
@@ -299,7 +299,7 @@ class MapService(
 
         objectRepository.findByIdOrNull(appAction.id)?.let { objectEntity ->
             sensorRepository.findByObjAndSensorType(objectEntity, SensorConfig.SENSOR_GEO).firstOrNull()?.let { sensorEntity ->
-                SensorService.checkAndCreateAggTable(entityManager, sensorEntity.id)
+                SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
                 ApplicationService.withConnection(entityManager) { conn ->
                     val rs = conn.executeQuery(

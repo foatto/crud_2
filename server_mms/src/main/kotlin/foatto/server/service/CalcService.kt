@@ -53,7 +53,7 @@ class CalcService(
         val states = mutableListOf<WorkPeriodData>()
 
         ApplicationService.withConnection(entityManager) { conn ->
-            SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+            SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
 
             val rs = conn.executeQuery(
                 """
@@ -241,7 +241,7 @@ class CalcService(
 
         ApplicationService.withConnection(entityManager) { conn ->
             sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
-                SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+                SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
 
                 var rs = conn.executeQuery(
                     """
@@ -337,7 +337,7 @@ class CalcService(
     ): Double {
         var result = 0.0
         ApplicationService.withConnection(entityManager) { conn ->
-            SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+            SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
 
             val rs = conn.executeQuery(
                 """

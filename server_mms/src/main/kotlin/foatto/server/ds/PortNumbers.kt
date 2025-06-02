@@ -43,7 +43,7 @@ object PortNumbers {
     const val MERCURY_TRANSFORM_KOEF_VOLTAGE_370: Int = 370
 
     //--- нет в MMSPulsarDataController
-    const val ESD_STATUS_500: Int = 500
+//    const val ESD_STATUS_500: Int = 500 - не используется
     const val ESD_VOLUME_504: Int = 504
     const val ESD_FLOW_508: Int = 508
     const val ESD_CAMERA_VOLUME_512: Int = 512

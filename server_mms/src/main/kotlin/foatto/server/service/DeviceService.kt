@@ -140,7 +140,6 @@ class DeviceService(
                 SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_ACCUMULATED, portNum = PortNumbers.EMIS_ACCUMULATED_VOLUME_320, descrBody = "Накопленный объём"),
             ),
             SENSOR_NAME_ESD to listOf(
-                SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_USING_COUNTER_STATE, portNum = PortNumbers.ESD_STATUS_500, descrBody = "Состояние расходомера"),
                 SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_USING, portNum = PortNumbers.ESD_VOLUME_504, descrBody = "Расходомер"),
                 SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_FLOW, portNum = PortNumbers.ESD_FLOW_508, descrBody = "Скорость потока"),
                 SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_USING, portNum = PortNumbers.ESD_CAMERA_VOLUME_512, descrBody = "Расходомер камеры подачи"),
@@ -828,7 +827,7 @@ class DeviceService(
             oldSensorEntity.portNum = (oldSensorEntity.portNum ?: 0) + (newDeviceIndex - oldDeviceIndex) * CoreTelematicFunction.MAX_PORT_PER_DEVICE
 
             sensorRepository.save(oldSensorEntity)
-            SensorService.checkAndCreateAggTable(entityManager, oldSensorEntity.id)
+            SensorService.checkAndCreateSensorTables(entityManager, oldSensorEntity.id)
 
             sensorCalibrationRepository.findBySensorOrderBySensorValue(oldSensorEntity).forEach { oldSensorCalibrationEntity ->
                 oldSensorCalibrationEntity.id = getNextId { nextId -> sensorCalibrationRepository.existsById(nextId) }
@@ -920,7 +919,7 @@ class DeviceService(
             smoothMethod = 0,
         )
         sensorRepository.save(sensorEntity)
-        SensorService.checkAndCreateAggTable(entityManager, sensorEntity.id)
+        SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
     }
 
 }

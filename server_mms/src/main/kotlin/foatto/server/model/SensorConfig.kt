@@ -13,7 +13,7 @@ class SensorConfig {
         //--- логические входы с датчиков
 
         //--- особые величины - сигнал с устройства
-        const val SENSOR_SIGNAL = -2   // Есть/нет
+        //const val SENSOR_SIGNAL = -2   // Есть/нет - устаревшие тип датчика, не используется
 
         //--- составной датчик - гео-данных ( координаты,скорость,пробег )
         const val SENSOR_GEO = -1           // координаты, км/ч, м или км
@@ -22,7 +22,7 @@ class SensorConfig {
         const val SENSOR_WORK = 1           // мото * час
 
         //--- контрольные величины - графики
-        //const val SENSOR_LIQUID_FLOW_CALC = 3 - считается автоматически при записи данных со счётчика расхода
+        //const val SENSOR_LIQUID_FLOW_CALC = 3 - устаревший тип псевдодатчика, сейчас считается автоматически при записи данных со счётчика расхода
         const val SENSOR_LIQUID_LEVEL = 4
         const val SENSOR_WEIGHT = 5
         const val SENSOR_TURN = 6
@@ -48,7 +48,7 @@ class SensorConfig {
         const val SENSOR_LIQUID_USING = 16
 
         //--- сигнальная величина - состояние расходомера/счётчика
-        const val SENSOR_LIQUID_USING_COUNTER_STATE = 17
+        //const val SENSOR_LIQUID_USING_COUNTER_STATE = 17 - вместо этого записываем все данные в MMS_text_XXX
 
         //--- electro energo counters
 
@@ -107,7 +107,6 @@ class SensorConfig {
 
         //--- названия датчиков
         val hmSensorDescr: Map<Int, String> = mapOf(
-            SENSOR_SIGNAL to "Сигнал",
             SENSOR_GEO to "Гео-данные",
             SENSOR_WORK to "Работа оборудования",
             SENSOR_LIQUID_LEVEL to "Уровень топлива",
@@ -123,7 +122,6 @@ class SensorConfig {
             SENSOR_MASS_ACCUMULATED to "Накопленная масса",
             SENSOR_VOLUME_ACCUMULATED to "Накопленный объём",
             SENSOR_LIQUID_USING to "Расход топлива",
-            SENSOR_LIQUID_USING_COUNTER_STATE to "Состояние расходомера",
             SENSOR_ENERGO_COUNT_AD to "Электроэнергия активная прямая",
             SENSOR_ENERGO_COUNT_AR to "Электроэнергия активная обратная",
             SENSOR_ENERGO_COUNT_RD to "Электроэнергия реактивная прямая",

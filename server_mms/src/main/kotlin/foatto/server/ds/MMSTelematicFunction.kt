@@ -13,34 +13,37 @@ import foatto.server.util.AdvancedLogger
 import foatto.server.util.getFileWriter
 import kotlinx.datetime.TimeZone
 import java.io.File
-import java.util.*
+import java.util.SortedMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
+import kotlin.math.roundToLong
 
 object MMSTelematicFunction {
 
-    const val DEVICE_TYPE_GALILEO = 1
-    const val DEVICE_TYPE_PULSAR_DATA = 3
+    const val DEVICE_TYPE_GALILEO: Int = 1
+    const val DEVICE_TYPE_PULSAR_DATA: Int = 3
+
+    private const val ERROR_CODE_NO_DATA: Long = -1_000_000_000_000L
+    private const val ERROR_CODE_MEASURE_ERROR: Long = -2_000_000_000_000L
+
+    private const val TEXT_TYPE_ERROR: Int = 1
+
+    private const val TEXT_CODE_NO_DATA: Int = 1
+    private const val TEXT_CODE_MEASURE_ERROR: Int = 2
+
+    private val errorCodes: Map<Long, Int> = mapOf(
+        ERROR_CODE_NO_DATA to TEXT_CODE_NO_DATA,
+        ERROR_CODE_MEASURE_ERROR to TEXT_CODE_MEASURE_ERROR,
+    )
+    private val errorDescrs: Map<Int, String> = mapOf(
+        TEXT_CODE_NO_DATA to "Датчик не отвечает",
+        TEXT_CODE_MEASURE_ERROR to "Ошибка измерения",
+    )
 
     private val chmLastDayWork = ConcurrentHashMap<Int, List<Int>>()
     private val chmLastWorkShift = ConcurrentHashMap<Int, Int>()
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//    fun fillDeviceTypeColumn(columnDeviceType: ColumnRadioButton) {
-//        columnDeviceType.defaultValue = DEVICE_TYPE_GALILEO
-//
-//        columnDeviceType.addChoice(DEVICE_TYPE_GALILEO, "Galileo")
-////            columnDeviceType.addChoice(DEVICE_TYPE_PETROLINE, "Petroline")
-//        columnDeviceType.addChoice(DEVICE_TYPE_PULSAR_DATA, "Pulsar Data")
-////            columnDeviceType.addChoice(DEVICE_TYPE_ARNAVI, "Arnavi")
-////            columnDeviceType.addChoice(DEVICE_TYPE_ESCORT, "Escort")
-////            columnDeviceType.addChoice(DEVICE_TYPE_DEL_VIDEO, "Видеорегистратор ДЭЛ-150В")
-////            columnDeviceType.addChoice(DEVICE_TYPE_DEL_PULSAR, "ДЭЛ-Пульсар")
-////            columnDeviceType.addChoice(DEVICE_TYPE_MIELTA, "Mielta")
-////            columnDeviceType.addChoice(DEVICE_TYPE_ADM, "ADM")
-////        columnDeviceType.addChoice(DEVICE_TYPE_NAVTELECOM, "NavTelecom")
-//    }
 
     //--- пришлось делать в виде static, т.к. VideoServer не является потомком MMSHandler,
     //--- а в AbstractHandler не знает про прикладные MMS-таблицы
@@ -342,7 +345,7 @@ object MMSTelematicFunction {
         sensorConfigs[portNum]?.forEach { sensorEntity ->
             when (sensorEntity.sensorType) {
                 in SensorConfig.analogueSensorTypes -> {
-                    SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+                    SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
                     saveAnalogueSensorData(
                         conn = conn,
                         sensorEntity = sensorEntity,
@@ -353,7 +356,7 @@ object MMSTelematicFunction {
                 }
 
                 in SensorConfig.counterSensorTypes -> {
-                    SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+                    SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
                     saveCounterSensorData(
                         conn = conn,
                         sensorEntity = sensorEntity,
@@ -364,7 +367,7 @@ object MMSTelematicFunction {
                 }
 
                 SensorConfig.SENSOR_WORK -> {
-                    SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+                    SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
                     saveWorkSensorData(
                         conn = conn,
                         sensorEntity = sensorEntity,
@@ -385,7 +388,7 @@ object MMSTelematicFunction {
         speed: Int,
         absoluteRun: Double?,
     ) {
-        SensorService.checkAndCreateAggTable(conn, sensorEntity.id)
+        SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
 
         var relativeRun = 0.0
 
@@ -424,6 +427,16 @@ object MMSTelematicFunction {
         pointTime: Int,
         sensorValue: Double,
     ) {
+        if (saveSensorError(
+                conn = conn,
+                sensorId = sensorEntity.id,
+                sensorTime = pointTime,
+                sensorValue = sensorValue,
+            )
+        ) {
+            return
+        }
+
         //--- ignore outbound values
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
@@ -482,6 +495,16 @@ object MMSTelematicFunction {
         pointTime: Int,
         sensorValue: Double,
     ) {
+        if (saveSensorError(
+                conn = conn,
+                sensorId = sensorEntity.id,
+                sensorTime = pointTime,
+                sensorValue = sensorValue,
+            )
+        ) {
+            return
+        }
+
         //--- ignore outbound values
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
@@ -551,6 +574,16 @@ object MMSTelematicFunction {
         pointTime: Int,
         sensorValue: Double,
     ) {
+        if (saveSensorError(
+                conn = conn,
+                sensorId = sensorEntity.id,
+                sensorTime = pointTime,
+                sensorValue = sensorValue,
+            )
+        ) {
+            return
+        }
+
         //--- ignore outbound values
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
@@ -613,16 +646,51 @@ object MMSTelematicFunction {
         )
     }
 
-    /*
-        //--- особые величины - сигнал с устройства
-        const val SENSOR_SIGNAL = -2   // Есть/нет
+    //--- work with sensor errors
+    private fun saveSensorError(
+        conn: CoreAdvancedConnection,
+        sensorId: Int,
+        sensorTime: Int,
+        sensorValue: Double,
+    ): Boolean {
+        val errorValue = sensorValue.roundToLong()
+        return errorCodes[errorValue]?.let { errorCode ->
+            var rs = conn.executeQuery(" SELECT MAX(ontime_1) FROM MMS_agg_$sensorId ")
+            val lastAggTime = if (rs.next()) {
+                rs.getInt(1)
+            } else {
+                0
+            }
+            rs.close()
 
-        //--- составной датчик - гео-данных ( координаты,скорость,пробег )
-        const val SENSOR_GEO = -1           // координаты, км/ч, м или км
+            rs = conn.executeQuery(" SELECT MAX(ontime_1) FROM MMS_text_$sensorId ")
+            val lastTextTime = if (rs.next()) {
+                rs.getInt(1)
+            } else {
+                0
+            }
+            rs.close()
 
-        //--- сигнальная величина - состояние расходомера/счётчика
-        const val SENSOR_LIQUID_USING_COUNTER_STATE = 17
-*/
+            if (lastTextTime > lastAggTime) {
+                conn.executeUpdate(
+                    """
+                        UPDATE MMS_text_$sensorId 
+                        SET ontime_1 = $sensorTime 
+                        WHERE ontime_1 = $lastTextTime 
+                    """
+                )
+            } else {
+                val errorDescr = errorDescrs[errorCode]
+                conn.executeUpdate(
+                    """
+                        INSERT INTO MMS_text_$sensorId ( ontime_0 , ontime_1 , type_0 , code_0 , message_0 , text_0 )
+                        VALUES ( $sensorTime , $sensorTime , $TEXT_TYPE_ERROR , $errorCode , '$errorDescr' , '$errorDescr' )
+                    """
+                )
+            }
+            true
+        } ?: false
+    }
 
     //--- define sensor data ignoring
     private fun isIgnoreSensorData(minIgnore: Double?, maxIgnore: Double?, sensorData: Double?): Boolean =
@@ -681,9 +749,9 @@ object MMSTelematicFunction {
         }
 
         return (sensorValue - sensorCalibration[pos].first) /
-            (sensorCalibration[pos + 1].first - sensorCalibration[pos].first) *
-            (sensorCalibration[pos + 1].second - sensorCalibration[pos].second) +
-            sensorCalibration[pos].second
+                (sensorCalibration[pos + 1].first - sensorCalibration[pos].first) *
+                (sensorCalibration[pos + 1].second - sensorCalibration[pos].second) +
+                sensorCalibration[pos].second
     }
 
 }

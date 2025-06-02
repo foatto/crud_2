@@ -60,7 +60,7 @@ class SchemeWorkIndicatorStateService(
         var sensorTime: Int? = null
         var sensorValue: Boolean? = null
 
-        SensorService.checkAndCreateAggTable(entityManager, sensorEntity.id)
+        SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
         ApplicationService.withConnection(entityManager) { conn ->
             val rs = conn.executeQuery(

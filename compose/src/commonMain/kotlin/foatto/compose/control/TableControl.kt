@@ -1,15 +1,51 @@
 package foatto.compose.control
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -25,33 +61,52 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import foatto.compose.*
+import foatto.compose.AppControl
+import foatto.compose.Root
+import foatto.compose.colorBottomBar
+import foatto.compose.colorCheckBox
+import foatto.compose.colorIconButton
+import foatto.compose.colorMainBack0
+import foatto.compose.colorMainText
+import foatto.compose.colorScrollBarBack
+import foatto.compose.colorScrollBarFore
+import foatto.compose.colorTableCellBorder
+import foatto.compose.colorTableCurrentRow
+import foatto.compose.colorTableGroupBack0
+import foatto.compose.colorTableGroupBack1
+import foatto.compose.colorTableRowBack0
+import foatto.compose.colorTableRowBack1
+import foatto.compose.colorTableSelectorBack
+import foatto.compose.colorTextButton
+import foatto.compose.colorToolBar
 import foatto.compose.composable.GenerateMenuBody
 import foatto.compose.composable.ImageOrTextFromNameControl
 import foatto.compose.control.composable.onPointerEvents
 import foatto.compose.control.composable.table.TableImageOrTextCell
 import foatto.compose.control.composable.table.TableToolBar
-import foatto.compose.control.model.table.AddActionButtonClient
-import foatto.compose.control.model.table.ClientActionButtonClient
-import foatto.compose.control.model.table.PageButton
-import foatto.compose.control.model.table.ServerActionButtonClient
-import foatto.compose.control.model.table.TableCaptionData
 import foatto.compose.control.model.table.cell.TableBaseCellClient
 import foatto.compose.control.model.table.cell.TableBooleanCellClient
 import foatto.compose.control.model.table.cell.TableButtonCellClient
 import foatto.compose.control.model.table.cell.TableCellDataClient
 import foatto.compose.control.model.table.cell.TableGridCellClient
 import foatto.compose.control.model.table.cell.TableSimpleCellClient
+import foatto.compose.invokeRequest
 import foatto.compose.model.MenuDataClient
+import foatto.compose.singleButtonShape
+import foatto.compose.styleOtherIconSize
 import foatto.compose.utils.maxDp
 import foatto.core.ActionType
 import foatto.core.model.AppAction
 import foatto.core.model.request.AppRequest
 import foatto.core.model.response.AppResponse
+import foatto.core.model.response.ClientActionButton
 import foatto.core.model.response.ResponseCode
-import foatto.core.model.response.table.TablePopupData
+import foatto.core.model.response.ServerActionButton
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
 import foatto.core.model.response.table.TableResponse
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBooleanCell
 import foatto.core.model.response.table.cell.TableButtonCell
 import foatto.core.model.response.table.cell.TableCellAlign
@@ -63,10 +118,13 @@ import kotlin.math.max
 import kotlin.math.min
 
 typealias SelectorFunType = ((selectorData: Map<String, String>) -> Unit)
-
 val tableSelectorFuns: MutableMap<Long, SelectorFunType> = mutableMapOf()
 
-//--- base/standart table/grid control
+var tableClientActionFun: (
+    action: AppAction,
+    tableControl: TableControl
+) -> Unit = { _: AppAction, _: TableControl ->
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 class TableControl(
@@ -83,14 +141,6 @@ class TableControl(
         private val TABLE_CELL_PADDING = 16.dp
     }
 
-    //--- for custom client actions in custom table/grid controls
-    protected var tableClientActionFun: (
-        action: AppAction,
-        alParam: List<Pair<String, String>>,
-        tableControl: TableControl
-    ) -> Unit = { _: AppAction, _: List<Pair<String, String>>, _: TableControl ->
-    }
-
     private var isFindTextVisible by mutableStateOf(root.isWideScreen)
     private var findText by mutableStateOf("")
 
@@ -98,16 +148,17 @@ class TableControl(
     private var isGotoButtonVisible by mutableStateOf(false)
     private var isPopupButtonVisible by mutableStateOf(false)
 
-    private val alAddButton = mutableStateListOf<AddActionButtonClient>()
-    private val alServerButton = mutableStateListOf<ServerActionButtonClient>()
-    private val alClientButton = mutableStateListOf<ClientActionButtonClient>()
-    private val alPageButton = mutableStateListOf<PageButton>()
+    private val commonServerButtons = mutableStateListOf<ServerActionButton>()
+    private val commonClientButtons = mutableStateListOf<ClientActionButton>()
+    private val rowServerButtons = mutableStateListOf<ServerActionButton>()
+    private val rowClientButtons = mutableStateListOf<ClientActionButton>()
+    private val tablePageButtonData = mutableStateListOf<TablePageButton>()
 
-    private var alCaptionData = mutableStateListOf<TableCaptionData>()
+    private var alCaptionData = mutableStateListOf<TableCaption>()
 
     private val alGridRows = mutableStateListOf<MutableList<TableBaseCellClient?>>()
 
-    private val alRowData = mutableStateListOf<TableRowData>()
+    private val alRowData = mutableStateListOf<TableRow>()
 
     private val hmColumnMaxWidth = mutableStateMapOf<Int, Dp>()
 
@@ -159,19 +210,20 @@ class TableControl(
                 },
                 isFindTextVisible = isFindTextVisible,
                 findText = findText,
-                alAddButton = alAddButton,
                 isFormButtonVisible = isFormButtonVisible,
                 isGotoButtonVisible = isGotoButtonVisible,
                 isPopupButtonVisible = isPopupButtonVisible,
-                alServerButton = alServerButton,
-                alClientButton = alClientButton,
+                commonServerButtons = commonServerButtons,
+                commonClientButtons = commonClientButtons,
+                rowServerButtons = rowServerButtons,
+                rowClientButtons = rowClientButtons,
                 tableAction = tableAction,
                 onFindInput = { newText: String -> findText = newText },
                 doFind = { isClear: Boolean -> coroutineScope.launch { doFind(isClear) } },
                 doForm = { coroutineScope.launch { doForm() } },
                 doGoto = { coroutineScope.launch { doGoto() } },
                 doPopup = { doPopup() },
-                clientAction = { action: AppAction, params: List<Pair<String, String>> -> clientAction(action, params) },
+                clientAction = { action: AppAction -> clientAction(action) },
                 call = { action: AppAction, inNewTab: Boolean -> coroutineScope.launch { call(action, inNewTab) } },
             )
 
@@ -182,25 +234,25 @@ class TableControl(
                     .horizontalScroll(state = horizontalScrollState)
             ) {
                 alCaptionData.forEachIndexed { col, captionData ->
-                    Button(
+                    TextButton(
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(0.dp),   // чтобы получился сплошной ряд заголовков
-                        colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+                        colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                         modifier = Modifier.then(
                             hmColumnMaxWidth[col]?.let { maxColWidth ->
                                 Modifier.width(maxColWidth)
                             } ?: Modifier
                         ),
                         onClick = {
-                            captionData.action?.let {
+                            captionData.action?.let { action ->
                                 coroutineScope.launch {
-                                    call(captionData.action, false)
+                                    call(action, false)
                                 }
                             }
                         }
                     ) {
                         Text(
-                            text = captionData.text,
+                            text = captionData.name,
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -211,7 +263,7 @@ class TableControl(
             TableBody(Modifier.weight(1.0f))
 
             //--- Page Bar
-            if (alPageButton.size > 1) {
+            if (tablePageButtonData.size > 1) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -226,11 +278,11 @@ class TableControl(
 //                            )
 //                            backgroundColor(getColorTablePagebarBack())
 
-                    for (pageButton in alPageButton) {
-                        Button(
+                    for (pageButton in tablePageButtonData) {
+                        TextButton(
                             modifier = Modifier.padding(1.dp),
                             shape = RoundedCornerShape(0.dp),   // чтобы получился почти сплошной ряд кнопок
-                            colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+                            colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                             enabled = pageButton.action != null,
 //                                cursor("pointer")
                             onClick = {
@@ -431,9 +483,9 @@ class TableControl(
                                                                 }
                                                             },
                                                             textButton = { caption ->
-                                                                Button(
+                                                                TextButton(
                                                                     shape = singleButtonShape,
-                                                                    colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+                                                                    colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                                                                     onClick = {
                                                                         cellData.action?.let {
                                                                             coroutineScope.launch {
@@ -654,9 +706,12 @@ class TableControl(
 
         findText = tableResponse.findText
 
-        readAddButtons()
-        readServerButtons()
-        readClientButtons()
+        commonServerButtons.clear()
+        commonServerButtons.addAll(tableResponse.serverActionButtons)
+
+        commonClientButtons.clear()
+        commonClientButtons.addAll(tableResponse.clientActionButtons)
+
         readPageButtons()
         readTable()
 
@@ -676,53 +731,17 @@ class TableControl(
 //        }, 100)
     }
 
-    private fun readAddButtons() {
-        alAddButton.clear()
-        for (aab in tableResponse.alAddActionButton) {
-            alAddButton.add(
-                AddActionButtonClient(
-                    name = aab.icon ?: aab.text ?: "(не заданы иконка и текст)",
-                    tooltip = aab.tooltip,
-                    action = aab.action
-                )
-            )
-        }
-    }
-
-    private fun readServerButtons() {
-        alServerButton.clear()
-        for (sab in tableResponse.alServerActionButton) {
-            alServerButton.add(ServerActionButtonClient.readFromServerActionButton(sab))
-        }
-    }
-
-    private fun readClientButtons() {
-        alClientButton.clear()
-        for (cab in tableResponse.alClientActionButton) {
-            alClientButton.add(
-                ClientActionButtonClient(
-                    name = cab.icon ?: cab.text ?: "(не заданы иконка и текст)",
-                    tooltip = cab.tooltip,
-                    action = cab.action,
-                    params = cab.alParam.toList(),
-                    isForWideScreenOnly = cab.isForWideScreenOnly,
-                )
-            )
-        }
-    }
-
     private fun readPageButtons() {
         pageUpAction = null
         pageDownAction = null
-        alPageButton.clear()
+        tablePageButtonData.clear()
 
         var isEmptyPassed = false
         //--- вывести новую разметку страниц
-        for ((action, text) in tableResponse.alPageButton) {
+        for (pageButton in tableResponse.tablePageButtonData) {
+            tablePageButtonData.add(pageButton)
 
-            alPageButton.add(PageButton(action, text))
-
-            action?.let {
+            pageButton.action?.let { action ->
                 if (!isEmptyPassed) {
                     pageUpAction = action
                 }
@@ -736,13 +755,14 @@ class TableControl(
     }
 
     private fun readTable() {
-        readCaption()
+        alCaptionData.clear()
+        alCaptionData.addAll(tableResponse.columnCaptions)
 
         alGridRows.clear()
 
-        var maxColCount = tableResponse.alColumnCaption.size
+        var maxColCount = tableResponse.columnCaptions.size
 
-        for (tc in tableResponse.alTableCell) {
+        for (tc in tableResponse.tableCells) {
             maxColCount = max(maxColCount, tc.col + tc.colSpan)
 
             val backColor = tc.backColor?.let { bc ->
@@ -847,27 +867,7 @@ class TableControl(
         }
 
         alRowData.clear()
-        alRowData.addAll(tableResponse.alTableRowData)
-    }
-
-    private fun readCaption() {
-        alCaptionData.clear()
-        //--- заголовки столбцов таблицы
-        for ((action, text) in tableResponse.alColumnCaption) {
-            val captionCell = TableCaptionData(
-//                    cursor(
-//                        if (url.isBlank()) {
-//                            "default"
-//                        } else {
-//                            "pointer"
-//                        }
-//                    )
-                tooltip = action?.let { "Сортировать по этому столбцу" } ?: "",
-                text = text,
-                action = action,
-            )
-            alCaptionData.add(captionCell)
-        }
+        alRowData.addAll(tableResponse.tableRows)
     }
 
     private fun closeTabById() {
@@ -915,11 +915,25 @@ class TableControl(
     private fun setCurrentRow(rowNo: Int?) {
         isFormButtonVisible = rowNo != null && alRowData[rowNo].formAction != null
         isGotoButtonVisible = rowNo != null && alRowData[rowNo].gotoAction != null
-        isPopupButtonVisible = rowNo != null && alRowData[rowNo].alPopupData.isNotEmpty()
+        isPopupButtonVisible = rowNo != null && alRowData[rowNo].tablePopups.isNotEmpty()
+
+        rowServerButtons.clear()
+        rowNo?.let {
+            rowServerButtons.addAll(alRowData[rowNo].serverActionButtons)
+        }
+
+        rowClientButtons.clear()
+        rowNo?.let {
+            rowClientButtons.addAll(alRowData[rowNo].clientActionButtons)
+        }
 
         currentRowNo = rowNo
 
 //        focusToCursorField(tabId)
+    }
+
+    private fun clientAction(action: AppAction) {
+        tableClientActionFun(action, this)
     }
 
     private suspend fun doKeyEnter() {
@@ -1048,17 +1062,13 @@ class TableControl(
         root.selectorControl = null
     }
 
-    private fun clientAction(action: AppAction, params: List<Pair<String, String>>) {
-        tableClientActionFun(action, params, this)
-    }
-
     private fun showPopupMenu(gridData: TableBaseCellClient?) {
         gridData?.let {
             //--- чтобы строчка выделялась и по правой кнопке мыши тоже
             setCurrentRow(gridData.dataRow)
             gridData.dataRow?.let { dataRow ->
-                if (alRowData[dataRow].alPopupData.isNotEmpty()) {
-                    convertPopupMenuDataClient(gridData, alRowData[dataRow].alPopupData)
+                if (alRowData[dataRow].tablePopups.isNotEmpty()) {
+                    convertPopupMenuDataClient(gridData, alRowData[dataRow].tablePopups)
                     gridData.isShowPopupMenu = true
                 } else {
                     gridData.isShowPopupMenu = false
@@ -1069,7 +1079,7 @@ class TableControl(
         }
     }
 
-    private fun convertPopupMenuDataClient(gridData: TableBaseCellClient, alMenuDataClient: List<TablePopupData>) {
+    private fun convertPopupMenuDataClient(gridData: TableBaseCellClient, alMenuDataClient: List<TablePopup>) {
         val alCurPopupData = mutableListOf<MenuDataClient>()
 
         var i = 0

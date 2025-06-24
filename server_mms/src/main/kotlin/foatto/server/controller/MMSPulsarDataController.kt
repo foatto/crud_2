@@ -26,7 +26,7 @@ class MMSPulsarDataController(
     ) {
         AdvancedLogger.debug(
             message = arrData.joinToString(separator = "\n") { (dateTime, deviceID, blockID, idx, vals) ->
-                "dateTime = ${dateTime}\n" +
+                "\ndateTime = ${dateTime}\n" +
                     "deviceID = ${deviceID}\n" +
                     "blockID = ${blockID}\n" +
                     "idx = ${idx}\n" +

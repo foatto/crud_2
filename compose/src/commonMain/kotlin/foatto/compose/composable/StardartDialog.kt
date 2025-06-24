@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun StardartDialog(
-    question: String,
+    content: @Composable (() -> Unit),
     buttonOkText: String,
     buttonCancelText: String,
     showCancelButton: Boolean,
@@ -15,9 +15,7 @@ fun StardartDialog(
     onCancelClick: () -> Unit,
 ) {
     AlertDialog(
-        text = {
-            Text(text = question)
-        },
+        text = content,
         onDismissRequest = {
             onCancelClick()
         },

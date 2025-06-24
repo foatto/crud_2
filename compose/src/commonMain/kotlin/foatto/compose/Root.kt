@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -112,7 +113,7 @@ open class Root {
     private var lastTabId: Int = 0
 
     private var dialogActionFun: () -> Unit = {}
-    private var dialogQuestion by mutableStateOf("")
+    private var dialogContent by mutableStateOf<@Composable (() -> Unit)>({})
     private var showDialogCancel by mutableStateOf(false)
     private var showDialog by mutableStateOf(false)
     private val dialogButtonOkText by mutableStateOf("OK")
@@ -221,7 +222,7 @@ open class Root {
                 }
                 if (showDialog) {
                     StardartDialog(
-                        question = dialogQuestion,
+                        content = dialogContent,
                         buttonOkText = dialogButtonOkText,
                         buttonCancelText = dialogButtonCancelText,
                         showCancelButton = showDialogCancel,
@@ -358,7 +359,7 @@ open class Root {
 
     fun showAlert(message: String) {
         dialogActionFun = {}
-        dialogQuestion = message
+        dialogContent = { Text(text = message) }
         showDialogCancel = false
         showDialog = true
     }

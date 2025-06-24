@@ -382,7 +382,7 @@ class FormControl(
 
         if (showDialog) {
             StardartDialog(
-                question = dialogQuestion,
+                content = { Text(text = dialogQuestion) },
                 buttonOkText = dialogButtonOkText,
                 buttonCancelText = dialogButtonCancelText,
                 showCancelButton = showDialogCancel,
@@ -867,9 +867,9 @@ class FormControl(
                                                             Row(
                                                                 verticalAlignment = Alignment.CenterVertically,
                                                             ) {
-                                                                Button(
+                                                                TextButton(
                                                                     shape = singleButtonShape,
-                                                                    colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+                                                                    colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                                                                     enabled = fileData.id >= 0,
                                                                     onClick = {
                                                                         if (fileData.id >= 0) {
@@ -1024,10 +1024,10 @@ class FormControl(
                             }
                         },
                         textButton = { caption ->
-                            Button(
+                            TextButton(
                                 modifier = Modifier.padding(2.dp),
                                 shape = singleButtonShape,
-                                colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+                                colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                                 border = BorderStroke(
                                     width = 2.dp,
                                     color = Color.Black,

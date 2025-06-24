@@ -15,6 +15,7 @@ import foatto.compose.colorCheckBox
 import foatto.compose.colorCompositeMovedBlockBack
 import foatto.compose.colorDatePicker
 import foatto.compose.colorIconButton
+import foatto.compose.colorMainBack0
 import foatto.compose.colorMainText
 import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorRadioButton
@@ -78,10 +79,11 @@ class MMSRoot : Root() {
         colorWait = darkBlueColor
         colorWaitTrack = orangeColor
 
-        colorTextButton = ButtonDefaults.buttonColors().copy(
+        colorTextButton = ButtonDefaults.textButtonColors().copy(
             containerColor = darkBlueColor,
+            contentColor = colorMainBack0,
         )
-        colorTextButtonDefault = ButtonDefaults.buttonColors().copy(
+        colorTextButtonDefault = ButtonDefaults.textButtonColors().copy(
             containerColor = orangeColor,
             contentColor = colorMainText,
         )

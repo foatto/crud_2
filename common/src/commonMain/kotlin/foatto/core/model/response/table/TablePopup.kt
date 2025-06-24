@@ -4,7 +4,7 @@ import foatto.core.model.AppAction
 import kotlinx.serialization.Serializable
 
 @Serializable
-class TablePopupData(
+class TablePopup(
     val group: String? = null,
     val action: AppAction?,
     val text: String,

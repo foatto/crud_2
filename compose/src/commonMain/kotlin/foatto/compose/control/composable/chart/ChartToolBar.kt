@@ -130,7 +130,7 @@ internal fun ChartToolBar(
         }
         ToolBarBlock {
 //                    for (legend in alGrLegend) {
-//                        Button(
+//                        TextButton(
 //                            attrs = {
 //                                style {
 //                                    legend.style(this)

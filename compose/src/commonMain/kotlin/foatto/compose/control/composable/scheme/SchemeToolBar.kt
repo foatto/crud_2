@@ -19,16 +19,16 @@ import foatto.compose.control.composable.RefreshSubToolBar
 import foatto.compose.control.composable.ToolBarBlock
 import foatto.compose.control.composable.ToolBarIconButton
 import foatto.compose.control.model.scheme.ElementMoveData
-import foatto.compose.control.model.table.ServerActionButtonClient
 import foatto.compose.getStyleToolbarIconNameSuffix
 import foatto.core.model.AppAction
+import foatto.core.model.response.ServerActionButton
 
 @Composable
 internal fun SchemeToolBar(
     isWideScreen: Boolean,
     isElementMoveEnabled: Boolean,
     isShowElementList: Boolean,
-    alServerButton: SnapshotStateList<ServerActionButtonClient>,
+    alServerButton: SnapshotStateList<ServerActionButton>,
     alMoveableElementData: SnapshotStateList<ElementMoveData>,
     refreshInterval: Int,
     onServerButtonClick: (action: AppAction) -> Unit,

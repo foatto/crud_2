@@ -21,7 +21,6 @@ import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.control.composable.scheme.SchemeToolBar
 import foatto.compose.control.model.scheme.ElementMoveData
-import foatto.compose.control.model.table.ServerActionButtonClient
 import foatto.compose.invokeRequest
 import foatto.core.ActionType
 import foatto.core.model.AppAction
@@ -29,6 +28,7 @@ import foatto.core.model.model.scheme.SchemeParam
 import foatto.core.model.model.xy.XyViewCoord
 import foatto.core.model.request.SchemeActionRequest
 import foatto.core.model.response.SchemeActionResponse
+import foatto.core.model.response.ServerActionButton
 import foatto.core.model.response.xy.scheme.SchemeResponse
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -56,7 +56,7 @@ class SchemeControl(
     private var isShowElementList by mutableStateOf(false)
 
     private val alMoveableElementData = mutableStateListOf<ElementMoveData>()
-    private val alServerButton = mutableStateListOf<ServerActionButtonClient>()
+    private val alServerButton = mutableStateListOf<ServerActionButton>()
 
     private var isShowStateAlert by mutableStateOf(false)
     private var stateAlertMessage by mutableStateOf("")
@@ -133,11 +133,7 @@ class SchemeControl(
         root.setTabInfo(tabId, schemeResponse.tabCaption)
 
         alServerButton.clear()
-        schemeResponse.alServerActionButton?.let { alServerActionButton ->
-            for (sab in alServerActionButton) {
-                alServerButton.add(ServerActionButtonClient.readFromServerActionButton(sab))
-            }
-        }
+        alServerButton.addAll(schemeResponse.alServerActionButton ?: emptyList())
 
         startSchemeBody(
             startExpandKoef = SCHEME_START_EXPAND_KOEF,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,10 +77,10 @@ abstract class AbstractControl(
             ) {
                 for (titleData in headerData.titles) {
                     titleData.action?.let { action ->
-                        Button(
+                        TextButton(
                             modifier = Modifier.padding(start = 4.dp, end = 4.dp),
                             shape = RoundedCornerShape(0.dp),   // чтобы образовалась почти сплошная полоса кнопок
-                            colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+                            colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                             onClick = {
                                 call(action)
                             },

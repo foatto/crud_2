@@ -21,11 +21,10 @@ import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorToolBar
 import foatto.compose.control.composable.ToolBarBlock
 import foatto.compose.control.composable.ToolBarIconButton
-import foatto.compose.control.model.table.AddActionButtonClient
-import foatto.compose.control.model.table.ClientActionButtonClient
-import foatto.compose.control.model.table.ServerActionButtonClient
 import foatto.compose.getStyleToolbarIconNameSuffix
 import foatto.core.model.AppAction
+import foatto.core.model.response.ClientActionButton
+import foatto.core.model.response.ServerActionButton
 
 @Composable
 fun TableToolBar(
@@ -34,20 +33,21 @@ fun TableToolBar(
     selectorCancelAction: (() -> Unit)?,
     isFindTextVisible: Boolean,
     findText: String,
-    alAddButton: SnapshotStateList<AddActionButtonClient>,
     isFormButtonVisible: Boolean,
     isGotoButtonVisible: Boolean,
     isPopupButtonVisible: Boolean,
-    alServerButton: SnapshotStateList<ServerActionButtonClient>,
-    alClientButton: SnapshotStateList<ClientActionButtonClient>,
+    commonServerButtons: SnapshotStateList<ServerActionButton>,
+    commonClientButtons: SnapshotStateList<ClientActionButton>,
+    rowServerButtons: SnapshotStateList<ServerActionButton>,
+    rowClientButtons: SnapshotStateList<ClientActionButton>,
     tableAction: AppAction,
     onFindInput: (newText: String) -> Unit,
     doFind: (isClear: Boolean) -> Unit,
     doForm: () -> Unit,
     doGoto: () -> Unit,
     doPopup: () -> Unit,
-    clientAction: (action: AppAction, params: List<Pair<String, String>>) -> Unit,
-    call: (action: AppAction, inNewTab: Boolean) -> Unit,    // call(appParam, false)
+    clientAction: (action: AppAction) -> Unit,
+    call: (action: AppAction, inNewTab: Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -56,16 +56,6 @@ fun TableToolBar(
             .background(colorToolBar),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-//                        borderTop(
-//                            width = getStyleTableCaptionBorderTop().width,
-//                            lineStyle = getStyleTableCaptionBorderTop().style,
-//                            color = getStyleTableCaptionBorderTop().color,
-//                        )
-//                        borderBottom(
-//                            width = getStyleTableCaptionBorderTop().width,
-//                            lineStyle = getStyleTableCaptionBorderTop().style,
-//                            color = getStyleTableCaptionBorderTop().color,
-//                        )
     ) {
         ToolBarBlock {
             ToolBarIconButton(
@@ -115,14 +105,26 @@ fun TableToolBar(
 
         if (!isSelectorMode) {
             ToolBarBlock {
-                for (addButton in alAddButton) {
+                for (serverButton in commonServerButtons) {
                     ToolBarIconButton(
-                        isVisible = isWideScreen || !isFindTextVisible,
-                        name = addButton.name,
+                        isVisible = isWideScreen || (!isFindTextVisible && !serverButton.isForWideScreenOnly),
+                        name = serverButton.name,
                     ) {
-                        call(addButton.action, false)
+                        call(serverButton.action, serverButton.inNewTab)
                     }
                 }
+            }
+            ToolBarBlock {
+                for (clientButton in commonClientButtons) {
+                    ToolBarIconButton(
+                        isVisible = isWideScreen || (!isFindTextVisible && !clientButton.isForWideScreenOnly),
+                        name = clientButton.name
+                    ) {
+                        clientAction(clientButton.action)
+                    }
+                }
+            }
+            ToolBarBlock {
                 ToolBarIconButton(
                     isVisible = (isWideScreen || !isFindTextVisible) && isFormButtonVisible,
                     name = "/images/ic_mode_edit_${getStyleToolbarIconNameSuffix()}.png",
@@ -142,9 +144,8 @@ fun TableToolBar(
                     doPopup()
                 }
             }
-
             ToolBarBlock {
-                for (serverButton in alServerButton) {
+                for (serverButton in rowServerButtons) {
                     ToolBarIconButton(
                         isVisible = isWideScreen || (!isFindTextVisible && !serverButton.isForWideScreenOnly),
                         name = serverButton.name,
@@ -153,14 +154,13 @@ fun TableToolBar(
                     }
                 }
             }
-
             ToolBarBlock {
-                for (clientButton in alClientButton) {
+                for (clientButton in rowClientButtons) {
                     ToolBarIconButton(
                         isVisible = isWideScreen || (!isFindTextVisible && !clientButton.isForWideScreenOnly),
-                        name = clientButton.name,
+                        name = clientButton.name
                     ) {
-                        clientAction(clientButton.action, clientButton.params)
+                        clientAction(clientButton.action)
                     }
                 }
             }

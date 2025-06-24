@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -146,10 +146,10 @@ fun LogonForm(
                 text = "Запомнить меня",
             )
         }
-        Button(
+        TextButton(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             shape = singleButtonShape,
-            colors = colorTextButton ?: ButtonDefaults.buttonColors(),
+            colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
             onClick = logon,
         ) {
             Text(

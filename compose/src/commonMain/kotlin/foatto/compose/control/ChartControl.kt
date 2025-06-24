@@ -1876,7 +1876,7 @@ private lateinit var butShowForTime: Button
         arrTxtDateTime[ i ]!!.setOnKeyPressed( this )
     }
 
-    butShowForTime = Button( "Показать" )
+    butShowForTime = TextButton( "Показать" )
     butShowForTime.tooltip = Tooltip( "Показать график на заданный период" )
     butShowForTime.setOnAction( this )
 

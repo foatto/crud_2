@@ -615,6 +615,7 @@ object MMSTelematicFunction {
 
         prevValue?.let {
             if (workValue == prevValue) {
+                //--- продлеваем предыдущий период
                 conn.executeUpdate(
                     """
                         UPDATE MMS_agg_${sensorEntity.id} 
@@ -622,25 +623,49 @@ object MMSTelematicFunction {
                         WHERE ontime_0 = $onTime0 
                     """
                 )
-                return
             } else {
-                //--- слишком короткий предыдущий период
+                //--- слишком короткий предыдущий период?
                 if (
                     !prevValue && (onTime1 - onTime0 < (sensorEntity.minOffTime ?: 0)) ||
                     prevValue && (onTime1 - onTime0 < (sensorEntity.minOnTime ?: 0))
                 ) {
+                    //--- удаляем слишком короткий предыдущий период
                     conn.executeUpdate(
                         """
                             DELETE FROM MMS_agg_${sensorEntity.id} 
                             WHERE ontime_0 = $onTime0 
                         """
                     )
+                    //--- продлеваем предпредыдущий период, если есть
+                    if (conn.executeUpdate(
+                            """
+                                UPDATE MMS_agg_${sensorEntity.id} 
+                                SET ontime_1 = $pointTime 
+                                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} ) 
+                            """
+                        ) == 0
+                    ) {
+                        //--- или создаём новый период, если не было предпредыдущего
+                        createNewWorkPeriod(conn, sensorEntity.id, pointTime, workValue)
+                    }
+                } else {
+                    createNewWorkPeriod(conn, sensorEntity.id, pointTime, workValue)
                 }
             }
+        } ?: run {
+            createNewWorkPeriod(conn, sensorEntity.id, pointTime, workValue)
         }
+    }
+
+    private fun createNewWorkPeriod(
+        conn: CoreAdvancedConnection,
+        id: Int,
+        pointTime: Int,
+        workValue: Boolean,
+    ) {
         conn.executeUpdate(
             """
-                INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
+                INSERT INTO MMS_agg_${id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
                 VALUES ( $pointTime , $pointTime , ${if (workValue) 1 else 0} , 0 , 0 , 0 , 0 )  
             """
         )

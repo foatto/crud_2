@@ -8,8 +8,10 @@ import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.form.FormButton
 import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.server.checkFormAddPermission
@@ -43,7 +45,7 @@ class DepartmentService(
         private const val FIELD_OWNER_FULL_NAME = "ownerFullName"   // псевдополе для селектора
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         if (action.isSelectorMode) {
@@ -62,9 +64,9 @@ class DepartmentService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -85,7 +87,7 @@ class DepartmentService(
         } else {
             departmentRepository.findByUserIdIn(enabledUserIds, pageRequest)
         }
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val departmentEntities = page.content
 
         for (departmentEntity in departmentEntities) {
@@ -110,9 +112,9 @@ class DepartmentService(
             var col = 0
 
             if (action.isSelectorMode) {
-                alTableCell += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
             }
-            alTableCell += getTableUserNameCell(
+            tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
                 userId = userConfig.id,
@@ -120,7 +122,7 @@ class DepartmentService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = departmentEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = departmentEntity.name ?: "-")
 
             val formAction = AppAction(
                 type = ActionType.MODULE_FORM,
@@ -130,17 +132,17 @@ class DepartmentService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopupData>()
+            val alPopupData = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = formAction,
                     text = "Открыть",
                     inNewTab = false,
                 )
             }
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formAction
                 } else {
@@ -156,7 +158,7 @@ class DepartmentService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (departmentEntity.id == action.id) {
@@ -264,7 +266,7 @@ class DepartmentService(
     ): Triple<Boolean, Boolean, Boolean> {
         val id = action.id
 
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
 
         val departmentEntity = id?.let {
             departmentRepository.findByIdOrNull(id) ?: return Triple(addEnabled, false, false)

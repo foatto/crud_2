@@ -18,8 +18,10 @@ import foatto.core.model.response.form.cells.FormComboCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableBooleanCell
 import foatto.core.model.response.table.cell.TableButtonCell
@@ -40,10 +42,8 @@ import foatto.server.repository.UserRepository
 import foatto.server.util.encodePassword
 import foatto.server.util.getNextId
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toInstant
 import org.springframework.data.domain.Page
@@ -144,7 +144,7 @@ class UserService(
         )
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         if (action.isSelectorMode) {
@@ -180,9 +180,9 @@ class UserService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -210,7 +210,7 @@ class UserService(
         } else {
             userRepository.findByParentIdAndUserIdIn(parentId, enabledUserIds, pageRequest)
         }
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val userEntities = page.content
 
         for (userEntity in userEntities) {
@@ -235,9 +235,9 @@ class UserService(
             )
 
             if (action.isSelectorMode) {
-                alTableCell += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
             }
-            alTableCell += getTableUserNameCell(
+            tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
                 userId = userConfig.id,
@@ -245,7 +245,7 @@ class UserService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -256,30 +256,30 @@ class UserService(
                     else -> "-"
                 }
             )
-            alTableCell += if (userEntity.orgType == OrgType.ORG_TYPE_DIVISION) {
+            tableCells += if (userEntity.orgType == OrgType.ORG_TYPE_DIVISION) {
                 TableSimpleCell(row = row, col = col++, dataRow = row, name = "")
             } else {
                 TableBooleanCell(row = row, col = col++, dataRow = row, value = userEntity.isDisabled ?: false)
             }
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.login ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.shortName ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.fullName ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.login ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.shortName ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.fullName ?: "-")
             if (isAdminOnly(userConfig)) {
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.roles.joinToString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.roles.joinToString())
             }
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.eMail ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.contactInfo ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.eMail ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.contactInfo ?: "-")
             if (isAdminOnly(userConfig)) {
-                alTableCell += TableButtonCell(
+                tableCells += TableButtonCell(
                     row = row,
                     col = col++,
                     dataRow = row,
                     values = getTableFileButtonCellData(userEntity.fileId),
                 )
             }
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.timeOffset?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.timeOffset?.toString() ?: "-")
             if (isAdminOnly(userConfig)) {
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.lastIP?.removePrefix("/") ?: "-")
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.lastIP?.removePrefix("/") ?: "-")
             }
 
             val formAction = AppAction(
@@ -290,17 +290,17 @@ class UserService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopupData>()
+            val alPopupData = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = formAction,
                     text = "Открыть",
                     inNewTab = false,
                 )
             }
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formAction
                 } else {
@@ -324,7 +324,7 @@ class UserService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (userEntity.id == action.id) {
@@ -675,7 +675,7 @@ class UserService(
     ): Triple<Boolean, Boolean, Boolean> {
         val id = action.id
 
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
 
         val userEntity = id?.let {
             userRepository.findByIdOrNull(id) ?: return Triple(addEnabled, false, false)

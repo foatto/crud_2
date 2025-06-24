@@ -5,8 +5,10 @@ import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.form.cells.FormBaseCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
@@ -31,7 +33,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.SortedMap
 
 @Service
 class DayWorkService(
@@ -62,7 +64,7 @@ class DayWorkService(
             private const val FIELD_COPY_SENSORS = "_copySensors"
      */
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += null to "" // by date group
@@ -82,9 +84,9 @@ class DayWorkService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
         var currentRowNo: Int? = null
         var row = 0
@@ -124,7 +126,7 @@ class DayWorkService(
                 dayWorkRepository.findByUserIdIn(enabledUserIds, pageRequest)
             }
         }
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val dayWorkEntities = page.content
 
         var prevGroupName: String? = null
@@ -150,7 +152,7 @@ class DayWorkService(
 
             val groupName = getDateEntityDMYString(dayEntity)
             if (prevGroupName != groupName) {
-                alTableCell += TableSimpleCell(
+                tableCells += TableSimpleCell(
                     row = row,
                     col = col,
                     colSpan = 6,
@@ -160,12 +162,12 @@ class DayWorkService(
                     isBoldText = true,
                 )
                 prevGroupName = groupName
-                alTableRowData += TableRowData()
+                tableRows += TableRow()
                 row++
             }
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
 
-            alTableCell += getTableUserNameCell(
+            tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
                 userId = userConfig.id,
@@ -174,14 +176,14 @@ class DayWorkService(
                 rowOwnerFullName = rowOwnerFullName
             )
 
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
                 name = (objectEntity.name ?: "-") +
-                    "\n${objectEntity.model ?: "-"}" +
-                    "\n${objectEntity.department?.name ?: "-"}" +
-                    "\n${objectEntity.group?.name ?: "-"}"
+                        "\n${objectEntity.model ?: "-"}" +
+                        "\n${objectEntity.department?.name ?: "-"}" +
+                        "\n${objectEntity.group?.name ?: "-"}"
             )
 
             val begTime = LocalDateTime(ye, mo, da, 0, 0).toInstant(timeZone).epochSeconds.toInt()
@@ -194,7 +196,7 @@ class DayWorkService(
             val tmEnergo = calcService.calcEnergo(objectEntity, begTime, endTime)
             calcService.calcLiquidUsing(objectEntity, begTime, endTime, byGroupLiquidSum, allLiquidSum)
 
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -202,7 +204,7 @@ class DayWorkService(
                     "$descr = ${workCalcData.onTime}"
                 }.joinToString("\n")
             )
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -210,7 +212,7 @@ class DayWorkService(
                     "$descr = ${getSplittedDouble(value, 1)}"
                 }.joinToString("\n")
             )
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -236,7 +238,7 @@ class DayWorkService(
                 formOpenAction = formOpenAction,
             )
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
@@ -250,7 +252,7 @@ class DayWorkService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (dayWorkEntity.id == action.id) {
@@ -269,11 +271,11 @@ class DayWorkService(
         endTime: Int,
         isFormEnabled: Boolean,
         formOpenAction: AppAction,
-    ): List<TablePopupData> {
-        val alPopupData = mutableListOf<TablePopupData>()
+    ): List<TablePopup> {
+        val alPopupData = mutableListOf<TablePopup>()
 
         if (isFormEnabled) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 action = formOpenAction,
                 text = "Открыть",
                 inNewTab = false,
@@ -286,7 +288,7 @@ class DayWorkService(
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, objectId, begTime, endTime, alPopupData)
 
         if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Карты",
                 action = AppAction(
                     type = ActionType.MODULE_MAP,
@@ -312,7 +314,7 @@ class DayWorkService(
 //            )
 //        }
         if (checkAccessPermission(AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Контрольные панели",
                 action = AppAction(
                     type = ActionType.MODULE_COMPOSITE,
@@ -333,10 +335,10 @@ class DayWorkService(
         objectId: Int,
         begTime: Int,
         endTime: Int,
-        alPopupData: MutableList<TablePopupData>
+        alPopupData: MutableList<TablePopup>
     ) {
         if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Графики",
                 action = AppAction(
                     type = ActionType.MODULE_CHART,
@@ -359,10 +361,10 @@ class DayWorkService(
         objectId: Int,
         begTime: Int,
         endTime: Int,
-        alPopupData: MutableList<TablePopupData>
+        alPopupData: MutableList<TablePopup>
     ) {
         if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Отчёты",
                 action = AppAction(
                     type = ActionType.MODULE_FORM,

@@ -7,8 +7,10 @@ import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core_mms.AppModuleMMS
@@ -42,7 +44,7 @@ class SensorCalibrationService(
         private const val FIELD_SENSOR_DATA = "sensorData"
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += FIELD_SENSOR_VALUE to "Значение датчика"
@@ -58,9 +60,9 @@ class SensorCalibrationService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -77,7 +79,7 @@ class SensorCalibrationService(
 
         val page: Page<SensorCalibrationEntity> = sensorCalibrationRepository.findBySensor(parentSensorEntity, pageRequest)
 
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val sensorCalibrationEntities = page.content
 
         for (sensorCalibrationEntity in sensorCalibrationEntities) {
@@ -90,8 +92,8 @@ class SensorCalibrationService(
                 userRoles = userConfig.roles
             )
 
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorCalibrationEntity.sensorValue?.toString() ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorCalibrationEntity.dataValue?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorCalibrationEntity.sensorValue?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorCalibrationEntity.dataValue?.toString() ?: "-")
 
             val formOpenAction = AppAction(
                 type = ActionType.MODULE_FORM,
@@ -101,17 +103,17 @@ class SensorCalibrationService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopupData>()
+            val alPopupData = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = formOpenAction,
                     text = "Открыть",
                     inNewTab = false,
                 )
             }
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
@@ -125,7 +127,7 @@ class SensorCalibrationService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (sensorCalibrationEntity.id == action.id) {
@@ -215,7 +217,7 @@ class SensorCalibrationService(
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
     ): Triple<Boolean, Boolean, Boolean> {
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
         val editEnabled = checkRowPermission(action.module, ActionType.FORM_EDIT, UserRelationEnum.NOBODY, userConfig.roles)
         val deleteEnabled = checkRowPermission(action.module, ActionType.FORM_DELETE, UserRelationEnum.NOBODY, userConfig.roles)
 

@@ -6,6 +6,7 @@ import foatto.core.IconName
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.AppResponse
+import foatto.core.model.response.ClientActionButton
 import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.HeaderData
 import foatto.core.model.response.ResponseCode
@@ -17,10 +18,10 @@ import foatto.core.model.response.form.FormResponse
 import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormFileData
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.AddActionButton
-import foatto.core.model.response.table.ClientActionButton
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TableResponse
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableButtonCell
 import foatto.core.model.response.table.cell.TableButtonCellData
@@ -164,16 +165,16 @@ abstract class ApplicationService(
         val columnCaptions = getTableColumnCaptions(action, userConfig)
 
         val alTableCell = mutableListOf<TableBaseCell>()
-        val alTableRowData = mutableListOf<TableRowData>()
-        val alPageButton = mutableListOf<Pair<AppAction?, String>>()
+        val alTableRowData = mutableListOf<TableRow>()
+        val tablePageButtonData = mutableListOf<TablePageButton>()
 
         val currentRowNo = fillTableGridData(
             action = action,
             userConfig = userConfig,
             moduleConfig = moduleConfig,
-            alTableCell = alTableCell,
-            alTableRowData = alTableRowData,
-            alPageButton = alPageButton,
+            tableCells = alTableCell,
+            tableRows = alTableRowData,
+            pageButtons = tablePageButtonData,
         )
 
         return AppResponse(
@@ -186,29 +187,13 @@ abstract class ApplicationService(
                     moduleConfig = moduleConfig,
                 ),
                 findText = action.findText ?: "",
-                alAddActionButton = if (checkFormAddPermission(action.module, userConfig.roles)) {
-                    listOf(
-                        AddActionButton(
-                            text = "Добавить",
-                            tooltip = "Добавить",
-                            icon = IconName.ADD_ITEM,
-                            action = getTableAddAction(
-                                action = action,
-                                parentModule = action.parentModule,
-                                parentId = action.parentId,
-                            ),
-                        )
-                    )
-                } else {
-                    emptyList()
-                },
-                alServerActionButton = getTableServerActionButtons(),
-                alClientActionButton = getTableClientActionButtons(),
-                alColumnCaption = columnCaptions,
-                alTableCell = alTableCell,
-                alTableRowData = alTableRowData,
+                serverActionButtons = getTableServerActionButtons(action, userConfig, moduleConfig),
+                clientActionButtons = getTableClientActionButtons(),
+                columnCaptions = columnCaptions,
+                tableCells = alTableCell,
+                tableRows = alTableRowData,
                 selectedRowNo = currentRowNo,
-                alPageButton = alPageButton,
+                tablePageButtonData = tablePageButtonData,
             )
         )
     }
@@ -232,31 +217,54 @@ abstract class ApplicationService(
         rows = emptyList()
     )
 
-    protected open fun getTableServerActionButtons(): List<ServerActionButton> = emptyList()
+    protected open fun getTableServerActionButtons(
+        action: AppAction,
+        userConfig: ServerUserConfig,
+        moduleConfig: AppModuleConfig,
+    ): List<ServerActionButton> =
+        if (checkFormAddPermission(moduleConfig, userConfig.roles)) {
+            listOf(
+                ServerActionButton(
+                    name = IconName.ADD_ITEM,
+                    action = getTableAddAction(
+                        action = action,
+                        parentModule = action.parentModule,
+                        parentId = action.parentId,
+                    ),
+                    inNewTab = false,
+                    isForWideScreenOnly = true,
+                )
+            )
+        } else {
+            emptyList()
+        }
 
     protected open fun getTableClientActionButtons(): List<ClientActionButton> = emptyList()
 
-    protected abstract fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction?, String>>
+    protected abstract fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption>
 
-    protected fun getTableColumnCaptionActions(action: AppAction, alColumnInfo: List<Pair<String?, String>>): List<Pair<AppAction, String>> =
+    protected fun getTableColumnCaptionActions(action: AppAction, alColumnInfo: List<Pair<String?, String>>): List<TableCaption> =
         alColumnInfo.map { (fieldName, fieldCaption) ->
-            action.copy(
-                sortName = fieldName,
-                isSortAsc = if (fieldName == action.sortName) {
-                    !action.isSortAsc
-                } else {
-                    true
-                }
-            ) to fieldCaption
+            TableCaption(
+                name = fieldCaption,
+                action = action.copy(
+                    sortName = fieldName,
+                    isSortAsc = if (fieldName == action.sortName) {
+                        !action.isSortAsc
+                    } else {
+                        true
+                    }
+                )
+            )
         }
 
     protected abstract fun fillTableGridData(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int?
 
     protected fun getTableSortedPageRequest(
@@ -334,7 +342,7 @@ abstract class ApplicationService(
     protected fun fillTablePageButtons(
         action: AppAction,
         pageCount: Int,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        alPageButton: MutableList<TablePageButton>,
     ) {
         val pageNo = action.pageNo
         //--- first page
@@ -343,7 +351,7 @@ abstract class ApplicationService(
         }
         //--- empty
         if (pageNo > 2) {
-            alPageButton += null to "..."
+            alPageButton += TablePageButton(null, "...")
         }
         //--- prev page
         if (pageNo > 1) {
@@ -351,7 +359,7 @@ abstract class ApplicationService(
         }
 
         //--- current page
-        alPageButton += null to "${pageNo + 1}"
+        alPageButton += TablePageButton(null, "${pageNo + 1}")
 
         //--- next page
         if (pageNo < pageCount - 2) {
@@ -359,7 +367,7 @@ abstract class ApplicationService(
         }
         //--- empty
         if (pageNo < pageCount - 3) {
-            alPageButton += null to "..."
+            alPageButton += TablePageButton(null, "...")
         }
         //--- last page
         if (pageNo < pageCount - 1) {
@@ -367,8 +375,11 @@ abstract class ApplicationService(
         }
     }
 
-    private fun getPageButton(action: AppAction, pageNo: Int): Pair<AppAction?, String> =
-        action.copy(pageNo = pageNo) to "${pageNo + 1}"
+    private fun getPageButton(action: AppAction, pageNo: Int): TablePageButton =
+        TablePageButton(
+            action = action.copy(pageNo = pageNo),
+            text = "${pageNo + 1}",
+        )
 
     private fun getFormResponse(
         action: AppAction,

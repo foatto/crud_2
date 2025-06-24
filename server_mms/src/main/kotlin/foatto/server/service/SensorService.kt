@@ -13,8 +13,10 @@ import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormComboCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
@@ -259,7 +261,7 @@ class SensorService(
         }
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += null to "" // sensorGroup
@@ -280,9 +282,9 @@ class SensorService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -304,7 +306,7 @@ class SensorService(
             sensorRepository.findByObj(parentObjectEntity, pageRequest)
         }
 
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val sensorEntities = page.content
 
         var prevGroupName: String? = null
@@ -320,7 +322,7 @@ class SensorService(
 
             val groupName = sensorEntity.group ?: "-"
             if (prevGroupName != groupName) {
-                alTableCell += TableSimpleCell(
+                tableCells += TableSimpleCell(
                     row = row,
                     col = col,
                     colSpan = 6,
@@ -330,14 +332,14 @@ class SensorService(
                     isBoldText = true,
                 )
                 prevGroupName = groupName
-                alTableRowData += TableRowData()
+                tableRows += TableRow()
                 row++
             }
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
 
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.descr ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.portNum?.toString() ?: "-")
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.descr ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.portNum?.toString() ?: "-")
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -345,8 +347,8 @@ class SensorService(
                     SensorConfig.hmSensorDescr[sensorType] ?: "(неизвестный тип датчика)"
                 } ?: "-",
             )
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.serialNo ?: "-")
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.serialNo ?: "-")
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -361,10 +363,10 @@ class SensorService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopupData>()
+            val alPopupData = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = formOpenAction,
                     text = "Открыть",
                     inNewTab = false,
@@ -378,7 +380,7 @@ class SensorService(
 //            alChildData.add(ChildData("mms_sensor_calibration", columnId, true))
 //        }
             if (checkAccessPermission(AppModuleMMS.SENSOR_CALIBRATION, userConfig.roles)) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.SENSOR_CALIBRATION,
@@ -390,7 +392,7 @@ class SensorService(
                 )
             }
             if (checkAccessPermission(AppModuleMMS.SENSOR_DATA, userConfig.roles)) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.SENSOR_DATA,
@@ -402,7 +404,7 @@ class SensorService(
                 )
             }
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
@@ -416,7 +418,7 @@ class SensorService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (sensorEntity.id == action.id) {
@@ -1303,7 +1305,7 @@ class SensorService(
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
     ): Triple<Boolean, Boolean, Boolean> {
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
         val editEnabled = checkRowPermission(action.module, ActionType.FORM_EDIT, UserRelationEnum.NOBODY, userConfig.roles)
         val deleteEnabled = checkRowPermission(action.module, ActionType.FORM_DELETE, UserRelationEnum.NOBODY, userConfig.roles)
 

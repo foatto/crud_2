@@ -5,7 +5,9 @@ import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.form.cells.FormBaseCell
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getDateTimeDMYHMSString
@@ -33,7 +35,7 @@ class SensorDataService(
         private const val PAGE_SIZE_IN_SEC = 900    // 3600  // 10_800 // 21_600 // 43_200 // 86_400
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += null to "Время (UTC)"
@@ -56,9 +58,9 @@ class SensorDataService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
         var row = 0
 
@@ -114,43 +116,43 @@ class SensorDataService(
                 val value3 = rs.getDouble(pos++)
 
                 var col = 0
-                alTableCell += TableSimpleCell(
+                tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
                     name = getDateTimeDMYHMSString(zoneUTC, ontime0)
                 )
-                alTableCell += TableSimpleCell(
+                tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
                     name = getDateTimeDMYHMSString(zoneLocal, ontime0)
                 )
-                alTableCell += TableSimpleCell(
+                tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
                     name = getDateTimeDMYHMSString(zoneUTC, ontime1)
                 )
-                alTableCell += TableSimpleCell(
+                tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
                     name = getDateTimeDMYHMSString(zoneLocal, ontime1)
                 )
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = type0.toString())
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = value0.toString())
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = value1.toString())
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = value2.toString())
-                alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = value3.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = type0.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value0.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value1.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value2.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value3.toString())
 
-                alTableRowData += TableRowData(
+                tableRows += TableRow(
                     formAction = null,
                     rowAction = null,
                     isRowUrlInNewTab = false,
                     gotoAction = null,
                     isGotoUrlInNewTab = true,
-                    alPopupData = emptyList(),
+                    tablePopups = emptyList(),
                 )
                 row++
             }
@@ -160,35 +162,35 @@ class SensorDataService(
 
         //--- first page
         if (action.pageNo > 0) {
-            alPageButton += action.copy(pageNo = 0) to getPageCaption(zoneUTC, lastTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC)
+            pageButtons += TablePageButton(action.copy(pageNo = 0), getPageCaption(zoneUTC, lastTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC))
         }
         //--- empty
         if (action.pageNo > 2) {
-            alPageButton += null to "..."
+            pageButtons += TablePageButton(null, "...")
         }
         //--- prev page
         if (action.pageNo > 1) {
-            alPageButton += action.copy(pageNo = action.pageNo - 1) to getPageCaption(zoneUTC, (currentPageNo + 1) * PAGE_SIZE_IN_SEC)
+            pageButtons += TablePageButton(action.copy(pageNo = action.pageNo - 1), getPageCaption(zoneUTC, (currentPageNo + 1) * PAGE_SIZE_IN_SEC))
         }
         //--- current page
-        alPageButton += null to getPageCaption(zoneUTC, currentPageNo * PAGE_SIZE_IN_SEC)
+        pageButtons += TablePageButton(null, getPageCaption(zoneUTC, currentPageNo * PAGE_SIZE_IN_SEC))
         //--- next page
         if (action.pageNo < pageCount - 2) {
-            alPageButton += action.copy(pageNo = action.pageNo + 1) to getPageCaption(zoneUTC, (currentPageNo - 1) * PAGE_SIZE_IN_SEC)
+            pageButtons += TablePageButton(action.copy(pageNo = action.pageNo + 1), getPageCaption(zoneUTC, (currentPageNo - 1) * PAGE_SIZE_IN_SEC))
         }
         //--- empty
         if (action.pageNo < pageCount - 3) {
-            alPageButton += null to "..."
+            pageButtons += TablePageButton(null, "...")
         }
         //--- last page
         if (action.pageNo < pageCount - 1) {
-            alPageButton += action.copy(pageNo = pageCount - 1) to getPageCaption(zoneUTC, firstTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC)
+            pageButtons += TablePageButton(action.copy(pageNo = pageCount - 1), getPageCaption(zoneUTC, firstTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC))
         }
 
         return null
     }
 
-     private fun getPageCaption(timeZone: TimeZone, time: Int): String {
+    private fun getPageCaption(timeZone: TimeZone, time: Int): String {
         val caption = getDateTimeDMYHMSString(timeZone, time)
         //--- remove last seconds digits
         return caption.substring(0, caption.length - 3)

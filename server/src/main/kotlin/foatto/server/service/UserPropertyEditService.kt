@@ -10,7 +10,9 @@ import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.server.checkRowPermission
 import foatto.server.model.AppModuleConfig
@@ -39,9 +41,9 @@ class UserPropertyEditService(
         private const val FIELD_FILE = "fileId"
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction?, String>> = emptyList()
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> = emptyList()
 
-    override fun fillTableGridData(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, alTableCell: MutableList<TableBaseCell>, alTableRowData: MutableList<TableRowData>, alPageButton: MutableList<Pair<AppAction?, String>>): Int? = null
+    override fun fillTableGridData(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, tableCells: MutableList<TableBaseCell>, tableRows: MutableList<TableRow>, pageButtons: MutableList<TablePageButton>): Int? = null
 
     override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> {
         val formCells = mutableListOf<FormBaseCell>()

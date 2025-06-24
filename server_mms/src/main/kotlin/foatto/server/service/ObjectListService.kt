@@ -6,7 +6,9 @@ import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.form.cells.FormBaseCell
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core_mms.AppModuleMMS
@@ -33,7 +35,7 @@ class ObjectListService(
         const val FIELD_MODEL: String = "model"
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
 //        alColumnInfo += null to "" // userId
@@ -53,9 +55,9 @@ class ObjectListService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -71,7 +73,7 @@ class ObjectListService(
         } else {
             objectRepository.findByUserIdIn(enabledUserIds, pageRequest)
         }
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val objectEntities = page.content
 
         for (objectEntity in objectEntities) {
@@ -89,12 +91,12 @@ class ObjectListService(
 //                rowOwnerFullName = rowOwnerFullName
 //            )
 //            alTableCell += TableBooleanCell(row = row, col = col++, dataRow = row, value = objectEntity.isDisabled ?: false)
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.name ?: "-")
 //            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.model ?: "-")
 //            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.department?.name ?: "-")
 //            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.group?.name ?: "-")
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = null,
                 rowAction = AppAction(
                     type = ActionType.MODULE_COMPOSITE,
@@ -104,7 +106,7 @@ class ObjectListService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = emptyList(),
+                tablePopups = emptyList(),
             )
 
             if (objectEntity.id == action.id) {

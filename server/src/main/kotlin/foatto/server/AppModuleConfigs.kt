@@ -113,8 +113,8 @@ fun checkAccessPermission(module: String?, userRoles: Set<String>): Boolean {
     return false
 }
 
-fun checkFormAddPermission(module: String?, userRoles: Set<String>): Boolean {
-    appModuleConfigs[module]?.let { moduleConfig ->
+fun checkFormAddPermission(moduleConfig: AppModuleConfig?, userRoles: Set<String>): Boolean {
+    moduleConfig?.let { moduleConfig ->
         //--- любая отрицательная роль достаточна для отказа
         if (
             moduleConfig.disabledFormAddRoles.any { disabledRole ->

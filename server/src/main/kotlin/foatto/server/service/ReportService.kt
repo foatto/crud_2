@@ -8,7 +8,9 @@ import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.form.FormButton
 import foatto.core.model.response.form.FormButtonKey
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
@@ -20,7 +22,15 @@ import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.util.getFreeFile
 import jxl.Workbook
-import jxl.format.*
+import jxl.format.Alignment
+import jxl.format.Border
+import jxl.format.BorderLineStyle
+import jxl.format.Colour
+import jxl.format.Orientation
+import jxl.format.PageOrientation
+import jxl.format.PaperSize
+import jxl.format.UnderlineStyle
+import jxl.format.VerticalAlignment
 import jxl.write.Label
 import jxl.write.NumberFormat
 import jxl.write.WritableCell
@@ -397,8 +407,8 @@ abstract class ReportService(
 
 //--- common app part --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction?, String>> = emptyList()
-    override fun fillTableGridData(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, alTableCell: MutableList<TableBaseCell>, alTableRowData: MutableList<TableRowData>, alPageButton: MutableList<Pair<AppAction?, String>>): Int? = null
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> = emptyList()
+    override fun fillTableGridData(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, tableCells: MutableList<TableBaseCell>, tableRows: MutableList<TableRow>, pageButtons: MutableList<TablePageButton>): Int? = null
 
     override fun getFormButtons(
         action: AppAction,
@@ -424,7 +434,7 @@ abstract class ReportService(
     }
 
     override fun getFormActionPermissions(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig): Triple<Boolean, Boolean, Boolean> {
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
 
         return Triple(addEnabled, false, false)
     }

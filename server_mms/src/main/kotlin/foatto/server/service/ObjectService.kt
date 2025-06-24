@@ -11,8 +11,10 @@ import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableBooleanCell
 import foatto.core.model.response.table.cell.TableButtonCell
@@ -75,7 +77,7 @@ class ObjectService(
         private const val FIELD_GROUP_NAME = "_groupName"             // псевдополе для селектора
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         if (action.isSelectorMode) {
@@ -102,9 +104,9 @@ class ObjectService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -120,7 +122,7 @@ class ObjectService(
         } else {
             objectRepository.findByUserIdIn(enabledUserIds, pageRequest)
         }
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val objectEntities = page.content
 
         for (objectEntity in objectEntities) {
@@ -145,9 +147,9 @@ class ObjectService(
             )
 
             if (action.isSelectorMode) {
-                alTableCell += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
             }
-            alTableCell += getTableUserNameCell(
+            tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
                 userId = userConfig.id,
@@ -155,13 +157,13 @@ class ObjectService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            alTableCell += TableBooleanCell(row = row, col = col++, dataRow = row, value = objectEntity.isDisabled ?: false)
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.name ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.model ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.department?.name ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.group?.name ?: "-")
+            tableCells += TableBooleanCell(row = row, col = col++, dataRow = row, value = objectEntity.isDisabled ?: false)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.model ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.department?.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.group?.name ?: "-")
             if (isAdminOnly(userConfig)) {
-                alTableCell += TableButtonCell(
+                tableCells += TableButtonCell(
                     row = row,
                     col = col++,
                     dataRow = row,
@@ -184,7 +186,7 @@ class ObjectService(
                 formOpenAction = formOpenAction,
             )
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
@@ -206,7 +208,7 @@ class ObjectService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (objectEntity.id == action.id) {
@@ -223,11 +225,11 @@ class ObjectService(
         id: Int,
         isFormEnabled: Boolean,
         formOpenAction: AppAction,
-    ): List<TablePopupData> {
-        val alPopupData = mutableListOf<TablePopupData>()
+    ): List<TablePopup> {
+        val alPopupData = mutableListOf<TablePopup>()
 
         if (isFormEnabled) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 action = formOpenAction,
                 text = "Открыть",
                 inNewTab = false,
@@ -249,7 +251,7 @@ class ObjectService(
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, id, begTime, endTime, alPopupData)
 
         if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Карты",
                 action = AppAction(
                     type = ActionType.MODULE_MAP,
@@ -274,7 +276,7 @@ class ObjectService(
 //            )
 //        }
         if (checkAccessPermission(AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Контрольные панели",
                 action = AppAction(
                     type = ActionType.MODULE_COMPOSITE,
@@ -289,9 +291,9 @@ class ObjectService(
         return alPopupData
     }
 
-    private fun getTableTablePopupData(userConfig: ServerUserConfig, module: String, id: Int, alPopupData: MutableList<TablePopupData>) {
+    private fun getTableTablePopupData(userConfig: ServerUserConfig, module: String, id: Int, alPopupData: MutableList<TablePopup>) {
         if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 action = AppAction(
                     type = ActionType.MODULE_TABLE,
                     module = module,
@@ -304,9 +306,9 @@ class ObjectService(
         }
     }
 
-    private fun getTableChartPopupData(userConfig: ServerUserConfig, module: String, id: Int, alPopupData: MutableList<TablePopupData>) {
+    private fun getTableChartPopupData(userConfig: ServerUserConfig, module: String, id: Int, alPopupData: MutableList<TablePopup>) {
         if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Графики",
                 action = AppAction(
                     type = ActionType.MODULE_CHART,
@@ -327,10 +329,10 @@ class ObjectService(
         id: Int,
         begTime: Int,
         endTime: Int,
-        alPopupData: MutableList<TablePopupData>
+        alPopupData: MutableList<TablePopup>
     ) {
         if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopupData(
+            alPopupData += TablePopup(
                 group = "Отчёты",
                 action = AppAction(
                     type = ActionType.MODULE_FORM,
@@ -621,7 +623,7 @@ class ObjectService(
     ): Triple<Boolean, Boolean, Boolean> {
         val id = action.id
 
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
 
         val objectEntity = id?.let {
             objectRepository.findByIdOrNull(id) ?: return Triple(addEnabled, false, false)

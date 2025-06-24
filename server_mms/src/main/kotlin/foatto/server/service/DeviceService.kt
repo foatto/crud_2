@@ -12,8 +12,10 @@ import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormComboCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.model.response.table.TablePopupData
-import foatto.core.model.response.table.TableRowData
+import foatto.core.model.response.table.TableCaption
+import foatto.core.model.response.table.TablePageButton
+import foatto.core.model.response.table.TablePopup
+import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getDateTimeDMYHMSString
@@ -202,7 +204,7 @@ class DeviceService(
         */
     }
 
-    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<Pair<AppAction, String>> {
+    override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += null to "" // Device.userId
@@ -236,9 +238,9 @@ class DeviceService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        alTableCell: MutableList<TableBaseCell>,
-        alTableRowData: MutableList<TableRowData>,
-        alPageButton: MutableList<Pair<AppAction?, String>>,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
         var currentRowNo: Int? = null
@@ -278,7 +280,7 @@ class DeviceService(
                 deviceRepository.findByUserIdIn(enabledUserIds, pageRequest)
             }
         }
-        fillTablePageButtons(action, page.totalPages, alPageButton)
+        fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceEntities = page.content
 
         for (deviceEntity in deviceEntities) {
@@ -294,7 +296,7 @@ class DeviceService(
                 userRoles = userConfig.roles
             )
 
-            alTableCell += getTableUserNameCell(
+            tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
                 userId = userConfig.id,
@@ -302,7 +304,7 @@ class DeviceService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
@@ -310,9 +312,9 @@ class DeviceService(
                     deviceTypes[type] ?: "(неизвестный тип датчика)"
                 } ?: "-",
             )
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.index?.toString() ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.serialNo ?: "-")
-            alTableCell += getTableUserNameCell(
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.index?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.serialNo ?: "-")
+            tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
                 userId = userConfig.id,
@@ -320,30 +322,30 @@ class DeviceService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.obj?.name ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.obj?.model ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.obj?.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.obj?.model ?: "-")
 
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellImei ?: "-"}\n${deviceEntity.cellImei2 ?: "-"}")
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellImei ?: "-"}\n${deviceEntity.cellImei2 ?: "-"}")
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
                 name = "${cellOwnerNames[deviceEntity.cellOwner] ?: "-"}\n${cellOwnerNames[deviceEntity.cellOwner2] ?: "-"}"
             )
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellNumber ?: "-"}\n${deviceEntity.cellNumber2 ?: "-"}")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellIcc ?: "-"}\n${deviceEntity.cellIcc2 ?: "-"}")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellOperator ?: "-"}\n${deviceEntity.cellOperator2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellNumber ?: "-"}\n${deviceEntity.cellNumber2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellIcc ?: "-"}\n${deviceEntity.cellIcc2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellOperator ?: "-"}\n${deviceEntity.cellOperator2 ?: "-"}")
 
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.fwVersion ?: "-")
-            alTableCell += TableSimpleCell(
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.fwVersion ?: "-")
+            tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
                 name = deviceEntity.lastSessionTime?.let { lastSessionTime -> getDateTimeDMYHMSString(zoneLocal, lastSessionTime) } ?: "-",
             )
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionStatus ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionError ?: "-")
-            alTableCell += TableSimpleCell(row = row, col = col++, dataRow = row, name = getDateEntityDMYString(deviceEntity.usingStartDate))
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionStatus ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionError ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = getDateEntityDMYString(deviceEntity.usingStartDate))
 
             val formOpenAction = AppAction(
                 type = ActionType.MODULE_FORM,
@@ -353,17 +355,17 @@ class DeviceService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopupData>()
+            val alPopupData = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopupData(
+                alPopupData += TablePopup(
                     action = formOpenAction,
                     text = "Открыть",
                     inNewTab = false,
                 )
             }
 
-            alTableRowData += TableRowData(
+            tableRows += TableRow(
                 formAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
@@ -377,7 +379,7 @@ class DeviceService(
                 isRowUrlInNewTab = false,
                 gotoAction = null,
                 isGotoUrlInNewTab = true,
-                alPopupData = alPopupData,
+                tablePopups = alPopupData,
             )
 
             if (deviceEntity.id == action.id) {
@@ -794,7 +796,7 @@ class DeviceService(
     ): Triple<Boolean, Boolean, Boolean> {
         val id = action.id
 
-        val addEnabled = checkFormAddPermission(action.module, userConfig.roles)
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
 
         val deviceEntity = id?.let {
             deviceRepository.findByIdOrNull(id) ?: return Triple(addEnabled, false, false)

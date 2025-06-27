@@ -314,8 +314,10 @@ class MMSSpringApp : SpringApp() {
         appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
             caption = "Журнал суточных работ",
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-            disabledAccessRoles = mutableSetOf(),
+//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+//            disabledAccessRoles = mutableSetOf(),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
+            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT, AppRole.USER),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
             disabledFormAddRoles = mutableSetOf(AppRole.USER),
             rowPermissions = mutableMapOf(

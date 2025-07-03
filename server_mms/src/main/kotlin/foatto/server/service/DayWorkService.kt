@@ -229,7 +229,7 @@ class DayWorkService(
                 parentId = action.parentId
             )
 
-            val alPopupData = getPopupDatas(
+            val popupDatas = getPopupDatas(
                 userConfig = userConfig,
                 objectId = objectEntity.id,
                 begTime = begTime,
@@ -239,20 +239,13 @@ class DayWorkService(
             )
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formOpenAction
-                } else {
-                    null
-                },
                 rowAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (dayWorkEntity.id == action.id) {

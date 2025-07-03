@@ -33,9 +33,6 @@ fun TableToolBar(
     selectorCancelAction: (() -> Unit)?,
     isFindTextVisible: Boolean,
     findText: String,
-    isFormButtonVisible: Boolean,
-    isGotoButtonVisible: Boolean,
-    isPopupButtonVisible: Boolean,
     commonServerButtons: SnapshotStateList<ServerActionButton>,
     commonClientButtons: SnapshotStateList<ClientActionButton>,
     rowServerButtons: SnapshotStateList<ServerActionButton>,
@@ -43,9 +40,6 @@ fun TableToolBar(
     tableAction: AppAction,
     onFindInput: (newText: String) -> Unit,
     doFind: (isClear: Boolean) -> Unit,
-    doForm: () -> Unit,
-    doGoto: () -> Unit,
-    doPopup: () -> Unit,
     clientAction: (action: AppAction) -> Unit,
     call: (action: AppAction, inNewTab: Boolean) -> Unit,
 ) {
@@ -122,26 +116,6 @@ fun TableToolBar(
                     ) {
                         clientAction(clientButton.action)
                     }
-                }
-            }
-            ToolBarBlock {
-                ToolBarIconButton(
-                    isVisible = (isWideScreen || !isFindTextVisible) && isFormButtonVisible,
-                    name = "/images/ic_mode_edit_${getStyleToolbarIconNameSuffix()}.png",
-                ) {
-                    doForm()
-                }
-                ToolBarIconButton(
-                    isVisible = (isWideScreen || !isFindTextVisible) && isGotoButtonVisible,
-                    name = "/images/ic_exit_to_app_${getStyleToolbarIconNameSuffix()}.png",
-                ) {
-                    doGoto()
-                }
-                ToolBarIconButton(
-                    isVisible = (isWideScreen || !isFindTextVisible) && isPopupButtonVisible,
-                    name = "/images/ic_menu_${getStyleToolbarIconNameSuffix()}.png",
-                ) {
-                    doPopup()
                 }
             }
             ToolBarBlock {

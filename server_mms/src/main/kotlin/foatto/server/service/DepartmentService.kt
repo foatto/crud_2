@@ -132,10 +132,10 @@ class DepartmentService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopup>()
+            val popupDatas = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = formAction,
                     text = "Открыть",
                     inNewTab = false,
@@ -143,11 +143,6 @@ class DepartmentService(
             }
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formAction
-                } else {
-                    null
-                },
                 rowAction = if (action.isSelectorMode) {
                     selectorAction
                 } else if (isFormEnabled) {
@@ -156,9 +151,7 @@ class DepartmentService(
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (departmentEntity.id == action.id) {

@@ -147,11 +147,8 @@ class SensorDataService(
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value3.toString())
 
                 tableRows += TableRow(
-                    formAction = null,
                     rowAction = null,
                     isRowUrlInNewTab = false,
-                    gotoAction = null,
-                    isGotoUrlInNewTab = true,
                     tablePopups = emptyList(),
                 )
                 row++

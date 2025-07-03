@@ -143,10 +143,6 @@ class TableControl(
     private var isFindTextVisible by mutableStateOf(root.isWideScreen)
     private var findText by mutableStateOf("")
 
-    private var isFormButtonVisible by mutableStateOf(false)
-    private var isGotoButtonVisible by mutableStateOf(false)
-    private var isPopupButtonVisible by mutableStateOf(false)
-
     private val commonServerButtons = mutableStateListOf<ServerActionButton>()
     private val commonClientButtons = mutableStateListOf<ClientActionButton>()
     private val rowServerButtons = mutableStateListOf<ServerActionButton>()
@@ -209,9 +205,6 @@ class TableControl(
                 },
                 isFindTextVisible = isFindTextVisible,
                 findText = findText,
-                isFormButtonVisible = isFormButtonVisible,
-                isGotoButtonVisible = isGotoButtonVisible,
-                isPopupButtonVisible = isPopupButtonVisible,
                 commonServerButtons = commonServerButtons,
                 commonClientButtons = commonClientButtons,
                 rowServerButtons = rowServerButtons,
@@ -219,9 +212,6 @@ class TableControl(
                 tableAction = tableAction,
                 onFindInput = { newText: String -> findText = newText },
                 doFind = { isClear: Boolean -> coroutineScope.launch { doFind(isClear) } },
-                doForm = { coroutineScope.launch { doForm() } },
-                doGoto = { coroutineScope.launch { doGoto() } },
-                doPopup = { doPopup() },
                 clientAction = { action: AppAction -> clientAction(action) },
                 call = { action: AppAction, inNewTab: Boolean -> coroutineScope.launch { call(action, inNewTab) } },
             )
@@ -891,31 +881,7 @@ class TableControl(
         }
     }
 
-    private suspend fun doForm() {
-        currentRowNo?.let { curRow ->
-            alRowData[curRow].formAction?.let { formAction ->
-                call(formAction, false)
-            }
-        }
-    }
-
-    private suspend fun doGoto() {
-        currentRowNo?.let { curRow ->
-            alRowData[curRow].gotoAction?.let { gotoAction ->
-                call(gotoAction, alRowData[curRow].isGotoUrlInNewTab)
-            }
-        }
-    }
-
-    private fun doPopup() {
-        showPopupMenu(currentGridData)
-    }
-
     private fun setCurrentRow(rowNo: Int?) {
-        isFormButtonVisible = rowNo != null && alRowData[rowNo].formAction != null
-        isGotoButtonVisible = rowNo != null && alRowData[rowNo].gotoAction != null
-        isPopupButtonVisible = rowNo != null && alRowData[rowNo].tablePopups.isNotEmpty()
-
         rowServerButtons.clear()
         rowNo?.let {
             rowServerButtons.addAll(alRowData[rowNo].serverActionButtons)

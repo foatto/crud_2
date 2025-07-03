@@ -355,10 +355,10 @@ class DeviceService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopup>()
+            val popupDatas = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = formOpenAction,
                     text = "Открыть",
                     inNewTab = false,
@@ -366,20 +366,13 @@ class DeviceService(
             }
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formOpenAction
-                } else {
-                    null
-                },
                 rowAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (deviceEntity.id == action.id) {

@@ -179,7 +179,7 @@ class ObjectService(
                 parentId = action.parentId
             )
 
-            val alPopupData = getPopupDatas(
+            val popupDatas = getPopupDatas(
                 userConfig = userConfig,
                 id = objectEntity.id,
                 isFormEnabled = isFormEnabled,
@@ -187,11 +187,6 @@ class ObjectService(
             )
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formOpenAction
-                } else {
-                    null
-                },
                 rowAction = if (action.isSelectorMode) {
                     AppAction(
                         type = ActionType.FORM_SELECTOR,
@@ -206,9 +201,7 @@ class ObjectService(
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (objectEntity.id == action.id) {

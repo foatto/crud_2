@@ -165,11 +165,8 @@ class ObjectDataService(
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = otherData)
 
                 tableRows += TableRow(
-                    formAction = null,
                     rowAction = null,
                     isRowUrlInNewTab = false,
-                    gotoAction = null,
-                    isGotoUrlInNewTab = true,
                     tablePopups = emptyList(),
                 )
                 row++

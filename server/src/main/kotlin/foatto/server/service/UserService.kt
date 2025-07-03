@@ -290,10 +290,10 @@ class UserService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopup>()
+            val popupDatas = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = formAction,
                     text = "Открыть",
                     inNewTab = false,
@@ -301,11 +301,6 @@ class UserService(
             }
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formAction
-                } else {
-                    null
-                },
                 rowAction = if (userEntity.orgType == OrgType.ORG_TYPE_DIVISION) {
                     action.copy(parentModule = action.module, parentId = userEntity.id)
                 } else if (action.isSelectorMode) {
@@ -322,9 +317,7 @@ class UserService(
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (userEntity.id == action.id) {

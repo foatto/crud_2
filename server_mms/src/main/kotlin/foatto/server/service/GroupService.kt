@@ -132,10 +132,10 @@ class GroupService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopup>()
+            val popupDatas = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = formAction,
                     text = "Открыть",
                     inNewTab = false,
@@ -143,11 +143,6 @@ class GroupService(
             }
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formAction
-                } else {
-                    null
-                },
                 rowAction = if (action.isSelectorMode) {
                     AppAction(
                         type = ActionType.FORM_SELECTOR,
@@ -162,9 +157,7 @@ class GroupService(
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (groupEntity.id == action.id) {

@@ -363,10 +363,10 @@ class SensorService(
                 parentId = action.parentId
             )
 
-            val alPopupData = mutableListOf<TablePopup>()
+            val popupDatas = mutableListOf<TablePopup>()
 
             if (isFormEnabled) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = formOpenAction,
                     text = "Открыть",
                     inNewTab = false,
@@ -380,7 +380,7 @@ class SensorService(
 //            alChildData.add(ChildData("mms_sensor_calibration", columnId, true))
 //        }
             if (checkAccessPermission(AppModuleMMS.SENSOR_CALIBRATION, userConfig.roles)) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.SENSOR_CALIBRATION,
@@ -392,7 +392,7 @@ class SensorService(
                 )
             }
             if (checkAccessPermission(AppModuleMMS.SENSOR_DATA, userConfig.roles)) {
-                alPopupData += TablePopup(
+                popupDatas += TablePopup(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.SENSOR_DATA,
@@ -405,20 +405,13 @@ class SensorService(
             }
 
             tableRows += TableRow(
-                formAction = if (isFormEnabled) {
-                    formOpenAction
-                } else {
-                    null
-                },
                 rowAction = if (isFormEnabled) {
                     formOpenAction
                 } else {
                     null
                 },
                 isRowUrlInNewTab = false,
-                gotoAction = null,
-                isGotoUrlInNewTab = true,
-                tablePopups = alPopupData,
+                tablePopups = popupDatas,
             )
 
             if (sensorEntity.id == action.id) {

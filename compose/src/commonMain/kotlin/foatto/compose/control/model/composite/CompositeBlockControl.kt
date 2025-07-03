@@ -12,8 +12,6 @@ import foatto.compose.control.TableControl
 class CompositeBlockControl(
     val id: Int,
 
-    val isStatic: Boolean,
-
     val chartBlock: ChartControl? = null,
     val mapBlock: MapControl? = null,
     val schemeBlock: SchemeControl? = null,

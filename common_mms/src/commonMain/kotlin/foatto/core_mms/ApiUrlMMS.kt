@@ -6,8 +6,6 @@ object ApiUrlMMS {
     const val OBJECT: String = "${ApiUrl.URL_BASE}/object/${ApiUrl.CURRENT_VERSION}"
     const val OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/object_form_action/${ApiUrl.CURRENT_VERSION}"
 
-    const val OBJECT_LIST: String = "${ApiUrl.URL_BASE}/object_list/${ApiUrl.CURRENT_VERSION}"
-
     const val DEPARTMENT: String = "${ApiUrl.URL_BASE}/department/${ApiUrl.CURRENT_VERSION}"
     const val DEPARTMENT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/department_form_action/${ApiUrl.CURRENT_VERSION}"
 
@@ -51,8 +49,10 @@ object ApiUrlMMS {
     const val SCHEME_WORK_INDICATOR_STATE_ACTION: String = "${ApiUrl.URL_BASE}/scheme_work_indicator_state_action/${ApiUrl.CURRENT_VERSION}"
 
     const val COMPOSITE_OBJECT_DASHBOARD: String = "${ApiUrl.URL_BASE}/composite_object_dashboard/${ApiUrl.CURRENT_VERSION}"
+    const val COMPOSITE_OBJECT_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/composite_object_dashboard_action/${ApiUrl.CURRENT_VERSION}"
 
     const val COMPOSITE_OBJECT_LIST_DASHBOARD: String = "${ApiUrl.URL_BASE}/composite_object_list_dashboard/${ApiUrl.CURRENT_VERSION}"
+    const val COMPOSITE_OBJECT_LIST_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/composite_object_list_dashboard_action/${ApiUrl.CURRENT_VERSION}"
 
     const val REPORT_SUMMARY: String = "${ApiUrl.URL_BASE}/report_summary/${ApiUrl.CURRENT_VERSION}"
     const val REPORT_SUMMARY_FORM_ACTION: String = "${ApiUrl.URL_BASE}/report_summary_form_action/${ApiUrl.CURRENT_VERSION}"

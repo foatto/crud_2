@@ -11,8 +11,6 @@ import kotlinx.serialization.Serializable
 class CompositeBlock(
     val id: Int,
 
-    val isStatic: Boolean,
-
     val isHidden: Boolean,
 
     val x: Int,

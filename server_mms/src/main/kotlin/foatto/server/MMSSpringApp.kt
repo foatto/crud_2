@@ -97,22 +97,6 @@ class MMSSpringApp : SpringApp() {
             ),
         )
 
-        appModuleConfigs[AppModuleMMS.OBJECT_LIST] = AppModuleConfig(
-            caption = "Список объектов",
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-            disabledAccessRoles = mutableSetOf(),
-            enabledFormAddRoles = mutableSetOf(),
-            disabledFormAddRoles = mutableSetOf(),
-            rowPermissions = mutableMapOf(
-                ActionType.MODULE_TABLE to Permission(
-                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
-                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
-                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
-                    },
-                ),
-            ),
-        )
-
         appModuleConfigs[AppModuleMMS.DEPARTMENT] = AppModuleConfig(
             caption = "Подразделения",
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,

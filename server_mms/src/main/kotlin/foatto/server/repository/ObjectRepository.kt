@@ -10,6 +10,16 @@ interface ObjectRepository : JpaRepository<ObjectEntity, Int> {
 
     fun findByUserIdAndName(userId: Int, name: String): List<ObjectEntity>
     fun findByUserIdInAndName(userIds: List<Int>, name: String): List<ObjectEntity>
+    @Query(
+        """
+            SELECT oe
+            FROM ObjectEntity oe
+            WHERE oe.id <> 0
+                AND oe.userId IN ?1
+            ORDER BY oe.name ASC
+        """
+    )
+    fun findByUserIdIn(userIds: List<Int>): List<ObjectEntity>
 
     @Query(
         """

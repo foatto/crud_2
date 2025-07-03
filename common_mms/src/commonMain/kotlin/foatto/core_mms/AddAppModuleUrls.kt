@@ -8,10 +8,6 @@ fun addAppModuleUrls() {
         appUrl = ApiUrlMMS.OBJECT,
         formActionUrl = ApiUrlMMS.OBJECT_FORM_ACTION,
     )
-    appModuleUrls[AppModuleMMS.OBJECT_LIST] = AppModuleUrl(
-        appUrl = ApiUrlMMS.OBJECT_LIST,
-        formActionUrl = null,
-    )
 
     appModuleUrls[AppModuleMMS.DEPARTMENT] = AppModuleUrl(
         appUrl = ApiUrlMMS.DEPARTMENT,
@@ -79,9 +75,11 @@ fun addAppModuleUrls() {
 
     appModuleUrls[AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD] = AppModuleUrl(
         appUrl = ApiUrlMMS.COMPOSITE_OBJECT_DASHBOARD,
+        compositeActionUrl = ApiUrlMMS.COMPOSITE_OBJECT_DASHBOARD_ACTION,
     )
     appModuleUrls[AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD] = AppModuleUrl(
         appUrl = ApiUrlMMS.COMPOSITE_OBJECT_LIST_DASHBOARD,
+        compositeActionUrl = ApiUrlMMS.COMPOSITE_OBJECT_LIST_DASHBOARD_ACTION,
     )
 
     appModuleUrls[AppModuleMMS.REPORT_SUMMARY] = AppModuleUrl(

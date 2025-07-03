@@ -1,13 +1,16 @@
-package foatto.server.service
+package foatto.server.service.composite
 
 import foatto.core.ActionType
 import foatto.core.model.AppAction
+import foatto.core.model.request.CompositeActionRequest
 import foatto.core.model.response.AppResponse
+import foatto.core.model.response.CompositeActionResponse
 import foatto.core.model.response.HeaderData
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.TitleData
 import foatto.core.model.response.composite.CompositeBlock
 import foatto.core.model.response.composite.CompositeLayoutData
+import foatto.core.model.response.composite.CompositeListItemData
 import foatto.core.model.response.composite.CompositeResponse
 import foatto.core.model.response.xy.scheme.SchemeResponse
 import foatto.core_mms.AppModuleMMS
@@ -15,8 +18,12 @@ import foatto.server.DashboardSensorTypeEnum
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
+import foatto.server.ds.CoreTelematicFunction
+import foatto.server.entity.DeviceEntity
+import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.model.SensorConfig
+import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.service.scheme.SchemeAnalogueIndicatorStateService
@@ -24,13 +31,12 @@ import foatto.server.service.scheme.SchemeCounterIndicatorStateService
 import foatto.server.service.scheme.SchemeWorkIndicatorStateService
 import kotlinx.serialization.json.Json
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.stereotype.Service
 import kotlin.math.ceil
 import kotlin.math.sqrt
 
-@Service
-class CompositeObjectDashboardService(
+abstract class AbstractCompositeDashboardService(
     private val objectRepository: ObjectRepository,
+    private val deviceRepository: DeviceRepository,
     private val sensorRepository: SensorRepository,
     private val schemeAnalogueIndicatorStateService: SchemeAnalogueIndicatorStateService,
     private val schemeCounterIndicatorStateService: SchemeCounterIndicatorStateService,
@@ -48,21 +54,62 @@ class CompositeObjectDashboardService(
         if (!checkAccessPermission(actionModule, userConfig.roles)) {
             return AppResponse(ResponseCode.LOGON_NEED)
         }
-        val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        val objectEntity = action.id?.let { objectId ->
-            objectRepository.findByIdOrNull(objectId)
-        } ?: return AppResponse(ResponseCode.LOGON_NEED)
 
-        val layoutSaveKey = actionModule + objectEntity.id
+        val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
+
+        return AppResponse(
+            responseCode = ResponseCode.MODULE_COMPOSITE,
+            composite = CompositeResponse(
+                tabCaption = moduleConfig.caption,
+                action = getCompositeResponseAction(action),
+                items = getCompositeItems(sessionId, action)
+            )
+        )
+    }
+
+    fun compositeAction(
+        sessionId: Long,
+        compositeActionRequest: CompositeActionRequest,
+    ): CompositeActionResponse {
+        val action = compositeActionRequest.action
+        val actionModule = action.module
+
+        val sessionData = SpringApp.getSessionData(sessionId) ?: return getErrorCompositeActionResponse()
+        val userConfig = sessionData.serverUserConfig ?: return getErrorCompositeActionResponse()
+        if (!checkAccessPermission(actionModule, userConfig.roles)) {
+            return getErrorCompositeActionResponse()
+        }
+
+        val moduleConfig = appModuleConfigs[actionModule] ?: return getErrorCompositeActionResponse()
+        val (objectEntity, deviceEntity) = when (action.parentModule) {
+            AppModuleMMS.OBJECT -> {
+                val oe = action.id?.let { objectId ->
+                    objectRepository.findByIdOrNull(objectId)
+                } ?: return getErrorCompositeActionResponse()
+
+                oe to null
+            }
+
+            AppModuleMMS.DEVICE -> {
+                val de = action.id?.let { deviceId ->
+                    deviceRepository.findByIdOrNull(deviceId)
+                } ?: return getErrorCompositeActionResponse()
+
+                val oe = de.obj ?: return getErrorCompositeActionResponse()
+
+                oe to de
+            }
+
+            else -> return getErrorCompositeActionResponse()
+        }
+
+        val layoutSaveKey = action.parentModule + action.id
         val compositeLayoutDatas = userConfig.userProperties[layoutSaveKey]?.let { propertyValue ->
             Json.decodeFromString<Map<Int, CompositeLayoutData>>(propertyValue)
         }
 
         val caption = moduleConfig.caption
-        val rows = listOf(
-            "Наименование объекта" to (objectEntity.name ?: "-"),
-            "Модель" to (objectEntity.model ?: "-"),
-        )
+        val rows = getHeaderRows(objectEntity, deviceEntity)
 
         val sensorEntities = mutableListOf<Pair<DashboardSensorTypeEnum, SensorEntity>>()
         //--- пока просто подряд, по порядку перечисления в SensorConfig
@@ -87,9 +134,16 @@ class CompositeObjectDashboardService(
             SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT,
             SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE,
         ).forEach { sensorType ->
-            sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
-                sensorEntities += DashboardSensorTypeEnum.ANALOGUE to sensorEntity
-            }
+            sensorRepository
+                .findByObjAndSensorType(objectEntity, sensorType)
+                .filter { sensorEntity ->
+                    deviceEntity?.let {
+                        deviceEntity.index == (sensorEntity.portNum ?: -1) / CoreTelematicFunction.MAX_PORT_PER_DEVICE
+                    } ?: true
+                }
+                .forEach { sensorEntity ->
+                    sensorEntities += DashboardSensorTypeEnum.ANALOGUE to sensorEntity
+                }
         }
         listOf(
             SensorConfig.SENSOR_MASS_ACCUMULATED,
@@ -100,16 +154,30 @@ class CompositeObjectDashboardService(
             SensorConfig.SENSOR_ENERGO_COUNT_RD,
             SensorConfig.SENSOR_ENERGO_COUNT_RR,
         ).forEach { sensorType ->
-            sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
-                sensorEntities += DashboardSensorTypeEnum.COUNTER to sensorEntity
-            }
+            sensorRepository
+                .findByObjAndSensorType(objectEntity, sensorType)
+                .filter { sensorEntity ->
+                    deviceEntity?.let {
+                        deviceEntity.index == (sensorEntity.portNum ?: -1) / CoreTelematicFunction.MAX_PORT_PER_DEVICE
+                    } ?: true
+                }
+                .forEach { sensorEntity ->
+                    sensorEntities += DashboardSensorTypeEnum.COUNTER to sensorEntity
+                }
         }
         listOf(
             SensorConfig.SENSOR_WORK,
         ).forEach { sensorType ->
-            sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
-                sensorEntities += DashboardSensorTypeEnum.WORK to sensorEntity
-            }
+            sensorRepository
+                .findByObjAndSensorType(objectEntity, sensorType)
+                .filter { sensorEntity ->
+                    deviceEntity?.let {
+                        deviceEntity.index == (sensorEntity.portNum ?: -1) / CoreTelematicFunction.MAX_PORT_PER_DEVICE
+                    } ?: true
+                }
+                .forEach { sensorEntity ->
+                    sensorEntities += DashboardSensorTypeEnum.WORK to sensorEntity
+                }
         }
 
         //--- в соотношении 2:1
@@ -131,7 +199,6 @@ class CompositeObjectDashboardService(
 
             blocks += CompositeBlock(
                 id = sensorEntity.id,
-                isStatic = false,
                 isHidden = compositeLayoutDatas?.let { compositeLayoutData?.isHidden ?: true } ?: false,
                 x = compositeLayoutDatas?.let { compositeLayoutData?.x ?: 0 } ?: col,
                 y = compositeLayoutDatas?.let { compositeLayoutData?.y ?: 0 } ?: row,
@@ -167,25 +234,43 @@ class CompositeObjectDashboardService(
             }
         }
 
-        return AppResponse(
-            responseCode = ResponseCode.MODULE_COMPOSITE,
-            composite = CompositeResponse(
-                tabCaption = caption,
-                headerData = HeaderData(
-                    titles = listOf(
-                        TitleData(
-                            action = null,
-                            text = caption,
-                            isBold = true,
-                        )
-                    ),
-                    rows = rows,
+        return CompositeActionResponse(
+            responseCode = ResponseCode.OK,
+            headerData = HeaderData(
+                titles = listOf(
+                    TitleData(
+                        action = null,
+                        text = caption,
+                        isBold = true,
+                    )
                 ),
-                blocks = blocks,
-                layoutSaveKey = layoutSaveKey
-            )
+                rows = rows,
+            ),
+            blocks = blocks,
+            layoutSaveKey = layoutSaveKey,
         )
     }
 
-}
+    private fun getErrorCompositeActionResponse() = CompositeActionResponse(
+        responseCode = ResponseCode.ERROR,
+        headerData = HeaderData(
+            titles = emptyList(),
+            rows = emptyList(),
+        ),
+        blocks = emptyList(),
+        layoutSaveKey = "",
+    )
 
+    protected abstract fun getCompositeResponseAction(action: AppAction): AppAction
+
+    protected abstract fun getCompositeItems(
+        sessionId: Long,
+        action: AppAction,
+    ): List<CompositeListItemData>?
+
+    protected abstract fun getHeaderRows(
+        objectEntity: ObjectEntity,
+        deviceEntity: DeviceEntity?,
+    ): List<Pair<String, String>>
+
+}

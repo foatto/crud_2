@@ -28,7 +28,7 @@ class LogonController(
             LogonResponse(
                 responseCode = result.responseCode,
                 appUserConfig = result.appUserConfig,
-                alMenuData = result.alMenuData,
+                menuDatas = result.alMenuData,
                 redirectOnLogon = result.redirectOnLogon,
             )
         } else {

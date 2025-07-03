@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -195,7 +194,7 @@ class TableControl(
                     }
                 ),
         ) {
-            getHeader { action: AppAction ->
+            GetHeader { action: AppAction ->
                 coroutineScope.launch {
                     call(action, false)
                 }

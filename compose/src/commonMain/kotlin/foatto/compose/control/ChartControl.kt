@@ -194,7 +194,7 @@ class ChartControl(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            getHeader()
+            GetHeader()
 
             ChartToolBar(
                 isWideScreen = root.isWideScreen,

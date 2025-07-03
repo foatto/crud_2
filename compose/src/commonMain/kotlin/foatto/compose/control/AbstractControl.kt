@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,12 +57,14 @@ abstract class AbstractControl(
     abstract suspend fun start()
 
     @Composable
-    protected fun getHeader(
+    protected fun GetHeader(
         call: (action: AppAction) -> Unit = {},
     ) {
-        headerData?.let { headerData ->
+        headerData?.let { hd ->
             Row(
-                modifier = Modifier.fillMaxWidth().background(colorHeader),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colorHeader),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
 //                    borderTop(
@@ -75,7 +76,7 @@ abstract class AbstractControl(
 //                        borderBottom(width = 1.px, lineStyle = LineStyle.Solid, color = colorMainBorder)
 //                    }
             ) {
-                for (titleData in headerData.titles) {
+                for (titleData in hd.titles) {
                     titleData.action?.let { action ->
                         TextButton(
                             modifier = Modifier.padding(start = 4.dp, end = 4.dp),
@@ -101,9 +102,11 @@ abstract class AbstractControl(
                     }
                 }
             }
-            headerData.rows.forEach { (label, value) ->
+            hd.rows.forEach { (label, value) ->
                 Row(
-                    modifier = Modifier.fillMaxWidth().background(colorHeader),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colorHeader),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

@@ -27,7 +27,7 @@ private const val MAIN_BACK_LIGHTNESS_3 = 0.82f
 
 val colorMainBack0: Color = Color.hsl(0.0f, 0.0f, 1.0f)                             // input field, etc.
 private val colorMainBack1: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_0)    // form panel
-private val colorMainBack2: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_1)    // active tab + header + toolbar
+val colorMainBack2: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_1)    // active tab + header + toolbar
 private val colorMainBack3: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_2)    // non-active tab
 val colorMainBack4: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_3)    // ?
 

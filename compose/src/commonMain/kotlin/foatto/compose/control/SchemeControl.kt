@@ -75,7 +75,7 @@ class SchemeControl(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            getHeader()
+            GetHeader()
 
             SchemeToolBar(
                 isWideScreen = root.isWideScreen,

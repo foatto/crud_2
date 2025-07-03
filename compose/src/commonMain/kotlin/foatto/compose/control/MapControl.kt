@@ -111,7 +111,7 @@ class MapControl(
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            getHeader()
+            GetHeader()
 
             MapToolBar(
                 isWideScreen = root.isWideScreen,

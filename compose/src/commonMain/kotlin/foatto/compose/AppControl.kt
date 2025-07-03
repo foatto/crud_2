@@ -13,7 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import foatto.compose.composable.LogonForm
-import foatto.compose.control.*
+import foatto.compose.control.AbstractControl
+import foatto.compose.control.ChartControl
+import foatto.compose.control.CompositeControl
+import foatto.compose.control.EmptyControl
+import foatto.compose.control.FormControl
+import foatto.compose.control.MapControl
+import foatto.compose.control.SchemeControl
+import foatto.compose.control.TableControl
 import foatto.compose.model.MenuDataClient
 import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
@@ -287,12 +294,14 @@ class AppControl(
 //                            if( appResponse.code == Code.LOGON_SUCCESS_BUT_OLD )
 //                                showWarning( "Система безопасности", "Срок действия пароля истек.\nПожалуйста, смените пароль." )
                 root.appUserConfig = logonResponse.appUserConfig!!
-                root.setMenuBarData(
-                    alMenuData = logonResponse.alMenuData!!.map { menuDataServer ->
-                        mapMenuData(menuDataServer)
-                    }.toMutableList(),
-                    scaledWindowWidth = root.scaledWindowWidth
-                )
+                logonResponse.menuDatas?.let { menuDatas ->
+                    root.setMenuBarData(
+                        alMenuData = menuDatas.map { menuDataServer ->
+                            mapMenuData(menuDataServer)
+                        }.toMutableList(),
+                        scaledWindowWidth = root.scaledWindowWidth
+                    )
+                }
                 prevRequest = logonResponse.redirectOnLogon ?: prevRequest
                 //--- перевызовем сервер с предыдущей (до-логинной) командой
                 call(prevRequest)
@@ -304,7 +313,7 @@ class AppControl(
     private fun mapMenuData(menuDataServer: MenuData): MenuDataClient = MenuDataClient(
         caption = menuDataServer.caption,
         action = menuDataServer.action,
-        alSubMenu = menuDataServer.alSubMenu?.map { subMenuDataServer ->
+        alSubMenu = menuDataServer.subMenuDatas?.map { subMenuDataServer ->
             mapMenuData(subMenuDataServer)
         },
         inNewTab = true,

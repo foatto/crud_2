@@ -210,7 +210,9 @@ open class Root {
                 }
                 if (waitCount > 0) {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(color = Color.White.copy(alpha = 0.7f))
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Color.White.copy(alpha = 0.7f))
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(128.dp).align(Alignment.Center),

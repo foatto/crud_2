@@ -1,5 +1,6 @@
 package foatto.compose.control.composable.map
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import foatto.compose.colorTextButton
+import foatto.compose.colorToolBar
 import foatto.compose.control.composable.RefreshSubToolBar
 import foatto.compose.control.composable.ToolBarBlock
 import foatto.compose.control.composable.ToolBarIconButton
@@ -49,7 +51,10 @@ internal fun MapToolBar(
     setInterval: (interval: Int) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorToolBar)
+            .padding(start = 4.dp, end = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
 //                        borderTop(

@@ -9,6 +9,6 @@ class LogonResponse(
     override val responseCode: ResponseCode,
 
     val appUserConfig: AppUserConfig? = null,
-    val alMenuData: List<MenuData>? = null,
+    val menuDatas: List<MenuData>? = null,
     val redirectOnLogon: AppRequest? = null,
 ) : BaseResponse()

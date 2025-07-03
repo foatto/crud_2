@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 class MenuData(
     val caption: String,
     val action: AppAction? = null,
-    val alSubMenu: List<MenuData>? = null,
+    val subMenuDatas: List<MenuData>? = null,
 )

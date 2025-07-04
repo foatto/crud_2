@@ -662,43 +662,43 @@ class GalileoHandler : MMSNioHandler() {
 
         //--- проверка на наличие команды терминалу
 
-        deviceConfig?.let { dc ->
-            val (cmdID, cmdStr) = MMSTelematicFunction.getCommand(dataWorker.conn, dc.deviceId)
-
-            //--- команда есть
-            if (cmdStr != null) {
-                //--- и она не пустая
-                if (cmdStr.isNotEmpty()) {
-                    val dataSize = 1 + 15 + 1 + 2 + 1 + 4 + 1 + 1 + cmdStr.length
-
-                    val bbOut = AdvancedByteBuffer(64)  // 64 байта в большинстве случаев хватает
-
-                    bbOut.putByte(0x01)
-                    bbOut.putShort(dataSize)
-
-                    bbOut.putByte(0x03)
-                    bbOut.put(arrIMEI)
-
-                    bbOut.putByte(0x04)
-                    bbOut.putShort(terminalId)
-
-                    bbOut.putByte(0xE0)
-                    bbOut.putInt(0)
-
-                    bbOut.putByte(0xE1)
-                    bbOut.putByte(cmdStr.length)
-                    bbOut.put(cmdStr.toByteArray())
-
-                    //--- кто бы мог подумать: CRC отправляется в big-endian, хотя сами данные приходят в little-endian
-                    bbOut.putShort(crc16_modbus(bbOut.array(), bbOut.arrayOffset(), dataSize + 3, true))
-
-                    outBuf(bbOut)
-                }
-                //--- отметим успешную отправку команды
-                MMSTelematicFunction.setCommandSended(dataWorker.conn, cmdID)
-                status += " CommandSend;"
-            }
-        }
+//        deviceConfig?.let { dc ->
+//            val (cmdID, cmdStr) = MMSTelematicFunction.getCommand(dataWorker.conn, dc.deviceId)
+//
+//            //--- команда есть
+//            if (cmdStr != null) {
+//                //--- и она не пустая
+//                if (cmdStr.isNotEmpty()) {
+//                    val dataSize = 1 + 15 + 1 + 2 + 1 + 4 + 1 + 1 + cmdStr.length
+//
+//                    val bbOut = AdvancedByteBuffer(64)  // 64 байта в большинстве случаев хватает
+//
+//                    bbOut.putByte(0x01)
+//                    bbOut.putShort(dataSize)
+//
+//                    bbOut.putByte(0x03)
+//                    bbOut.put(arrIMEI)
+//
+//                    bbOut.putByte(0x04)
+//                    bbOut.putShort(terminalId)
+//
+//                    bbOut.putByte(0xE0)
+//                    bbOut.putInt(0)
+//
+//                    bbOut.putByte(0xE1)
+//                    bbOut.putByte(cmdStr.length)
+//                    bbOut.put(cmdStr.toByteArray())
+//
+//                    //--- кто бы мог подумать: CRC отправляется в big-endian, хотя сами данные приходят в little-endian
+//                    bbOut.putShort(crc16_modbus(bbOut.array(), bbOut.arrayOffset(), dataSize + 3, true))
+//
+//                    outBuf(bbOut)
+//                }
+//                //--- отметим успешную отправку команды
+//                MMSTelematicFunction.setCommandSended(dataWorker.conn, cmdID)
+//                status += " CommandSend;"
+//            }
+//        }
 
         //--- данные успешно переданы - теперь можно завершить транзакцию
         status += " Ok 2;"

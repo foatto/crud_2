@@ -45,40 +45,40 @@ object MMSTelematicFunction {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //--- пришлось делать в виде static, т.к. VideoServer не является потомком MMSHandler,
-    //--- а в AbstractHandler не знает про прикладные MMS-таблицы
-    fun getCommand(conn: CoreAdvancedConnection, deviceId: Int): Pair<Int, String?> {
-        var cmdID = 0
-        var cmdStr: String? = null
-        val rs = conn.executeQuery(
-            """
-                 SELECT MMS_device_command_history.id , MMS_device_command.cmd 
-                 FROM MMS_device_command_history , MMS_device_command 
-                 WHERE MMS_device_command_history.command_id = MMS_device_command.id 
-                 AND MMS_device_command_history.device_id = $deviceId 
-                 AND MMS_device_command_history.for_send <> 0 
-                 ORDER BY MMS_device_command_history.send_time 
-             """
-        )
-        if (rs.next()) {
-            cmdID = rs.getInt(1)
-            cmdStr = rs.getString(2).trim()
-        }
-        rs.close()
-
-        return Pair(cmdID, cmdStr)
-    }
-
-    fun setCommandSended(conn: CoreAdvancedConnection, cmdId: Int) {
-        //--- отметим успешную отправку команды
-        conn.executeUpdate(
-            """ 
-                UPDATE MMS_device_command_history 
-                SET for_send = 0 , send_time = ${getCurrentTimeInt()} 
-                WHERE id = $cmdId
-            """
-        )
-    }
+//    //--- пришлось делать в виде static, т.к. VideoServer не является потомком MMSHandler,
+//    //--- а в AbstractHandler не знает про прикладные MMS-таблицы
+//    fun getCommand(conn: CoreAdvancedConnection, deviceId: Int): Pair<Int, String?> {
+//        var cmdID = 0
+//        var cmdStr: String? = null
+//        val rs = conn.executeQuery(
+//            """
+//                 SELECT MMS_device_command_history.id , MMS_device_command.cmd
+//                 FROM MMS_device_command_history , MMS_device_command
+//                 WHERE MMS_device_command_history.command_id = MMS_device_command.id
+//                 AND MMS_device_command_history.device_id = $deviceId
+//                 AND MMS_device_command_history.for_send <> 0
+//                 ORDER BY MMS_device_command_history.send_time
+//             """
+//        )
+//        if (rs.next()) {
+//            cmdID = rs.getInt(1)
+//            cmdStr = rs.getString(2).trim()
+//        }
+//        rs.close()
+//
+//        return Pair(cmdID, cmdStr)
+//    }
+//
+//    fun setCommandSended(conn: CoreAdvancedConnection, cmdId: Int) {
+//        //--- отметим успешную отправку команды
+//        conn.executeUpdate(
+//            """
+//                UPDATE MMS_device_command_history
+//                SET for_send = 0 , send_time = ${getCurrentTimeInt()}
+//                WHERE id = $cmdId
+//            """
+//        )
+//    }
 
     fun addPoint(conn: CoreAdvancedConnection, deviceConfig: DeviceConfig, time: Int, bbData: AdvancedByteBuffer) {
         //--- если объект прописан, то записываем точки, иначе просто пропускаем

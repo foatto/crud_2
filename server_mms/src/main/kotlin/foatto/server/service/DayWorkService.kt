@@ -114,17 +114,9 @@ class DayWorkService(
         }
 
         val page: Page<DayWorkEntity> = parentObjectEntity?.let {
-            if (findText.isNotEmpty()) {
-                dayWorkRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, pageRequest)
-            } else {
-                dayWorkRepository.findByObjAndUserIdIn(parentObjectEntity, enabledUserIds, pageRequest)
-            }
+            dayWorkRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, pageRequest)
         } ?: run {
-            if (findText.isNotEmpty()) {
-                dayWorkRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
-            } else {
-                dayWorkRepository.findByUserIdIn(enabledUserIds, pageRequest)
-            }
+            dayWorkRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
         }
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val dayWorkEntities = page.content

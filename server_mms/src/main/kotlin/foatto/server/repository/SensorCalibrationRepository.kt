@@ -3,7 +3,7 @@ package foatto.server.repository
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.entity.SensorEntity
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface SensorCalibrationRepository : JpaRepository<SensorCalibrationEntity, Int> {
@@ -12,5 +12,5 @@ interface SensorCalibrationRepository : JpaRepository<SensorCalibrationEntity, I
 
     fun deleteBySensorId(sensorId: Int): Int
 
-    fun findBySensor(sensor: SensorEntity, pageRequest: PageRequest): Page<SensorCalibrationEntity>
+    fun findBySensor(sensor: SensorEntity, pageRequest: Pageable): Page<SensorCalibrationEntity>
 }

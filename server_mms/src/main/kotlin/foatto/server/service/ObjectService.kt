@@ -117,11 +117,7 @@ class ObjectService(
 
         val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
 
-        val page: Page<ObjectEntity> = if (findText.isNotEmpty()) {
-            objectRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
-        } else {
-            objectRepository.findByUserIdIn(enabledUserIds, pageRequest)
-        }
+        val page: Page<ObjectEntity> = objectRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val objectEntities = page.content
 

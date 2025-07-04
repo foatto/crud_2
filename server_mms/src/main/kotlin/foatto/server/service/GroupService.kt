@@ -82,11 +82,7 @@ class GroupService(
             roles = userConfig.roles,
         )
 
-        val page: Page<GroupEntity> = if (findText.isNotEmpty()) {
-            groupRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
-        } else {
-            groupRepository.findByUserIdIn(enabledUserIds, pageRequest)
-        }
+        val page: Page<GroupEntity> = groupRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val groupEntities = page.content
 
@@ -242,9 +238,8 @@ class GroupService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
         }
 
-        val recordId = id ?: getNextId { nextId -> groupRepository.existsById(nextId) }
         val groupEntity = GroupEntity(
-            id = recordId,
+            id = id ?: getNextId { nextId -> groupRepository.existsById(nextId) },
             userId = recordUserId,
             name = name,
         )

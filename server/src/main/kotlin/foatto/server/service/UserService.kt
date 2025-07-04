@@ -205,11 +205,7 @@ class UserService(
             roles = userConfig.roles,
         )
 
-        val page: Page<UserEntity> = if (findText.isNotEmpty()) {
-            userRepository.findByParentIdAndUserIdInAndFilter(parentId, enabledUserIds, findText, pageRequest)
-        } else {
-            userRepository.findByParentIdAndUserIdIn(parentId, enabledUserIds, pageRequest)
-        }
+        val page: Page<UserEntity> = userRepository.findByParentIdAndUserIdInAndFilter(parentId, enabledUserIds, findText, pageRequest)
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val userEntities = page.content
 
@@ -612,9 +608,8 @@ class UserService(
         val lastLoginDateTime = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_LAST_LOGIN]?.dateTimeValue ?: 0)
         val passwordLastChangeDate = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_PASSWORD_LAST_CHANGE]?.dateTimeValue ?: 0)
 
-        val recordId = id ?: getNextId { nextId -> userRepository.existsById(nextId) }
         val userEntity = UserEntity(
-            id = recordId,
+            id = id ?: getNextId { nextId -> userRepository.existsById(nextId) },
             parentId = formActionData[FIELD_PARENT_ID]?.stringValue?.toIntOrNull() ?: 0,
             userId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull() ?: 0,
             orgType = formActionData[FIELD_ORG_TYPE]?.stringValue?.toIntOrNull() ?: OrgType.ORG_TYPE_DIVISION,

@@ -82,11 +82,7 @@ class DepartmentService(
             roles = userConfig.roles,
         )
 
-        val page: Page<DepartmentEntity> = if (findText.isNotEmpty()) {
-            departmentRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
-        } else {
-            departmentRepository.findByUserIdIn(enabledUserIds, pageRequest)
-        }
+        val page: Page<DepartmentEntity> = departmentRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val departmentEntities = page.content
 
@@ -236,9 +232,8 @@ class DepartmentService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
         }
 
-        val recordId = id ?: getNextId { nextId -> departmentRepository.existsById(nextId) }
         val departmentEntity = DepartmentEntity(
-            id = recordId,
+            id = id ?: getNextId { nextId -> departmentRepository.existsById(nextId) },
             userId = recordUserId,
             name = name,
         )

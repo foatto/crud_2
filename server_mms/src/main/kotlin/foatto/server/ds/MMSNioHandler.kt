@@ -96,7 +96,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
 
         var rs = conn.executeQuery(
             """
-                SELECT port_num , id , sensor_type ,
+                SELECT port_num , id , sensor_type , beg_time , end_time ,  
                     min_moving_time , min_parking_time , min_over_speed_time , is_absolute_run , speed_round_rule , run_koef ,
                         is_use_pos , is_use_speed , is_use_run ,
                     bound_value , active_value , beg_work_value ,
@@ -127,6 +127,8 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 descr = null,
                 portNum = portNum,
                 sensorType = rs.getInt(pos++),
+                begTime = rs.getInt(pos++),
+                endTime = rs.getInt(pos++),
                 serialNo = null,
                 usingStartDate = null,
 

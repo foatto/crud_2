@@ -27,6 +27,11 @@ class SensorEntity(
     @Column(name = "sensor_type")
     val sensorType: Int?,
 
+    @Column(name = "beg_time")
+    var begTime: Int?,
+    @Column(name = "end_time")
+    var endTime: Int?,
+
     @Column(name = "serial_no")
     val serialNo: String?,
 
@@ -212,14 +217,10 @@ class SensorEntity(
         if (this === other) return true
         if (other !is SensorEntity) return false
 
-        if (obj != other.obj) return false
-        if (name != other.name) return false
-        if (group != other.group) return false
-        if (descr != other.descr) return false
         if (portNum != other.portNum) return false
         if (sensorType != other.sensorType) return false
-        if (serialNo != other.serialNo) return false
-        if (usingStartDate != other.usingStartDate) return false
+        if (begTime != other.begTime) return false
+        if (endTime != other.endTime) return false
         if (minMovingTime != other.minMovingTime) return false
         if (minParkingTime != other.minParkingTime) return false
         if (minOverSpeedTime != other.minOverSpeedTime) return false
@@ -234,19 +235,18 @@ class SensorEntity(
         if (begWorkValue != other.begWorkValue) return false
         if (cmdOnId != other.cmdOnId) return false
         if (cmdOffId != other.cmdOffId) return false
-        if (signalOn != other.signalOn) return false
-        if (signalOff != other.signalOff) return false
         if (minOnTime != other.minOnTime) return false
         if (minOffTime != other.minOffTime) return false
         if (smoothTime != other.smoothTime) return false
         if (minIgnore != other.minIgnore) return false
         if (maxIgnore != other.maxIgnore) return false
-        if (liquidName != other.liquidName) return false
         if (liquidNorm != other.liquidNorm) return false
         if (minView != other.minView) return false
         if (maxView != other.maxView) return false
         if (minLimit != other.minLimit) return false
         if (maxLimit != other.maxLimit) return false
+        if (indicatorDelimiterCount != other.indicatorDelimiterCount) return false
+        if (indicatorMultiplicator != other.indicatorMultiplicator) return false
         if (isAbsoluteCount != other.isAbsoluteCount) return false
         if (phase != other.phase) return false
         if (inOutType != other.inOutType) return false
@@ -265,19 +265,25 @@ class SensorEntity(
         if (decAddTimeAfter != other.decAddTimeAfter) return false
         if (schemeX != other.schemeX) return false
         if (schemeY != other.schemeY) return false
+        if (smoothMethod != other.smoothMethod) return false
+        if (obj != other.obj) return false
+        if (name != other.name) return false
+        if (group != other.group) return false
+        if (descr != other.descr) return false
+        if (serialNo != other.serialNo) return false
+        if (usingStartDate != other.usingStartDate) return false
+        if (signalOn != other.signalOn) return false
+        if (signalOff != other.signalOff) return false
+        if (liquidName != other.liquidName) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = obj.hashCode()
-        result = 31 * result + name.hashCode()
-        result = 31 * result + group.hashCode()
-        result = 31 * result + descr.hashCode()
-        result = 31 * result + (portNum ?: 0)
+        var result = portNum ?: 0
         result = 31 * result + (sensorType ?: 0)
-        result = 31 * result + serialNo.hashCode()
-        result = 31 * result + usingStartDate.hashCode()
+        result = 31 * result + (begTime ?: 0)
+        result = 31 * result + (endTime ?: 0)
         result = 31 * result + (minMovingTime ?: 0)
         result = 31 * result + (minParkingTime ?: 0)
         result = 31 * result + (minOverSpeedTime ?: 0)
@@ -292,19 +298,18 @@ class SensorEntity(
         result = 31 * result + (begWorkValue?.hashCode() ?: 0)
         result = 31 * result + (cmdOnId ?: 0)
         result = 31 * result + (cmdOffId ?: 0)
-        result = 31 * result + (signalOn?.hashCode() ?: 0)
-        result = 31 * result + (signalOff?.hashCode() ?: 0)
         result = 31 * result + (minOnTime ?: 0)
         result = 31 * result + (minOffTime ?: 0)
         result = 31 * result + (smoothTime ?: 0)
         result = 31 * result + (minIgnore?.hashCode() ?: 0)
         result = 31 * result + (maxIgnore?.hashCode() ?: 0)
-        result = 31 * result + (liquidName?.hashCode() ?: 0)
         result = 31 * result + (liquidNorm?.hashCode() ?: 0)
         result = 31 * result + (minView?.hashCode() ?: 0)
         result = 31 * result + (maxView?.hashCode() ?: 0)
         result = 31 * result + (minLimit?.hashCode() ?: 0)
         result = 31 * result + (maxLimit?.hashCode() ?: 0)
+        result = 31 * result + (indicatorDelimiterCount ?: 0)
+        result = 31 * result + (indicatorMultiplicator?.hashCode() ?: 0)
         result = 31 * result + (isAbsoluteCount?.hashCode() ?: 0)
         result = 31 * result + (phase ?: 0)
         result = 31 * result + (inOutType ?: 0)
@@ -323,8 +328,16 @@ class SensorEntity(
         result = 31 * result + (decAddTimeAfter ?: 0)
         result = 31 * result + (schemeX ?: 0)
         result = 31 * result + (schemeY ?: 0)
-
+        result = 31 * result + (smoothMethod ?: 0)
+        result = 31 * result + (obj?.hashCode() ?: 0)
+        result = 31 * result + (name?.hashCode() ?: 0)
+        result = 31 * result + (group?.hashCode() ?: 0)
+        result = 31 * result + (descr?.hashCode() ?: 0)
+        result = 31 * result + (serialNo?.hashCode() ?: 0)
+        result = 31 * result + (usingStartDate?.hashCode() ?: 0)
+        result = 31 * result + (signalOn?.hashCode() ?: 0)
+        result = 31 * result + (signalOff?.hashCode() ?: 0)
+        result = 31 * result + (liquidName?.hashCode() ?: 0)
         return result
     }
-
 }

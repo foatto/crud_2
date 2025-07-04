@@ -20,6 +20,8 @@ import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core.util.getCurrentTimeInt
+import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getRandomInt
 import foatto.core.util.getTimeZone
@@ -71,6 +73,8 @@ class SensorService(
         private const val FIELD_DESCR = "descr"
         private const val FIELD_PORT_NUM = "portNum"
         private const val FIELD_SENSOR_TYPE = "sensorType"
+        private const val FIELD_BEG_TIME = "begTime"
+        private const val FIELD_END_TIME = "endTime"
         private const val FIELD_SERIAL_NO = "serialNo"
         private const val FIELD_USING_START_DATE = "usingStartDate"
 
@@ -269,6 +273,8 @@ class SensorService(
         alColumnInfo += FIELD_DESCR to "Описание"
         alColumnInfo += FIELD_PORT_NUM to "Номер входа"
         alColumnInfo += FIELD_SENSOR_TYPE to "Тип датчика"
+        alColumnInfo += FIELD_BEG_TIME to "Дата/время начала использования"
+        alColumnInfo += FIELD_END_TIME to "Дата/время окончания использования"
         alColumnInfo += FIELD_SERIAL_NO to "Серийный номер"
         alColumnInfo += FIELD_USING_START_DATE to "Дата начала эксплуатации"
 
@@ -287,6 +293,8 @@ class SensorService(
         pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
+        val zoneLocal = getTimeZone(userConfig.timeOffset)
+
         var currentRowNo: Int? = null
         var row = 0
 
@@ -300,11 +308,7 @@ class SensorService(
         }
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
-        val page: Page<SensorEntity> = if (findText.isNotEmpty()) {
-            sensorRepository.findByObjAndFilter(parentObjectEntity, findText, pageRequest)
-        } else {
-            sensorRepository.findByObj(parentObjectEntity, pageRequest)
-        }
+        val page: Page<SensorEntity> = sensorRepository.findByObjAndFilter(parentObjectEntity, findText, pageRequest)
 
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val sensorEntities = page.content
@@ -346,6 +350,18 @@ class SensorService(
                 name = sensorEntity.sensorType?.let { sensorType ->
                     SensorConfig.hmSensorDescr[sensorType] ?: "(неизвестный тип датчика)"
                 } ?: "-",
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = sensorEntity.begTime?.let { begTime -> getDateTimeDMYHMSString(zoneLocal, begTime)} ?: "-",
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = sensorEntity.endTime?.let { endTime -> getDateTimeDMYHMSString(zoneLocal, endTime)} ?: "-",
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.serialNo ?: "-")
             tableCells += TableSimpleCell(
@@ -558,6 +574,24 @@ class SensorService(
                         addChoice(sensorType, descr)
                     }
         */
+        formCells += FormDateTimeCell(
+            name = FIELD_BEG_TIME,
+            caption = "Дата/время начала использования",
+            isEditable = true,
+            mode = FormDateTimeCellMode.DMYHMS,
+            value = if (id == 0) {
+                getCurrentTimeInt()
+            } else {
+                sensorEntity?.begTime
+            },
+        )
+        formCells += FormDateTimeCell(
+            name = FIELD_END_TIME,
+            caption = "Дата/время окончания использования",
+            isEditable = true,
+            mode = FormDateTimeCellMode.DMYHMS,
+            value = sensorEntity?.endTime,
+        )
         formCells += FormSimpleCell(
             name = FIELD_SERIAL_NO,
             caption = "Серийный номер",
@@ -1195,6 +1229,8 @@ class SensorService(
             descr = descr,
             portNum = portNum,
             sensorType = formActionData[FIELD_SENSOR_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfig.SENSOR_GEO,
+            begTime = formActionData[FIELD_BEG_TIME]?.dateTimeValue,
+            endTime = formActionData[FIELD_END_TIME]?.dateTimeValue,
             serialNo = formActionData[FIELD_SERIAL_NO]?.stringValue ?: "",
             usingStartDate = DateEntity(
                 ye = usingStartDate[0],

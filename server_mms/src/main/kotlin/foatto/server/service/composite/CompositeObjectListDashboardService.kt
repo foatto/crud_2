@@ -65,7 +65,7 @@ class CompositeObjectListDashboardService(
             }
             for (deviceEntity in filteredDeviceEntities) {
                 deviceList += CompositeListItemData(
-                    text = deviceEntity.serialNo ?: deviceEntity.index?.toString() ?: "(без серийного номера и индекса)",
+                    text = deviceEntity.name ?: deviceEntity.serialNo ?: deviceEntity.index?.toString() ?: "(без наименования, серийного номера и индекса)",
                     itemId = deviceEntity.id,
                     itemModule = AppModuleMMS.DEVICE,
                 )
@@ -96,6 +96,7 @@ class CompositeObjectListDashboardService(
         )
         deviceEntity?.let {
             rows += "Серийный номер контроллера" to (deviceEntity.serialNo ?: "-")
+            rows += "Наименование контроллера" to (deviceEntity.name ?: "-")
         }
 
         return rows

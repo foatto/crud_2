@@ -20,6 +20,8 @@ class DeviceEntity(
     @Column(name = "serial_no")
     val serialNo: String?,
 
+    val name: String?,
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "object_id")
     var obj: ObjectEntity?,
@@ -72,20 +74,21 @@ class DeviceEntity(
         if (userId != other.userId) return false
         if (index != other.index) return false
         if (type != other.type) return false
+        if (cellOwner != other.cellOwner) return false
+        if (cellOwner2 != other.cellOwner2) return false
+        if (lastSessionTime != other.lastSessionTime) return false
+        if (name != other.name) return false
         if (serialNo != other.serialNo) return false
         if (obj != other.obj) return false
         if (cellImei != other.cellImei) return false
-        if (cellOwner != other.cellOwner) return false
         if (cellNumber != other.cellNumber) return false
         if (cellIcc != other.cellIcc) return false
         if (cellOperator != other.cellOperator) return false
         if (cellImei2 != other.cellImei2) return false
-        if (cellOwner2 != other.cellOwner2) return false
         if (cellNumber2 != other.cellNumber2) return false
         if (cellIcc2 != other.cellIcc2) return false
         if (cellOperator2 != other.cellOperator2) return false
         if (fwVersion != other.fwVersion) return false
-        if (lastSessionTime != other.lastSessionTime) return false
         if (lastSessionStatus != other.lastSessionStatus) return false
         if (lastSessionError != other.lastSessionError) return false
         if (usingStartDate != other.usingStartDate) return false
@@ -97,20 +100,21 @@ class DeviceEntity(
         var result = userId ?: 0
         result = 31 * result + (index ?: 0)
         result = 31 * result + (type ?: 0)
+        result = 31 * result + (cellOwner ?: 0)
+        result = 31 * result + (cellOwner2 ?: 0)
+        result = 31 * result + (lastSessionTime ?: 0)
+        result = 31 * result + (name?.hashCode() ?: 0)
         result = 31 * result + (serialNo?.hashCode() ?: 0)
         result = 31 * result + (obj?.hashCode() ?: 0)
         result = 31 * result + (cellImei?.hashCode() ?: 0)
-        result = 31 * result + (cellOwner ?: 0)
         result = 31 * result + (cellNumber?.hashCode() ?: 0)
         result = 31 * result + (cellIcc?.hashCode() ?: 0)
         result = 31 * result + (cellOperator?.hashCode() ?: 0)
         result = 31 * result + (cellImei2?.hashCode() ?: 0)
-        result = 31 * result + (cellOwner2 ?: 0)
         result = 31 * result + (cellNumber2?.hashCode() ?: 0)
         result = 31 * result + (cellIcc2?.hashCode() ?: 0)
         result = 31 * result + (cellOperator2?.hashCode() ?: 0)
         result = 31 * result + (fwVersion?.hashCode() ?: 0)
-        result = 31 * result + (lastSessionTime ?: 0)
         result = 31 * result + (lastSessionStatus?.hashCode() ?: 0)
         result = 31 * result + (lastSessionError?.hashCode() ?: 0)
         result = 31 * result + (usingStartDate?.hashCode() ?: 0)

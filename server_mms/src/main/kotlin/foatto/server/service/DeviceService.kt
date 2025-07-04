@@ -18,6 +18,7 @@ import foatto.core.model.response.table.TablePopup
 import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getTimeZone
@@ -70,8 +71,8 @@ class DeviceService(
         private const val FIELD_TYPE = "type"
         private const val FIELD_INDEX = "index"
         private const val FIELD_SERIAL_NO = "serialNo"
+        private const val FIELD_NAME = "name"
 
-        //        private const val FIELD_OBJECT = "obj"
         private const val FIELD_CELL_IMEI = "cellImei"
         private const val FIELD_CELL_OWNER = "cellOwner"
         private const val FIELD_CELL_NUMBER = "cellNumber"
@@ -211,8 +212,9 @@ class DeviceService(
         alColumnInfo += FIELD_TYPE to "Тип"
         alColumnInfo += FIELD_INDEX to "Индекс на объекте"
         alColumnInfo += FIELD_SERIAL_NO to "Серийный номер"
+        alColumnInfo += FIELD_NAME to "Наименование контроллера"
         alColumnInfo += null to "" // Object.userId
-        alColumnInfo += FIELD_OBJECT_NAME to "Наименование"
+        alColumnInfo += FIELD_OBJECT_NAME to "Наименование объекта"
         alColumnInfo += FIELD_OBJECT_MODEL to "Модель"
 
         //--- две строки в каждой ячейке - по обеим симкам
@@ -243,10 +245,10 @@ class DeviceService(
         pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
+        val zoneLocal = getTimeZone(userConfig.timeOffset)
+
         var currentRowNo: Int? = null
         var row = 0
-
-        val zoneLocal = getTimeZone(userConfig.timeOffset)
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_SERIAL_NO))
         val findText = action.findText?.trim() ?: ""
@@ -268,17 +270,9 @@ class DeviceService(
         )
 
         val page: Page<DeviceEntity> = parentObjectEntity?.let {
-            if (findText.isNotEmpty()) {
-                deviceRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, pageRequest)
-            } else {
-                deviceRepository.findByObjAndUserIdIn(parentObjectEntity, enabledUserIds, pageRequest)
-            }
+            deviceRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, pageRequest)
         } ?: run {
-            if (findText.isNotEmpty()) {
-                deviceRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
-            } else {
-                deviceRepository.findByUserIdIn(enabledUserIds, pageRequest)
-            }
+            deviceRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
         }
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceEntities = page.content
@@ -314,6 +308,7 @@ class DeviceService(
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.index?.toString() ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.serialNo ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.name ?: "-")
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
@@ -444,6 +439,12 @@ class DeviceService(
             isEditable = changeEnabled,
             value = deviceEntity?.serialNo ?: "",
         )
+        formCells += FormSimpleCell(
+            name = FIELD_NAME,
+            caption = "Наименование контроллера",
+            isEditable = changeEnabled,
+            value = deviceEntity?.name ?: "",
+        )
 
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_ID,
@@ -453,7 +454,7 @@ class DeviceService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_NAME,
-            caption = "Наименование",
+            caption = "Наименование объекта",
             isEditable = false,
             value = if (parentObjectId == 0) {
                 "-"
@@ -699,13 +700,13 @@ class DeviceService(
             deviceRepository.findByIdOrNull(id)
         }
 
-        val recordId = id ?: getNextId { nextId -> deviceRepository.existsById(nextId) }
         val deviceEntity = DeviceEntity(
-            id = recordId,
+            id = id ?: getNextId { nextId -> deviceRepository.existsById(nextId) },
             userId = recordUserId,
             index = index,
             type = formActionData[FIELD_TYPE]?.stringValue?.toIntOrNull() ?: MMSTelematicFunction.DEVICE_TYPE_PULSAR_DATA,
             serialNo = serialNo,
+            name = formActionData[FIELD_NAME]?.stringValue?.trim(),
             obj = objectEntity,
             cellImei = formActionData[FIELD_CELL_IMEI]?.stringValue,
             cellOwner = formActionData[FIELD_CELL_OWNER]?.stringValue?.toIntOrNull() ?: CELL_OWNER_UNKNOWN,
@@ -730,11 +731,11 @@ class DeviceService(
         deviceRepository.saveAndFlush(deviceEntity)
 
         if (copySensors) {
-            oldDeviceEntity?.let {
-                oldDeviceEntity.obj?.id?.let { oldObjectId ->
+            objectEntity?.let {
+                oldDeviceEntity?.obj?.let { oldObjectEntity ->
                     oldDeviceEntity.index?.let { oldIndex ->
-                        if (objectId != 0 && objectId != oldObjectId) {
-                            copySensors(oldObjectId, oldIndex, objectEntity, index)
+                        if (objectEntity.id != 0 && objectEntity.id != oldObjectEntity.id) {
+                            copySensors(oldObjectEntity, oldIndex, objectEntity, index)
                         }
                     }
                 }
@@ -807,19 +808,22 @@ class DeviceService(
         return FormActionResponse(responseCode = ResponseCode.OK)
     }
 
-    private fun copySensors(oldObjectId: Int, oldDeviceIndex: Int, newObjectEntity: ObjectEntity?, newDeviceIndex: Int) {
-        val oldObjectEntity = objectRepository.findByIdOrNull(oldObjectId) ?: return
-
+    private fun copySensors(oldObjectEntity: ObjectEntity, oldDeviceIndex: Int, newObjectEntity: ObjectEntity, newDeviceIndex: Int) {
         sensorRepository.findByObjAndPortNumBetween(
             obj = oldObjectEntity,
             startPort = oldDeviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE,
             endPort = (oldDeviceIndex + 1) * CoreTelematicFunction.MAX_PORT_PER_DEVICE - 1,
         ).forEach { oldSensorEntity ->
-            val nextSensorId = getNextId { nextId -> sensorRepository.existsById(nextId) }
+            //--- close sensor's work period
+            oldSensorEntity.endTime = getCurrentTimeInt()
+            sensorRepository.save(oldSensorEntity)
 
-            oldSensorEntity.id = nextSensorId
+            oldSensorEntity.id = getNextId { nextId -> sensorRepository.existsById(nextId) }
             oldSensorEntity.obj = newObjectEntity
-            oldSensorEntity.portNum = (oldSensorEntity.portNum ?: 0) + (newDeviceIndex - oldDeviceIndex) * CoreTelematicFunction.MAX_PORT_PER_DEVICE
+            oldSensorEntity.portNum = (oldSensorEntity.portNum ?: 0) % CoreTelematicFunction.MAX_PORT_PER_DEVICE + newDeviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE
+            //--- open sensor's work period
+            oldSensorEntity.begTime = getCurrentTimeInt()
+            oldSensorEntity.endTime = null
 
             sensorRepository.save(oldSensorEntity)
             SensorService.checkAndCreateSensorTables(entityManager, oldSensorEntity.id)
@@ -861,6 +865,8 @@ class DeviceService(
             descr = "$descrPrefix $descrBody $descrPostfix",
             portNum = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE + portNum + sensorIndex,
             sensorType = sensorType,
+            begTime = getCurrentTimeInt(),
+            endTime = null,
             serialNo = null,
             usingStartDate = DateEntity(2000, 1, 1),
             minMovingTime = 1,

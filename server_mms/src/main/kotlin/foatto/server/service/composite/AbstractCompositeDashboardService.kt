@@ -13,6 +13,7 @@ import foatto.core.model.response.composite.CompositeLayoutData
 import foatto.core.model.response.composite.CompositeListItemData
 import foatto.core.model.response.composite.CompositeResponse
 import foatto.core.model.response.xy.scheme.SchemeResponse
+import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
 import foatto.server.DashboardSensorTypeEnum
 import foatto.server.SpringApp
@@ -135,7 +136,7 @@ abstract class AbstractCompositeDashboardService(
             SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE,
         ).forEach { sensorType ->
             sensorRepository
-                .findByObjAndSensorType(objectEntity, sensorType)
+                .findByObjAndSensorTypeAndTime(objectEntity, sensorType, getCurrentTimeInt())
                 .filter { sensorEntity ->
                     deviceEntity?.let {
                         deviceEntity.index == (sensorEntity.portNum ?: -1) / CoreTelematicFunction.MAX_PORT_PER_DEVICE
@@ -155,7 +156,7 @@ abstract class AbstractCompositeDashboardService(
             SensorConfig.SENSOR_ENERGO_COUNT_RR,
         ).forEach { sensorType ->
             sensorRepository
-                .findByObjAndSensorType(objectEntity, sensorType)
+                .findByObjAndSensorTypeAndTime(objectEntity, sensorType, getCurrentTimeInt())
                 .filter { sensorEntity ->
                     deviceEntity?.let {
                         deviceEntity.index == (sensorEntity.portNum ?: -1) / CoreTelematicFunction.MAX_PORT_PER_DEVICE
@@ -169,7 +170,7 @@ abstract class AbstractCompositeDashboardService(
             SensorConfig.SENSOR_WORK,
         ).forEach { sensorType ->
             sensorRepository
-                .findByObjAndSensorType(objectEntity, sensorType)
+                .findByObjAndSensorTypeAndTime(objectEntity, sensorType, getCurrentTimeInt())
                 .filter { sensorEntity ->
                     deviceEntity?.let {
                         deviceEntity.index == (sensorEntity.portNum ?: -1) / CoreTelematicFunction.MAX_PORT_PER_DEVICE

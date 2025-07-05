@@ -47,7 +47,7 @@ class ChartAnalogueByTypeService(
         chartActionRequest.action.id?.let { objectId ->
             objectRepository.findByIdOrNull(objectId)?.let { objectEntity ->
                 SensorConfig.analogueSensorTypes.forEach { sensorType ->
-                    sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
+                    sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
                         getChart(
                             sensorEntity = sensorEntity,
                             begTime = begTime,

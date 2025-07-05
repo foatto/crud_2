@@ -245,7 +245,7 @@ class MapService(
         val (begTime, endTime) = getBegEndTime(appAction)
 
         objectRepository.findByIdOrNull(appAction.id)?.let { objectEntity ->
-            sensorRepository.findByObjAndSensorType(objectEntity, SensorConfig.SENSOR_GEO).firstOrNull()?.let { sensorEntity ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
                 SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
                 ApplicationService.withConnection(entityManager) { conn ->
@@ -298,7 +298,7 @@ class MapService(
         val fillColors = mutableListOf<Int>()
 
         objectRepository.findByIdOrNull(appAction.id)?.let { objectEntity ->
-            sensorRepository.findByObjAndSensorType(objectEntity, SensorConfig.SENSOR_GEO).firstOrNull()?.let { sensorEntity ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
                 SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
                 ApplicationService.withConnection(entityManager) { conn ->

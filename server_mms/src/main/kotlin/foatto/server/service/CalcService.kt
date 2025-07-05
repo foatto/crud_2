@@ -29,7 +29,7 @@ class CalcService(
     ): SortedMap<String, WorkCalcData> {
         val tmWork = sortedMapOf<String, WorkCalcData>()
 
-        sensorRepository.findByObjAndSensorType(objectEntity, SensorConfig.SENSOR_WORK).forEach { sensorEntity ->
+        sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_WORK, begTime, endTime).forEach { sensorEntity ->
             val wcd = calcWorkSensor(sensorEntity, begTime, endTime)
             tmWork[sensorEntity.descr ?: ""] = wcd
 
@@ -114,7 +114,7 @@ class CalcService(
             SensorConfig.SENSOR_ENERGO_COUNT_RD,
             SensorConfig.SENSOR_ENERGO_COUNT_RR,
         ).forEach { sensorType ->
-            sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
                 val result = calcCounterSensor(sensorEntity, begTime, endTime)
                 tmEnergo[sensorEntity.descr ?: ""] = result
 
@@ -148,7 +148,7 @@ class CalcService(
             SensorConfig.SENSOR_VOLUME_ACCUMULATED,
             SensorConfig.SENSOR_LIQUID_USING,
         ).forEach { sensorType ->
-            sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
                 if (!sensorEntity.liquidName.isNullOrBlank()) {
                     val result = calcCounterSensor(sensorEntity, begTime, endTime)
 
@@ -240,7 +240,7 @@ class CalcService(
         val result = sortedMapOf<String, Pair<Double?, Double?>>()
 
         ApplicationService.withConnection(entityManager) { conn ->
-            sensorRepository.findByObjAndSensorType(objectEntity, sensorType).forEach { sensorEntity ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
                 SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
 
                 var rs = conn.executeQuery(

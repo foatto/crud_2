@@ -1209,9 +1209,10 @@ class SensorService(
         if (descr.isEmpty()) {
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to "Не введёно описание"))
         }
-        if (sensorRepository.findByObjAndDescr(parentObjectEntity, descr).any { oe -> oe.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to "Такое описание уже существует"))
-        }
+        //--- могу быть одинаковые описания датчиков из разных периодов
+        //if (sensorRepository.findByObjAndDescr(parentObjectEntity, descr).any { oe -> oe.id != id }) {
+        //    return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to "Такое описание уже существует"))
+        //}
 
         val portNum = formActionData[FIELD_PORT_NUM]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to "Не введён номер входа"))
         if (portNum < 0 || portNum > 65535) {

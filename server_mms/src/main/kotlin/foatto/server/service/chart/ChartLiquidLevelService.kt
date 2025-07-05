@@ -45,8 +45,8 @@ class ChartLiquidLevelService(
 
         chartActionRequest.action.id?.let { objectId ->
             objectRepository.findByIdOrNull(objectId)?.let { objectEntity ->
-                sensorRepository.findByObjAndSensorType(objectEntity, SensorConfig.SENSOR_LIQUID_LEVEL).forEach { levelSensorEntity ->
-                    val additiveSensorEntities = sensorRepository.findByObjAndGroupAndSensorTypeIn(
+                sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_LIQUID_LEVEL, begTime, endTime).forEach { levelSensorEntity ->
+                    val additiveSensorEntities = sensorRepository.findByObjAndGroupAndSensorTypeInAndPeriod(
                         obj = objectEntity,
                         group = levelSensorEntity.group,
                         sensorTypes = setOf(
@@ -54,8 +54,10 @@ class ChartLiquidLevelService(
                             SensorConfig.SENSOR_TEMPERATURE,
                             SensorConfig.SENSOR_DENSITY,
                         ),
+                        begTime = begTime,
+                        endTime = endTime,
                     )
-                    val counterSensorEntities = sensorRepository.findByObjAndGroupAndSensorTypeIn(
+                    val counterSensorEntities = sensorRepository.findByObjAndGroupAndSensorTypeInAndPeriod(
                         obj = objectEntity,
                         group = levelSensorEntity.group,
                         sensorTypes = setOf(
@@ -63,6 +65,8 @@ class ChartLiquidLevelService(
                             SensorConfig.SENSOR_VOLUME_ACCUMULATED,
                             SensorConfig.SENSOR_LIQUID_USING,
                         ),
+                        begTime = begTime,
+                        endTime = endTime,
                     )
 
                     getChart(

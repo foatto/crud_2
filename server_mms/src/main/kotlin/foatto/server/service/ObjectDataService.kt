@@ -11,6 +11,7 @@ import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
@@ -55,7 +56,9 @@ class ObjectDataService(
         }
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return emptyResult
 
-        val sensorConfigs = getSensorConfigs(parentObjectEntity)
+        //--- Передавать два getCurrentTimeInt() неправильно, но определить показываемый период сейчас невозможно.
+        //--- Рассчитываем на то, что после отключения старой версии Пульсара этот класс/фукционал не понадобится
+        val sensorConfigs = getSensorConfigs(parentObjectEntity, getCurrentTimeInt(), getCurrentTimeInt())
 
         alColumnInfo += null to "Время (UTC)"
         alColumnInfo += null to "Время (местное)"
@@ -87,8 +90,6 @@ class ObjectDataService(
         }
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
-        val sensorConfigs = getSensorConfigs(parentObjectEntity)
-
         val zoneUTC = getTimeZone(0)
         val zoneLocal = getTimeZone(userConfig.timeOffset)
 
@@ -110,6 +111,8 @@ class ObjectDataService(
         val currentPageNo = lastTimeUTC / PAGE_SIZE_IN_SEC - action.pageNo
         val begPageTime = currentPageNo * PAGE_SIZE_IN_SEC
         val endPageTime = begPageTime + PAGE_SIZE_IN_SEC
+
+        val sensorConfigs = getSensorConfigs(parentObjectEntity, begPageTime, endPageTime)
 
         queryNativeSql(
             entityManager,
@@ -205,9 +208,9 @@ class ObjectDataService(
         return null
     }
 
-    private fun getSensorConfigs(parentObjectEntity: ObjectEntity): TreeMap<Int, Int> {
+    private fun getSensorConfigs(parentObjectEntity: ObjectEntity, begTime: Int, endTime: Int): TreeMap<Int, Int> {
         val sensorConfigs = TreeMap<Int, Int>()
-        sensorRepository.findByObj(parentObjectEntity).forEach { sensorEntity ->
+        sensorRepository.findByObjAndPeriod(parentObjectEntity, begTime, endTime).forEach { sensorEntity ->
             sensorEntity.portNum?.let { portNum ->
                 sensorEntity.sensorType?.let { sensorType ->
                     sensorConfigs[portNum] = sensorType

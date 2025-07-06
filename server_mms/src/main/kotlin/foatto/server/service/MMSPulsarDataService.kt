@@ -42,7 +42,7 @@ class MMSPulsarDataService(
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    fun getPulsarData(
+    fun storePulsarData(
         request: HttpServletRequest,
         arrData: Array<PulsarData>,
     ) {
@@ -157,30 +157,28 @@ class MMSPulsarDataService(
             return
         }
 
-//--- экономный, но неправильный вариант - время точки может быть из прошлого,
-//--- когда требуемые датчики ещё были или были другими
-//        val sensorConfigs = mutableMapOf<Int, MutableList<SensorEntity>>()                 // portNum to sensorEntities
-//        val sensorCalibrations = mutableMapOf<Int, MutableList<Pair<Double, Double>>>()    // sensorId to list of <sensorValue to dataValue> pairs
-//
-//        objectRepository.findByIdOrNull(deviceConfig.objectId)?.let { objectEntity ->
-//            sensorRepository.findByObjAndTime(objectEntity, getCurrentTimeInt()).forEach { sensorEntity ->
-//                //--- fill sensor datas
-//                sensorEntity.portNum?.let { portNum ->
-//                    val sensorEntitiesByPortNum = sensorConfigs.getOrPut(portNum) { mutableListOf() }
-//                    sensorEntitiesByPortNum += sensorEntity
-//                }
-//                //--- fill sensors calibration datas
-//                val sensorCalibrationPairs = mutableListOf<Pair<Double, Double>>()
-//                sensorCalibrationRepository.findBySensorOrderBySensorValue(sensorEntity).forEach { sensorCalibrationEntity ->
-//                    sensorCalibrationEntity.sensorValue?.let { sensorValue ->
-//                        sensorCalibrationEntity.dataValue?.let { dataValue ->
-//                            sensorCalibrationPairs += sensorValue to dataValue
-//                        }
-//                    }
-//                }
-//                sensorCalibrations[sensorEntity.id] = sensorCalibrationPairs
-//            }
-//        }
+        val sensorConfigs = mutableMapOf<Int, MutableList<SensorEntity>>()                 // portNum to sensorEntities
+        val sensorCalibrations = mutableMapOf<Int, MutableList<Pair<Double, Double>>>()    // sensorId to list of <sensorValue to dataValue> pairs
+
+        objectRepository.findByIdOrNull(deviceConfig.objectId)?.let { objectEntity ->
+            sensorRepository.findByObjAndTime(objectEntity, getCurrentTimeInt()).forEach { sensorEntity ->
+                //--- fill sensor datas
+                sensorEntity.portNum?.let { portNum ->
+                    val sensorEntitiesByPortNum = sensorConfigs.getOrPut(portNum) { mutableListOf() }
+                    sensorEntitiesByPortNum += sensorEntity
+                }
+                //--- fill sensors calibration datas
+                val sensorCalibrationPairs = mutableListOf<Pair<Double, Double>>()
+                sensorCalibrationRepository.findBySensorOrderBySensorValue(sensorEntity).forEach { sensorCalibrationEntity ->
+                    sensorCalibrationEntity.sensorValue?.let { sensorValue ->
+                        sensorCalibrationEntity.dataValue?.let { dataValue ->
+                            sensorCalibrationPairs += sensorValue to dataValue
+                        }
+                    }
+                }
+                sensorCalibrations[sensorEntity.id] = sensorCalibrationPairs
+            }
+        }
 
         for (i in 1..arrData.lastIndex) {
             val pulsarData = arrData[i]
@@ -188,30 +186,6 @@ class MMSPulsarDataService(
 
                 val curTime = getCurrentTimeInt()
                 if (pointTime > curTime - CoreTelematicFunction.MAX_PAST_TIME && pointTime < curTime + CoreTelematicFunction.MAX_FUTURE_TIME) {
-
-                    //--- затратный, но правильный вариант - настройки датчиков берутся для каждого конкретного времени
-                    val sensorConfigs = mutableMapOf<Int, MutableList<SensorEntity>>()                 // portNum to sensorEntities
-                    val sensorCalibrations = mutableMapOf<Int, MutableList<Pair<Double, Double>>>()    // sensorId to list of <sensorValue to dataValue> pairs
-
-                    objectRepository.findByIdOrNull(deviceConfig.objectId)?.let { objectEntity ->
-                        sensorRepository.findByObjAndTime(objectEntity, pointTime).forEach { sensorEntity ->
-                            //--- fill sensor datas
-                            sensorEntity.portNum?.let { portNum ->
-                                val sensorEntitiesByPortNum = sensorConfigs.getOrPut(portNum) { mutableListOf() }
-                                sensorEntitiesByPortNum += sensorEntity
-                            }
-                            //--- fill sensors calibration datas
-                            val sensorCalibrationPairs = mutableListOf<Pair<Double, Double>>()
-                            sensorCalibrationRepository.findBySensorOrderBySensorValue(sensorEntity).forEach { sensorCalibrationEntity ->
-                                sensorCalibrationEntity.sensorValue?.let { sensorValue ->
-                                    sensorCalibrationEntity.dataValue?.let { dataValue ->
-                                        sensorCalibrationPairs += sensorValue to dataValue
-                                    }
-                                }
-                            }
-                            sensorCalibrations[sensorEntity.id] = sensorCalibrationPairs
-                        }
-                    }
 
                     pulsarData.vals?.forEach { hmData ->
                         hmData.forEach { (sId, value) ->

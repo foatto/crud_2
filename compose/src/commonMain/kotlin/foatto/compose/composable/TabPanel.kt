@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import foatto.compose.colorTabActive
@@ -25,7 +27,7 @@ import foatto.compose.model.TabInfo
 internal fun TabPanel(
     isTabPanelVisible: Boolean,
     selectedTabIndex: Int,
-    alTabInfo: List<TabInfo>,
+    tabInfos: List<TabInfo>,
     onTabClick: (index: Int) -> Unit,
     onTabCloseClick: (index: Int) -> Unit,
 ) {
@@ -43,7 +45,7 @@ internal fun TabPanel(
                 }
             },
         ) {
-            alTabInfo.forEachIndexed { index, tabInfo ->
+            tabInfos.forEachIndexed { index, tabInfo ->
                 Tab(
                     modifier = Modifier
                         .wrapContentWidth()
@@ -62,22 +64,25 @@ internal fun TabPanel(
                     Row(
                         //horizontalArrangement = Arrangement.SpaceBetween, - don't work properly, use Spacer
                     ) {
-                        Spacer(modifier = Modifier.weight(1.0f))
+//                        Spacer(modifier = Modifier.weight(1.0f))
+                        Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                                 .weight(1.0f)
                                 .wrapContentWidth(),
+                            textAlign = TextAlign.Center,
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis,
-                            text = tabInfo.alText.joinToString("\n"),
+                            text = tabInfo.texts.joinToString("\n"),
                         )
-                        Spacer(modifier = Modifier.weight(1.0f))
+//                        Spacer(modifier = Modifier.weight(1.0f))
+                        Spacer(modifier = Modifier.width(16.dp))
                         FilledIconButton(
                             modifier = Modifier.align(Alignment.CenterVertically),
                             shape = RoundedCornerShape(0.dp),               // чтобы не срезало углы иконок
                             colors = IconButtonDefaults.iconButtonColors(), // иконки должны быть на прозрачном фоне
-                            enabled = alTabInfo.size > 1,
+                            enabled = tabInfos.size > 1,
                             onClick = {
                                 onTabCloseClick(index)
                             }

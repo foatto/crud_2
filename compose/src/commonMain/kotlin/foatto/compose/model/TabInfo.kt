@@ -1,6 +1,9 @@
 package foatto.compose.model
 
+import androidx.compose.runtime.mutableStateListOf
+
 class TabInfo(
     val id: Int,
-    var alText: List<String>,
-)
+) {
+    val texts = mutableStateListOf<String>()
+}

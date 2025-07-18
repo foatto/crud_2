@@ -40,7 +40,14 @@ import foatto.compose.control.TableControl
 import foatto.compose.i18n.lang
 import foatto.compose.model.MenuDataClient
 import foatto.compose.model.TabInfo
-import foatto.compose.utils.*
+import foatto.compose.utils.SETTINGS_LANGUAGE
+import foatto.compose.utils.SETTINGS_LOGIN
+import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
+import foatto.compose.utils.SETTINGS_PASSWORD
+import foatto.compose.utils.encodePassword
+import foatto.compose.utils.getScaledWindowWidth
+import foatto.compose.utils.openFileByUrl
+import foatto.compose.utils.settings
 import foatto.core.ActionType
 import foatto.core.i18n.LanguageEnum
 import foatto.core.model.AppAction
@@ -101,9 +108,9 @@ open class Root {
 
     private var isTabPanelVisible by mutableStateOf(false)
     private var selectedTabIndex by mutableIntStateOf(0)
-    private val alTabInfo = mutableStateListOf<TabInfo>()
+    private val tabInfos = mutableStateListOf<TabInfo>()
 
-    private val alControl = mutableStateListOf<AppControl>()
+    private val controls = mutableStateListOf<AppControl>()
     var selectorControl: TableControl? by mutableStateOf(null)
 
     private var waitCount by mutableIntStateOf(0)
@@ -179,7 +186,7 @@ open class Root {
                         TabPanel(
                             isTabPanelVisible = isTabPanelVisible,
                             selectedTabIndex = selectedTabIndex,
-                            alTabInfo = alTabInfo,
+                            tabInfos = tabInfos,
                             onTabClick = { index ->
                                 selectedTabIndex = index
                             },
@@ -188,7 +195,7 @@ open class Root {
                             },
                         )
                     }
-                    alControl.getOrNull(selectedTabIndex)?.Body()
+                    controls.getOrNull(selectedTabIndex)?.Body()
                 }
 
                 selectorControl?.Body()
@@ -278,8 +285,8 @@ open class Root {
 
                     isTabPanelVisible = false
                     selectedTabIndex = 0
-                    alTabInfo.clear()
-                    alControl.clear()
+                    tabInfos.clear()
+                    controls.clear()
 
                     start()
                 }
@@ -303,33 +310,31 @@ open class Root {
 
         val appControl = AppControl(this, action, lastTabId)
 
-        alTabInfo += TabInfo(lastTabId, listOf())
-        alControl += appControl
+        tabInfos += TabInfo(lastTabId)
+        controls += appControl
 
-        selectedTabIndex = alTabInfo.lastIndex
+        selectedTabIndex = tabInfos.lastIndex
 
         appControl.start()
     }
 
     fun setTabInfo(tabId: Int, tabText: String) {
-        alTabInfo.find { tabInfo ->
+        tabInfos.find { tabInfo ->
             tabInfo.id == tabId
         }?.let { tabInfo ->
-            tabInfo.alText = tabText.split('\n').filter { tabWord ->
-                tabWord.isNotBlank()
-            }.map { tabWord ->
-                tabWord
-//                if (tabWord.length > getStyleTabComboTextLen()) {
-//                    tabWord.substring(0, getStyleTabComboTextLen()) + "..."
-//                } else {
-//                    tabWord
-//                }
-            }
+            tabInfo.texts.clear()
+            tabInfo.texts.addAll(
+                tabText.split('\n').filter { tabWord ->
+                    tabWord.isNotBlank()
+                }.map { tabWord ->
+                    tabWord
+                }
+            )
         }
     }
 
     fun closeTabById(tabId: Int) {
-        val indexForClose = alTabInfo.indexOfFirst { tabInfo ->
+        val indexForClose = tabInfos.indexOfFirst { tabInfo ->
             tabInfo.id == tabId
         }
         closeTabByIndex(indexForClose)
@@ -337,12 +342,12 @@ open class Root {
 
     fun closeTabByIndex(indexForClose: Int) {
         //--- for last tab removing case
-        if (selectedTabIndex == alTabInfo.lastIndex) {
+        if (selectedTabIndex == tabInfos.lastIndex) {
             selectedTabIndex--
         }
 
-        alControl.removeAt(indexForClose)
-        alTabInfo.removeAt(indexForClose)
+        controls.removeAt(indexForClose)
+        tabInfos.removeAt(indexForClose)
     }
 
     fun setMenuBarData(alMenuData: List<MenuDataClient>, scaledWindowWidth: Int) {

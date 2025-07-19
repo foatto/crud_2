@@ -28,7 +28,6 @@ import foatto.compose.getStyleToolbarIconNameSuffix
 @Composable
 internal fun CompositeToolBar(
     isWideScreen: Boolean,
-    isToolBarsVisible: Boolean,
     isPanButtonEnabled: Boolean,
     isLayoutButtonEnabled: Boolean,
     isBlocksVisibilityButtonVisible: Boolean,
@@ -69,21 +68,19 @@ internal fun CompositeToolBar(
 //                        )
 //                        backgroundColor(getColorTableToolbarBack())
     ) {
-        if (isToolBarsVisible) {
-            ToolBarBlock {
+        ToolBarBlock {
+            ToolBarIconButton(
+                isEnabled = isPanButtonEnabled && refreshInterval == 0,
+                name = "/images/ic_open_with_${getStyleToolbarIconNameSuffix()}.png",
+            ) {
+                setMode(CompositeWorkMode.PAN)
+            }
+            if (isWideScreen) {
                 ToolBarIconButton(
-                    isEnabled = isPanButtonEnabled && refreshInterval == 0,
-                    name = "/images/ic_open_with_${getStyleToolbarIconNameSuffix()}.png",
+                    isEnabled = isLayoutButtonEnabled && refreshInterval == 0,
+                    name = "/images/ic_touch_app_${getStyleToolbarIconNameSuffix()}.png",
                 ) {
-                    setMode(CompositeWorkMode.PAN)
-                }
-                if (isWideScreen) {
-                    ToolBarIconButton(
-                        isEnabled = isLayoutButtonEnabled && refreshInterval == 0,
-                        name = "/images/ic_touch_app_${getStyleToolbarIconNameSuffix()}.png",
-                    ) {
-                        setMode(CompositeWorkMode.LAYOUT)
-                    }
+                    setMode(CompositeWorkMode.LAYOUT)
                 }
             }
         }
@@ -150,7 +147,7 @@ internal fun CompositeToolBar(
         }
         ToolBarBlock {
         }
-        if (isToolBarsVisible && isRefreshButtonsVisible) {
+        if (isRefreshButtonsVisible) {
             RefreshSubToolBar(
                 isWideScreen = isWideScreen,
                 refreshInterval = refreshInterval,

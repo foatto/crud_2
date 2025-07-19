@@ -8,9 +8,10 @@ import foatto.compose.control.ChartControl
 import foatto.compose.control.MapControl
 import foatto.compose.control.SchemeControl
 import foatto.compose.control.TableControl
+import foatto.core.model.response.composite.CompositeBlock
 
 class CompositeBlockControl(
-    val id: Int,
+    val data: CompositeBlock,
 
     val chartBlock: ChartControl? = null,
     val mapBlock: MapControl? = null,

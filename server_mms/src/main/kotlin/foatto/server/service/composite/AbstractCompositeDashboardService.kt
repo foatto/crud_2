@@ -27,12 +27,14 @@ import foatto.server.model.SensorConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.service.scheme.AbstractSchemeIndicatorStateService
 import foatto.server.service.scheme.SchemeAnalogueIndicatorStateService
 import foatto.server.service.scheme.SchemeCounterIndicatorStateService
 import foatto.server.service.scheme.SchemeWorkIndicatorStateService
 import kotlinx.serialization.json.Json
 import org.springframework.data.repository.findByIdOrNull
 import kotlin.math.ceil
+import kotlin.math.round
 import kotlin.math.sqrt
 
 abstract class AbstractCompositeDashboardService(
@@ -74,6 +76,8 @@ abstract class AbstractCompositeDashboardService(
     ): CompositeActionResponse {
         val action = compositeActionRequest.action
         val actionModule = action.module
+
+        val (viewWidth, viewHeight) = compositeActionRequest.viewSize
 
         val sessionData = SpringApp.getSessionData(sessionId) ?: return getErrorCompositeActionResponse()
         val userConfig = sessionData.serverUserConfig ?: return getErrorCompositeActionResponse()
@@ -181,9 +185,9 @@ abstract class AbstractCompositeDashboardService(
                 }
         }
 
-        //--- в соотношении 2:1
-        val blockRows = ceil(sqrt(sensorEntities.size / 2.0)).toInt()
-        val blockOnRow = blockRows * 2
+        val viewSizeRelation = viewWidth / viewHeight * AbstractSchemeIndicatorStateService.SCHEME_HEIGHT / AbstractSchemeIndicatorStateService.SCHEME_WIDTH
+        val blockRows = round(sqrt(sensorEntities.size / viewSizeRelation)).toInt()
+        val blockCols = ceil(sensorEntities.size.toFloat() / blockRows).toInt()
 
         val blocks = mutableListOf<CompositeBlock>()
 
@@ -229,11 +233,12 @@ abstract class AbstractCompositeDashboardService(
             )
 
             col++
-            if (col >= blockOnRow) {
+            if (col >= blockCols) {
                 row++
                 col = 0
             }
         }
+
 
         return CompositeActionResponse(
             responseCode = ResponseCode.OK,

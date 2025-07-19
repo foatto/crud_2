@@ -8,7 +8,7 @@ import foatto.core.model.response.xy.scheme.SchemeResponse
 import kotlinx.serialization.Serializable
 
 @Serializable
-class CompositeBlock(
+data class CompositeBlock(
     val id: Int,
 
     val isHidden: Boolean,

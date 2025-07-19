@@ -9,6 +9,7 @@ import kotlin.collections.get
 @Serializable
 class CompositeActionRequest(
     val action: AppAction,
+    val viewSize: Pair<Float, Float>,
 ) : BaseRequest(
     url = appModuleUrls[action.module]?.compositeActionUrl ?: ApiUrl.ERROR,
 )

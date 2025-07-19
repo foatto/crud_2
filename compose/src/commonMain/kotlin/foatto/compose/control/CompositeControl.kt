@@ -1,6 +1,5 @@
 package foatto.compose.control
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,9 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -48,9 +42,8 @@ import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.colorCompositeMovedBlockBack
 import foatto.compose.colorIconButton
+import foatto.compose.colorMainBack0
 import foatto.compose.colorMainBack2
-import foatto.compose.colorScrollBarBack
-import foatto.compose.colorScrollBarFore
 import foatto.compose.control.composable.composite.CompositeToolBar
 import foatto.compose.control.composable.onPointerEvents
 import foatto.compose.control.model.CompositeListItem
@@ -76,9 +69,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
-import kotlin.math.max
-import kotlin.math.min
 
 class CompositeControl(
     protected val root: Root,
@@ -86,20 +78,6 @@ class CompositeControl(
     protected val compositeResponse: CompositeResponse,
     tabId: Int,
 ) : AbstractControl(tabId) {
-
-    companion object {
-        private val SCROLL_BAR_TICKNESS = 16.dp
-
-        //--- 350 - узковато - не помещаются некоторые наименования, при этом 6-й столбец на стандартный FullHD уже не помещается;
-        //--- 400 - ширина достаточна, при этом 5-й столбец на стандартный FullHD помещается не полностью;
-        //--- 380 == (1920 - 16) / 5 (с учётом вертикального тулбара)
-        const val BLOCK_MIN_WIDTH: Int = 360
-
-        //--- 200 - низковато, соседние заголовки и подписи располагаются слишком близко
-        const val BLOCK_MIN_HEIGHT: Int = 240
-    }
-
-    private var isToolBarsVisible by mutableStateOf(true)
 
     private var isPanButtonEnabled by mutableStateOf(false)
     private var isLayoutButtonEnabled by mutableStateOf(true)
@@ -114,15 +92,6 @@ class CompositeControl(
     private var canvasWidth: Float by mutableFloatStateOf(0.0f)
     private var canvasHeight: Float by mutableFloatStateOf(0.0f)
 
-    private var oneBlockWidth by mutableFloatStateOf(0.0f)
-    private var oneBlockHeight by mutableFloatStateOf(0.0f)
-
-    private var vScrollBarLength: Float by mutableFloatStateOf(0.0f)
-    private var hScrollBarLength: Float by mutableFloatStateOf(0.0f)
-
-    private var screenOffsetX: Float by mutableFloatStateOf(0.0f)
-    private var screenOffsetY: Float by mutableFloatStateOf(0.0f)
-
     private var curMode = CompositeWorkMode.PAN
 
     private var listItems: List<CompositeListItem>? = null
@@ -132,6 +101,7 @@ class CompositeControl(
 
     private var layoutSaveKey: String? = null
 
+    private var selectedBlock: CompositeBlockControl? by mutableStateOf(null)
     private var movingBlock: CompositeBlockControl? by mutableStateOf(null)
 
     @Composable
@@ -143,7 +113,7 @@ class CompositeControl(
         Row(
             modifier = Modifier.fillMaxSize(),
         ) {
-            key(listItems, verticalScrollState, blocks) {
+            key(canvasWidth, canvasHeight, listItems, verticalScrollState, blocks) {
                 listItems?.let { items ->
                     Column(
                         modifier = Modifier
@@ -166,7 +136,6 @@ class CompositeControl(
 
                     CompositeToolBar(
                         isWideScreen = root.isWideScreen,
-                        isToolBarsVisible = isToolBarsVisible,
                         isPanButtonEnabled = isPanButtonEnabled,
                         isLayoutButtonEnabled = isLayoutButtonEnabled,
                         isBlocksVisibilityButtonVisible = isBlocksVisibilityButtonVisible,
@@ -185,157 +154,177 @@ class CompositeControl(
                         setInterval = { interval: Int -> coroutineScope.launch { setInterval(interval) } },
                     )
 
-                    Row(
+                    Box(
                         modifier = Modifier
                             .weight(1.0f)
-                            .fillMaxWidth()
+                            .fillMaxSize()
+                            .clipToBounds()
+                            .onSizeChanged { size ->
+                                canvasWidth = size.width.toFloat()
+                                canvasHeight = size.height.toFloat()
+                            }
+//                            .onPointerEvents(
+//                                withInteractive = true,
+//                                onPointerDown = { pointerInputChange -> },
+//                                onPointerUp = { pointerInputChange -> onPointerUp(pointerInputChange) },
+//                                onDragStart = { offset -> },
+//                                onDrag = { pointerInputChange, offset -> },
+//                                onDragEnd = { },
+//                                onDragCancel = { },
+//                            ),
                     ) {
-                        if (blocks.isNotEmpty()) {
+                        for (block in blocks) {
+                            BlockBody(block) { blockX, blockY, blockW, blockH ->
+                                Box(
+                                    modifier = Modifier
+                                        .offset(
+                                            x = with(density) { blockX.toDp() },
+                                            y = with(density) { blockY.toDp() },
+                                        )
+                                        .size(
+                                            width = with(density) { blockW.toDp() },
+                                            height = with(density) { blockH.toDp() },
+                                        )
+                                        .onPointerEvents(
+                                            withInteractive = true,
+                                            onPointerDown = { pointerInputChange -> },
+                                            onPointerUp = { pointerInputChange -> coroutineScope.launch { onPointerUpOnBlock(block, pointerInputChange) } },
+                                            onDragStart = { offset -> },
+                                            onDrag = { pointerInputChange, offset -> },
+                                            onDragEnd = { },
+                                            onDragCancel = { },
+                                        ),
+                                ) {
+                                    block.chartBlock?.MainChartBody(false)
+                                        ?: block.mapBlock?.getXyElementTemplate(false)
+                                        ?: block.schemeBlock?.getXyElementTemplate(false)
+                                        ?: block.tableBlock?.TableBody(Modifier)
+                                        ?: run {
+                                            Text(text = "Не задан тип блока!")
+                                        }
+                                }
+                            }
+                        }
+
+                        selectedBlock?.let { block ->
                             Box(
                                 modifier = Modifier
-                                    .weight(1.0f)
                                     .fillMaxSize()
-                                    .clipToBounds()
-                                    .onSizeChanged { size ->
-                                        canvasWidth = size.width.toFloat()
-                                        canvasHeight = size.height.toFloat()
-
-                                        oneBlockWidth = max(BLOCK_MIN_WIDTH * root.scaleKoef, canvasWidth / getBlockColSum())
-                                        oneBlockHeight = max(BLOCK_MIN_HEIGHT * root.scaleKoef, canvasHeight / getBlockRowSum())
-                                    }
+                                    .background(colorMainBack0)
                                     .onPointerEvents(
                                         withInteractive = true,
                                         onPointerDown = { pointerInputChange -> },
-                                        onPointerUp = { pointerInputChange -> onPointerUp(pointerInputChange) },
+                                        onPointerUp = { pointerInputChange ->
+                                            selectedBlock = null
+                                            pointerInputChange.consume()
+                                        },
                                         onDragStart = { offset -> },
-                                        onDrag = { pointerInputChange, offset -> onDrag(pointerInputChange, offset.x, offset.y) },
+                                        onDrag = { pointerInputChange, offset -> },
                                         onDragEnd = { },
                                         onDragCancel = { },
                                     ),
                             ) {
-                                for (block in blocks) {
-                                    BlockBody(block) { blockX, blockY, blockW, blockH ->
-                                        Box(
-                                            modifier = Modifier
-                                                .offset(
-                                                    x = with(density) { blockX.toDp() },
-                                                    y = with(density) { blockY.toDp() },
-                                                )
-                                                .size(
-                                                    width = with(density) { blockW.toDp() },
-                                                    height = with(density) { blockH.toDp() },
-                                                )
-                                        ) {
-                                            block.chartBlock?.MainChartBody(false)
-                                                ?: block.mapBlock?.getXyElementTemplate(false)
-                                                ?: block.schemeBlock?.getXyElementTemplate(false)
-                                                ?: block.tableBlock?.TableBody(Modifier)
-                                                ?: run {
-                                                    Text(text = "Не задан тип блока!")
-                                                }
-                                        }
+                                block.chartBlock?.MainChartBody(false)
+                                    ?: block.mapBlock?.getXyElementTemplate(false)
+                                    ?: block.schemeBlock?.getXyElementTemplate(false)
+                                    ?: block.tableBlock?.TableBody(Modifier)
+                                    ?: run {
+                                        Text(text = "Не задан тип блока!")
                                     }
+                            }
+                        }
+
+                        movingBlock?.let { block ->
+                            BlockBody(block) { blockX, blockY, blockW, blockH ->
+                                Box(
+                                    modifier = Modifier
+                                        .offset(
+                                            x = with(density) { blockX.toDp() },
+                                            y = with(density) { blockY.toDp() },
+                                        )
+                                        .size(
+                                            width = with(density) { blockW.toDp() },
+                                            height = with(density) { blockH.toDp() },
+                                        )
+                                        .background(color = colorCompositeMovedBlockBack)
+                                )
+
+                                val iconSize = styleToolbarIconSize
+
+                                val blockCenterX = blockX + blockW / 2 - iconSize / 2
+                                val blockCenterY = blockY + blockH / 2 - iconSize / 2
+
+                                LayoutButton(
+                                    modifier = Modifier.offset(
+                                        x = with(density) { blockCenterX.toDp() },
+                                        y = with(density) { blockCenterY.toDp() },
+                                    ),
+                                    iconName = "/images/ic_done_${getStyleToolbarIconNameSuffix()}.png",
+                                    isEnabled = true
+                                ) {
+                                    movingBlock = null
                                 }
 
-                                movingBlock?.let { block ->
-                                    BlockBody(block) { blockX, blockY, blockW, blockH ->
-                                        Box(
-                                            modifier = Modifier
-                                                .offset(
-                                                    x = with(density) { blockX.toDp() },
-                                                    y = with(density) { blockY.toDp() },
-                                                )
-                                                .size(
-                                                    width = with(density) { blockW.toDp() },
-                                                    height = with(density) { blockH.toDp() },
-                                                )
-                                                .background(color = colorCompositeMovedBlockBack)
-                                        )
+                                LayoutButton(
+                                    modifier = Modifier.offset(
+                                        x = with(density) { blockCenterX.toDp() },
+                                        y = with(density) { (blockCenterY - iconSize * 2).toDp() },
+                                    ),
+                                    iconName = "/images/ic_arrow_upward_${getStyleToolbarIconNameSuffix()}.png",
+                                    isEnabled = true
+                                ) {
+                                    onBlockMoveUp(block)
+                                }
 
-                                        val iconSize = styleToolbarIconSize
+                                LayoutButton(
+                                    modifier = Modifier.offset(
+                                        x = with(density) { (blockCenterX - iconSize * 2).toDp() },
+                                        y = with(density) { blockCenterY.toDp() },
+                                    ),
+                                    iconName = "/images/ic_arrow_back_${getStyleToolbarIconNameSuffix()}.png",
+                                    isEnabled = true
+                                ) {
+                                    onBlockMoveLeft(block)
+                                }
 
-                                        val blockCenterX = blockX + blockW / 2 - iconSize / 2
-                                        val blockCenterY = blockY + blockH / 2 - iconSize / 2
+                                LayoutButton(
+                                    modifier = Modifier.offset(
+                                        x = with(density) { (blockCenterX + iconSize * 2).toDp() },
+                                        y = with(density) { blockCenterY.toDp() },
+                                    ),
+                                    iconName = "/images/ic_arrow_forward_${getStyleToolbarIconNameSuffix()}.png",
+                                    isEnabled = true
+                                ) {
+                                    onBlockMoveRight(block)
+                                }
 
-                                        LayoutButton(
-                                            modifier = Modifier.offset(
-                                                x = with(density) { blockCenterX.toDp() },
-                                                y = with(density) { blockCenterY.toDp() },
-                                            ),
-                                            iconName = "/images/ic_done_${getStyleToolbarIconNameSuffix()}.png",
-                                            isEnabled = true
-                                        ) {
-                                            movingBlock = null
-                                            isToolBarsVisible = true
-                                        }
+                                LayoutButton(
+                                    modifier = Modifier.offset(
+                                        x = with(density) { blockCenterX.toDp() },
+                                        y = with(density) { (blockCenterY + iconSize * 2).toDp() },
+                                    ),
+                                    iconName = "/images/ic_arrow_downward_${getStyleToolbarIconNameSuffix()}.png",
+                                    isEnabled = true
+                                ) {
+                                    onBlockMoveDown(block)
+                                }
 
-                                        LayoutButton(
-                                            modifier = Modifier.offset(
-                                                x = with(density) { blockCenterX.toDp() },
-                                                y = with(density) { (blockCenterY - iconSize * 2).toDp() },
-                                            ),
-                                            iconName = "/images/ic_arrow_upward_${getStyleToolbarIconNameSuffix()}.png",
-                                            isEnabled = true
-                                        ) {
-                                            onBlockMoveUp(block)
-                                        }
+                                LayoutButton(
+                                    modifier = Modifier.offset(
+                                        x = with(density) { (blockCenterX + iconSize * 3).toDp() },
+                                        y = with(density) { (blockCenterY + iconSize * 2).toDp() },
+                                    ),
+                                    iconName = "/images/ic_visibility_off_${getStyleToolbarIconNameSuffix()}.png",
+                                    isEnabled = true
+                                ) {
+                                    block.isHidden = true
+                                    block.x = -block.x - 1    // добавим -1 с учётом возможных координат 0,0
+                                    block.y = -block.y - 1
 
-                                        LayoutButton(
-                                            modifier = Modifier.offset(
-                                                x = with(density) { (blockCenterX - iconSize * 2).toDp() },
-                                                y = with(density) { blockCenterY.toDp() },
-                                            ),
-                                            iconName = "/images/ic_arrow_back_${getStyleToolbarIconNameSuffix()}.png",
-                                            isEnabled = true
-                                        ) {
-                                            onBlockMoveLeft(block)
-                                        }
-
-                                        LayoutButton(
-                                            modifier = Modifier.offset(
-                                                x = with(density) { (blockCenterX + iconSize * 2).toDp() },
-                                                y = with(density) { blockCenterY.toDp() },
-                                            ),
-                                            iconName = "/images/ic_arrow_forward_${getStyleToolbarIconNameSuffix()}.png",
-                                            isEnabled = true
-                                        ) {
-                                            onBlockMoveRight(block)
-                                        }
-
-                                        LayoutButton(
-                                            modifier = Modifier.offset(
-                                                x = with(density) { blockCenterX.toDp() },
-                                                y = with(density) { (blockCenterY + iconSize * 2).toDp() },
-                                            ),
-                                            iconName = "/images/ic_arrow_downward_${getStyleToolbarIconNameSuffix()}.png",
-                                            isEnabled = true
-                                        ) {
-                                            onBlockMoveDown(block)
-                                        }
-
-                                        LayoutButton(
-                                            modifier = Modifier.offset(
-                                                x = with(density) { (blockCenterX + iconSize * 3).toDp() },
-                                                y = with(density) { (blockCenterY + iconSize * 2).toDp() },
-                                            ),
-                                            iconName = "/images/ic_visibility_off_${getStyleToolbarIconNameSuffix()}.png",
-                                            isEnabled = true
-                                        ) {
-                                            block.isHidden = true
-                                            block.x = -block.x - 1    // добавим -1 с учётом возможных координат 0,0
-                                            block.y = -block.y - 1
-
-                                            movingBlock = null
-                                            isToolBarsVisible = true
-                                        }
-                                    }
+                                    movingBlock = null
                                 }
                             }
-                            VerticalScrollBody()
                         }
-                    }
-                    if (blocks.isNotEmpty()) {
-                        HorizontalScrollBody()
                     }
                 }
             }
@@ -420,18 +409,22 @@ class CompositeControl(
         }
     }
 
-    private fun getMenuPadding(level: Int) = ((1 + level) * 16).dp
+    private fun getMenuPadding(level: Int) = //((1 + level) * 16).dp
+        when (level) {
+            0 -> 16.dp
+            else -> ((3 + level) * 16).dp
+        }
 
     @Composable
     fun BlockBody(
         block: CompositeBlockControl,
         content: @Composable (blockX: Float, blockY: Float, blockW: Float, blockH: Float) -> Unit,
     ) {
-        val blockX = block.x * oneBlockWidth + screenOffsetX
-        val blockY = block.y * oneBlockHeight + screenOffsetY
+        val blockX = block.x * getOneBlockWidth()
+        val blockY = block.y * getOneBlockHeight()
 
-        val blockW = block.w * oneBlockWidth
-        val blockH = block.h * oneBlockHeight
+        val blockW = block.w * getOneBlockWidth()
+        val blockH = block.h * getOneBlockHeight()
 
         content(blockX, blockY, blockW, blockH)
     }
@@ -460,104 +453,6 @@ class CompositeControl(
         }
     }
 
-    @Composable
-    private fun VerticalScrollBody() {
-        val density = LocalDensity.current
-
-        Canvas(
-            modifier = Modifier
-                .width(SCROLL_BAR_TICKNESS)
-                .fillMaxHeight()
-                .onSizeChanged { size ->
-                    vScrollBarLength = size.height.toFloat()
-                }
-                .clipToBounds()
-                .onPointerEvents(
-                    withInteractive = true,
-                    onPointerDown = { pointerInputChange -> },
-                    onPointerUp = { pointerInputChange -> },
-                    onDragStart = { offset -> },
-                    onDrag = { pointerInputChange, offset ->
-                        val pixEndY = getBlockRowSum() * oneBlockHeight
-                        val incScaleY = pixEndY / vScrollBarLength
-                        onDrag(pointerInputChange, 0.0f, -offset.y * incScaleY)
-                    },
-                    onDragEnd = { },
-                    onDragCancel = { },
-                )
-        ) {
-            drawRect(
-                topLeft = Offset(0.0f, 0.0f),
-                size = Size(with(density) { SCROLL_BAR_TICKNESS.toPx() }, vScrollBarLength),
-                color = colorScrollBarBack,
-                style = Fill,
-            )
-            val pixEndY = getBlockRowSum() * oneBlockHeight
-            val decScaleY = min(1.0f, canvasHeight / pixEndY)
-            val scrollBarH = vScrollBarLength * decScaleY
-            val scrollBarY = if (canvasHeight >= pixEndY) {
-                0.0f
-            } else {
-                (vScrollBarLength - scrollBarH) * (-screenOffsetY) / (pixEndY - canvasHeight)
-            }
-            drawRect(
-                topLeft = Offset(0.0f, scrollBarY),
-                size = Size(with(density) { SCROLL_BAR_TICKNESS.toPx() }, scrollBarH),
-                color = colorScrollBarFore,
-                style = Fill,
-            )
-        }
-    }
-
-    @Composable
-    private fun HorizontalScrollBody() {
-        val density = LocalDensity.current
-
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(SCROLL_BAR_TICKNESS)
-                .onSizeChanged { size ->
-                    hScrollBarLength = size.width.toFloat()
-                }
-                .clipToBounds()
-                .onPointerEvents(
-                    withInteractive = true,
-                    onPointerDown = { pointerInputChange -> },
-                    onPointerUp = { pointerInputChange -> },
-                    onDragStart = { offset -> },
-                    onDrag = { pointerInputChange, offset ->
-                        val pixEndX = getBlockColSum() * oneBlockWidth
-                        val incScaleX = pixEndX / hScrollBarLength
-                        onDrag(pointerInputChange, -offset.x * incScaleX, 0.0f)
-                    },
-                    onDragEnd = { },
-                    onDragCancel = { },
-                )
-        ) {
-            drawRect(
-                topLeft = Offset(0.0f, 0.0f),
-                size = Size(hScrollBarLength, with(density) { SCROLL_BAR_TICKNESS.toPx() }),
-                color = colorScrollBarBack,
-                style = Fill,
-            )
-            val pixEndX = getBlockColSum() * oneBlockWidth
-            val decScaleX = min(1.0f, canvasWidth / pixEndX)
-            val scrollBarW = hScrollBarLength * decScaleX
-            val scrollBarX = if (canvasWidth >= pixEndX) {
-                0.0f
-            } else {
-                (hScrollBarLength - scrollBarW) * (-screenOffsetX) / (pixEndX - canvasWidth)
-            }
-            drawRect(
-                topLeft = Offset(scrollBarX, 0.0f),
-                size = Size(scrollBarW, with(density) { SCROLL_BAR_TICKNESS.toPx() }),
-                color = colorScrollBarFore,
-                style = Fill,
-            )
-        }
-    }
-
     @OptIn(DelicateCoroutinesApi::class)
     override suspend fun start() {
         root.setTabInfo(tabId, compositeResponse.tabCaption)
@@ -568,15 +463,17 @@ class CompositeControl(
             }
         }
 
-        GlobalScope.launch {
-            compositeBlocksReload(
-                id = compositeResponse.items?.let {
-                    null
-                } ?: compositeResponse.action.id,
-                parentModule = compositeResponse.items?.let {
-                    null
-                } ?: compositeResponse.action.parentModule,
-            )
+        while (canvasWidth == 0.0f) {
+            yield()
+        }
+
+        if (compositeResponse.items == null) {
+            GlobalScope.launch {
+                compositeBlocksReload(
+                    id = compositeResponse.action.id,
+                    parentModule = compositeResponse.action.parentModule,
+                )
+            }
         }
         /*
             !!! setInterval(10)
@@ -604,18 +501,17 @@ class CompositeControl(
                     id = id,
                     parentModule = parentModule,
                 ),
+                viewSize = canvasWidth / root.scaleKoef to canvasHeight / root.scaleKoef,
             )
         ) { compositeActionResponse: CompositeActionResponse ->
 
-            //--- сбрасываем горизонтальный скроллинг/смещение
-            screenOffsetX = 0.0f
-            screenOffsetY = 0.0f
+            setMode(CompositeWorkMode.PAN)
 
             headerData = compositeActionResponse.headerData
 
             blocks.clear()
             compositeActionResponse.blocks.forEach { blockControlData ->
-                readBlock(blockControlData)
+                blocks += readBlock(blockControlData)
             }
 
             layoutSaveKey = compositeActionResponse.layoutSaveKey
@@ -624,9 +520,9 @@ class CompositeControl(
         }
     }
 
-    private suspend fun readBlock(blockControlData: CompositeBlock) {
-        blocks += CompositeBlockControl(
-            id = blockControlData.id,
+    private suspend fun readBlock(blockControlData: CompositeBlock): CompositeBlockControl =
+        CompositeBlockControl(
+            data = blockControlData,
             chartBlock = blockControlData.chartResponse?.let { chartResponse ->
                 ChartControl(root, appControl, blockControlData.action, chartResponse, tabId).apply {
                     startChartBody()
@@ -659,7 +555,6 @@ class CompositeControl(
             w = blockControlData.w
             h = blockControlData.h
         }
-    }
 
     private suspend fun setInterval(sec: Int) {
         refreshInterval = sec
@@ -694,8 +589,6 @@ class CompositeControl(
             CompositeWorkMode.LAYOUT -> {
                 isLayoutButtonEnabled = true
 
-                movingBlock = null
-
                 isBlocksVisibilityButtonVisible = false
                 isLayoutSaveButtonVisible = false
             }
@@ -717,77 +610,108 @@ class CompositeControl(
                 isRefreshButtonsVisible = false
             }
         }
-        curMode = newMode
-
+        //--- при любом переключении режима выключаем любые активные элементы
+        selectedBlock = null
+        movingBlock = null
         refreshInterval = 0
+
+        curMode = newMode
     }
 
-    private fun onPointerUp(pointerInputChange: PointerInputChange) {
-        val mouseX = pointerInputChange.position.x
-        val mouseY = pointerInputChange.position.y
+    /*
+        private fun onPointerUpOnComposite(pointerInputChange: PointerInputChange) {
+            val mouseX = pointerInputChange.position.x
+            val mouseY = pointerInputChange.position.y
 
+            when (curMode) {
+                CompositeWorkMode.PAN -> {
+
+                }
+
+                CompositeWorkMode.LAYOUT -> {
+                    for (block in blocks) {
+                        if (block.isHidden) {
+                            continue
+                        }
+
+                        val blockX = block.x * getOneBlockWidth()
+                        val blockY = block.y * getOneBlockHeight()
+
+                        val blockW = block.w * getOneBlockWidth()
+                        val blockH = block.h * getOneBlockHeight()
+
+                        if (mouseX > blockX &&
+                            mouseX < blockX + blockW &&
+                            mouseY > blockY &&
+                            mouseY < blockY + blockH
+                        ) {
+                            isToolBarsVisible = false
+                            movingBlock = block
+                            break
+                        }
+                    }
+                }
+
+                else -> {}
+            }
+        }
+    */
+    private suspend fun onPointerUpOnBlock(block: CompositeBlockControl, pointerInputChange: PointerInputChange) {
         when (curMode) {
+            CompositeWorkMode.PAN -> {
+                selectedBlock = readBlock(
+                    block.data.copy(
+                        x = 0,
+                        y = 0,
+                        w = getBlockColSum(),
+                        h = getBlockRowSum(),
+                    )
+                )
+            }
+
             CompositeWorkMode.LAYOUT -> {
-                for (block in blocks) {
-                    if (block.isHidden) {
-                        continue
-                    }
-
-                    val blockX = block.x * oneBlockWidth + screenOffsetX
-                    val blockY = block.y * oneBlockHeight + screenOffsetY
-
-                    val blockW = block.w * oneBlockWidth
-                    val blockH = block.h * oneBlockHeight
-
-                    if (mouseX > blockX &&
-                        mouseX < blockX + blockW &&
-                        mouseY > blockY &&
-                        mouseY < blockY + blockH
-                    ) {
-                        isToolBarsVisible = false
-                        movingBlock = block
-                        break
-                    }
-                }
+                movingBlock = block
             }
-
-            else -> {}
         }
+
+        pointerInputChange.consume()
     }
 
-    private fun onDrag(pointerInputChange: PointerInputChange, dx: Float, dy: Float) {
-        when (curMode) {
-            CompositeWorkMode.PAN, CompositeWorkMode.LAYOUT -> {
-                val pixEndX = getBlockColSum() * oneBlockWidth
-                val pixEndY = getBlockRowSum() * oneBlockHeight
+    /*
+        private fun onDragOverComposite(pointerInputChange: PointerInputChange, dx: Float, dy: Float) {
+            when (curMode) {
+                CompositeWorkMode.PAN, CompositeWorkMode.LAYOUT -> {
+                    val pixEndX = getBlockColSum() * getOneBlockWidth()
+                    val pixEndY = getBlockRowSum() * getOneBlockHeight()
 
-                val newOffsetX = screenOffsetX + dx
-                val newOffsetY = screenOffsetY + dy
+                    val newOffsetX = screenOffsetX + dx
+                    val newOffsetY = screenOffsetY + dy
 
-                if (newOffsetX <= 0) {
-                    screenOffsetX = if (newOffsetX >= canvasWidth - pixEndX) {
-                        newOffsetX
+                    if (newOffsetX <= 0) {
+                        screenOffsetX = if (newOffsetX >= canvasWidth - pixEndX) {
+                            newOffsetX
+                        } else {
+                            canvasWidth - pixEndX
+                        }
                     } else {
-                        canvasWidth - pixEndX
+                        screenOffsetX = 0.0f
                     }
-                } else {
-                    screenOffsetX = 0.0f
+
+                    if (newOffsetY <= 0) {
+                        screenOffsetY = if (newOffsetY >= canvasHeight - pixEndY) {
+                            newOffsetY
+                        } else {
+                            canvasHeight - pixEndY
+                        }
+                    } else {
+                        screenOffsetY = 0.0f
+                    }
                 }
 
-                if (newOffsetY <= 0) {
-                    screenOffsetY = if (newOffsetY >= canvasHeight - pixEndY) {
-                        newOffsetY
-                    } else {
-                        canvasHeight - pixEndY
-                    }
-                } else {
-                    screenOffsetY = 0.0f
-                }
+                else -> {}
             }
-
-            else -> {}
         }
-    }
+    */
 
     private fun onBlockMoveLeft(block: CompositeBlockControl) {
         if (block.x > 0) {
@@ -873,6 +797,24 @@ class CompositeControl(
             block.y + block.h
         }
 
+    private fun getOneBlockWidth(): Float {
+        val cols = getBlockColSum()
+        return if (cols == 0) {
+            0.0f
+        } else {
+            canvasWidth / cols
+        }
+    }
+
+    private fun getOneBlockHeight(): Float {
+        val rows = getBlockRowSum()
+        return if (rows == 0) {
+            0.0f
+        } else {
+            canvasHeight / rows
+        }
+    }
+
     private fun changeBlockVisibility(block: CompositeBlockControl) {
         if (block.isHidden) {
             block.x = -(block.x + 1)
@@ -906,7 +848,7 @@ class CompositeControl(
 
     private fun saveLayout() {
         val compositeLayoutDatas = blocks.associate { block ->
-            block.id to CompositeLayoutData(
+            block.data.id to CompositeLayoutData(
                 isHidden = block.isHidden,
                 x = block.x,
                 y = block.y,
@@ -929,3 +871,116 @@ class CompositeControl(
 //        }
     }
 }
+
+//    companion object {
+//        private val SCROLL_BAR_TICKNESS = 16.dp
+//
+//        //--- 350 - узковато - не помещаются некоторые наименования, при этом 6-й столбец на стандартный FullHD уже не помещается;
+//        //--- 400 - ширина достаточна, при этом 5-й столбец на стандартный FullHD помещается не полностью;
+//        //--- 380 == (1920 - 16) / 5 (с учётом вертикального тулбара)
+//        const val BLOCK_MIN_WIDTH: Int = 360
+//
+//        //--- 200 - низковато, соседние заголовки и подписи располагаются слишком близко
+//        const val BLOCK_MIN_HEIGHT: Int = 240
+//    }
+
+//    private var vScrollBarLength: Float by mutableFloatStateOf(0.0f)
+//    private var hScrollBarLength: Float by mutableFloatStateOf(0.0f)
+
+//    @Composable
+//    private fun VerticalScrollBody() {
+//        val density = LocalDensity.current
+//
+//        Canvas(
+//            modifier = Modifier
+//                .width(SCROLL_BAR_TICKNESS)
+//                .fillMaxHeight()
+//                .onSizeChanged { size ->
+//                    vScrollBarLength = size.height.toFloat()
+//                }
+//                .clipToBounds()
+//                .onPointerEvents(
+//                    withInteractive = true,
+//                    onPointerDown = { pointerInputChange -> },
+//                    onPointerUp = { pointerInputChange -> },
+//                    onDragStart = { offset -> },
+//                    onDrag = { pointerInputChange, offset ->
+//                        val pixEndY = getBlockRowSum() * oneBlockHeight
+//                        val incScaleY = pixEndY / vScrollBarLength
+//                        onDrag(pointerInputChange, 0.0f, -offset.y * incScaleY)
+//                    },
+//                    onDragEnd = { },
+//                    onDragCancel = { },
+//                )
+//        ) {
+//            drawRect(
+//                topLeft = Offset(0.0f, 0.0f),
+//                size = Size(with(density) { SCROLL_BAR_TICKNESS.toPx() }, vScrollBarLength),
+//                color = colorScrollBarBack,
+//                style = Fill,
+//            )
+//            val pixEndY = getBlockRowSum() * oneBlockHeight
+//            val decScaleY = min(1.0f, canvasHeight / pixEndY)
+//            val scrollBarH = vScrollBarLength * decScaleY
+//            val scrollBarY = if (canvasHeight >= pixEndY) {
+//                0.0f
+//            } else {
+//                (vScrollBarLength - scrollBarH) * (-screenOffsetY) / (pixEndY - canvasHeight)
+//            }
+//            drawRect(
+//                topLeft = Offset(0.0f, scrollBarY),
+//                size = Size(with(density) { SCROLL_BAR_TICKNESS.toPx() }, scrollBarH),
+//                color = colorScrollBarFore,
+//                style = Fill,
+//            )
+//        }
+//    }
+
+//    @Composable
+//    private fun HorizontalScrollBody() {
+//        val density = LocalDensity.current
+//
+//        Canvas(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(SCROLL_BAR_TICKNESS)
+//                .onSizeChanged { size ->
+//                    hScrollBarLength = size.width.toFloat()
+//                }
+//                .clipToBounds()
+//                .onPointerEvents(
+//                    withInteractive = true,
+//                    onPointerDown = { pointerInputChange -> },
+//                    onPointerUp = { pointerInputChange -> },
+//                    onDragStart = { offset -> },
+//                    onDrag = { pointerInputChange, offset ->
+//                        val pixEndX = getBlockColSum() * oneBlockWidth
+//                        val incScaleX = pixEndX / hScrollBarLength
+//                        onDrag(pointerInputChange, -offset.x * incScaleX, 0.0f)
+//                    },
+//                    onDragEnd = { },
+//                    onDragCancel = { },
+//                )
+//        ) {
+//            drawRect(
+//                topLeft = Offset(0.0f, 0.0f),
+//                size = Size(hScrollBarLength, with(density) { SCROLL_BAR_TICKNESS.toPx() }),
+//                color = colorScrollBarBack,
+//                style = Fill,
+//            )
+//            val pixEndX = getBlockColSum() * oneBlockWidth
+//            val decScaleX = min(1.0f, canvasWidth / pixEndX)
+//            val scrollBarW = hScrollBarLength * decScaleX
+//            val scrollBarX = if (canvasWidth >= pixEndX) {
+//                0.0f
+//            } else {
+//                (hScrollBarLength - scrollBarW) * (-screenOffsetX) / (pixEndX - canvasWidth)
+//            }
+//            drawRect(
+//                topLeft = Offset(scrollBarX, 0.0f),
+//                size = Size(scrollBarW, with(density) { SCROLL_BAR_TICKNESS.toPx() }),
+//                color = colorScrollBarFore,
+//                style = Fill,
+//            )
+//        }
+//    }

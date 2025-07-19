@@ -33,6 +33,9 @@ abstract class AbstractSchemeIndicatorStateService(
         //--- and the edges of the outline can flush against the edges of the window / screen.
         //--- A step of 1 million points allows you to fit up to 2000 circuit elements (2 billion MAX_INTEGER / 1 million = 2000) with sufficient accuracy.
         const val GRID_STEP: Int = 1024 * 1024
+
+        const val SCHEME_WIDTH: Int = 12
+        const val SCHEME_HEIGHT: Int = 8
     }
 
     fun scheme(
@@ -90,7 +93,7 @@ abstract class AbstractSchemeIndicatorStateService(
                 SchemeActionResponse(
                     responseCode = ResponseCode.OK,
                     minCoord = XyPoint(0, 0),
-                    maxCoord = XyPoint(12 * GRID_STEP, 8 * GRID_STEP),
+                    maxCoord = XyPoint(SCHEME_WIDTH * GRID_STEP, SCHEME_HEIGHT * GRID_STEP),
                 )
             }
 

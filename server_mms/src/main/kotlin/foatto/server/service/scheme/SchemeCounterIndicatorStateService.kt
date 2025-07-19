@@ -31,6 +31,8 @@ class SchemeCounterIndicatorStateService(
         private const val TYPE_SCHEME_CI_CUR_VALUE_TEXT: String = "mms_scheme_ci_cur_value_text"
         private const val TYPE_SCHEME_CI_DESCR_TEXT: String = "mms_scheme_ci_descr_text"
 
+        private const val BACK_COLOR = 0xFF_E0_E0_E0.toInt()
+        private const val BORDER_COLOR = 0xFF_D0_D0_D0.toInt()
         private const val TEXT_COLOR = 0xFF_00_00_00.toInt()
     }
 
@@ -92,16 +94,18 @@ class SchemeCounterIndicatorStateService(
 
         XyElement(TYPE_SCHEME_CI_CUR_VALUE_TEXT, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, 6 * GRID_STEP))
+            alPoint = listOf(XyPoint(x0, 5 * GRID_STEP))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
-            text = sensorValue?.let { sv ->
-                getSplittedDouble(sv, 1)
-            } ?: "-"
+            text = " " + (
+                    sensorValue?.let { sv ->
+                        getSplittedDouble(sv, 1)
+                    } ?: "-") +
+                    " "
             textColor = TEXT_COLOR
-            fillColor = null
-            drawColor = null
-            lineWidth = null
+            fillColor = BACK_COLOR
+            drawColor = BORDER_COLOR
+            lineWidth = 1
             fontSize = 24
             isFontBold = true
         }.let { xyElement ->

@@ -404,20 +404,20 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
 
                 if (size > 0) {
-                    alMenu += MenuData("Учёт", null, this)
+                    alMenu += MenuData("Контроль", null, this)
                 }
             }
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
 
                 if (size > 0) {
-                    alMenu += MenuData("Контроль", null, this)
+                    alMenu += MenuData("Учёт", null, this)
                 }
             }
 

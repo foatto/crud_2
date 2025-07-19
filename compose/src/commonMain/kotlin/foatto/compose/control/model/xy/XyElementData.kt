@@ -148,6 +148,7 @@ class XyElementData(
                 return rect.isIntersects(XyRect(x - rx, y - ry, rx * 2, ry * 2))
             }
 
+            XyElementDataType.ICON,
             XyElementDataType.IMAGE,
             XyElementDataType.RECT -> {
                 return rect.isIntersects(XyRect(x, y, width, height))

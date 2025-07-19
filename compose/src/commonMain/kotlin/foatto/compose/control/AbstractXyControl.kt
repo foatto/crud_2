@@ -213,7 +213,7 @@ abstract class AbstractXyControl(
 //                                        onXyMouseOut()
 //                                    }
 
-                            XyElementDataType.IMAGE -> {
+                            XyElementDataType.ICON, XyElementDataType.IMAGE -> {
                                 //--- Сделано через KamelImage в нижележащем слое.
                                 //--- Compose-resource пока не готов нормально грузить карты со внешнего урла.
                                 //element.imageBitmap.value?.let { imageBitmap ->
@@ -343,6 +343,32 @@ abstract class AbstractXyControl(
 
                 //--- for adding specific XY-elements
                 addSpecificXy(this)
+            }
+
+            for (alElement in xyElements) {
+                for (element in alElement) {
+                    if (element.type == XyElementDataType.ICON) {
+                        KamelImage(
+                            modifier = Modifier
+                                .size(
+                                    width = with(density) { element.width.toDp() },
+                                    height = with(density) { element.height.toDp() },
+                                )
+                                .offset(
+                                    x = with(density) { element.x.toDp() },
+                                    y = with(density) { element.y.toDp() },
+                                ),
+                            resource = asyncPainterResource(data = element.url),
+                            contentDescription = null,
+                        )
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
+                    }
+                }
             }
         }
 
@@ -597,7 +623,7 @@ abstract class AbstractXyControl(
 
                 alLayer.add(
                     XyElementData(
-                        type = XyElementDataType.IMAGE,
+                        type = XyElementDataType.ICON,
                         elementId = element.elementId,
                         objectId = element.objectId,
                         x = ((p.x - xyViewCoord.x1) / xyViewCoord.scale - element.calcAnchorXKoef() * element.imageWidth).toInt() * root.scaleKoef,

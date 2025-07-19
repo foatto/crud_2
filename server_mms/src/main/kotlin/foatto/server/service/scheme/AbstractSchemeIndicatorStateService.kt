@@ -126,6 +126,18 @@ abstract class AbstractSchemeIndicatorStateService(
         isEditablePoint = false
     )
 
+    protected fun getIconConfig(name: String, layer: Int) = XyElementConfig(
+        name = name,
+        clientType = XyElementClientType.ICON,
+        layer = layer,
+        scaleMin = MIN_SCALE,
+        scaleMax = MAX_SCALE,
+        descrForAction = "",
+        isRotatable = false,
+        isMoveable = false,
+        isEditablePoint = false
+    )
+
     protected fun getLineConfig(name: String, layer: Int) = XyElementConfig(
         name = name,
         clientType = XyElementClientType.POLY,

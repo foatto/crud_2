@@ -60,8 +60,8 @@ class MMSRoot : Root() {
         settings.putString(SETTINGS_SERVER_ADDRESS, "192.168.0.44")
         settings.putInt(SETTINGS_SERVER_PORT, 19998)
 
-        defaultStartModule = AppModuleMMS.OBJECT
-
+        defaultStartModule = AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD
+        
         addAppModuleUrls()
     }
 

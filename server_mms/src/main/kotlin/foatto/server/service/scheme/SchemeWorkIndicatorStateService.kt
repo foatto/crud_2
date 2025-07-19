@@ -1,6 +1,7 @@
 package foatto.server.service.scheme
 
 import foatto.core.model.model.xy.XyElement
+import foatto.core.model.model.xy.XyElement.Anchor
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.util.getDateTimeDMYHMSString
@@ -26,9 +27,8 @@ class SchemeWorkIndicatorStateService(
 
     companion object {
         private const val TYPE_SCHEME_WI_TITLE_TEXT: String = "type_scheme_wi_title_text"
-
         private const val TYPE_SCHEME_WI_VALUE: String = "type_scheme_wi_value"
-
+        private const val TYPE_SCHEME_WI_ICON: String = "type_scheme_wi_icon"
         private const val TYPE_SCHEME_WI_DESCR_TEXT: String = "type_scheme_wi_descr_text"
 
         private const val INDICATOR_BACK_COLOR_NO_DATA = 0xFF_D0_D0_D0.toInt()
@@ -44,9 +44,8 @@ class SchemeWorkIndicatorStateService(
 
     override fun getElementConfigs(): Map<String, XyElementConfig> = initXyElementConfig(level = 10, minScale = MIN_SCALE, maxScale = MAX_SCALE).apply {
         this[TYPE_SCHEME_WI_TITLE_TEXT] = getTextConfig(TYPE_SCHEME_WI_TITLE_TEXT, 1)
-
         this[TYPE_SCHEME_WI_VALUE] = getArcConfig(TYPE_SCHEME_WI_VALUE, 1)
-
+        this[TYPE_SCHEME_WI_ICON] = getIconConfig(TYPE_SCHEME_WI_ICON, 2)
         this[TYPE_SCHEME_WI_DESCR_TEXT] = getTextConfig(TYPE_SCHEME_WI_DESCR_TEXT, 1)
     }
 
@@ -80,6 +79,7 @@ class SchemeWorkIndicatorStateService(
         }
 
         val x0 = 6 * GRID_STEP
+        val y0 = 4 * GRID_STEP
 
         //--- заголовок
 
@@ -101,7 +101,7 @@ class SchemeWorkIndicatorStateService(
 
         XyElement(TYPE_SCHEME_WI_VALUE, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, 4 * GRID_STEP))
+            alPoint = listOf(XyPoint(x0, y0))
             radius = 2 * GRID_STEP
             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
             startAngle = 180
@@ -121,10 +121,22 @@ class SchemeWorkIndicatorStateService(
             alResult.add(xyElement)
         }
 
+        XyElement(TYPE_SCHEME_WI_ICON, -getRandomInt(), sensorId).apply {
+            isReadOnly = true
+            alPoint = listOf(XyPoint(x0, y0))
+            anchorX = Anchor.CC
+            anchorY = Anchor.CC
+            imageName = "/images/icons8-engine-32.png"
+            imageWidth = 32
+            imageHeight = 32
+        }.let { xyElement ->
+            alResult.add(xyElement)
+        }
+
         sensorTime?.let { lastDataTime ->
             XyElement(TYPE_SCHEME_WI_DESCR_TEXT, -getRandomInt(), sensorId).apply {
                 isReadOnly = true
-                alPoint = listOf(XyPoint(x0, 7 * GRID_STEP))
+                alPoint = listOf(XyPoint(x0, y0 + 3 * GRID_STEP))
                 anchorX = XyElement.Anchor.CC
                 anchorY = XyElement.Anchor.LT
                 text = getDateTimeDMYHMSString(userConfig.timeOffset, lastDataTime)

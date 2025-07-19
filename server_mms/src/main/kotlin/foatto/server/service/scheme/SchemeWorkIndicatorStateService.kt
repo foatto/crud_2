@@ -1,7 +1,6 @@
 package foatto.server.service.scheme
 
 import foatto.core.model.model.xy.XyElement
-import foatto.core.model.model.xy.XyElement.Anchor
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.util.getDateTimeDMYHMSString
@@ -31,12 +30,12 @@ class SchemeWorkIndicatorStateService(
         private const val TYPE_SCHEME_WI_ICON: String = "type_scheme_wi_icon"
         private const val TYPE_SCHEME_WI_DESCR_TEXT: String = "type_scheme_wi_descr_text"
 
-        private const val INDICATOR_BACK_COLOR_NO_DATA = 0xFF_D0_D0_D0.toInt()
-        private const val INDICATOR_BACK_COLOR_OFF = 0xFF_FF_E0_E0.toInt()
+        private const val INDICATOR_BACK_COLOR_NO_DATA = 0xFF_FF_E0_E0.toInt()
+        private const val INDICATOR_BACK_COLOR_OFF = 0xFF_D0_D0_D0.toInt()
         private const val INDICATOR_BACK_COLOR_ON = 0xFF_E0_FF_E0.toInt()
 
-        private const val INDICATOR_BORDER_COLOR_NO_DATA = 0xFF_A0_A0_A0.toInt()
-        private const val INDICATOR_BORDER_COLOR_OFF = 0xFF_FF_00_00.toInt()
+        private const val INDICATOR_BORDER_COLOR_NO_DATA = 0xFF_FF_00_00.toInt()
+        private const val INDICATOR_BORDER_COLOR_OFF = 0xFF_A0_A0_A0.toInt()
         private const val INDICATOR_BORDER_COLOR_ON = 0xFF_00_B0_00.toInt()
 
         private const val TEXT_COLOR = 0xFF_00_00_00.toInt()
@@ -49,7 +48,7 @@ class SchemeWorkIndicatorStateService(
         this[TYPE_SCHEME_WI_DESCR_TEXT] = getTextConfig(TYPE_SCHEME_WI_DESCR_TEXT, 1)
     }
 
-    override fun getElements(userConfig: ServerUserConfig, sensorId: Int): List<XyElement> {
+    override fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement> {
         val alResult = mutableListOf<XyElement>()
 
         val sensorEntity = sensorRepository.findByIdOrNull(sensorId) ?: return emptyList()
@@ -93,7 +92,14 @@ class SchemeWorkIndicatorStateService(
             fillColor = null
             drawColor = null
             lineWidth = null
-            fontSize = 12
+            fontSize = when {
+                scale <= 12_000 -> 18
+                scale <= 24_000 -> 14
+                scale <= 36_000 -> 12
+                scale <= 48_000 -> 11
+                scale <= 60_000 -> 10
+                else -> 9
+            }
             isFontBold = true
         }.let { xyElement ->
             alResult.add(xyElement)
@@ -121,14 +127,22 @@ class SchemeWorkIndicatorStateService(
             alResult.add(xyElement)
         }
 
+        val iconSize = when {
+            scale <= 12_000 -> 96
+            scale <= 24_000 -> 64
+            scale <= 36_000 -> 64
+            scale <= 48_000 -> 32
+            scale <= 60_000 -> 32
+            else -> 32
+        }
         XyElement(TYPE_SCHEME_WI_ICON, -getRandomInt(), sensorId).apply {
             isReadOnly = true
             alPoint = listOf(XyPoint(x0, y0))
-            anchorX = Anchor.CC
-            anchorY = Anchor.CC
-            imageName = "/images/icons8-engine-32.png"
-            imageWidth = 32
-            imageHeight = 32
+            anchorX = XyElement.Anchor.CC
+            anchorY = XyElement.Anchor.CC
+            imageName = "/images/icons8-engine-$iconSize.png"
+            imageWidth = iconSize
+            imageHeight = iconSize
         }.let { xyElement ->
             alResult.add(xyElement)
         }
@@ -144,7 +158,14 @@ class SchemeWorkIndicatorStateService(
                 fillColor = null
                 drawColor = null
                 lineWidth = null
-                fontSize = 12
+                fontSize = when {
+                    scale <= 12_000 -> 18
+                    scale <= 24_000 -> 14
+                    scale <= 36_000 -> 12
+                    scale <= 48_000 -> 11
+                    scale <= 60_000 -> 10
+                    else -> 9
+                }
                 isFontBold = false
             }.let { xyElement ->
                 alResult.add(xyElement)

@@ -156,7 +156,8 @@ class SchemeControl(
             SchemeActionRequest(
                 action = schemeAction.copy(
                     type = ActionType.GET_COORDS
-                )
+                ),
+                viewSize = xyCanvasWidth / root.scaleKoef to xyCanvasHeight / root.scaleKoef,
             )
         ) { schemeActionResponse: SchemeActionResponse ->
 
@@ -250,7 +251,10 @@ class SchemeControl(
             root.setWait(true)
         }
         invokeRequest(
-            SchemeActionRequest(action = schemeAction.copy(type = ActionType.GET_ELEMENTS))
+            SchemeActionRequest(
+                action = schemeAction.copy(type = ActionType.GET_ELEMENTS),
+                viewSize = xyCanvasWidth / root.scaleKoef to xyCanvasHeight / root.scaleKoef,
+            )
         ) { schemeActionResponse: SchemeActionResponse ->
 
             //--- сбрасываем горизонтальный и вертикальный скроллинг/смещение

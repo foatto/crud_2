@@ -32,8 +32,13 @@ class SchemeCounterIndicatorStateService(
         private const val TYPE_SCHEME_CI_DESCR_TEXT: String = "mms_scheme_ci_descr_text"
 
         private const val BACK_COLOR = 0xFF_E0_E0_E0.toInt()
+        private const val NO_DATA_BACK_COLOR = 0xFF_FF_E0_E0.toInt()
+
         private const val BORDER_COLOR = 0xFF_D0_D0_D0.toInt()
+        private const val NO_DATA_BORDER_COLOR = 0xFF_FF_D0_D0.toInt()
+
         private const val TEXT_COLOR = 0xFF_00_00_00.toInt()
+        private const val NO_DATA_TEXT_COLOR = 0xFF_FF_00_00.toInt()
     }
 
     override fun getElementConfigs(): Map<String, XyElementConfig> = initXyElementConfig(level = 10, minScale = MIN_SCALE, maxScale = MAX_SCALE).apply {
@@ -43,7 +48,7 @@ class SchemeCounterIndicatorStateService(
         this[TYPE_SCHEME_CI_DESCR_TEXT] = getTextConfig(TYPE_SCHEME_CI_DESCR_TEXT, 1)
     }
 
-    override fun getElements(userConfig: ServerUserConfig, sensorId: Int): List<XyElement> {
+    override fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement> {
         val alResult = mutableListOf<XyElement>()
 
         val sensorEntity = sensorRepository.findByIdOrNull(sensorId) ?: return emptyList()
@@ -86,7 +91,14 @@ class SchemeCounterIndicatorStateService(
             fillColor = null
             drawColor = null
             lineWidth = null
-            fontSize = 12
+            fontSize = when {
+                scale <= 12_000 -> 18
+                scale <= 24_000 -> 14
+                scale <= 36_000 -> 12
+                scale <= 48_000 -> 11
+                scale <= 60_000 -> 10
+                else -> 9
+            }
             isFontBold = true
         }.let { xyElement ->
             alResult.add(xyElement)
@@ -102,11 +114,18 @@ class SchemeCounterIndicatorStateService(
                         getSplittedDouble(sv, 1)
                     } ?: "-") +
                     " "
-            textColor = TEXT_COLOR
-            fillColor = BACK_COLOR
-            drawColor = BORDER_COLOR
+            textColor = sensorValue?.let { TEXT_COLOR } ?: NO_DATA_TEXT_COLOR
+            fillColor = sensorValue?.let { BACK_COLOR } ?: NO_DATA_BACK_COLOR
+            drawColor = sensorValue?.let { BORDER_COLOR } ?: NO_DATA_BORDER_COLOR
             lineWidth = 1
-            fontSize = 24
+            fontSize = when {
+                scale <= 12_000 -> 60
+                scale <= 24_000 -> 40
+                scale <= 36_000 -> 28
+                scale <= 48_000 -> 22
+                scale <= 60_000 -> 18
+                else -> 12
+            }
             isFontBold = true
         }.let { xyElement ->
             alResult.add(xyElement)
@@ -123,7 +142,14 @@ class SchemeCounterIndicatorStateService(
                 fillColor = null
                 drawColor = null
                 lineWidth = null
-                fontSize = 12
+                fontSize = when {
+                    scale <= 12_000 -> 18
+                    scale <= 24_000 -> 14
+                    scale <= 36_000 -> 12
+                    scale <= 48_000 -> 11
+                    scale <= 60_000 -> 10
+                    else -> 9
+                }
                 isFontBold = false
             }.let { xyElement ->
                 alResult.add(xyElement)

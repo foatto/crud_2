@@ -45,7 +45,7 @@ class SchemeAnalogueIndicatorStateService(
         private const val TYPE_SCHEME_AI_CUR_VALUE_TEXT: String = "mms_scheme_ai_cur_value_text"
         private const val TYPE_SCHEME_AI_DESCR_TEXT: String = "mms_scheme_ai_descr_text"
 
-        private const val INDICATOR_BACK_COLOR_OFF = 0xFF_D0_D0_D0.toInt()
+        private const val INDICATOR_BACK_COLOR_OFF = 0xFF_FF_E0_E0.toInt()
         private const val INDICATOR_BACK_COLOR_NEUTRAL = 0xFF_F0_F0_F0.toInt()
         private const val INDICATOR_BACK_COLOR_NORMAL = 0xFF_E0_FF_E0.toInt()
         private const val INDICATOR_BACK_COLOR_CRITICAL = 0xFF_FF_E0_E0.toInt()
@@ -77,7 +77,7 @@ class SchemeAnalogueIndicatorStateService(
         this[TYPE_SCHEME_AI_DESCR_TEXT] = getTextConfig(TYPE_SCHEME_AI_DESCR_TEXT, 1)
     }
 
-    override fun getElements(userConfig: ServerUserConfig, sensorId: Int): List<XyElement> {
+    override fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement> {
         val alResult = mutableListOf<XyElement>()
 
         val sensorEntity = sensorRepository.findByIdOrNull(sensorId) ?: return emptyList()
@@ -177,7 +177,14 @@ class SchemeAnalogueIndicatorStateService(
             fillColor = null
             drawColor = null
             lineWidth = null
-            fontSize = 12
+            fontSize = when {
+                scale <= 12_000 -> 18
+                scale <= 24_000 -> 14
+                scale <= 36_000 -> 12
+                scale <= 48_000 -> 11
+                scale <= 60_000 -> 10
+                else -> 9
+            }
             isFontBold = true
         }.let { xyElement ->
             alResult.add(xyElement)
@@ -278,7 +285,14 @@ class SchemeAnalogueIndicatorStateService(
                             fillColor = null
                             drawColor = null
                             lineWidth = null
-                            fontSize = 12
+                            fontSize = when {
+                                scale <= 12_000 -> 24
+                                scale <= 24_000 -> 18
+                                scale <= 36_000 -> 12
+                                scale <= 48_000 -> 11
+                                scale <= 60_000 -> 10
+                                else -> 9
+                            }
                             isFontBold = true
                         }.let { xyElement ->
                             alResult.add(xyElement)
@@ -318,7 +332,15 @@ class SchemeAnalogueIndicatorStateService(
                 fillColor = null
                 drawColor = null
                 lineWidth = null
-                fontSize = 24
+                //--- на несколько размеров меньше, чем показатель текущего значения
+                fontSize = when {
+                    scale <= 12_000 -> 32
+                    scale <= 24_000 -> 26
+                    scale <= 36_000 -> 20
+                    scale <= 48_000 -> 16
+                    scale <= 60_000 -> 12
+                    else -> 10
+                }
                 isFontBold = false
             }.let { xyElement ->
                 alResult.add(xyElement)
@@ -386,7 +408,14 @@ class SchemeAnalogueIndicatorStateService(
             fillColor = null
             drawColor = null
             lineWidth = null
-            fontSize = 24
+            fontSize = when {
+                scale <= 12_000 -> 40
+                scale <= 24_000 -> 32
+                scale <= 36_000 -> 24
+                scale <= 48_000 -> 20
+                scale <= 60_000 -> 16
+                else -> 12
+            }
             isFontBold = true
         }.let { xyElement ->
             alResult.add(xyElement)
@@ -403,7 +432,14 @@ class SchemeAnalogueIndicatorStateService(
                 fillColor = null
                 drawColor = null
                 lineWidth = null
-                fontSize = 12
+                fontSize = when {
+                    scale <= 12_000 -> 18
+                    scale <= 24_000 -> 14
+                    scale <= 36_000 -> 12
+                    scale <= 48_000 -> 11
+                    scale <= 60_000 -> 10
+                    else -> 9
+                }
                 isFontBold = false
             }.let { xyElement ->
                 alResult.add(xyElement)

@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class SchemeActionRequest(
     val action: AppAction,
+    val viewSize: Pair<Float, Float>,
 
 //    //--- GET_ELEMENTS, GET_ONE_ELEMENT
 //    val viewCoord: XyViewCoord? = null,

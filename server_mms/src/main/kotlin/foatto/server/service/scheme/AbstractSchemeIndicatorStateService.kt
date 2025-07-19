@@ -19,6 +19,7 @@ import foatto.server.checkAccessPermission
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
 import org.springframework.data.repository.findByIdOrNull
+import kotlin.math.max
 
 abstract class AbstractSchemeIndicatorStateService(
     private val objectRepository: ObjectRepository,
@@ -81,6 +82,7 @@ abstract class AbstractSchemeIndicatorStateService(
 
     fun schemeAction(schemeActionRequest: SchemeActionRequest): SchemeActionResponse {
         val actionModule = schemeActionRequest.action.module
+        val (viewWidth, viewHeight) = schemeActionRequest.viewSize
 
         val sessionData = SpringApp.getSessionData(schemeActionRequest.sessionId) ?: return SchemeActionResponse(ResponseCode.LOGON_NEED)
         val userConfig = sessionData.serverUserConfig ?: return SchemeActionResponse(ResponseCode.LOGON_NEED)
@@ -100,7 +102,11 @@ abstract class AbstractSchemeIndicatorStateService(
             ActionType.GET_ELEMENTS -> {
                 SchemeActionResponse(
                     responseCode = ResponseCode.OK,
-                    elements = getElements(userConfig, schemeActionRequest.action.id!!),
+                    elements = getElements(
+                        userConfig = userConfig,
+                        sensorId = schemeActionRequest.action.id!!,
+                        scale = max(SCHEME_WIDTH * GRID_STEP / viewWidth, SCHEME_HEIGHT * GRID_STEP / viewHeight),
+                    ),
                 )
             }
 
@@ -112,7 +118,7 @@ abstract class AbstractSchemeIndicatorStateService(
         }
     }
 
-    protected abstract fun getElements(userConfig: ServerUserConfig, sensorId: Int): List<XyElement>
+    protected abstract fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement>
 
     protected fun getArcConfig(name: String, layer: Int) = XyElementConfig(
         name = name,

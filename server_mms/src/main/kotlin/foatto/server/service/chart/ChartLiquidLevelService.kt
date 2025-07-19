@@ -30,15 +30,8 @@ class ChartLiquidLevelService(
 //        isGeoSensorShowed = false
 //        isCommonTroubleShowed = false
 
-        val (begTime, endTime) = chartActionRequest.times ?: run {
-            AdvancedLogger.error("ChartLiquidLevelService: chartActionRequest.times not defined")
-            val defaultEndTime = getCurrentTimeInt()
-            defaultEndTime - 86_400 to defaultEndTime
-        }
-        val (viewWidth, viewHeight) = chartActionRequest.viewSize ?: run {
-            AdvancedLogger.error("ChartLiquidLevelService: chartActionRequest.viewSize not defined")
-            3840.0f to 2160.0f
-        }
+        val (begTime, endTime) = chartActionRequest.times
+        val (viewWidth, viewHeight) = chartActionRequest.viewSize
 
         val tmElement = sortedMapOf<String, ChartData>()
         val tmElementVisibleConfig = sortedMapOf<String, Triple<String, String, Boolean>>()

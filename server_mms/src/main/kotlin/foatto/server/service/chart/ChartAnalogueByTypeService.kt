@@ -30,15 +30,9 @@ class ChartAnalogueByTypeService(
 //        isGeoSensorShowed = false
 //        isCommonTroubleShowed = false
 
-        val (begTime, endTime) = chartActionRequest.times ?: run {
-            AdvancedLogger.error("ChartAnalogueByTypeService: chartActionRequest.times not defined")
-            val defaultEndTime = getCurrentTimeInt()
-            defaultEndTime - 86_400 to defaultEndTime
-        }
-        val (viewWidth, viewHeight) = chartActionRequest.viewSize ?: run {
-            AdvancedLogger.error("ChartAnalogueByTypeService: chartActionRequest.viewSize not defined")
-            3840.0f to 2160.0f
-        }
+        val (begTime, endTime) = chartActionRequest.times
+        val (viewWidth, viewHeight) = chartActionRequest.viewSize
+
         //!!! где-то здесь надо получить конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
 
         val tmElement = sortedMapOf<String, ChartData>()

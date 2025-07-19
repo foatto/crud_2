@@ -123,13 +123,13 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                 AND se.sensorType IN ?3
                 AND (
                        se.endTime IS NULL
-                    OR ?2 IS NULL
-                    OR ?2 <= se.endTime
+                    OR ?4 IS NULL
+                    OR ?4 <= se.endTime
                 )
                 AND (
                        se.begTime IS NULL
-                    OR ?3 IS NULL 
-                    OR ?3 >= se.begTime
+                    OR ?5 IS NULL 
+                    OR ?5 >= se.begTime
                 )
         """
     )

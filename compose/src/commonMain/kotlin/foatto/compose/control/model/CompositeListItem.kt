@@ -7,6 +7,8 @@ class CompositeListItem(
     val text: String,
     val itemId: Int,
     val itemModule: String,
+    val itemStatus: Boolean,
     val subListDatas: List<CompositeListItem>? = null,
-    var isExpanded: MutableState<Boolean> = mutableStateOf(false),
-)
+) {
+    var isExpanded: MutableState<Boolean> = mutableStateOf(false)
+}

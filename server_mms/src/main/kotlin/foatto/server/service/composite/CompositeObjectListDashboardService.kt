@@ -3,6 +3,7 @@ package foatto.server.service.composite
 import foatto.core.ActionType
 import foatto.core.model.AppAction
 import foatto.core.model.response.composite.CompositeListItemData
+import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
 import foatto.server.SpringApp
 import foatto.server.entity.DeviceEntity
@@ -32,6 +33,10 @@ class CompositeObjectListDashboardService(
     schemeCounterIndicatorStateService = schemeCounterIndicatorStateService,
     schemeWorkIndicatorStateService = schemeWorkIndicatorStateService,
 ) {
+
+    companion object {
+        private val MIN_LAST_SESSION_PERIOD_DIFF = 3600
+    }
 
     override fun getCompositeResponseAction(action: AppAction): AppAction =
         action.copy(
@@ -68,6 +73,7 @@ class CompositeObjectListDashboardService(
                     text = deviceEntity.name ?: deviceEntity.serialNo ?: deviceEntity.index?.toString() ?: "(без наименования, серийного номера и индекса)",
                     itemId = deviceEntity.id,
                     itemModule = AppModuleMMS.DEVICE,
+                    itemStatus = (getCurrentTimeInt() - (deviceEntity.lastSessionTime ?: 0)) < MIN_LAST_SESSION_PERIOD_DIFF,
                 )
             }
 
@@ -78,6 +84,7 @@ class CompositeObjectListDashboardService(
                 text = objectEntity.name ?: "(без наименования)",
                 itemId = objectEntity.id,
                 itemModule = AppModuleMMS.OBJECT,
+                itemStatus = true,
                 subListDatas = if (deviceList.isEmpty()) {
                     null
                 } else {

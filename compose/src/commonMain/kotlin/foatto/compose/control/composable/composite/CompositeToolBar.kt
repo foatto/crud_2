@@ -30,10 +30,9 @@ internal fun CompositeToolBar(
     isWideScreen: Boolean,
     isPanButtonEnabled: Boolean,
     isLayoutButtonEnabled: Boolean,
-    isBlocksVisibilityButtonVisible: Boolean,
+    isLayoutButtonsVisible: Boolean,
     isShowBlocksList: Boolean,
     blocks: SnapshotStateList<CompositeBlockControl>,
-    isLayoutSaveButtonVisible: Boolean,
     isRefreshButtonsVisible: Boolean,
     refreshInterval: Int,
     setMode: (compositeWorkMode: CompositeWorkMode) -> Unit,
@@ -41,6 +40,7 @@ internal fun CompositeToolBar(
     doCloseBlocksList: () -> Unit,
     onBlocksListClick: (block: CompositeBlockControl) -> Unit,
     saveLayout: () -> Unit,
+    removeLayout: () -> Unit,
     setInterval: (interval: Int) -> Unit,
 ) {
     /*
@@ -87,7 +87,7 @@ internal fun CompositeToolBar(
         ToolBarBlock {
         }
         ToolBarBlock {
-            if (isBlocksVisibilityButtonVisible) {
+            if (isLayoutButtonsVisible) {
                 ToolBarIconButton(
                     isEnabled = refreshInterval == 0,
                     name = "/images/ic_visibility_${getStyleToolbarIconNameSuffix()}.png",
@@ -136,12 +136,18 @@ internal fun CompositeToolBar(
                     }
                 }
             }
-            if (isLayoutSaveButtonVisible) {
+            if (isLayoutButtonsVisible) {
                 ToolBarIconButton(
                     isEnabled = refreshInterval == 0,
                     name = "/images/ic_save_${getStyleToolbarIconNameSuffix()}.png",
                 ) {
                     saveLayout()
+                }
+                ToolBarIconButton(
+                    isEnabled = refreshInterval == 0,
+                    name = "/images/ic_delete_forever_${getStyleToolbarIconNameSuffix()}.png",
+                ) {
+                    removeLayout()
                 }
             }
         }

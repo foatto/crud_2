@@ -31,6 +31,7 @@ import foatto.server.service.scheme.AbstractSchemeIndicatorStateService
 import foatto.server.service.scheme.SchemeAnalogueIndicatorStateService
 import foatto.server.service.scheme.SchemeCounterIndicatorStateService
 import foatto.server.service.scheme.SchemeWorkIndicatorStateService
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.springframework.data.repository.findByIdOrNull
 import kotlin.math.ceil
@@ -110,7 +111,11 @@ abstract class AbstractCompositeDashboardService(
 
         val layoutSaveKey = action.parentModule + action.id
         val compositeLayoutDatas = userConfig.userProperties[layoutSaveKey]?.let { propertyValue ->
-            Json.decodeFromString<Map<Int, CompositeLayoutData>>(propertyValue)
+            try {
+                Json.decodeFromString<Map<Int, CompositeLayoutData>>(propertyValue)
+            } catch(iae: IllegalArgumentException) {
+                null
+            }
         }
 
         val caption = moduleConfig.caption

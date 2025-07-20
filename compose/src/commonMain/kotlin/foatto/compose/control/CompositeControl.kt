@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -33,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -82,9 +85,8 @@ class CompositeControl(
     private var isPanButtonEnabled by mutableStateOf(false)
     private var isLayoutButtonEnabled by mutableStateOf(true)
 
-    private var isBlocksVisibilityButtonVisible by mutableStateOf(false)
+    private var isLayoutButtonsVisible by mutableStateOf(false)
     private var isShowBlocksList by mutableStateOf(false)
-    private var isLayoutSaveButtonVisible by mutableStateOf(false)
 
     private var isRefreshButtonsVisible by mutableStateOf(true)
     private var refreshInterval: Int by mutableIntStateOf(0)
@@ -138,10 +140,9 @@ class CompositeControl(
                         isWideScreen = root.isWideScreen,
                         isPanButtonEnabled = isPanButtonEnabled,
                         isLayoutButtonEnabled = isLayoutButtonEnabled,
-                        isBlocksVisibilityButtonVisible = isBlocksVisibilityButtonVisible,
+                        isLayoutButtonsVisible = isLayoutButtonsVisible,
                         isShowBlocksList = isShowBlocksList,
                         blocks = blocks,
-                        isLayoutSaveButtonVisible = isLayoutSaveButtonVisible,
                         isRefreshButtonsVisible = isRefreshButtonsVisible,
                         refreshInterval = refreshInterval,
                         setMode = { compositeWorkMode: CompositeWorkMode -> setMode(compositeWorkMode) },
@@ -151,6 +152,7 @@ class CompositeControl(
                             changeBlockVisibility(block)
                         },
                         saveLayout = { saveLayout() },
+                        removeLayout = { removeLayout() },
                         setInterval = { interval: Int -> coroutineScope.launch { setInterval(interval) } },
                     )
 
@@ -369,7 +371,27 @@ class CompositeControl(
                             } else {
                                 FontWeight.Normal
                             },
+                            color = if (item.itemStatus) { Color.Black } else { Color.Red },
                         )
+                    },
+                    trailingIcon = if (level == 0) {
+                        null
+                    } else {
+                        {
+                            Icon(
+                                imageVector = if (item.itemStatus) {
+                                    Icons.Default.Check
+                                } else {
+                                    Icons.Default.Warning
+                                },
+                                tint = if (item.itemStatus) {
+                                    Color.Black
+                                } else {
+                                    Color.Red
+                                },
+                                contentDescription = null,
+                            )
+                        }
                     },
                     contentPadding = PaddingValues(start = getMenuPadding(level), end = 16.dp),
                     onClick = {
@@ -395,7 +417,31 @@ class CompositeControl(
                             } else {
                                 FontWeight.Normal
                             },
+                            color = if (item.itemStatus) {
+                                Color.Black
+                            } else {
+                                Color.Red
+                            },
                         )
+                    },
+                    trailingIcon = if (level == 0) {
+                        null
+                    } else {
+                        {
+                            Icon(
+                                imageVector = if (item.itemStatus) {
+                                    Icons.Default.Check
+                                } else {
+                                    Icons.Default.Warning
+                                },
+                                tint = if (item.itemStatus) {
+                                    Color.Black
+                                } else {
+                                    Color.Red
+                                },
+                                contentDescription = null,
+                            )
+                        }
                     },
                     contentPadding = PaddingValues(start = getMenuPadding(level), end = 16.dp),
                     onClick = {
@@ -484,6 +530,7 @@ class CompositeControl(
         text = compositeListItemData.text,
         itemId = compositeListItemData.itemId,
         itemModule = compositeListItemData.itemModule,
+        itemStatus = compositeListItemData.itemStatus,
         subListDatas = compositeListItemData.subListDatas?.map { subListData ->
             mapListItems(subListData)
         },
@@ -588,28 +635,23 @@ class CompositeControl(
 
             CompositeWorkMode.LAYOUT -> {
                 isLayoutButtonEnabled = true
-
-                isBlocksVisibilityButtonVisible = false
-                isLayoutSaveButtonVisible = false
+                isLayoutButtonsVisible = false
             }
         }
 
         when (newMode) {
             CompositeWorkMode.PAN -> {
                 isPanButtonEnabled = false
-
                 isRefreshButtonsVisible = true
             }
 
             CompositeWorkMode.LAYOUT -> {
                 isLayoutButtonEnabled = false
-
-                isBlocksVisibilityButtonVisible = true
-                isLayoutSaveButtonVisible = true
-
+                isLayoutButtonsVisible = true
                 isRefreshButtonsVisible = false
             }
         }
+
         //--- при любом переключении режима выключаем любые активные элементы
         selectedBlock = null
         movingBlock = null
@@ -864,12 +906,28 @@ class CompositeControl(
                     value = Json.encodeToString(compositeLayoutDatas),
                 )
             ) { _: SaveUserPropertyResponse ->
-                root.showAlert("Сохранено")
+                root.showAlert("Ручное расположение блоков сохранено.")
             }
         }
 //            root.appUserConfig.userProperties[propertyName] = propertyValue
 //        }
     }
+
+    private fun removeLayout() {
+        layoutSaveKey?.let { saveKey ->
+            invokeRequest(
+                SaveUserPropertyRequest(
+                    name = saveKey,
+                    value = "",
+                )
+            ) { _: SaveUserPropertyResponse ->
+                root.showAlert("Ручное расположение блоков очищено.")
+            }
+        }
+//            root.appUserConfig.userProperties[propertyName] = propertyValue
+//        }
+    }
+
 }
 
 //    companion object {

@@ -593,7 +593,6 @@ class TableControl(
                                 val rowHeightSum = rowHeights.values.sum()
                                 val incScaleY = max(1.0f, rowHeightSum / vScrollBarLength)
                                 verticalScrollState.scrollBy(dy * incScaleY)
-                                //verticalScrollState.scrollTo((verticalScrollState.value + dy * incScaleY).toInt())
                             }
                         }
                     },

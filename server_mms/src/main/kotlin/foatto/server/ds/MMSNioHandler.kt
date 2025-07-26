@@ -54,6 +54,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    //--- для Galileo-приборов
     protected fun loadDeviceConfig(conn: CoreAdvancedConnection): Boolean {
         DeviceConfig.getDeviceConfig(conn, serialNo)?.let { dc ->
             deviceConfig = dc
@@ -91,6 +92,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
         }
     }
 
+    //--- для Galileo-приборов
     private fun loadSensorConfigs(conn: CoreAdvancedConnection, dc: DeviceConfig) {
         sensorConfigs.clear()
 
@@ -99,14 +101,10 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 SELECT port_num , id , sensor_type , beg_time , end_time ,  
                     min_moving_time , min_parking_time , min_over_speed_time , is_absolute_run , speed_round_rule , run_koef ,
                         is_use_pos , is_use_speed , is_use_run ,
-                    bound_value , active_value , beg_work_value ,
-                    min_on_time , min_off_time ,
+                    active_value , bound_value , idle_border , limit_border , min_on_time , min_off_time ,
                     smooth_time , ignore_min_sensor , ignore_max_sensor , liquid_name , liquid_norm ,
                     analog_min_view , analog_max_view , analog_min_limit , analog_max_limit ,  
-                    is_absolute_count , energo_phase , in_out_type ,
-                    container_type , analog_using_min_len , analog_is_using_calc ,
-                    analog_detect_inc , analog_detect_inc_min_diff , analog_detect_inc_min_len , analog_inc_add_time_before , analog_inc_add_time_after ,
-                    analog_detect_dec , analog_detect_dec_min_diff , analog_detect_dec_min_len , analog_dec_add_time_before , analog_dec_add_time_after                            
+                    is_absolute_count , energo_phase , in_out_type , container_type                            
                 FROM MMS_sensor
                 WHERE id <> 0 
                 AND object_id = ${dc.objectId}                         
@@ -119,6 +117,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
             val sensorEntities = sensorConfigs.getOrPut(portNum) {
                 mutableListOf()
             }
+            //--- для Galileo-приборов
             sensorEntities += SensorEntity(
                 id = rs.getInt(pos++),
                 obj = null,
@@ -130,7 +129,6 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 begTime = rs.getInt(pos++),
                 endTime = rs.getInt(pos++),
                 serialNo = null,
-                usingStartDate = null,
 
                 minMovingTime = rs.getInt(pos++),
                 minParkingTime = rs.getInt(pos++),
@@ -142,15 +140,10 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 isUseSpeed = rs.getInt(pos++) != 0,
                 isUseRun = rs.getInt(pos++) != 0,
 
-                boundValue = rs.getInt(pos++),
-                activeValue = rs.getInt(pos++),
-                begWorkValue = rs.getDouble(pos++),
-
-                cmdOnId = null,
-                cmdOffId = null,
-                signalOn = null,
-                signalOff = null,
-
+                isAboveBorder = rs.getInt(pos++) != 0,
+                onOffBorder = rs.getDouble(pos++),
+                idleBorder = rs.getDouble(pos++),
+                limitBorder = rs.getDouble(pos++),
                 minOnTime = rs.getInt(pos++),
                 minOffTime = rs.getInt(pos++),
 
@@ -170,26 +163,10 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 isAbsoluteCount = rs.getInt(pos++) != 0,
                 phase = rs.getInt(pos++),
                 inOutType = rs.getInt(pos++),
-
                 containerType = rs.getInt(pos++),
-                usingMinLen = rs.getInt(pos++),
-                isUsingCalc = rs.getInt(pos++) != 0,
-
-                detectIncMinDiff = rs.getDouble(pos++),
-                detectIncKoef = rs.getDouble(pos++),
-                detectIncMinLen = rs.getInt(pos++),
-                incAddTimeBefore = rs.getInt(pos++),
-                incAddTimeAfter = rs.getInt(pos++),
-
-                detectDecKoef = rs.getDouble(pos++),
-                detectDecMinDiff = rs.getDouble(pos++),
-                detectDecMinLen = rs.getInt(pos++),
-                decAddTimeBefore = rs.getInt(pos++),
-                decAddTimeAfter = rs.getInt(pos++),
 
                 schemeX = null,
                 schemeY = null,
-                smoothMethod = null,
             )
         }
         rs.close()

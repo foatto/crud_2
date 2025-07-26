@@ -22,7 +22,6 @@ import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
-import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getRandomInt
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
@@ -31,7 +30,6 @@ import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
-import foatto.server.entity.DateEntity
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.model.AppModuleConfig
@@ -46,8 +44,6 @@ import foatto.server.repository.SensorRepository
 import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toInstant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
@@ -76,7 +72,6 @@ class SensorService(
         private const val FIELD_BEG_TIME = "begTime"
         private const val FIELD_END_TIME = "endTime"
         private const val FIELD_SERIAL_NO = "serialNo"
-        private const val FIELD_USING_START_DATE = "usingStartDate"
 
         private const val FIELD_MIN_MOVING_TIME = "minMovingTime"
         private const val FIELD_MIN_PARKING_TIME = "minParkingTime"
@@ -88,14 +83,10 @@ class SensorService(
         private const val FIELD_IS_USE_SPEED = "isUseSpeed"
         private const val FIELD_IS_USE_RUN = "isUseRun"
 
-        private const val FIELD_BOUND_VALUE = "boundValue"
-        private const val FIELD_ACTIVE_VALUE = "activeValue"
-        private const val FIELD_BEG_WORK_VALUE = "begWorkValue"
-
-        //        private const val FIELD_CMD_ON_ID = "cmdOnId"
-//        private const val FIELD_CMD_OFF_ID = "cmdOffId"
-//        private const val FIELD_SIGNAL_ON = "signalOn"
-//        private const val FIELD_SIGNAL_OFF = "signalOff"
+        private const val FIELD_IS_ABOVE_BORDER = "isAboveBorder"
+        private const val FIELD_ON_OFF_BORDER = "onOffBorder"
+        private const val FIELD_IDLE_BORDER = "idleBorder"
+        private const val FIELD_LIMIT_BORDER = "limitBorder"
         private const val FIELD_MIN_ON_TIME = "minOnTime"
         private const val FIELD_MIN_OFF_TIME = "minOffTime"
 
@@ -116,20 +107,8 @@ class SensorService(
         private const val FIELD_IS_ABSOLUTE_COUNT = "isAbsoluteCount"
         private const val FIELD_PHASE = "phase"
         private const val FIELD_IN_OUT_TYPE = "inOutType"
-
         private const val FIELD_CONTAINER_TYPE = "containerType"
-        private const val FIELD_USING_MIN_LEN = "usingMinLen"
-        private const val FIELD_IS_USING_CALC = "isUsingCalc"
-        private const val FIELD_DETECT_INC_KOEF = "detectIncKoef"
-        private const val FIELD_DETECT_INC_MIN_DIFF = "detectIncMinDiff"
-        private const val FIELD_DETECT_INC_MIN_LEN = "detectIncMinLen"
-        private const val FIELD_INC_ADD_TIME_BEFORE = "incAddTimeBefore"
-        private const val FIELD_INC_ADD_TIME_AFTER = "incAddTimeAfter"
-        private const val FIELD_DETECT_DEC_KOEF = "detectDecKoef"
-        private const val FIELD_DETECT_DEC_MIN_DIFF = "detectDecMinDiff"
-        private const val FIELD_DETECT_DEC_MIN_LEN = "detectDecMinLen"
-        private const val FIELD_DEC_ADD_TIME_BEFORE = "decAddTimeBefore"
-        private const val FIELD_DEC_ADD_TIME_AFTER = "decAddTimeAfter"
+
         private const val FIELD_SCHEME_X = "schemeX"
         private const val FIELD_SCHEME_Y = "schemeY"
 
@@ -273,10 +252,9 @@ class SensorService(
         alColumnInfo += FIELD_DESCR to "Описание"
         alColumnInfo += FIELD_PORT_NUM to "Номер входа"
         alColumnInfo += FIELD_SENSOR_TYPE to "Тип датчика"
-        alColumnInfo += FIELD_BEG_TIME to "Дата/время начала использования"
-        alColumnInfo += FIELD_END_TIME to "Дата/время окончания использования"
+        alColumnInfo += FIELD_BEG_TIME to "Дата/время начала эксплуатации"
+        alColumnInfo += FIELD_END_TIME to "Дата/время окончания эксплуатации"
         alColumnInfo += FIELD_SERIAL_NO to "Серийный номер"
-        alColumnInfo += FIELD_USING_START_DATE to "Дата начала эксплуатации"
 
         return getTableColumnCaptionActions(
             action = action,
@@ -329,7 +307,7 @@ class SensorService(
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col,
-                    colSpan = 6,
+                    colSpan = 6,    // сколько должно быть?
                     dataRow = row,
                     name = groupName,
                     backColorType = TableCellBackColorType.GROUP_0,
@@ -364,12 +342,6 @@ class SensorService(
                 name = sensorEntity.endTime?.let { endTime -> getDateTimeDMYHMSString(zoneLocal, endTime)} ?: "-",
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.serialNo ?: "-")
-            tableCells += TableSimpleCell(
-                row = row,
-                col = col++,
-                dataRow = row,
-                name = getDateEntityDMYString(sensorEntity.usingStartDate),
-            )
 
             val formOpenAction = AppAction(
                 type = ActionType.MODULE_FORM,
@@ -576,7 +548,7 @@ class SensorService(
         */
         formCells += FormDateTimeCell(
             name = FIELD_BEG_TIME,
-            caption = "Дата/время начала использования",
+            caption = "Дата/время начала эксплуатации",
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
             value = if (id == 0) {
@@ -587,7 +559,7 @@ class SensorService(
         )
         formCells += FormDateTimeCell(
             name = FIELD_END_TIME,
-            caption = "Дата/время окончания использования",
+            caption = "Дата/время окончания эксплуатации",
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
             value = sensorEntity?.endTime,
@@ -599,16 +571,6 @@ class SensorService(
 //            formPinMode = FormPinMode.OFF
 //            isEditable = !isEquip
             value = sensorEntity?.serialNo ?: "",
-        )
-        formCells += FormDateTimeCell(
-            name = FIELD_USING_START_DATE,
-            caption = "Дата начала эксплуатации",
-            isEditable = changeEnabled,
-//            isEditable = !isEquip
-            mode = FormDateTimeCellMode.DMY,
-            value = sensorEntity?.usingStartDate?.let { dt ->
-                LocalDateTime(dt.ye ?: 2000, dt.mo ?: 1, dt.da ?: 1, 0, 0, 0).toInstant(getTimeZone(userConfig.timeOffset)).epochSeconds.toInt()
-            },
         )
 
         //--- geo-sensors (coordinates, speed and mileage) ----------------------------------------------------------------------------------------
@@ -722,27 +684,11 @@ class SensorService(
 
         //--- discrete sensors: equipment operating time; -----------------------------------------------------------------------------
 
-        formCells += FormSimpleCell(
-            name = FIELD_BOUND_VALUE,
-            caption = "Граничное значение",
+        formCells += FormBooleanCell(
+            name = FIELD_IS_ABOVE_BORDER,
+            caption = "Рабочее состояние выше граничного",
             isEditable = changeEnabled,
-            value = sensorEntity?.boundValue?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = workSensorType,
-            ),
-        )
-        formCells += FormComboCell(
-            name = FIELD_ACTIVE_VALUE,
-            caption = "Рабочее состояние",
-            isEditable = changeEnabled,
-            value = sensorEntity?.activeValue?.toString() ?: "1",
-            values = listOf(
-                "0" to "если < граничного значения",
-                "1" to "если > граничного значения",
-            ),
-            asRadioButtons = true,
+            value = sensorEntity?.isAboveBorder ?: true,
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -750,26 +696,38 @@ class SensorService(
             ),
         )
         formCells += FormSimpleCell(
-            name = FIELD_BEG_WORK_VALUE,
-            caption = "",   // isEquip = "Наработка на момент установки датчика [мото-час]",
+            name = FIELD_ON_OFF_BORDER,
+            caption = "Граница включения",
             isEditable = changeEnabled,
-            value = sensorEntity?.begWorkValue?.toString() ?: "0.0",
+            value = sensorEntity?.onOffBorder?.toString() ?: "",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
                 values = workSensorType,
             ),
         )
-
-        //--- command and signals -----------------------------------------------------------------------------
-
-//    val cmdOnId: Int?,
-//    val cmdOffId: Int?,
-//    val signalOn: String?,
-//    val signalOff: String?,
-
-        //--- discrete and counter sensors: equipment operating time; -----------------------------------------------------------------------------
-
+        formCells += FormSimpleCell(
+            name = FIELD_IDLE_BORDER,
+            caption = "Граница холостого хода",
+            isEditable = changeEnabled,
+            value = sensorEntity?.idleBorder?.toString() ?: "",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = workSensorType,
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_LIMIT_BORDER,
+            caption = "Граница перегрузки",
+            isEditable = changeEnabled,
+            value = sensorEntity?.limitBorder?.toString() ?: "",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = workSensorType,
+            ),
+        )
         formCells += FormSimpleCell(
             name = FIELD_MIN_ON_TIME,
             caption = "Минимальное время работы [сек]",
@@ -778,7 +736,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = workSensorType + counterAndSummarySensorTypes,
+                values = workSensorType,
             ),
         )
         formCells += FormSimpleCell(
@@ -789,7 +747,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = workSensorType + counterAndSummarySensorTypes,
+                values = workSensorType,
             ),
         )
 
@@ -1030,140 +988,6 @@ class SensorService(
                 values = liquidLevelSensorType,
             ),
         )
-        formCells += FormSimpleCell(
-            name = FIELD_USING_MIN_LEN,
-            caption = "Минимальная продолжительность расхода [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.usingMinLen?.toString() ?: "1",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_IS_USING_CALC,
-            caption = "Использовать расчётный расход за время заправки/слива",
-            isEditable = changeEnabled,
-            value = sensorEntity?.isUsingCalc ?: false,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-
-        formCells += FormSimpleCell(
-            name = FIELD_DETECT_INC_KOEF,
-            caption = "Детектор заправки [л/час]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.detectIncKoef?.toString() ?: "1.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_DETECT_INC_MIN_DIFF,
-            caption = "Минимальный объём заправки",
-            isEditable = changeEnabled,
-            value = sensorEntity?.detectIncMinDiff?.toString() ?: "0.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_DETECT_INC_MIN_LEN,
-            caption = "Минимальная продолжительность заправки [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.detectIncMinLen?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_INC_ADD_TIME_BEFORE,
-            caption = "Добавить время к началу заправки [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.incAddTimeBefore?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_INC_ADD_TIME_AFTER,
-            caption = "Добавить время к концу заправки [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.incAddTimeAfter?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-
-        formCells += FormSimpleCell(
-            name = FIELD_DETECT_DEC_KOEF,
-            caption = "Детектор слива [л/час]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.detectDecKoef?.toString() ?: "1.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_DETECT_DEC_MIN_DIFF,
-            caption = "Минимальный объём слива",
-            isEditable = changeEnabled,
-            value = sensorEntity?.detectDecMinDiff?.toString() ?: "0.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_DETECT_DEC_MIN_LEN,
-            caption = "Минимальная продолжительность слива [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.detectDecMinLen?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_DEC_ADD_TIME_BEFORE,
-            caption = "Добавить время к началу слива [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.decAddTimeBefore?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_DEC_ADD_TIME_AFTER,
-            caption = "Добавить время к концу слива [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.decAddTimeAfter?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = liquidLevelSensorType,
-            ),
-        )
 
         formCells += FormSimpleCell(
             name = FIELD_SCHEME_X,
@@ -1219,8 +1043,6 @@ class SensorService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to "Номер входа должен быть в диапазоне от 0 до 65535"))
         }
 
-        val usingStartDate = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_USING_START_DATE]?.dateTimeValue ?: 0)
-
         val recordId = id ?: getNextId { nextId -> sensorRepository.existsById(nextId) }
         val sensorEntity = SensorEntity(
             id = recordId,
@@ -1233,11 +1055,6 @@ class SensorService(
             begTime = formActionData[FIELD_BEG_TIME]?.dateTimeValue,
             endTime = formActionData[FIELD_END_TIME]?.dateTimeValue,
             serialNo = formActionData[FIELD_SERIAL_NO]?.stringValue ?: "",
-            usingStartDate = DateEntity(
-                ye = usingStartDate[0],
-                mo = usingStartDate[1],
-                da = usingStartDate[2],
-            ),
             minMovingTime = formActionData[FIELD_MIN_MOVING_TIME]?.stringValue?.toIntOrNull() ?: 1,
             minParkingTime = formActionData[FIELD_MIN_PARKING_TIME]?.stringValue?.toIntOrNull() ?: 300,
             minOverSpeedTime = formActionData[FIELD_MIN_OVER_SPEED_TIME]?.stringValue?.toIntOrNull() ?: 60,
@@ -1247,9 +1064,10 @@ class SensorService(
             isUsePos = formActionData[FIELD_IS_USE_POS]?.booleanValue ?: true,
             isUseSpeed = formActionData[FIELD_IS_USE_SPEED]?.booleanValue ?: true,
             isUseRun = formActionData[FIELD_IS_USE_RUN]?.booleanValue ?: true,
-            boundValue = formActionData[FIELD_BOUND_VALUE]?.stringValue?.toIntOrNull() ?: 0,
-            activeValue = formActionData[FIELD_ACTIVE_VALUE]?.stringValue?.toIntOrNull() ?: 1,
-            begWorkValue = formActionData[FIELD_BEG_WORK_VALUE]?.stringValue?.toDoubleOrNull() ?: 0.0,
+            isAboveBorder = formActionData[FIELD_IS_ABOVE_BORDER]?.booleanValue ?: true,
+            onOffBorder = formActionData[FIELD_ON_OFF_BORDER]?.stringValue?.toDoubleOrNull(),
+            idleBorder = formActionData[FIELD_IDLE_BORDER]?.stringValue?.toDoubleOrNull(),
+            limitBorder = formActionData[FIELD_LIMIT_BORDER]?.stringValue?.toDoubleOrNull(),
             minOnTime = formActionData[FIELD_MIN_ON_TIME]?.stringValue?.toIntOrNull() ?: 1,
             minOffTime = formActionData[FIELD_MIN_OFF_TIME]?.stringValue?.toIntOrNull() ?: 1,
             smoothTime = formActionData[FIELD_SMOOTH_TIME]?.stringValue?.toIntOrNull() ?: 0,
@@ -1267,26 +1085,8 @@ class SensorService(
             phase = formActionData[FIELD_PHASE]?.stringValue?.toIntOrNull() ?: 0,
             inOutType = formActionData[FIELD_IN_OUT_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigCounter.CALC_TYPE_OUT,
             containerType = formActionData[FIELD_CONTAINER_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
-            usingMinLen = formActionData[FIELD_USING_MIN_LEN]?.stringValue?.toIntOrNull() ?: 1,
-            isUsingCalc = formActionData[FIELD_IS_USING_CALC]?.booleanValue ?: false,
-            detectIncKoef = formActionData[FIELD_DETECT_INC_KOEF]?.stringValue?.toDoubleOrNull() ?: 1.0,
-            detectIncMinDiff = formActionData[FIELD_DETECT_INC_MIN_DIFF]?.stringValue?.toDoubleOrNull() ?: 0.0,
-            detectIncMinLen = formActionData[FIELD_DETECT_INC_MIN_LEN]?.stringValue?.toIntOrNull() ?: 0,
-            incAddTimeBefore = formActionData[FIELD_INC_ADD_TIME_BEFORE]?.stringValue?.toIntOrNull() ?: 0,
-            incAddTimeAfter = formActionData[FIELD_INC_ADD_TIME_AFTER]?.stringValue?.toIntOrNull() ?: 0,
-            detectDecKoef = formActionData[FIELD_DETECT_DEC_KOEF]?.stringValue?.toDoubleOrNull() ?: 1.0,
-            detectDecMinDiff = formActionData[FIELD_DETECT_DEC_MIN_DIFF]?.stringValue?.toDoubleOrNull() ?: 0.0,
-            detectDecMinLen = formActionData[FIELD_DETECT_DEC_MIN_LEN]?.stringValue?.toIntOrNull() ?: 0,
-            decAddTimeBefore = formActionData[FIELD_DEC_ADD_TIME_BEFORE]?.stringValue?.toIntOrNull() ?: 0,
-            decAddTimeAfter = formActionData[FIELD_DEC_ADD_TIME_AFTER]?.stringValue?.toIntOrNull() ?: 0,
             schemeX = formActionData[FIELD_SCHEME_X]?.stringValue?.toIntOrNull() ?: 0,
             schemeY = formActionData[FIELD_SCHEME_Y]?.stringValue?.toIntOrNull() ?: 0,
-            //!!! для совместимости со старой версией
-            cmdOnId = 0,
-            cmdOffId = 0,
-            signalOn = "",
-            signalOff = "",
-            smoothMethod = 0,
         )
         sensorRepository.saveAndFlush(sensorEntity)
 

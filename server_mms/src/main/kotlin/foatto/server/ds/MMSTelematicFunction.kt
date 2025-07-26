@@ -589,12 +589,13 @@ object MMSTelematicFunction {
             return
         }
 
-        val workValue: Boolean = sensorEntity.boundValue?.let { boundValue ->
-            sensorEntity.activeValue?.let { activeValue ->
-                if (activeValue != 0) {
-                    sensorValue > boundValue
+        val borderValue = sensorEntity.idleBorder ?: sensorEntity.onOffBorder
+        val workValue: Boolean = borderValue?.let {
+            sensorEntity.isAboveBorder?.let { isAboveBorder ->
+                if (isAboveBorder) {
+                    sensorValue > borderValue
                 } else {
-                    sensorValue < boundValue
+                    sensorValue < borderValue
                 }
             } ?: false
         } ?: false

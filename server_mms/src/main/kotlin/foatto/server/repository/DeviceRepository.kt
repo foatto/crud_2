@@ -26,6 +26,16 @@ interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
             SELECT de
             FROM DeviceEntity de
             LEFT JOIN de.obj oe
+            WHERE oe = ?1
+        """
+    )
+    fun findByObject(objectEntity: ObjectEntity): List<DeviceEntity>
+
+    @Query(
+        """
+            SELECT de
+            FROM DeviceEntity de
+            LEFT JOIN de.obj oe
             WHERE de.id <> 0
                 AND de.userId IN ?1
                 AND (

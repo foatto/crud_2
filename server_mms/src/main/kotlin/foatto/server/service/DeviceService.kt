@@ -898,8 +898,8 @@ class DeviceService(
             phase = phase,
             inOutType = SensorConfigCounter.CALC_TYPE_OUT,
             containerType = SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
-            schemeX = 0,
-            schemeY = 0,
+            schemeX = null,
+            schemeY = null,
         )
         sensorRepository.save(sensorEntity)
         SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)

@@ -20,7 +20,7 @@ class DeviceEntity(
     @Column(name = "serial_no")
     val serialNo: String?,
 
-    val name: String?,
+    var name: String?,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "object_id")

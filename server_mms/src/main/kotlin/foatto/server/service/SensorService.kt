@@ -307,7 +307,7 @@ class SensorService(
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col,
-                    colSpan = 6,    // сколько должно быть?
+                    colSpan = 7,
                     dataRow = row,
                     name = groupName,
                     backColorType = TableCellBackColorType.GROUP_0,
@@ -1085,8 +1085,8 @@ class SensorService(
             phase = formActionData[FIELD_PHASE]?.stringValue?.toIntOrNull() ?: 0,
             inOutType = formActionData[FIELD_IN_OUT_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigCounter.CALC_TYPE_OUT,
             containerType = formActionData[FIELD_CONTAINER_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
-            schemeX = formActionData[FIELD_SCHEME_X]?.stringValue?.toIntOrNull() ?: 0,
-            schemeY = formActionData[FIELD_SCHEME_Y]?.stringValue?.toIntOrNull() ?: 0,
+            schemeX = formActionData[FIELD_SCHEME_X]?.stringValue?.toIntOrNull(),
+            schemeY = formActionData[FIELD_SCHEME_Y]?.stringValue?.toIntOrNull(),
         )
         sensorRepository.saveAndFlush(sensorEntity)
 

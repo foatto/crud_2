@@ -1,6 +1,9 @@
 package foatto.server.controller
 
+import foatto.server.ds.PulsarConfig
+import foatto.server.ds.PulsarConfigResult
 import foatto.server.ds.PulsarData
+import foatto.server.service.MMSPulsarConfigService
 import foatto.server.service.MMSPulsarDataService
 import foatto.server.util.AdvancedLogger
 import jakarta.servlet.http.HttpServletRequest
@@ -11,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class MMSPulsarDataController(
+class MMSPulsarController(
     private val mmsPulsarDataService: MMSPulsarDataService,
+    private val mmsPulsarConfigService: MMSPulsarConfigService,
 ) {
     //--- /{fileName} - на время Юриной отладки
     @PostMapping(value = ["/data/pulsar/{fileName}"])
@@ -37,9 +41,20 @@ class MMSPulsarDataController(
             subDir = arrData.firstOrNull()?.deviceID ?: "0"
         )
 
-        mmsPulsarDataService.getPulsarData(
+        mmsPulsarDataService.storePulsarData(
             request = request,
             arrData = arrData,
+        )
+    }
+
+    @PostMapping(value = ["/config/pulsar"])
+    @Transactional
+    fun getPulsarConfig(
+        @RequestBody
+        pulsarConfig: PulsarConfig,
+    ): PulsarConfigResult {
+        return mmsPulsarConfigService.storePulsarConfig(
+            pulsarConfig = pulsarConfig,
         )
     }
 

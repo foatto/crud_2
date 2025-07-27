@@ -14,6 +14,7 @@ import foatto.server.repository.UserRepository
 import jakarta.persistence.EntityManager
 import kotlinx.datetime.Instant
 import org.springframework.stereotype.Service
+import kotlin.math.max
 import kotlin.math.min
 
 @Service
@@ -70,15 +71,23 @@ class APIService(
                     SELECT ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3
                     FROM MMS_agg_${sensorEntity.id}
                 """ + (
-                    begTime?.let {
-                        """
-                            WHERE ontime_0 BETWEEN $begTime AND $endTime
-                            ORDER BY ontime_0 ASC
-                        """
-                    } ?: """
-                            WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} )
-                         """
-                    )
+                        begTime?.let {
+                            if (sensorEntity.sensorType == SensorConfig.SENSOR_WORK) {
+                                """ 
+                                    WHERE ontime_0 <= $endTime
+                                      AND ontime_1 >= $begTime
+                                    ORDER BY ontime_0 ASC
+                                """
+                            } else {
+                                """ 
+                                    WHERE ontime_0 BETWEEN $begTime AND $endTime
+                                    ORDER BY ontime_0 ASC
+                                """
+                            }
+                        } ?: """
+                                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} )
+                             """
+                        )
             ) { rs ->
                 while (rs.next()) {
                     var pos = 1
@@ -105,8 +114,18 @@ class APIService(
 
                         SensorConfig.SENSOR_WORK -> {
                             data += mapOf(
-                                "begTime" to Instant.fromEpochSeconds(ontime0.toLong()).toString(),
-                                "endTime" to Instant.fromEpochSeconds(ontime1.toLong()).toString(),
+                                "begTime" to Instant.fromEpochSeconds(
+                                    (
+                                            begTime?.let {
+                                                max(begTime, ontime0)
+                                            } ?: ontime0
+                                            ).toLong()).toString(),
+                                "endTime" to Instant.fromEpochSeconds(
+                                    (
+                                            endTime?.let {
+                                                min(endTime, ontime1)
+                                            } ?: ontime1
+                                            ).toLong()).toString(),
                                 "state" to type0.toString(),
                             )
                         }

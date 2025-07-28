@@ -110,6 +110,7 @@ class MMSPulsarConfigService(
                 begTime = getCurrentTimeInt(),
                 endTime = null,
                 serialNo = null,
+
                 minMovingTime = 1,
                 minParkingTime = 300,
                 minOverSpeedTime = 60,
@@ -119,27 +120,36 @@ class MMSPulsarConfigService(
                 isUsePos = true,
                 isUseSpeed = true,
                 isUseRun = true,
+
+                minIgnore = sensor.minIgnore,
+                maxIgnore = sensor.maxIgnore,
+                dim = sensor.dim,
+
                 isAboveBorder = sensor.isAboveBorder,
                 onOffBorder = sensor.onOffBorder,
                 idleBorder = sensor.idleBorder,
                 limitBorder = sensor.limitBorder,
                 minOnTime = sensor.minOnTime,
                 minOffTime = sensor.minOffTime,
-                smoothTime = sensor.smoothTime,
-                minIgnore = sensor.minIgnore,
-                maxIgnore = sensor.maxIgnore,
-                liquidName = sensor.liquidName,
-                liquidNorm = sensor.liquidNorm,
+
                 minView = sensor.minView,
                 maxView = sensor.maxView,
                 minLimit = sensor.minLimit,
                 maxLimit = sensor.maxLimit,
+                smoothTime = sensor.smoothTime,
                 indicatorDelimiterCount = 4,
                 indicatorMultiplicator = 1.0,
+
                 isAbsoluteCount = sensor.isAbsoluteCount,
-                phase = sensor.phase,
                 inOutType = sensor.inOutType,
+
                 containerType = sensor.containerType,
+
+                phase = sensor.phase,
+
+                liquidName = sensor.liquidName,
+                liquidNorm = sensor.liquidNorm,
+
                 schemeX = null,
                 schemeY = null,
             )

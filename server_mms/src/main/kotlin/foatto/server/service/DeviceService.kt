@@ -868,6 +868,7 @@ class DeviceService(
             begTime = getCurrentTimeInt(),
             endTime = null,
             serialNo = null,
+
             minMovingTime = 1,
             minParkingTime = 300,
             minOverSpeedTime = 60,
@@ -877,27 +878,36 @@ class DeviceService(
             isUsePos = true,
             isUseSpeed = true,
             isUseRun = true,
+
+            minIgnore = 0.0,
+            maxIgnore = 1_000_000_000.0,
+            dim = null,
+
             isAboveBorder = true,
             onOffBorder = null,
             idleBorder = null,
             limitBorder = null,
             minOnTime = 1,
             minOffTime = 1,
-            smoothTime = 0,
-            minIgnore = 0.0,
-            maxIgnore = 0.0,
-            liquidName = "",
-            liquidNorm = 0.0,
+
             minView = minView,
             maxView = maxView,
             minLimit = minLimit,
             maxLimit = maxLimit,
+            smoothTime = 0,
             indicatorDelimiterCount = indicatorDelimiterCount,
             indicatorMultiplicator = indicatorMultiplicator,
+
             isAbsoluteCount = true,
-            phase = phase,
             inOutType = SensorConfigCounter.CALC_TYPE_OUT,
+
             containerType = SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
+
+            phase = phase,
+
+            liquidName = null,
+            liquidNorm = null,
+
             schemeX = null,
             schemeY = null,
         )

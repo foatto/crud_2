@@ -68,6 +68,16 @@ class SensorEntity(
     @Column(name = "is_use_run")
     val isUseRun: Boolean?,
 
+    //--- for all sensor tpes (exclude geo-sensor)
+
+    @Column(name = "ignore_min_sensor")
+    val minIgnore: Double?,
+
+    @Column(name = "ignore_max_sensor")
+    val maxIgnore: Double?,
+
+    val dim: String?,
+
     //--- equipment working sensors
 
     @Convert(converter = BooleanToIntConverter::class)
@@ -89,23 +99,6 @@ class SensorEntity(
     @Column(name = "min_off_time")
     val minOffTime: Int?,
 
-    //--- base sensor attributes
-
-    @Column(name = "smooth_time")
-    val smoothTime: Int?,
-
-    @Column(name = "ignore_min_sensor")
-    val minIgnore: Double?,
-
-    @Column(name = "ignore_max_sensor")
-    val maxIgnore: Double?,
-
-    @Column(name = "liquid_name")
-    val liquidName: String?,
-
-    @Column(name = "liquid_norm")
-    val liquidNorm: Double?,
-
     //--- analogue sensor attributes
 
     @Column(name = "analog_min_view")
@@ -120,6 +113,9 @@ class SensorEntity(
     @Column(name = "analog_max_limit")
     val maxLimit: Double?,
 
+    @Column(name = "smooth_time")
+    val smoothTime: Int?,
+
     @Column(name = "analog_indicator_delimiter_count")
     val indicatorDelimiterCount: Int?,
 
@@ -132,13 +128,6 @@ class SensorEntity(
     @Column(name = "is_absolute_count")
     val isAbsoluteCount: Boolean?,
 
-    //--- energo sensor attributes
-
-    @Column(name = "energo_phase")
-    val phase: Int?,
-
-    //--- for counter and mass/volume accumulated sensors
-
     @Column(name = "in_out_type")
     val inOutType: Int?,
 
@@ -146,6 +135,19 @@ class SensorEntity(
 
     @Column(name = "container_type")
     val containerType: Int?,
+
+    //--- energo sensor attributes
+
+    @Column(name = "energo_phase")
+    val phase: Int?,
+
+    //--- base sensor attributes
+
+    @Column(name = "liquid_name")
+    val liquidName: String?,
+
+    @Column(name = "liquid_norm")
+    val liquidNorm: Double?,
 
     @Column(name = "scheme_x")
     val schemeX: Int?,

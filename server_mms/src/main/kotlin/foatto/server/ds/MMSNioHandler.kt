@@ -55,15 +55,14 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     //--- для Galileo-приборов
-    protected fun loadDeviceConfig(conn: CoreAdvancedConnection): Boolean {
+    protected fun loadDeviceConfig(conn: CoreAdvancedConnection): DeviceConfig? =
         DeviceConfig.getDeviceConfig(conn, serialNo)?.let { dc ->
-            deviceConfig = dc
             status += " ID 2;"
 
             if (dc.objectId != 0) {
                 loadSensorConfigs(conn, dc)
             }
-            return true
+            dc
         } ?: run {
             //--- неизвестный контроллер
             MMSTelematicFunction.writeError(
@@ -88,9 +87,8 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 address = (selectionKey!!.channel() as SocketChannel).remoteAddress.toString() + " -> " + (selectionKey!!.channel() as SocketChannel).localAddress.toString(),
                 errorText = "Unknown device ID = $serialNo",
             )
-            return false
+            null
         }
-    }
 
     //--- для Galileo-приборов
     private fun loadSensorConfigs(conn: CoreAdvancedConnection, dc: DeviceConfig) {
@@ -99,12 +97,16 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
         var rs = conn.executeQuery(
             """
                 SELECT port_num , id , sensor_type , beg_time , end_time ,  
-                    min_moving_time , min_parking_time , min_over_speed_time , is_absolute_run , speed_round_rule , run_koef ,
+                    min_moving_time , min_parking_time , min_over_speed_time , 
+                        is_absolute_run , speed_round_rule , run_koef ,
                         is_use_pos , is_use_speed , is_use_run ,
+                    ignore_min_sensor , ignore_max_sensor , dim ,
                     active_value , bound_value , idle_border , limit_border , min_on_time , min_off_time ,
-                    smooth_time , ignore_min_sensor , ignore_max_sensor , liquid_name , liquid_norm ,
-                    analog_min_view , analog_max_view , analog_min_limit , analog_max_limit ,  
-                    is_absolute_count , energo_phase , in_out_type , container_type                            
+                    analog_min_view , analog_max_view , analog_min_limit , analog_max_limit , smooth_time ,   
+                    is_absolute_count , in_out_type ,  
+                    container_type ,
+                    energo_phase ,                             
+                    liquid_name , liquid_norm
                 FROM MMS_sensor
                 WHERE id <> 0 
                 AND object_id = ${dc.objectId}                         
@@ -140,6 +142,10 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 isUseSpeed = rs.getInt(pos++) != 0,
                 isUseRun = rs.getInt(pos++) != 0,
 
+                minIgnore = rs.getDouble(pos++),
+                maxIgnore = rs.getDouble(pos++),
+                dim = rs.getString(pos++),
+
                 isAboveBorder = rs.getInt(pos++) != 0,
                 onOffBorder = rs.getDouble(pos++),
                 idleBorder = rs.getDouble(pos++),
@@ -147,23 +153,23 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 minOnTime = rs.getInt(pos++),
                 minOffTime = rs.getInt(pos++),
 
-                smoothTime = rs.getInt(pos++),
-                minIgnore = rs.getDouble(pos++),
-                maxIgnore = rs.getDouble(pos++),
-                liquidName = rs.getString(pos++),
-                liquidNorm = rs.getDouble(pos++),
-
                 minView = rs.getDouble(pos++),
                 maxView = rs.getDouble(pos++),
                 minLimit = rs.getDouble(pos++),
                 maxLimit = rs.getDouble(pos++),
+                smoothTime = rs.getInt(pos++),
                 indicatorDelimiterCount = null,
                 indicatorMultiplicator = null,
 
                 isAbsoluteCount = rs.getInt(pos++) != 0,
-                phase = rs.getInt(pos++),
                 inOutType = rs.getInt(pos++),
+
                 containerType = rs.getInt(pos++),
+
+                phase = rs.getInt(pos++),
+
+                liquidName = rs.getString(pos++),
+                liquidNorm = rs.getDouble(pos++),
 
                 schemeX = null,
                 schemeY = null,
@@ -207,89 +213,3 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
         }
 
 }
-
-/*
-    object_id           INT,    -- объект
-    name                VARCHAR( 250 ), -- невидимое имя датчика, для опознавания генератором датчиков при заливке измерений
-    group_name          VARCHAR( 250 ), -- видимое описание группы датчиков для логической связки разнотипных датчиков в пределах одного графика/отчёта
-    descr               VARCHAR( 250 ), -- видимое описание датчика наладчиком или генератором датчиков при заливке измерений
-    serial_no           VARCHAR( 250 ), -- серийный номер
-    beg_ye              INT,    -- дата ввода в эксплуатацию
-    beg_mo              INT,
-    beg_da              INT,
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "object_id")
-    var obj: ObjectEntity?,
-
-    val name: String?,       // inner/system sensor name for programmatically sensors adding
-
-    @Column(name = "group_name")
-    val group: String?,      // sensor group name for sensors logical linking and/or grouping
-
-    val descr: String?,      // sensor visible description
-
-    @Column(name = "serial_no")
-    val serialNo: String?,
-
-    @AttributeOverrides(
-        AttributeOverride(name = "ye", column = Column(name = "beg_ye")),
-        AttributeOverride(name = "mo", column = Column(name = "beg_mo")),
-        AttributeOverride(name = "da", column = Column(name = "beg_da")),
-    )
-    @Embedded
-    val usingStartDate: DateEntity?,
-
-
-    cmd_on_id           INT,    -- команда на включение
-    cmd_off_id          INT,    -- команда на отключение
-    signal_on           VARCHAR( 250 ), -- сигналы, разрешающие включение
-    signal_off          VARCHAR( 250 ), -- сигналы, разрешающие отключение
-
-    @Column(name = "cmd_on_id")
-    val cmdOnId: Int?,
-
-    @Column(name = "cmd_off_id")
-    val cmdOffId: Int?,
-
-    @Column(name = "signal_on")
-    val signalOn: String?,
-
-    @Column(name = "signal_off")
-    val signalOff: String?,
-
-
-    analog_indicator_delimiter_count    INT,    -- кол-во делений на шкале индикатора
-    analog_indicator_multiplicator      FLOAT8, -- множитель значений на шкале индикатора
-
-    @Column(name = "analog_indicator_delimiter_count")
-    val indicatorDelimiterCount: Int?,
-
-    @Column(name = "analog_indicator_multiplicator")
-    val indicatorMultiplicator: Double?,
-
-
-    scheme_x            INT,
-    scheme_y            INT,
-
-    @Column(name = "scheme_x")
-    val schemeX: Int?,
-
-    @Column(name = "scheme_y")
-    val schemeY: Int?,
-
-
-    container_type              INT NOT NULL DEFAULT(1),    -- тип ёмкости
-    analog_using_min_len        INT,    -- минимальная продолжительность расхода
-    analog_is_using_calc        INT,    -- использовать ли расчётный расход топлива за период заправок/сливов
-    analog_detect_inc           FLOAT8,  -- скорость увеличения уровня (топлива) для детектора заправки
-    analog_detect_inc_min_diff  FLOAT8,  -- минимально учитываемый объём заправки
-    analog_detect_inc_min_len   INT,    -- минимально учитываемая продолжительность заправки
-    analog_inc_add_time_before  INT,    -- добавить время до заправки
-    analog_inc_add_time_after   INT,    -- добавить время после заправки
-    analog_detect_dec           FLOAT8,  -- скорость уменьшения уровня (топлива) для детектора слива
-    analog_detect_dec_min_diff  FLOAT8,  -- минимально учитываемый объём слива
-    analog_detect_dec_min_len   INT,    -- минимально учитываемая продолжительность слива
-    analog_dec_add_time_before  INT,    -- добавить время до заправки
-    analog_dec_add_time_after   INT,    -- добавить время после заправки
-*/

@@ -201,9 +201,7 @@ class GalileoHandler : MMSNioHandler() {
                     serialNo = imei.substring(imei.length - 7).toIntOrNull().toString()
                     AdvancedLogger.debug("serialNo = $serialNo")
 
-                    if (!loadDeviceConfig(dataWorker.conn)) {
-                        return false
-                    }
+                    deviceConfig = loadDeviceConfig(dataWorker.conn) ?: return false
                 }
 
                 //--- нужен только для отправки команды терминалу, обычно он одинаков у всех приборов

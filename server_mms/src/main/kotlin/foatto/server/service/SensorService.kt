@@ -83,6 +83,10 @@ class SensorService(
         private const val FIELD_IS_USE_SPEED = "isUseSpeed"
         private const val FIELD_IS_USE_RUN = "isUseRun"
 
+        private const val FIELD_MIN_IGNORE = "minIgnore"
+        private const val FIELD_MAX_IGNORE = "maxIgnore"
+        private const val FIELD_DIM = "dim"
+
         private const val FIELD_IS_ABOVE_BORDER = "isAboveBorder"
         private const val FIELD_ON_OFF_BORDER = "onOffBorder"
         private const val FIELD_IDLE_BORDER = "idleBorder"
@@ -90,24 +94,22 @@ class SensorService(
         private const val FIELD_MIN_ON_TIME = "minOnTime"
         private const val FIELD_MIN_OFF_TIME = "minOffTime"
 
-        private const val FIELD_SMOOTH_TIME = "smoothTime"
-        private const val FIELD_MIN_IGNORE = "minIgnore"
-        private const val FIELD_MAX_IGNORE = "maxIgnore"
-        private const val FIELD_LIQUID_NAME = "liquidName"
-        private const val FIELD_LIQUID_NORM = "liquidNorm"
-
         private const val FIELD_MIN_VIEW = "minView"
         private const val FIELD_MAX_VIEW = "maxView"
         private const val FIELD_MIN_LIMIT = "minLimit"
         private const val FIELD_MAX_LIMIT = "maxLimit"
-
+        private const val FIELD_SMOOTH_TIME = "smoothTime"
         private const val FIELD_INDICATOR_DELIMITER_COUNT = "indicatorDelimiterCount"
         private const val FIELD_INDICATOR_MILTIPLICATOR = "indicatorMultiplicator"
 
         private const val FIELD_IS_ABSOLUTE_COUNT = "isAbsoluteCount"
-        private const val FIELD_PHASE = "phase"
         private const val FIELD_IN_OUT_TYPE = "inOutType"
+
         private const val FIELD_CONTAINER_TYPE = "containerType"
+        private const val FIELD_PHASE = "phase"
+
+        private const val FIELD_LIQUID_NAME = "liquidName"
+        private const val FIELD_LIQUID_NORM = "liquidNorm"
 
         private const val FIELD_SCHEME_X = "schemeX"
         private const val FIELD_SCHEME_Y = "schemeY"
@@ -446,6 +448,7 @@ class SensorService(
 
         val geoSensorType = setOf(SensorConfig.SENSOR_GEO).map { it.toString() }.toSet()
         val workSensorType = setOf(SensorConfig.SENSOR_WORK).map { it.toString() }.toSet()
+        val liquidLevelSensorType = setOf(SensorConfig.SENSOR_LIQUID_LEVEL).map { it.toString() }.toSet()
 
         val counterAndSummarySensorTypes = setOf(
             SensorConfig.SENSOR_LIQUID_USING,
@@ -460,7 +463,6 @@ class SensorService(
             SensorConfig.SENSOR_ENERGO_COUNT_RR,
         ).map { it.toString() }.toSet()
 
-        val liquidLevelSensorType = setOf(SensorConfig.SENSOR_LIQUID_LEVEL).map { it.toString() }.toSet()
         val phasedEnergoSensorTypes = setOf(
             SensorConfig.SENSOR_ENERGO_VOLTAGE,
             SensorConfig.SENSOR_ENERGO_CURRENT,
@@ -469,6 +471,7 @@ class SensorService(
             SensorConfig.SENSOR_ENERGO_POWER_REACTIVE,
             SensorConfig.SENSOR_ENERGO_POWER_FULL,
         ).map { it.toString() }.toSet()
+
         val analogSensorTypes = (setOf(
             SensorConfig.SENSOR_WEIGHT,
             SensorConfig.SENSOR_TURN,
@@ -479,7 +482,6 @@ class SensorService(
             SensorConfig.SENSOR_DENSITY,
             SensorConfig.SENSOR_MASS_FLOW,
             SensorConfig.SENSOR_VOLUME_FLOW,
-            //!!! без учёта фазы?
             SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT,
             SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE,
         ) + liquidLevelSensorType + phasedEnergoSensorTypes).map { it.toString() }.toSet()
@@ -682,7 +684,44 @@ class SensorService(
             ),
         )
 
-        //--- discrete sensors: equipment operating time; -----------------------------------------------------------------------------
+        //--- all sensors (exclude geo-sensor) --------------------------------------------------------------
+
+        formCells += FormSimpleCell(
+            name = FIELD_MIN_IGNORE,
+            caption = "Игнорировать показания датчика менее",
+            isEditable = changeEnabled,
+            value = sensorEntity?.minIgnore?.toString() ?: "0.0",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = false,
+                values = geoSensorType,
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_MAX_IGNORE,
+            caption = "Игнорировать показания датчика более",
+            isEditable = changeEnabled,
+            value = sensorEntity?.maxIgnore?.toString() ?: "1000000.0",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = false,
+                values = geoSensorType,
+            ),
+        )
+
+        formCells += FormSimpleCell(
+            name = FIELD_DIM,
+            caption = "Единица измерения",
+            isEditable = changeEnabled,
+            value = sensorEntity?.dim ?: "",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = false,
+                values = geoSensorType,
+            ),
+        )
+
+        //--- discrete sensors: equipment operating time; ---------------------------------------------------
 
         formCells += FormBooleanCell(
             name = FIELD_IS_ABOVE_BORDER,
@@ -751,143 +790,6 @@ class SensorService(
             ),
         )
 
-        //--- for smoothable sensors (analog sensors only)
-
-        formCells += FormSimpleCell(
-            name = FIELD_SMOOTH_TIME,
-            caption = "Период сглаживания [мин]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.smoothTime?.toString() ?: "0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = analogSensorTypes,
-            ),
-        )
-
-        //--- common for all sensors, except for geo and total sensors --------------------------------------------------------------------------------
-
-        formCells += FormSimpleCell(
-            name = FIELD_MIN_IGNORE,
-            caption = "Игнорировать показания датчика менее",
-            isEditable = changeEnabled,
-            value = sensorEntity?.minIgnore?.toString() ?: "0.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = false,
-                values = geoSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_MAX_IGNORE,
-            caption = "Игнорировать показания датчика более",
-            isEditable = changeEnabled,
-            value = sensorEntity?.maxIgnore?.toString() ?: "1000000.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = false,
-                values = geoSensorType,
-            ),
-        )
-
-        //--- common for geo sensors, discrete, counting, liquid level, density, total mass and total volume
-
-        formCells += FormSimpleCell(
-            name = FIELD_LIQUID_NAME,
-            caption = "Наименование топлива",
-            isEditable = changeEnabled,
-            value = sensorEntity?.liquidName ?: "",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType + workSensorType + counterAndSummarySensorTypes + liquidLevelSensorType,
-            ),
-        )
-
-        //--- common for geo and discrete sensors ------------------------------------------------------------------------------------------------
-
-        formCells += FormSimpleCell(
-            name = FIELD_LIQUID_NORM,
-            caption = "-",
-            isEditable = changeEnabled,
-            value = sensorEntity?.liquidNorm?.toString() ?: "0.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType + workSensorType,
-            ),
-            captions = FormCellCaption(
-                name = FIELD_SENSOR_TYPE,
-                captions = mapOf(
-                    "Норматив расхода топлива [л/100км]" to geoSensorType,
-                    "Норматив расхода топлива [л/час]" to workSensorType,
-                ),
-            ),
-        )
-
-        //--- applies only to (fuel) counter sensors
-
-        formCells += FormBooleanCell(
-            name = FIELD_IS_ABSOLUTE_COUNT,
-            caption = "Накопительный счётчик",
-            isEditable = changeEnabled,
-            value = sensorEntity?.isAbsoluteCount ?: true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = counterAndSummarySensorTypes + energoSummarySensorTypes,
-            ),
-        )
-
-        //--- applies for counter and summary volume/mass sensors
-
-        formCells += FormComboCell(
-            name = FIELD_IN_OUT_TYPE,
-            caption = "Тип учёта",
-            isEditable = changeEnabled,
-            value = sensorEntity?.inOutType?.toString() ?: SensorConfigCounter.CALC_TYPE_OUT.toString(),
-            values = listOf(
-                SensorConfigCounter.CALC_TYPE_IN.toString() to "Входящий/заправочный счётчик",
-                SensorConfigCounter.CALC_TYPE_OUT.toString() to "Исходящий/расходный счётчик",
-            ),
-            asRadioButtons = true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = counterAndSummarySensorTypes,
-            ),
-        )
-
-        //        ColumnDouble columnFuelUsingMax = new ColumnDouble(  tableName, "liquid_using_max", "Максимально возможный расход [л/час]", 10, 0, 100.0  );
-        //            columnFuelUsingMax.addFormVisible(  new FormColumnVisibleData(  columnSensorType, true, new int[] { SensorConfig.SENSOR_LIQUID_USING }  )  );
-        //
-        //        ColumnDouble columnFuelUsingNormal = new ColumnDouble(  tableName, "liquid_using_normal", "Граница рабочего хода [л/час]", 10, 0, 10.0  );
-        //            columnFuelUsingNormal.addFormVisible(  new FormColumnVisibleData(  columnSensorType, true, new int[] { SensorConfig.SENSOR_LIQUID_USING }  )  );
-        //
-        //        ColumnDouble columnFuelUsingBorder = new ColumnDouble(  tableName, "liquid_using_border", "Граница холостого хода [л/час]", 10, 0, 1.0  );
-        //            columnFuelUsingBorder.addFormVisible(  new FormColumnVisibleData(  columnSensorType, true, new int[] { SensorConfig.SENSOR_LIQUID_USING }  )  );
-
-        //--- applies only to readings of electricity meters
-
-        formCells += FormComboCell(
-            name = FIELD_PHASE,
-            caption = "Фаза",
-            isEditable = changeEnabled,
-            value = sensorEntity?.phase?.toString() ?: "0",
-            values = listOf(
-                0.toString() to "По сумме фаз",
-                1.toString() to "A",
-                2.toString() to "B",
-                3.toString() to "C",
-            ),
-            asRadioButtons = true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = phasedEnergoSensorTypes,
-            ),
-        )
-
         //--- analog / measuring sensors ---------------------------------------------------------------------------------
 
         formCells += FormSimpleCell(
@@ -924,8 +826,6 @@ class SensorService(
             ),
         )
 
-        //--- geo + analog / measuring sensors ---------------------------------------------------------------------------------
-
         formCells += FormSimpleCell(
             name = FIELD_MAX_LIMIT,
             caption = "-",
@@ -934,7 +834,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = geoSensorType + analogSensorTypes,
+                values = geoSensorType + analogSensorTypes,     //--- geo + analog / measuring sensors
             ),
             captions = FormCellCaption(
                 name = FIELD_SENSOR_TYPE,
@@ -945,7 +845,17 @@ class SensorService(
             ),
         )
 
-        //--- analog measuring sensors ---------------------------------------------------------------------------------
+        formCells += FormSimpleCell(
+            name = FIELD_SMOOTH_TIME,
+            caption = "Период сглаживания [мин]",
+            isEditable = changeEnabled,
+            value = sensorEntity?.smoothTime?.toString() ?: "0",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = analogSensorTypes,
+            ),
+        )
 
         formCells += FormSimpleCell(
             name = FIELD_INDICATOR_DELIMITER_COUNT,
@@ -970,6 +880,37 @@ class SensorService(
             ),
         )
 
+        //--- applies only to (fuel) counter sensors
+
+        formCells += FormBooleanCell(
+            name = FIELD_IS_ABSOLUTE_COUNT,
+            caption = "Накопительный счётчик",
+            isEditable = changeEnabled,
+            value = sensorEntity?.isAbsoluteCount ?: true,
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = counterAndSummarySensorTypes,
+            ),
+        )
+
+        formCells += FormComboCell(
+            name = FIELD_IN_OUT_TYPE,
+            caption = "Тип учёта",
+            isEditable = changeEnabled,
+            value = sensorEntity?.inOutType?.toString() ?: SensorConfigCounter.CALC_TYPE_OUT.toString(),
+            values = listOf(
+                SensorConfigCounter.CALC_TYPE_IN.toString() to "Входящий/заправочный счётчик",
+                SensorConfigCounter.CALC_TYPE_OUT.toString() to "Исходящий/расходный счётчик",
+            ),
+            asRadioButtons = true,
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = counterAndSummarySensorTypes,
+            ),
+        )
+
         //--- while they are only used for liquid (fuel) level sensors
 
         formCells += FormComboCell(
@@ -986,6 +927,62 @@ class SensorService(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
                 values = liquidLevelSensorType,
+            ),
+        )
+
+        //--- applies only to readings of electricity meters
+
+        formCells += FormComboCell(
+            name = FIELD_PHASE,
+            caption = "Фаза",
+            isEditable = changeEnabled,
+            value = sensorEntity?.phase?.toString() ?: "0",
+            values = listOf(
+                0.toString() to "По сумме фаз",
+                1.toString() to "A",
+                2.toString() to "B",
+                3.toString() to "C",
+            ),
+            asRadioButtons = true,
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = phasedEnergoSensorTypes,
+            ),
+        )
+
+        //--- common for geo sensors, discrete, counting, liquid level, density, total mass and total volume
+
+        formCells += FormSimpleCell(
+            name = FIELD_LIQUID_NAME,
+            caption = "Наименование топлива",
+            isEditable = changeEnabled,
+            value = sensorEntity?.liquidName ?: "",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = geoSensorType + workSensorType + counterAndSummarySensorTypes + liquidLevelSensorType,
+            ),
+        )
+
+        //--- common for geo and discrete sensors ------------------------------------------------------------------------------------------------
+
+        formCells += FormSimpleCell(
+            name = FIELD_LIQUID_NORM,
+            caption = "-",
+            isEditable = changeEnabled,
+            value = sensorEntity?.liquidNorm?.toString() ?: "0.0",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = geoSensorType + workSensorType,
+            ),
+            captions = FormCellCaption(
+                name = FIELD_SENSOR_TYPE,
+                captions = mapOf(
+                    "Норматив расхода топлива [л/100км]" to geoSensorType,
+                    "Норматив расхода топлива [л/час]" to workSensorType,
+                ),
             ),
         )
 
@@ -1064,27 +1061,28 @@ class SensorService(
             isUsePos = formActionData[FIELD_IS_USE_POS]?.booleanValue ?: true,
             isUseSpeed = formActionData[FIELD_IS_USE_SPEED]?.booleanValue ?: true,
             isUseRun = formActionData[FIELD_IS_USE_RUN]?.booleanValue ?: true,
+            minIgnore = formActionData[FIELD_MIN_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
+            maxIgnore = formActionData[FIELD_MAX_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
+            dim = formActionData[FIELD_DIM]?.stringValue,
             isAboveBorder = formActionData[FIELD_IS_ABOVE_BORDER]?.booleanValue ?: true,
             onOffBorder = formActionData[FIELD_ON_OFF_BORDER]?.stringValue?.toDoubleOrNull(),
             idleBorder = formActionData[FIELD_IDLE_BORDER]?.stringValue?.toDoubleOrNull(),
             limitBorder = formActionData[FIELD_LIMIT_BORDER]?.stringValue?.toDoubleOrNull(),
             minOnTime = formActionData[FIELD_MIN_ON_TIME]?.stringValue?.toIntOrNull() ?: 1,
             minOffTime = formActionData[FIELD_MIN_OFF_TIME]?.stringValue?.toIntOrNull() ?: 1,
-            smoothTime = formActionData[FIELD_SMOOTH_TIME]?.stringValue?.toIntOrNull() ?: 0,
-            minIgnore = formActionData[FIELD_MIN_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
-            maxIgnore = formActionData[FIELD_MAX_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
-            liquidName = formActionData[FIELD_LIQUID_NAME]?.stringValue ?: "",
-            liquidNorm = formActionData[FIELD_LIQUID_NORM]?.stringValue?.toDoubleOrNull() ?: 0.0,
             minView = formActionData[FIELD_MIN_VIEW]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxView = formActionData[FIELD_MAX_VIEW]?.stringValue?.toDoubleOrNull() ?: 100.0,
             minLimit = formActionData[FIELD_MIN_LIMIT]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxLimit = formActionData[FIELD_MAX_LIMIT]?.stringValue?.toDoubleOrNull() ?: 100.0,
+            smoothTime = formActionData[FIELD_SMOOTH_TIME]?.stringValue?.toIntOrNull() ?: 0,
             indicatorDelimiterCount = formActionData[FIELD_INDICATOR_DELIMITER_COUNT]?.stringValue?.toIntOrNull() ?: 4,
             indicatorMultiplicator = formActionData[FIELD_INDICATOR_MILTIPLICATOR]?.stringValue?.toDoubleOrNull() ?: 1.0,
             isAbsoluteCount = formActionData[FIELD_IS_ABSOLUTE_COUNT]?.booleanValue ?: true,
-            phase = formActionData[FIELD_PHASE]?.stringValue?.toIntOrNull() ?: 0,
             inOutType = formActionData[FIELD_IN_OUT_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigCounter.CALC_TYPE_OUT,
             containerType = formActionData[FIELD_CONTAINER_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
+            phase = formActionData[FIELD_PHASE]?.stringValue?.toIntOrNull() ?: 0,
+            liquidName = formActionData[FIELD_LIQUID_NAME]?.stringValue ?: "",
+            liquidNorm = formActionData[FIELD_LIQUID_NORM]?.stringValue?.toDoubleOrNull() ?: 0.0,
             schemeX = formActionData[FIELD_SCHEME_X]?.stringValue?.toIntOrNull(),
             schemeY = formActionData[FIELD_SCHEME_Y]?.stringValue?.toIntOrNull(),
         )

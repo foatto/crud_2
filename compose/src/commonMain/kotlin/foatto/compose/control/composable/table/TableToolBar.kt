@@ -60,14 +60,16 @@ fun TableToolBar(
             }
             if (isFindTextVisible) {
                 OutlinedTextField(
-                    modifier = Modifier.background(colorControlBack).onKeyEvent { keyEvent ->
-                        if (keyEvent.key == Key.Enter) {
-                            doFind(false)
-                            true
-                        } else {
-                            false
-                        }
-                    },
+                    modifier = Modifier
+                        .background(colorControlBack)
+                        .onKeyEvent { keyEvent ->
+                            if (keyEvent.key == Key.Enter) {
+                                doFind(false)
+                                true
+                            } else {
+                                false
+                            }
+                        },
                     colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
                     value = findText,
                     onValueChange = { newText ->

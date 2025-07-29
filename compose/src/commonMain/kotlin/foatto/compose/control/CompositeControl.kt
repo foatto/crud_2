@@ -7,15 +7,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Warning
@@ -23,8 +27,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -33,20 +40,27 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.colorCompositeMovedBlockBack
+import foatto.compose.colorControlBack
 import foatto.compose.colorIconButton
 import foatto.compose.colorMainBack0
 import foatto.compose.colorMainBack2
+import foatto.compose.colorOutlinedTextInput
 import foatto.compose.control.composable.composite.CompositeToolBar
 import foatto.compose.control.composable.onPointerEvents
 import foatto.compose.control.model.CompositeListItem
@@ -103,6 +117,10 @@ class CompositeControl(
 
     private var layoutSaveKey: String? = null
 
+    private var isFocusRequesterDefined = false
+    private val focusRequester = FocusRequester()
+    private var findTextFieldValueState by mutableStateOf(TextFieldValue(text = ""))
+
     private var selectedBlock: CompositeBlockControl? by mutableStateOf(null)
     private var movingBlock: CompositeBlockControl? by mutableStateOf(null)
 
@@ -123,9 +141,53 @@ class CompositeControl(
                             .fillMaxHeight()
                             .background(color = colorMainBack2)
                             .padding(16.dp)
-                            .verticalScroll(state = verticalScrollState)
                     ) {
-                        GenerateItemList(items, 0)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
+                        ) {
+                            isFocusRequesterDefined = true
+
+                            Spacer(modifier = Modifier.width(16.dp))
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .background(colorControlBack)
+                                    .align(Alignment.CenterVertically)
+                                    .weight(1.0f)
+                                    .focusRequester(focusRequester),
+                                colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
+                                value = findTextFieldValueState,
+                                onValueChange = { newTextFieldValue ->
+                                    findTextFieldValueState = newTextFieldValue
+                                    filterListItems()
+                                },
+                                //label = { Text("Поиск...") }, - появляется паразитный белый фон вокруг рамки
+                                placeholder = { Text("Поиск...") },
+                                singleLine = true,
+                            )
+                            FilledIconButton(
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                shape = RoundedCornerShape(0.dp),               // чтобы не срезало углы иконок
+                                colors = IconButtonDefaults.iconButtonColors(), // иконки должны быть на прозрачном фоне
+                                enabled = findTextFieldValueState.text.isNotEmpty(),
+                                onClick = {
+                                    findTextFieldValueState = findTextFieldValueState.copy(text = "")
+                                    filterListItems()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .verticalScroll(state = verticalScrollState)
+                        ) {
+                            GenerateItemList(items, 0)
+                        }
                     }
                 }
 
@@ -253,8 +315,14 @@ class CompositeControl(
 
                                 val iconSize = styleToolbarIconSize
 
-                                val blockCenterX = blockX + blockW / 2 - iconSize / 2
-                                val blockCenterY = blockY + blockH / 2 - iconSize / 2
+                                //!!! Число 6 подобрано опытным путём. Скорее всего соотносится с каким-либо padding'ом. Выяснить позже.
+                                val blockCenterX = blockX + blockW / 2 - (iconSize / 2 + 6) * root.scaleKoef
+                                val blockCenterY = blockY + blockH / 2 - (iconSize / 2 + 6) * root.scaleKoef
+                                val buttonShift = if (blockW > 200 / root.scaleKoef && blockH > 200 / root.scaleKoef) {
+                                    iconSize * 2 * root.scaleKoef
+                                } else {
+                                    iconSize * 4 / 3 * root.scaleKoef
+                                }
 
                                 LayoutButton(
                                     modifier = Modifier.offset(
@@ -270,7 +338,7 @@ class CompositeControl(
                                 LayoutButton(
                                     modifier = Modifier.offset(
                                         x = with(density) { blockCenterX.toDp() },
-                                        y = with(density) { (blockCenterY - iconSize * 2).toDp() },
+                                        y = with(density) { (blockCenterY - buttonShift).toDp() },
                                     ),
                                     iconName = "/images/ic_arrow_upward_${getStyleToolbarIconNameSuffix()}.png",
                                     isEnabled = true
@@ -280,7 +348,7 @@ class CompositeControl(
 
                                 LayoutButton(
                                     modifier = Modifier.offset(
-                                        x = with(density) { (blockCenterX - iconSize * 2).toDp() },
+                                        x = with(density) { (blockCenterX - buttonShift).toDp() },
                                         y = with(density) { blockCenterY.toDp() },
                                     ),
                                     iconName = "/images/ic_arrow_back_${getStyleToolbarIconNameSuffix()}.png",
@@ -291,7 +359,7 @@ class CompositeControl(
 
                                 LayoutButton(
                                     modifier = Modifier.offset(
-                                        x = with(density) { (blockCenterX + iconSize * 2).toDp() },
+                                        x = with(density) { (blockCenterX + buttonShift).toDp() },
                                         y = with(density) { blockCenterY.toDp() },
                                     ),
                                     iconName = "/images/ic_arrow_forward_${getStyleToolbarIconNameSuffix()}.png",
@@ -303,7 +371,7 @@ class CompositeControl(
                                 LayoutButton(
                                     modifier = Modifier.offset(
                                         x = with(density) { blockCenterX.toDp() },
-                                        y = with(density) { (blockCenterY + iconSize * 2).toDp() },
+                                        y = with(density) { (blockCenterY + buttonShift).toDp() },
                                     ),
                                     iconName = "/images/ic_arrow_downward_${getStyleToolbarIconNameSuffix()}.png",
                                     isEnabled = true
@@ -313,8 +381,8 @@ class CompositeControl(
 
                                 LayoutButton(
                                     modifier = Modifier.offset(
-                                        x = with(density) { (blockCenterX + iconSize * 3).toDp() },
-                                        y = with(density) { (blockCenterY + iconSize * 2).toDp() },
+                                        x = with(density) { (blockCenterX + buttonShift).toDp() },
+                                        y = with(density) { (blockCenterY + buttonShift).toDp() },
                                     ),
                                     iconName = "/images/ic_visibility_off_${getStyleToolbarIconNameSuffix()}.png",
                                     isEnabled = true
@@ -336,6 +404,13 @@ class CompositeControl(
             while (refreshInterval > 0) {
                 refreshAll()
                 delay(refreshInterval * 1000L)
+            }
+        }
+
+        SideEffect {
+            if (isFocusRequesterDefined) {
+                focusRequester.requestFocus()
+                findTextFieldValueState = findTextFieldValueState.copy(selection = TextRange(index = findTextFieldValueState.text.length))
             }
         }
     }
@@ -371,7 +446,11 @@ class CompositeControl(
                             } else {
                                 FontWeight.Normal
                             },
-                            color = if (item.itemStatus) { Color.Black } else { Color.Red },
+                            color = if (item.itemStatus) {
+                                Color.Black
+                            } else {
+                                Color.Red
+                            },
                         )
                     },
                     trailingIcon = if (level == 0) {
@@ -524,6 +603,22 @@ class CompositeControl(
         /*
             !!! setInterval(10)
          */
+    }
+
+    private fun filterListItems() {
+        compositeResponse.items?.let { items ->
+            val findText = findTextFieldValueState.text
+            listItems = items.filter { item ->
+                item.text.contains(findText) ||
+                        item.subListDatas?.let { subListDatas ->
+                            subListDatas.any { subItem ->
+                                subItem.text.contains(findText)
+                            }
+                        } ?: false
+            }.map { item ->
+                mapListItems(item)
+            }
+        }
     }
 
     private fun mapListItems(compositeListItemData: CompositeListItemData): CompositeListItem = CompositeListItem(

@@ -12,8 +12,8 @@ var styleToolbarDarkIcon: Boolean = true
 var styleOtherDarkIcon: Boolean = true
 
 //--- по умолчанию - иконки размером 36dp (пока только на toolbar'ах, в остальных местах 48)
-var styleToolbarIconSize: Int = 36
-var styleOtherIconSize: Int = 48
+const val styleToolbarIconSize: Int = 36
+const val styleOtherIconSize: Int = 48
 
 //--- суффикс наименовани типовой иконки material design
 fun getStyleToolbarIconNameSuffix(): String = (if (styleToolbarDarkIcon) "black" else "white") + "_" + styleToolbarIconSize + "dp"

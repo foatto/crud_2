@@ -104,16 +104,20 @@ class SchemeCounterIndicatorStateService(
             alResult.add(xyElement)
         }
 
+        val valueText = sensorValue?.let { sv ->
+            val dim = sensorEntity.dim?.trim() ?: ""
+            getSplittedDouble(sv, 1) + if (dim.isNotEmpty()) {
+                " [$dim]"
+            } else {
+                ""
+            }
+        } ?: "-"
         XyElement(TYPE_SCHEME_CI_CUR_VALUE_TEXT, -getRandomInt(), sensorId).apply {
             isReadOnly = true
             alPoint = listOf(XyPoint(x0, 5 * GRID_STEP))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
-            text = " " + (
-                    sensorValue?.let { sv ->
-                        getSplittedDouble(sv, 1)
-                    } ?: "-") +
-                    " "
+            text = " $valueText "
             textColor = sensorValue?.let { TEXT_COLOR } ?: NO_DATA_TEXT_COLOR
             fillColor = sensorValue?.let { BACK_COLOR } ?: NO_DATA_BACK_COLOR
             drawColor = sensorValue?.let { BORDER_COLOR } ?: NO_DATA_BORDER_COLOR

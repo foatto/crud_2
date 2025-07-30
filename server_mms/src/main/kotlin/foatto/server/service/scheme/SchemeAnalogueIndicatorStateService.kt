@@ -43,7 +43,7 @@ class SchemeAnalogueIndicatorStateService(
         private const val TYPE_SCHEME_AI_ARROW: String = "mms_scheme_ai_arrow"
 
         private const val TYPE_SCHEME_AI_CUR_VALUE_TEXT: String = "mms_scheme_ai_cur_value_text"
-        private const val TYPE_SCHEME_AI_DESCR_TEXT: String = "mms_scheme_ai_descr_text"
+        private const val TYPE_SCHEME_AI_TIME_TEXT: String = "mms_scheme_ai_descr_text"
 
         private const val INDICATOR_BACK_COLOR_OFF = 0xFF_FF_E0_E0.toInt()
         private const val INDICATOR_BACK_COLOR_NEUTRAL = 0xFF_F0_F0_F0.toInt()
@@ -74,7 +74,7 @@ class SchemeAnalogueIndicatorStateService(
         this[TYPE_SCHEME_AI_ARROW] = getLineConfig(TYPE_SCHEME_AI_ARROW, 3)
 
         this[TYPE_SCHEME_AI_CUR_VALUE_TEXT] = getTextConfig(TYPE_SCHEME_AI_CUR_VALUE_TEXT, 1)
-        this[TYPE_SCHEME_AI_DESCR_TEXT] = getTextConfig(TYPE_SCHEME_AI_DESCR_TEXT, 1)
+        this[TYPE_SCHEME_AI_TIME_TEXT] = getTextConfig(TYPE_SCHEME_AI_TIME_TEXT, 1)
     }
 
     override fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement> {
@@ -402,7 +402,12 @@ class SchemeAnalogueIndicatorStateService(
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.LT
             text = sensorValue?.let { sv ->
-                getSplittedDouble(sv, 1)
+                val dim = sensorEntity.dim?.trim() ?: ""
+                getSplittedDouble(sv, 1) + if (dim.isNotEmpty()) {
+                    " [$dim]"
+                } else {
+                    ""
+                }
             } ?: "-"
             textColor = TEXT_COLOR
             fillColor = null
@@ -422,7 +427,7 @@ class SchemeAnalogueIndicatorStateService(
         }
 
         sensorTime?.let { lastDataTime ->
-            XyElement(TYPE_SCHEME_AI_DESCR_TEXT, -getRandomInt(), sensorId).apply {
+            XyElement(TYPE_SCHEME_AI_TIME_TEXT, -getRandomInt(), sensorId).apply {
                 isReadOnly = true
                 alPoint = listOf(XyPoint(x0, 7 * GRID_STEP + GRID_STEP / 4))
                 anchorX = XyElement.Anchor.CC

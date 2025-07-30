@@ -53,8 +53,6 @@ class SchemeWorkIndicatorStateService(
 
         val sensorEntity = sensorRepository.findByIdOrNull(sensorId) ?: return emptyList()
 
-//        val valueMultiplicator = sensorEntity.indicatorMultiplicator ?: 1.0
-
         var sensorTime: Int? = null
         var sensorValue: Boolean? = null
 

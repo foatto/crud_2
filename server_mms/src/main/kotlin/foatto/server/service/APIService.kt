@@ -32,10 +32,16 @@ class APIService(
         start: String?,
         duration: Int?,
     ): ObjectDataResponse {
+        duration?.let {
+            if (duration > 86_400) {
+                return ObjectDataResponse(errorMessage = "Длительность периода не может быть более 1 суток")
+            }
+        }
+
         // 2020-08-30T18:43:00Z
         // 2023-01-02T23:40:57Z
         val begTime = start?.let { Instant.parse(start).epochSeconds.toInt() }
-        val endTime = begTime?.let { begTime + min(duration ?: 86_400, 86_400) }
+        val endTime = begTime?.let { begTime + (duration ?: 86_400) }
 
         val userEntity = getUser(token) ?: return ObjectDataResponse(errorMessage = "Пользователь с таким логином и паролём не найден")
         if (userEntity.isDisabled == true) {

@@ -294,6 +294,31 @@ class MMSSpringApp : SpringApp() {
                 ),
             ),
         )
+        appModuleConfigs[AppModuleMMS.DEVICE_MANAGE] = AppModuleConfig(
+            caption = "Управление контроллером",
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
+            disabledAccessRoles = mutableSetOf(AppRole.USER),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
 
         appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
             caption = "Журнал суточных работ",

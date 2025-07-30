@@ -27,6 +27,9 @@ object ApiUrlMMS {
     const val DEVICE: String = "${ApiUrl.URL_BASE}/device/${ApiUrl.CURRENT_VERSION}"
     const val DEVICE_FORM_ACTION: String = "${ApiUrl.URL_BASE}/device_form_action/${ApiUrl.CURRENT_VERSION}"
 
+    const val DEVICE_MANAGE: String = "${ApiUrl.URL_BASE}/device_manage/${ApiUrl.CURRENT_VERSION}"
+    const val DEVICE_MANAGE_FORM_ACTION: String = "${ApiUrl.URL_BASE}/device_manage_form_action/${ApiUrl.CURRENT_VERSION}"
+
     const val DAY_WORK: String = "${ApiUrl.URL_BASE}/day_work/${ApiUrl.CURRENT_VERSION}"
     const val DAY_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_work_form_action/${ApiUrl.CURRENT_VERSION}"
 

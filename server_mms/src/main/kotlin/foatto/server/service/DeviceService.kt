@@ -23,6 +23,8 @@ import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.server.appModuleConfigs
+import foatto.server.checkAccessPermission
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.ds.CoreTelematicFunction
@@ -39,6 +41,7 @@ import foatto.server.model.SensorConfigCounter
 import foatto.server.model.SensorConfigGeo
 import foatto.server.model.SensorConfigLiquidLevel
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.DeviceManageRepository
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
@@ -57,6 +60,7 @@ import org.springframework.stereotype.Service
 class DeviceService(
     private val entityManager: EntityManager,
     private val deviceRepository: DeviceRepository,
+    private val deviceManageRepository: DeviceManageRepository,
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
@@ -359,6 +363,18 @@ class DeviceService(
                     inNewTab = false,
                 )
             }
+            if (checkAccessPermission(AppModuleMMS.DEVICE_MANAGE, userConfig.roles)) {
+                popupDatas += TablePopup(
+                    action = AppAction(
+                        type = ActionType.MODULE_TABLE,
+                        module = AppModuleMMS.DEVICE_MANAGE,
+                        parentModule = AppModuleMMS.DEVICE,
+                        parentId = deviceEntity.id,
+                    ),
+                    text = appModuleConfigs[AppModuleMMS.DEVICE_MANAGE]?.caption ?: "(неизвестный тип модуля: '${AppModuleMMS.DEVICE_MANAGE}')",
+                    inNewTab = true,
+                )
+            }
 
             tableRows += TableRow(
                 rowAction = if (isFormEnabled) {
@@ -390,7 +406,7 @@ class DeviceService(
 
         val id = action.id
 
-        val changeEnabled = action.id?.let { editEnabled } ?: addEnabled
+        val changeEnabled = id?.let { editEnabled } ?: addEnabled
 
         val deviceEntity = id?.let {
             //--- TODO: ошибка об отсутствии такой записи
@@ -803,6 +819,9 @@ class DeviceService(
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {
+        deviceRepository.findByIdOrNull(id)?.let { deviceEntity ->
+            deviceManageRepository.deleteByDevice(deviceEntity)
+        }
         deviceRepository.deleteById(id)
 
         return FormActionResponse(responseCode = ResponseCode.OK)

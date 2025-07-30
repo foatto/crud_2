@@ -239,7 +239,9 @@ class SensorService(
             sensorCalibrationRepository: SensorCalibrationRepository,
             sensorId: Int
         ) {
-            sensorCalibrationRepository.deleteBySensorId(sensorId)
+            sensorRepository.findByIdOrNull(sensorId)?.let { sensorEntity ->
+                sensorCalibrationRepository.deleteBySensor(sensorEntity)
+            }
             sensorRepository.deleteById(sensorId)
             executeNativeSql(entityManager, " DROP TABLE MMS_agg_$sensorId ")
             executeNativeSql(entityManager, " DROP TABLE MMS_text_$sensorId ")
@@ -1088,7 +1090,7 @@ class SensorService(
         )
         sensorRepository.saveAndFlush(sensorEntity)
 
-        sensorCalibrationRepository.deleteBySensorId(recordId)
+        sensorCalibrationRepository.deleteBySensor(sensorEntity)
         val calibrationText = formActionData[FIELD_CALIBRATION]?.stringValue ?: ""
         calibrationText.split('\n').forEach { calibrationPair ->
             val alSensorData = calibrationPair.split('=')

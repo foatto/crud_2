@@ -155,7 +155,7 @@ class MMSPulsarConfigService(
             )
             sensorRepository.save(sensorEntity)
 
-            sensorCalibrationRepository.deleteBySensorId(recordId)
+            sensorCalibrationRepository.deleteBySensor(sensorEntity)
             sensor.sensorValues.forEachIndexed { index, sensorValue ->
                 val dataValue = sensor.dataValues[index]
 

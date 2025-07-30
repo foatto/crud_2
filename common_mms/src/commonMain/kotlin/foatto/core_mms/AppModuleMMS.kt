@@ -13,6 +13,7 @@ object AppModuleMMS {
     const val SENSOR_DATA: String = "SENSOR_DATA"
 
     const val DEVICE: String = "DEVICE"
+    const val DEVICE_MANAGE: String = "DEVICE_MANAGE"
 
     const val DAY_WORK: String = "DAY_WORK"
 

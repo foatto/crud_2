@@ -40,6 +40,10 @@ fun addAppModuleUrls() {
         appUrl = ApiUrlMMS.DEVICE,
         formActionUrl = ApiUrlMMS.DEVICE_FORM_ACTION,
     )
+    appModuleUrls[AppModuleMMS.DEVICE_MANAGE] = AppModuleUrl(
+        appUrl = ApiUrlMMS.DEVICE_MANAGE,
+        formActionUrl = ApiUrlMMS.DEVICE_MANAGE_FORM_ACTION,
+    )
 
     appModuleUrls[AppModuleMMS.DAY_WORK] = AppModuleUrl(
         appUrl = ApiUrlMMS.DAY_WORK,

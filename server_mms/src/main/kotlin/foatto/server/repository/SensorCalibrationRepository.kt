@@ -10,7 +10,7 @@ interface SensorCalibrationRepository : JpaRepository<SensorCalibrationEntity, I
     fun findBySensorIdOrderBySensorValue(sensorId: Int): List<SensorCalibrationEntity>
     fun findBySensorOrderBySensorValue(sensor: SensorEntity): List<SensorCalibrationEntity>
 
-    fun deleteBySensorId(sensorId: Int): Int
+    fun deleteBySensor(sensor: SensorEntity): Int
 
     fun findBySensor(sensor: SensorEntity, pageRequest: Pageable): Page<SensorCalibrationEntity>
 }

@@ -3,7 +3,7 @@ package foatto.server.service.report
 import foatto.core.model.response.chart.ChartElement
 import foatto.server.calc.getPrecision
 import foatto.server.entity.ObjectEntity
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.service.CalcService
 import foatto.server.service.FileStoreService

@@ -9,6 +9,7 @@ import foatto.server.SpringApp
 import foatto.server.entity.DeviceEntity
 import foatto.server.entity.ObjectEntity
 import foatto.server.getEnabledUserIds
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
@@ -33,10 +34,6 @@ class CompositeObjectListDashboardService(
     schemeCounterIndicatorStateService = schemeCounterIndicatorStateService,
     schemeWorkIndicatorStateService = schemeWorkIndicatorStateService,
 ) {
-
-    companion object {
-        private val MIN_LAST_SESSION_PERIOD_DIFF = 3600
-    }
 
     override fun getCompositeResponseAction(action: AppAction): AppAction =
         action.copy(
@@ -73,7 +70,7 @@ class CompositeObjectListDashboardService(
                     text = deviceEntity.name ?: deviceEntity.serialNo ?: deviceEntity.index?.toString() ?: "(без наименования, серийного номера и индекса)",
                     itemId = deviceEntity.id,
                     itemModule = AppModuleMMS.DEVICE,
-                    itemStatus = (getCurrentTimeInt() - (deviceEntity.lastSessionTime ?: 0)) < MIN_LAST_SESSION_PERIOD_DIFF,
+                    itemStatus = (getCurrentTimeInt() - (deviceEntity.lastSessionTime ?: 0)) < SensorConfig.CRITICAL_OFF_PERIOD,
                 )
             }
 

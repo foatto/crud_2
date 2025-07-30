@@ -22,7 +22,7 @@ import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.initXyElementConfig
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager

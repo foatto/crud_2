@@ -1,10 +1,8 @@
 package foatto.server.ds
 
-import foatto.core.model.model.xy.XyProjection
-import foatto.core.util.crc16_modbus
 import foatto.core.util.getCurrentTimeInt
-import foatto.server.model.SensorConfig
-import foatto.server.model.SensorConfigCounter
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigCounter
 import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.util.AdvancedByteBuffer
 import foatto.server.util.AdvancedLogger

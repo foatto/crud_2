@@ -31,10 +31,14 @@ class PulsarSensorConfig(
     val idleBorder: Double? = null,
     //--- граница перегрузки
     val limitBorder: Double? = null,
-    //--- минимальное время работы (сек)
-    val minOnTime: Int? = null,
     //--- минимальное время простоя (сек)
     val minOffTime: Int? = null,
+    //--- минимальное время работы (сек)
+    val minOnTime: Int? = null,
+    //--- минимальное время холостого хода (сек)
+    val minIdleTime: Int? = null,
+    //--- минимальное время перегрузки (сек)
+    val minOverTime: Int? = null,
 
     //--- для датчиков контрольных значений
 

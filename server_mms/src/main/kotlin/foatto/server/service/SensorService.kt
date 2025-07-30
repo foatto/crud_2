@@ -33,10 +33,10 @@ import foatto.server.checkRowPermission
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.model.AppModuleConfig
-import foatto.server.model.SensorConfig
-import foatto.server.model.SensorConfigCounter
-import foatto.server.model.SensorConfigGeo
-import foatto.server.model.SensorConfigLiquidLevel
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigCounter
+import foatto.server.model.sensor.SensorConfigGeo
+import foatto.server.model.sensor.SensorConfigLiquidLevel
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
@@ -88,11 +88,13 @@ class SensorService(
         private const val FIELD_DIM = "dim"
 
         private const val FIELD_IS_ABOVE_BORDER = "isAboveBorder"
-        private const val FIELD_ON_OFF_BORDER = "onOffBorder"
-        private const val FIELD_IDLE_BORDER = "idleBorder"
-        private const val FIELD_LIMIT_BORDER = "limitBorder"
-        private const val FIELD_MIN_ON_TIME = "minOnTime"
-        private const val FIELD_MIN_OFF_TIME = "minOffTime"
+        private const val FIELD_ON_BORDER = "workOnBorder"
+        private const val FIELD_IDLE_BORDER = "workIdleBorder"
+        private const val FIELD_OVER_BORDER = "workOverBorder"
+        private const val FIELD_MIN_OFF_TIME = "workMinOffTime"
+        private const val FIELD_MIN_ON_TIME = "workMinOnTime"
+        private const val FIELD_MIN_IDLE_TIME = "workMinIdleTime"
+        private const val FIELD_MIN_OVER_TIME = "workMinOverTime"
 
         private const val FIELD_MIN_VIEW = "minView"
         private const val FIELD_MAX_VIEW = "maxView"
@@ -729,7 +731,7 @@ class SensorService(
             name = FIELD_IS_ABOVE_BORDER,
             caption = "Рабочее состояние выше граничного",
             isEditable = changeEnabled,
-            value = sensorEntity?.isAboveBorder ?: true,
+            value = sensorEntity?.isWorkAboveBorder ?: true,
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -737,10 +739,10 @@ class SensorService(
             ),
         )
         formCells += FormSimpleCell(
-            name = FIELD_ON_OFF_BORDER,
+            name = FIELD_ON_BORDER,
             caption = "Граница включения",
             isEditable = changeEnabled,
-            value = sensorEntity?.onOffBorder?.toString() ?: "",
+            value = sensorEntity?.workOnBorder?.toString() ?: "",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -751,7 +753,7 @@ class SensorService(
             name = FIELD_IDLE_BORDER,
             caption = "Граница холостого хода",
             isEditable = changeEnabled,
-            value = sensorEntity?.idleBorder?.toString() ?: "",
+            value = sensorEntity?.workIdleBorder?.toString() ?: "",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -759,21 +761,10 @@ class SensorService(
             ),
         )
         formCells += FormSimpleCell(
-            name = FIELD_LIMIT_BORDER,
+            name = FIELD_OVER_BORDER,
             caption = "Граница перегрузки",
             isEditable = changeEnabled,
-            value = sensorEntity?.limitBorder?.toString() ?: "",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = workSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_MIN_ON_TIME,
-            caption = "Минимальное время работы [сек]",
-            isEditable = changeEnabled,
-            value = sensorEntity?.minOnTime?.toString() ?: "1",
+            value = sensorEntity?.workOverBorder?.toString() ?: "",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -784,7 +775,40 @@ class SensorService(
             name = FIELD_MIN_OFF_TIME,
             caption = "Минимальное время простоя [сек]",
             isEditable = changeEnabled,
-            value = sensorEntity?.minOffTime?.toString() ?: "1",
+            value = sensorEntity?.workMinOffTime?.toString() ?: "1",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = workSensorType,
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_MIN_ON_TIME,
+            caption = "Минимальное время работы [сек]",
+            isEditable = changeEnabled,
+            value = sensorEntity?.workMinOnTime?.toString() ?: "1",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = workSensorType,
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_MIN_IDLE_TIME,
+            caption = "Минимальное время холостого хода [сек]",
+            isEditable = changeEnabled,
+            value = sensorEntity?.workMinIdleTime?.toString() ?: "1",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = workSensorType,
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_MIN_OVER_TIME,
+            caption = "Минимальное время перегрузки [сек]",
+            isEditable = changeEnabled,
+            value = sensorEntity?.workMinOverTime?.toString() ?: "1",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -1066,12 +1090,14 @@ class SensorService(
             minIgnore = formActionData[FIELD_MIN_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxIgnore = formActionData[FIELD_MAX_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
             dim = formActionData[FIELD_DIM]?.stringValue,
-            isAboveBorder = formActionData[FIELD_IS_ABOVE_BORDER]?.booleanValue ?: true,
-            onOffBorder = formActionData[FIELD_ON_OFF_BORDER]?.stringValue?.toDoubleOrNull(),
-            idleBorder = formActionData[FIELD_IDLE_BORDER]?.stringValue?.toDoubleOrNull(),
-            limitBorder = formActionData[FIELD_LIMIT_BORDER]?.stringValue?.toDoubleOrNull(),
-            minOnTime = formActionData[FIELD_MIN_ON_TIME]?.stringValue?.toIntOrNull() ?: 1,
-            minOffTime = formActionData[FIELD_MIN_OFF_TIME]?.stringValue?.toIntOrNull() ?: 1,
+            isWorkAboveBorder = formActionData[FIELD_IS_ABOVE_BORDER]?.booleanValue ?: true,
+            workOnBorder = formActionData[FIELD_ON_BORDER]?.stringValue?.toDoubleOrNull(),
+            workIdleBorder = formActionData[FIELD_IDLE_BORDER]?.stringValue?.toDoubleOrNull(),
+            workOverBorder = formActionData[FIELD_OVER_BORDER]?.stringValue?.toDoubleOrNull(),
+            workMinOffTime = formActionData[FIELD_MIN_OFF_TIME]?.stringValue?.toIntOrNull() ?: 1,
+            workMinOnTime = formActionData[FIELD_MIN_ON_TIME]?.stringValue?.toIntOrNull() ?: 1,
+            workMinIdleTime = formActionData[FIELD_MIN_IDLE_TIME]?.stringValue?.toIntOrNull() ?: 1,
+            workMinOverTime = formActionData[FIELD_MIN_OVER_TIME]?.stringValue?.toIntOrNull() ?: 1,
             minView = formActionData[FIELD_MIN_VIEW]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxView = formActionData[FIELD_MAX_VIEW]?.stringValue?.toDoubleOrNull() ?: 100.0,
             minLimit = formActionData[FIELD_MIN_LIMIT]?.stringValue?.toDoubleOrNull() ?: 0.0,

@@ -7,7 +7,7 @@ import foatto.server.entity.UserEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.ObjectDataResponse
 import foatto.server.model.ObjectDataResponseSensorInfo
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.repository.UserRepository

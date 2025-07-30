@@ -3,10 +3,13 @@ package foatto.server.service.scheme
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
+import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getRandomInt
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigWork
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.service.ApplicationService
@@ -30,15 +33,20 @@ class SchemeWorkIndicatorStateService(
         private const val TYPE_SCHEME_WI_ICON: String = "type_scheme_wi_icon"
         private const val TYPE_SCHEME_WI_DESCR_TEXT: String = "type_scheme_wi_descr_text"
 
-        private const val INDICATOR_BACK_COLOR_NO_DATA = 0xFF_FF_E0_E0.toInt()
-        private const val INDICATOR_BACK_COLOR_OFF = 0xFF_D0_D0_D0.toInt()
-        private const val INDICATOR_BACK_COLOR_ON = 0xFF_E0_FF_E0.toInt()
+        private val INDICATOR_BACK_COLOR_NO_DATA: Int? = null
+        private val INDICATOR_BACK_COLOR_OFF: Int? = 0xFF_D0_D0_D0.toInt()
+        private val INDICATOR_BACK_COLOR_IDLE: Int? = 0xFF_E0_E0_FF.toInt()
+        private val INDICATOR_BACK_COLOR_WORK: Int? = 0xFF_E0_FF_E0.toInt()
+        private val INDICATOR_BACK_COLOR_OVER: Int? = 0xFF_FF_E0_E0.toInt()
 
-        private const val INDICATOR_BORDER_COLOR_NO_DATA = 0xFF_FF_00_00.toInt()
-        private const val INDICATOR_BORDER_COLOR_OFF = 0xFF_A0_A0_A0.toInt()
-        private const val INDICATOR_BORDER_COLOR_ON = 0xFF_00_B0_00.toInt()
+        private val INDICATOR_BORDER_COLOR_NO_DATA: Int? = 0xFF_00_00_00.toInt()
+        private val INDICATOR_BORDER_COLOR_OFF: Int? = 0xFF_A0_A0_A0.toInt()
+        private val INDICATOR_BORDER_COLOR_IDLE: Int? = 0xFF_00_00_B0.toInt()
+        private val INDICATOR_BORDER_COLOR_WORK: Int? = 0xFF_00_B0_00.toInt()
+        private val INDICATOR_BORDER_COLOR_OVER: Int? = 0xFF_FF_00_00.toInt()
 
-        private const val TEXT_COLOR = 0xFF_00_00_00.toInt()
+        private const val TEXT_COLOR_NORMAL = 0xFF_00_00_00.toInt()
+        private const val TEXT_COLOR_CRITICAL = 0xFF_FF_00_00.toInt()
     }
 
     override fun getElementConfigs(): Map<String, XyElementConfig> = initXyElementConfig(level = 10, minScale = MIN_SCALE, maxScale = MAX_SCALE).apply {
@@ -54,7 +62,7 @@ class SchemeWorkIndicatorStateService(
         val sensorEntity = sensorRepository.findByIdOrNull(sensorId) ?: return emptyList()
 
         var sensorTime: Int? = null
-        var sensorValue: Boolean? = null
+        var sensorValue: Int? = null
 
         SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
@@ -70,7 +78,7 @@ class SchemeWorkIndicatorStateService(
             )
             if (rs.next()) {
                 sensorTime = rs.getInt(1)
-                sensorValue = rs.getInt(2) != 0
+                sensorValue = rs.getInt(2)
             }
             rs.close()
         }
@@ -86,7 +94,7 @@ class SchemeWorkIndicatorStateService(
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
             text = sensorEntity.descr ?: "-"
-            textColor = TEXT_COLOR
+            textColor = TEXT_COLOR_NORMAL
             fillColor = null
             drawColor = null
             lineWidth = null
@@ -111,16 +119,24 @@ class SchemeWorkIndicatorStateService(
             startAngle = 180
             sweepAngle = 360
             fillColor = when (sensorValue) {
-                null -> INDICATOR_BACK_COLOR_NO_DATA
-                false -> INDICATOR_BACK_COLOR_OFF
-                true -> INDICATOR_BACK_COLOR_ON
+                SensorConfigWork.STATE_OFF -> INDICATOR_BACK_COLOR_OFF
+                SensorConfigWork.STATE_IDLE -> INDICATOR_BACK_COLOR_IDLE
+                SensorConfigWork.STATE_WORK -> INDICATOR_BACK_COLOR_WORK
+                SensorConfigWork.STATE_OVER -> INDICATOR_BACK_COLOR_OVER
+                else -> INDICATOR_BACK_COLOR_NO_DATA
             }
             drawColor = when (sensorValue) {
-                null -> INDICATOR_BORDER_COLOR_NO_DATA
-                false -> INDICATOR_BORDER_COLOR_OFF
-                true -> INDICATOR_BORDER_COLOR_ON
+                SensorConfigWork.STATE_OFF -> INDICATOR_BORDER_COLOR_OFF
+                SensorConfigWork.STATE_IDLE -> INDICATOR_BORDER_COLOR_IDLE
+                SensorConfigWork.STATE_WORK -> INDICATOR_BORDER_COLOR_WORK
+                SensorConfigWork.STATE_OVER -> INDICATOR_BORDER_COLOR_OVER
+                else -> INDICATOR_BORDER_COLOR_NO_DATA
             }
-            lineWidth = 4
+            lineWidth = if (sensorValue == null) {
+                1
+            } else {
+                4
+            }
         }.let { xyElement ->
             alResult.add(xyElement)
         }
@@ -152,7 +168,11 @@ class SchemeWorkIndicatorStateService(
                 anchorX = XyElement.Anchor.CC
                 anchorY = XyElement.Anchor.LT
                 text = getDateTimeDMYHMSString(userConfig.timeOffset, lastDataTime)
-                textColor = TEXT_COLOR
+                textColor = if (getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD) {
+                    TEXT_COLOR_CRITICAL
+                } else {
+                    TEXT_COLOR_NORMAL
+                }
                 fillColor = null
                 drawColor = null
                 lineWidth = null
@@ -164,7 +184,7 @@ class SchemeWorkIndicatorStateService(
                     scale <= 60_000 -> 10
                     else -> 9
                 }
-                isFontBold = false
+                isFontBold = getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD
             }.let { xyElement ->
                 alResult.add(xyElement)
             }

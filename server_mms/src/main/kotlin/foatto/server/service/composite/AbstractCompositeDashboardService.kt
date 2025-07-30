@@ -23,7 +23,7 @@ import foatto.server.ds.CoreTelematicFunction
 import foatto.server.entity.DeviceEntity
 import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository

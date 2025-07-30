@@ -3,12 +3,15 @@ package foatto.server.service.scheme
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
+import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getRandomInt
 import foatto.core.util.getSplittedDouble
 import foatto.server.calc.DataValueStateEnum
+import foatto.server.calc.getPrecision
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.service.ApplicationService
@@ -57,7 +60,8 @@ class SchemeAnalogueIndicatorStateService(
 
         private const val INDICATOR_MULTIPLICATOR_COLOR = 0xFF_A0_A0_A0.toInt()
 
-        private const val TEXT_COLOR = 0xFF_00_00_00.toInt()
+        private const val TEXT_COLOR_NORMAL = 0xFF_00_00_00.toInt()
+        private const val TEXT_COLOR_CRITICAL = 0xFF_FF_00_00.toInt()
     }
 
     override fun getElementConfigs(): Map<String, XyElementConfig> = initXyElementConfig(level = 10, minScale = MIN_SCALE, maxScale = MAX_SCALE).apply {
@@ -173,7 +177,7 @@ class SchemeAnalogueIndicatorStateService(
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
             text = sensorEntity.descr ?: "-"
-            textColor = TEXT_COLOR
+            textColor = TEXT_COLOR_NORMAL
             fillColor = null
             drawColor = null
             lineWidth = null
@@ -281,7 +285,7 @@ class SchemeAnalogueIndicatorStateService(
                             }
                             anchorY = XyElement.Anchor.RB
                             text = getSplittedDouble(value / valueMultiplicator, prec)
-                            textColor = TEXT_COLOR
+                            textColor = TEXT_COLOR_NORMAL
                             fillColor = null
                             drawColor = null
                             lineWidth = null
@@ -304,7 +308,7 @@ class SchemeAnalogueIndicatorStateService(
                                 XyPoint(x0 + dx2, y0 + dy2),
                             )
                             fillColor = null
-                            drawColor = TEXT_COLOR
+                            drawColor = TEXT_COLOR_NORMAL
                             lineWidth = 4
                         }.let { xyElement ->
                             alResult.add(xyElement)
@@ -360,8 +364,8 @@ class SchemeAnalogueIndicatorStateService(
                             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
                             startAngle = 180
                             sweepAngle = 360
-                            fillColor = TEXT_COLOR
-                            drawColor = TEXT_COLOR
+                            fillColor = TEXT_COLOR_NORMAL
+                            drawColor = TEXT_COLOR_NORMAL
                             lineWidth = 1
                         }.let { xyElement ->
                             alResult.add(xyElement)
@@ -380,7 +384,7 @@ class SchemeAnalogueIndicatorStateService(
                                 XyPoint(x0 + dx, y0 + dy),
                             )
                             fillColor = null
-                            drawColor = TEXT_COLOR
+                            drawColor = TEXT_COLOR_NORMAL
 //                            when (dataValueStateEnum) {
 //                                DataValueStateEnum.OFF -> ARROW_COLOR_NEUTRAL
 //                                DataValueStateEnum.NEUTRAL -> ARROW_COLOR_NEUTRAL
@@ -403,13 +407,13 @@ class SchemeAnalogueIndicatorStateService(
             anchorY = XyElement.Anchor.LT
             text = sensorValue?.let { sv ->
                 val dim = sensorEntity.dim?.trim() ?: ""
-                getSplittedDouble(sv, 1) + if (dim.isNotEmpty()) {
+                getSplittedDouble(sv, getPrecision(sv)) + if (dim.isNotEmpty()) {
                     " [$dim]"
                 } else {
                     ""
                 }
             } ?: "-"
-            textColor = TEXT_COLOR
+            textColor = TEXT_COLOR_NORMAL
             fillColor = null
             drawColor = null
             lineWidth = null
@@ -433,7 +437,11 @@ class SchemeAnalogueIndicatorStateService(
                 anchorX = XyElement.Anchor.CC
                 anchorY = XyElement.Anchor.LT
                 text = getDateTimeDMYHMSString(userConfig.timeOffset, lastDataTime)
-                textColor = TEXT_COLOR
+                textColor = if (getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD) {
+                    TEXT_COLOR_CRITICAL
+                } else {
+                    TEXT_COLOR_NORMAL
+                }
                 fillColor = null
                 drawColor = null
                 lineWidth = null
@@ -445,7 +453,7 @@ class SchemeAnalogueIndicatorStateService(
                     scale <= 60_000 -> 10
                     else -> 9
                 }
-                isFontBold = false
+                isFontBold = getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD
             }.let { xyElement ->
                 alResult.add(xyElement)
             }

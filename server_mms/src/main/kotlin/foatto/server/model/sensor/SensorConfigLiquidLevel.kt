@@ -1,4 +1,4 @@
-package foatto.server.model
+package foatto.server.model.sensor
 
 class SensorConfigLiquidLevel {
     companion object {

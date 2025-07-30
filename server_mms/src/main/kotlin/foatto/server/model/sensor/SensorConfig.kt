@@ -1,8 +1,11 @@
-package foatto.server.model
+package foatto.server.model.sensor
 
 class SensorConfig {
 
     companion object {
+
+        //--- критичный период отсутствия связи и/или данных
+        const val CRITICAL_OFF_PERIOD: Int = 3600
 
         //--- предопределённый номер порта для гео-датика
         const val GEO_PORT_NUM = 19

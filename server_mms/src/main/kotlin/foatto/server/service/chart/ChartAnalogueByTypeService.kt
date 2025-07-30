@@ -4,12 +4,10 @@ import foatto.core.model.request.ChartActionRequest
 import foatto.core.model.response.ChartActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.chart.*
-import foatto.core.util.getCurrentTimeInt
 import foatto.server.entity.SensorEntity
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
-import foatto.server.util.AdvancedLogger
 import jakarta.persistence.EntityManager
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service

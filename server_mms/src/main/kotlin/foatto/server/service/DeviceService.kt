@@ -36,10 +36,10 @@ import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
-import foatto.server.model.SensorConfig
-import foatto.server.model.SensorConfigCounter
-import foatto.server.model.SensorConfigGeo
-import foatto.server.model.SensorConfigLiquidLevel
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigCounter
+import foatto.server.model.sensor.SensorConfigGeo
+import foatto.server.model.sensor.SensorConfigLiquidLevel
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.DeviceManageRepository
 import foatto.server.repository.DeviceRepository
@@ -902,12 +902,14 @@ class DeviceService(
             maxIgnore = 1_000_000_000.0,
             dim = null,
 
-            isAboveBorder = true,
-            onOffBorder = null,
-            idleBorder = null,
-            limitBorder = null,
-            minOnTime = 1,
-            minOffTime = 1,
+            isWorkAboveBorder = true,
+            workOnBorder = null,
+            workIdleBorder = null,
+            workOverBorder = null,
+            workMinOnTime = 1,
+            workMinOffTime = 1,
+            workMinIdleTime = 1,
+            workMinOverTime = 1,
 
             minView = minView,
             maxView = maxView,

@@ -7,8 +7,8 @@ import foatto.server.ds.PulsarConfig
 import foatto.server.ds.PulsarConfigResult
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.entity.SensorEntity
-import foatto.server.model.SensorConfig
-import foatto.server.model.SensorConfigGeo
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
@@ -125,12 +125,14 @@ class MMSPulsarConfigService(
                 maxIgnore = sensor.maxIgnore,
                 dim = sensor.dim,
 
-                isAboveBorder = sensor.isAboveBorder,
-                onOffBorder = sensor.onOffBorder,
-                idleBorder = sensor.idleBorder,
-                limitBorder = sensor.limitBorder,
-                minOnTime = sensor.minOnTime,
-                minOffTime = sensor.minOffTime,
+                isWorkAboveBorder = sensor.isAboveBorder,
+                workOnBorder = sensor.onOffBorder,
+                workIdleBorder = sensor.idleBorder,
+                workOverBorder = sensor.limitBorder,
+                workMinOffTime = sensor.minOffTime,
+                workMinOnTime = sensor.minOnTime,
+                workMinIdleTime = sensor.minIdleTime,
+                workMinOverTime = sensor.minOverTime,
 
                 minView = sensor.minView,
                 maxView = sensor.maxView,

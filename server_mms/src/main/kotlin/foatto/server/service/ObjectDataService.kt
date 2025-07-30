@@ -17,7 +17,7 @@ import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
 import foatto.server.entity.ObjectEntity
 import foatto.server.model.AppModuleConfig
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository

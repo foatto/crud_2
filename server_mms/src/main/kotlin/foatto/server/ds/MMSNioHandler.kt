@@ -1,7 +1,7 @@
 package foatto.server.ds
 
 import foatto.server.entity.SensorEntity
-import foatto.server.model.SensorConfigGeo
+import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.sql.CoreAdvancedConnection
 import kotlinx.datetime.TimeZone
 import java.nio.channels.SocketChannel
@@ -101,7 +101,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                         is_absolute_run , speed_round_rule , run_koef ,
                         is_use_pos , is_use_speed , is_use_run ,
                     ignore_min_sensor , ignore_max_sensor , dim ,
-                    active_value , bound_value , idle_border , limit_border , min_on_time , min_off_time ,
+                    active_value , bound_value , idle_border , limit_border , min_off_time , min_on_time , min_idle_time , min_over_time ,  
                     analog_min_view , analog_max_view , analog_min_limit , analog_max_limit , smooth_time ,   
                     is_absolute_count , in_out_type ,  
                     container_type ,
@@ -146,12 +146,14 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 maxIgnore = rs.getDouble(pos++),
                 dim = rs.getString(pos++),
 
-                isAboveBorder = rs.getInt(pos++) != 0,
-                onOffBorder = rs.getDouble(pos++),
-                idleBorder = rs.getDouble(pos++),
-                limitBorder = rs.getDouble(pos++),
-                minOnTime = rs.getInt(pos++),
-                minOffTime = rs.getInt(pos++),
+                isWorkAboveBorder = rs.getInt(pos++) != 0,
+                workOnBorder = rs.getDouble(pos++),
+                workIdleBorder = rs.getDouble(pos++),
+                workOverBorder = rs.getDouble(pos++),
+                workMinOffTime = rs.getInt(pos++),
+                workMinOnTime = rs.getInt(pos++),
+                workMinIdleTime = rs.getInt(pos++),
+                workMinOverTime = rs.getInt(pos++),
 
                 minView = rs.getDouble(pos++),
                 maxView = rs.getDouble(pos++),

@@ -4,7 +4,7 @@ import foatto.server.calc.WorkCalcData
 import foatto.server.calc.WorkPeriodData
 import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service

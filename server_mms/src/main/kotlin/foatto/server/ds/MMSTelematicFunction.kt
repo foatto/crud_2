@@ -5,7 +5,8 @@ import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getDateTimeYMDHMSString
 import foatto.server.entity.SensorEntity
-import foatto.server.model.SensorConfig
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigWork
 import foatto.server.service.SensorService
 import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.util.AdvancedByteBuffer
@@ -589,85 +590,102 @@ object MMSTelematicFunction {
             return
         }
 
-        val borderValue = sensorEntity.idleBorder ?: sensorEntity.onOffBorder
-        val workValue: Boolean = borderValue?.let {
-            sensorEntity.isAboveBorder?.let { isAboveBorder ->
-                if (isAboveBorder) {
-                    sensorValue > borderValue
-                } else {
-                    sensorValue < borderValue
-                }
-            } ?: false
-        } ?: false
-
-        val rs = conn.executeQuery(
-            """
-                SELECT ontime_0 , ontime_1 , type_0
-                FROM MMS_agg_${sensorEntity.id}
-                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} ) 
-            """
-        )
-        val (onTime0, onTime1, prevValue) = if (rs.next()) {
-            Triple(rs.getInt(1), rs.getInt(2), rs.getInt(3) != 0)
-        } else {
-            Triple(0, 0, null)
-        }
-        rs.close()
-
-        prevValue?.let {
-            if (workValue == prevValue) {
-                //--- продлеваем предыдущий период
-                conn.executeUpdate(
-                    """
-                        UPDATE MMS_agg_${sensorEntity.id} 
-                        SET ontime_1 = $pointTime 
-                        WHERE ontime_0 = $onTime0 
-                    """
-                )
+        val isWorkAboveBorder = sensorEntity.isWorkAboveBorder ?: true
+        val workState =
+            if (sensorEntity.workOverBorder != null &&
+                (isWorkAboveBorder && sensorValue >= sensorEntity.workOverBorder ||
+                        !isWorkAboveBorder && sensorValue <= sensorEntity.workOverBorder)
+            ) {
+                SensorConfigWork.STATE_OVER
+            } else if (sensorEntity.workOnBorder != null &&
+                (isWorkAboveBorder && sensorValue < sensorEntity.workOnBorder ||
+                        !isWorkAboveBorder && sensorValue > sensorEntity.workOnBorder)
+            ) {
+                SensorConfigWork.STATE_OFF
+            } else if (sensorEntity.workIdleBorder != null &&
+                (isWorkAboveBorder && sensorValue < sensorEntity.workIdleBorder ||
+                        !isWorkAboveBorder && sensorValue > sensorEntity.workIdleBorder)
+            ) {
+                SensorConfigWork.STATE_IDLE
             } else {
-                //--- слишком короткий предыдущий период?
-                if (
-                    !prevValue && (onTime1 - onTime0 < (sensorEntity.minOffTime ?: 0)) ||
-                    prevValue && (onTime1 - onTime0 < (sensorEntity.minOnTime ?: 0))
-                ) {
-                    //--- удаляем слишком короткий предыдущий период
+                SensorConfigWork.STATE_WORK
+            }
+
+        val (onTime0, onTime1, prevState) = getPrevWorkState(conn, sensorEntity.id)
+
+        prevState?.let {
+            if (workState == prevState) {
+                continuePrevPeriod(conn, sensorEntity.id, pointTime)
+            } else {
+                val minTime = when (prevState) {
+                    SensorConfigWork.STATE_OFF -> sensorEntity.workMinOffTime ?: 1
+                    SensorConfigWork.STATE_WORK -> sensorEntity.workMinOnTime ?: 1
+                    SensorConfigWork.STATE_IDLE -> sensorEntity.workMinIdleTime ?: 1
+                    SensorConfigWork.STATE_OVER -> sensorEntity.workMinOverTime ?: 1
+                    else -> 1
+                }
+
+                if (onTime1 - onTime0 < minTime) {
                     conn.executeUpdate(
                         """
                             DELETE FROM MMS_agg_${sensorEntity.id} 
                             WHERE ontime_0 = $onTime0 
                         """
                     )
-                    //--- продлеваем предпредыдущий период, если есть
-                    if (conn.executeUpdate(
-                            """
-                                UPDATE MMS_agg_${sensorEntity.id} 
-                                SET ontime_1 = $pointTime 
-                                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} ) 
-                            """
-                        ) == 0
-                    ) {
-                        //--- или создаём новый период, если не было предпредыдущего
-                        createNewWorkPeriod(conn, sensorEntity.id, pointTime, workValue)
+
+                    val (_, _, prevState2) = getPrevWorkState(conn, sensorEntity.id)
+
+                    prevState2?.let {
+                        if (workState == prevState2) {
+                            continuePrevPeriod(conn, sensorEntity.id, pointTime)
+                        } else {
+                            createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
+                        }
+                    } ?: run {
+                        createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
                     }
                 } else {
-                    createNewWorkPeriod(conn, sensorEntity.id, pointTime, workValue)
+                    createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
                 }
             }
         } ?: run {
-            createNewWorkPeriod(conn, sensorEntity.id, pointTime, workValue)
+            createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
         }
     }
 
-    private fun createNewWorkPeriod(
-        conn: CoreAdvancedConnection,
-        id: Int,
-        pointTime: Int,
-        workValue: Boolean,
-    ) {
+    private fun getPrevWorkState(conn: CoreAdvancedConnection, sensorId: Int): Triple<Int, Int, Int?> {
+        val rs = conn.executeQuery(
+            """
+                SELECT ontime_0 , ontime_1 , type_0
+                FROM MMS_agg_${sensorId}
+                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorId} ) 
+            """
+        )
+        val result = if (rs.next()) {
+            Triple(rs.getInt(1), rs.getInt(2), rs.getInt(3))
+        } else {
+            Triple(0, 0, null)
+        }
+        rs.close()
+
+        return result
+    }
+
+    private fun continuePrevPeriod(conn: CoreAdvancedConnection, sensorId: Int, pointTime: Int) {
         conn.executeUpdate(
             """
-                INSERT INTO MMS_agg_${id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
-                VALUES ( $pointTime , $pointTime , ${if (workValue) 1 else 0} , 0 , 0 , 0 , 0 )  
+                UPDATE MMS_agg_${sensorId} 
+                SET ontime_1 = $pointTime 
+                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorId} ) 
+            """
+        )
+    }
+
+    private fun createNewWorkPeriod(conn: CoreAdvancedConnection, sensorId: Int, pointTime: Int, workState: Int) {
+        conn.executeUpdate(
+            """
+                INSERT INTO MMS_agg_${sensorId} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
+                VALUES ( $pointTime , $pointTime , $workState , 0 , 0 , 0 , 0 )  
             """
         )
     }

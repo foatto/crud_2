@@ -3,15 +3,12 @@ package foatto.server.service.scheme
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
-import foatto.core.util.getCurrentTimeInt
-import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getRandomInt
 import foatto.core.util.getSplittedDouble
 import foatto.server.calc.DataValueStateEnum
 import foatto.server.calc.getPrecision
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
-import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.service.ApplicationService
@@ -29,25 +26,27 @@ class SchemeAnalogueIndicatorStateService(
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
 ) : AbstractSchemeIndicatorStateService(
+    entityManager = entityManager,
     objectRepository = objectRepository,
 ) {
 
     companion object {
-        private const val TYPE_SCHEME_AI_TITLE_TEXT: String = "mms_scheme_ai_title_text"
+        private const val TYPE_SCHEME_AI_TITLE: String = "mms_scheme_ai_title"
 
         private const val TYPE_SCHEME_AI_ARC_LIMIT: String = "mms_scheme_ai_arc_limit"
         private const val TYPE_SCHEME_AI_ARC_BASE: String = "mms_scheme_ai_arc_base"
         private const val TYPE_SCHEME_AI_ARC_NOTCH: String = "mms_scheme_ai_arc_notch"
-        private const val TYPE_SCHEME_AI_ARC_VALUE_TEXT: String = "mms_scheme_ai_arc_value_text"
+        private const val TYPE_SCHEME_AI_ARC_VALUE: String = "mms_scheme_ai_arc_value"
 
         private const val TYPE_SCHEME_AI_MULTIPLICATOR: String = "mms_scheme_ai_multiplicator"
 
         private const val TYPE_SCHEME_AI_ARROW_BASE: String = "mms_scheme_ai_arrow_base"
         private const val TYPE_SCHEME_AI_ARROW: String = "mms_scheme_ai_arrow"
 
-        private const val TYPE_SCHEME_AI_CUR_VALUE_TEXT: String = "mms_scheme_ai_cur_value_text"
-        private const val TYPE_SCHEME_AI_TIME_TEXT: String = "mms_scheme_ai_descr_text"
+        private const val TYPE_SCHEME_AI_CUR_VALUE: String = "mms_scheme_ai_cur_value"
+        private const val TYPE_SCHEME_AI_TIME: String = "mms_scheme_ai_descr"
 
+        private const val INDICATOR_BACK_COLOR_ERROR = 0xFF_FF_D0_D0.toInt()
         private const val INDICATOR_BACK_COLOR_OFF = 0xFF_FF_E0_E0.toInt()
         private const val INDICATOR_BACK_COLOR_NEUTRAL = 0xFF_F0_F0_F0.toInt()
         private const val INDICATOR_BACK_COLOR_NORMAL = 0xFF_E0_FF_E0.toInt()
@@ -59,26 +58,23 @@ class SchemeAnalogueIndicatorStateService(
         private const val INDICATOR_ARC_COLOR_BASE = 0xFF_00_00_00.toInt()
 
         private const val INDICATOR_MULTIPLICATOR_COLOR = 0xFF_A0_A0_A0.toInt()
-
-        private const val TEXT_COLOR_NORMAL = 0xFF_00_00_00.toInt()
-        private const val TEXT_COLOR_CRITICAL = 0xFF_FF_00_00.toInt()
     }
 
     override fun getElementConfigs(): Map<String, XyElementConfig> = initXyElementConfig(level = 10, minScale = MIN_SCALE, maxScale = MAX_SCALE).apply {
-        this[TYPE_SCHEME_AI_TITLE_TEXT] = getTextConfig(TYPE_SCHEME_AI_TITLE_TEXT, 1)
+        this[TYPE_SCHEME_AI_TITLE] = getTextConfig(TYPE_SCHEME_AI_TITLE, 1)
 
         this[TYPE_SCHEME_AI_ARC_LIMIT] = getArcConfig(TYPE_SCHEME_AI_ARC_LIMIT, 1)
         this[TYPE_SCHEME_AI_ARC_BASE] = getArcConfig(TYPE_SCHEME_AI_ARC_BASE, 2)
         this[TYPE_SCHEME_AI_ARC_NOTCH] = getLineConfig(TYPE_SCHEME_AI_ARC_NOTCH, 2)
-        this[TYPE_SCHEME_AI_ARC_VALUE_TEXT] = getTextConfig(TYPE_SCHEME_AI_ARC_VALUE_TEXT, 2)
+        this[TYPE_SCHEME_AI_ARC_VALUE] = getTextConfig(TYPE_SCHEME_AI_ARC_VALUE, 2)
 
         this[TYPE_SCHEME_AI_MULTIPLICATOR] = getTextConfig(TYPE_SCHEME_AI_MULTIPLICATOR, 3)
 
         this[TYPE_SCHEME_AI_ARROW_BASE] = getArcConfig(TYPE_SCHEME_AI_ARROW_BASE, 3)
         this[TYPE_SCHEME_AI_ARROW] = getLineConfig(TYPE_SCHEME_AI_ARROW, 3)
 
-        this[TYPE_SCHEME_AI_CUR_VALUE_TEXT] = getTextConfig(TYPE_SCHEME_AI_CUR_VALUE_TEXT, 1)
-        this[TYPE_SCHEME_AI_TIME_TEXT] = getTextConfig(TYPE_SCHEME_AI_TIME_TEXT, 1)
+        this[TYPE_SCHEME_AI_CUR_VALUE] = getTextConfig(TYPE_SCHEME_AI_CUR_VALUE, 1)
+        this[TYPE_SCHEME_AI_TIME] = getTextConfig(TYPE_SCHEME_AI_TIME, 1)
     }
 
     override fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement> {
@@ -88,11 +84,10 @@ class SchemeAnalogueIndicatorStateService(
 
         val valueMultiplicator = sensorEntity.indicatorMultiplicator ?: 1.0
 
-        var sensorTime: Int? = null
-        var sensorValue: Double? = null
-
         SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
+        var sensorTime: Int? = null
+        var sensorValue: Double? = null
         ApplicationService.withConnection(entityManager) { conn ->
             val rs = conn.executeQuery(
                 """
@@ -109,6 +104,9 @@ class SchemeAnalogueIndicatorStateService(
             }
             rs.close()
         }
+
+        val (errorTime, errorMessage) = getErrorText(sensorEntity.id)
+        val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
 
         val dataValueStateEnum = sensorValue?.let { value ->
             sensorEntity.minLimit?.let { minLimit ->
@@ -171,28 +169,16 @@ class SchemeAnalogueIndicatorStateService(
 
         //--- заголовок
 
-        XyElement(TYPE_SCHEME_AI_TITLE_TEXT, -getRandomInt(), sensorId).apply {
-            isReadOnly = true
-            alPoint = listOf(XyPoint(x0, 1 * GRID_STEP))
-            anchorX = XyElement.Anchor.CC
-            anchorY = XyElement.Anchor.RB
-            text = sensorEntity.descr ?: "-"
-            textColor = TEXT_COLOR_NORMAL
-            fillColor = null
-            drawColor = null
-            lineWidth = null
-            fontSize = when {
-                scale <= 12_000 -> 18
-                scale <= 24_000 -> 14
-                scale <= 36_000 -> 12
-                scale <= 48_000 -> 11
-                scale <= 60_000 -> 10
-                else -> 9
-            }
-            isFontBold = true
-        }.let { xyElement ->
-            alResult.add(xyElement)
-        }
+        addTitleElement(
+            sensorEntity = sensorEntity,
+            sensorTime = sensorTime,
+            errorTime = errorTime,
+            elementType = TYPE_SCHEME_AI_TITLE,
+            x = x0,
+            y = 1 * GRID_STEP,
+            scale = scale,
+            alResult = alResult,
+        )
 
         //--- по краю шкалы - широкая цветная дуга лимитов
 
@@ -231,11 +217,15 @@ class SchemeAnalogueIndicatorStateService(
             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
             startAngle = 180
             sweepAngle = 180
-            fillColor = when (dataValueStateEnum) {
-                DataValueStateEnum.OFF -> INDICATOR_BACK_COLOR_OFF
-                DataValueStateEnum.NEUTRAL -> INDICATOR_BACK_COLOR_NEUTRAL
-                DataValueStateEnum.NORMAL -> INDICATOR_BACK_COLOR_NORMAL
-                DataValueStateEnum.CRITICAL -> INDICATOR_BACK_COLOR_CRITICAL
+            fillColor = if (isErrorStatus) {
+                INDICATOR_BACK_COLOR_ERROR
+            } else {
+                when (dataValueStateEnum) {
+                    DataValueStateEnum.OFF -> INDICATOR_BACK_COLOR_OFF
+                    DataValueStateEnum.NEUTRAL -> INDICATOR_BACK_COLOR_NEUTRAL
+                    DataValueStateEnum.NORMAL -> INDICATOR_BACK_COLOR_NORMAL
+                    DataValueStateEnum.CRITICAL -> INDICATOR_BACK_COLOR_CRITICAL
+                }
             }
             drawColor = INDICATOR_ARC_COLOR_BASE
             lineWidth = 1
@@ -273,7 +263,7 @@ class SchemeAnalogueIndicatorStateService(
                         val dx2 = -cos(radian) * (GRID_STEP * 4 - GRID_STEP / 8)
                         val dy2 = -sin(radian) * (GRID_STEP * 4 - GRID_STEP / 8)
 
-                        XyElement(TYPE_SCHEME_AI_ARC_VALUE_TEXT, -getRandomInt(), sensorId).apply {
+                        XyElement(TYPE_SCHEME_AI_ARC_VALUE, -getRandomInt(), sensorId).apply {
                             isReadOnly = true
                             alPoint = listOf(XyPoint(x0 + dxt, y0 + dyt))
                             anchorX = if (value < avgValue) {
@@ -385,12 +375,6 @@ class SchemeAnalogueIndicatorStateService(
                             )
                             fillColor = null
                             drawColor = TEXT_COLOR_NORMAL
-//                            when (dataValueStateEnum) {
-//                                DataValueStateEnum.OFF -> ARROW_COLOR_NEUTRAL
-//                                DataValueStateEnum.NEUTRAL -> ARROW_COLOR_NEUTRAL
-//                                DataValueStateEnum.NORMAL -> ARROW_COLOR_NORMAL
-//                                DataValueStateEnum.CRITICAL -> ARROW_COLOR_CRITICAL
-//                            }
                             lineWidth = 4
                         }.let { xyElement ->
                             alResult.add(xyElement)
@@ -400,24 +384,35 @@ class SchemeAnalogueIndicatorStateService(
             }
         }
 
-        XyElement(TYPE_SCHEME_AI_CUR_VALUE_TEXT, -getRandomInt(), sensorId).apply {
+        val valueText = sensorValue?.let { sv ->
+            val dim = sensorEntity.dim?.trim() ?: ""
+            getSplittedDouble(sv, getPrecision(sv)) + if (dim.isNotEmpty()) {
+                " [$dim]"
+            } else {
+                ""
+            }
+        } ?: "-"
+
+        XyElement(TYPE_SCHEME_AI_CUR_VALUE, -getRandomInt(), sensorId).apply {
             isReadOnly = true
             alPoint = listOf(XyPoint(x0, y0 + GRID_STEP / 4))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.LT
-            text = sensorValue?.let { sv ->
-                val dim = sensorEntity.dim?.trim() ?: ""
-                getSplittedDouble(sv, getPrecision(sv)) + if (dim.isNotEmpty()) {
-                    " [$dim]"
-                } else {
-                    ""
-                }
-            } ?: "-"
-            textColor = TEXT_COLOR_NORMAL
+            text = if (isErrorStatus) {
+                errorMessage ?: "(неизвестная ошибка)"
+            } else {
+                valueText
+            }
+            textColor = if (isErrorStatus) {
+                TEXT_COLOR_CRITICAL
+            } else {
+                TEXT_COLOR_NORMAL
+            }
             fillColor = null
             drawColor = null
             lineWidth = null
             fontSize = when {
+                isErrorStatus -> 12
                 scale <= 12_000 -> 40
                 scale <= 24_000 -> 32
                 scale <= 36_000 -> 24
@@ -430,34 +425,17 @@ class SchemeAnalogueIndicatorStateService(
             alResult.add(xyElement)
         }
 
-        sensorTime?.let { lastDataTime ->
-            XyElement(TYPE_SCHEME_AI_TIME_TEXT, -getRandomInt(), sensorId).apply {
-                isReadOnly = true
-                alPoint = listOf(XyPoint(x0, 7 * GRID_STEP + GRID_STEP / 4))
-                anchorX = XyElement.Anchor.CC
-                anchorY = XyElement.Anchor.LT
-                text = getDateTimeDMYHMSString(userConfig.timeOffset, lastDataTime)
-                textColor = if (getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD) {
-                    TEXT_COLOR_CRITICAL
-                } else {
-                    TEXT_COLOR_NORMAL
-                }
-                fillColor = null
-                drawColor = null
-                lineWidth = null
-                fontSize = when {
-                    scale <= 12_000 -> 18
-                    scale <= 24_000 -> 14
-                    scale <= 36_000 -> 12
-                    scale <= 48_000 -> 11
-                    scale <= 60_000 -> 10
-                    else -> 9
-                }
-                isFontBold = getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD
-            }.let { xyElement ->
-                alResult.add(xyElement)
-            }
-        }
+        addTimeElement(
+            userConfig = userConfig,
+            sensorId = sensorId,
+            sensorTime = sensorTime,
+            errorTime = errorTime,
+            elementType = TYPE_SCHEME_AI_TIME,
+            x = x0,
+            y = 7 * GRID_STEP + GRID_STEP / 4,
+            scale = scale,
+            alResult = alResult,
+        )
 
         return alResult
     }

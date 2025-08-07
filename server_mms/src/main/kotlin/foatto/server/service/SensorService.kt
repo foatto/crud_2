@@ -227,7 +227,7 @@ class SensorService(
                     ontime_1        INT,         
                     type_0          INT,
                     code_0          INT,
-                    message_0       VARCHAR(250),
+                    message_0       VARCHAR(125),
                     text_0          TEXT
                 )
             """,

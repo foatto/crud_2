@@ -13,15 +13,23 @@ import foatto.core.model.response.xy.XyElementClientType
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.model.response.xy.scheme.SchemeResponse
+import foatto.core.util.getCurrentTimeInt
+import foatto.core.util.getDateTimeDMYHMSString
+import foatto.core.util.getRandomInt
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
+import foatto.server.entity.SensorEntity
 import foatto.server.model.ServerUserConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
+import foatto.server.service.ApplicationService
+import jakarta.persistence.EntityManager
 import org.springframework.data.repository.findByIdOrNull
 import kotlin.math.max
 
 abstract class AbstractSchemeIndicatorStateService(
+    private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
 ) {
 
@@ -37,6 +45,10 @@ abstract class AbstractSchemeIndicatorStateService(
 
         const val SCHEME_WIDTH: Int = 12
         const val SCHEME_HEIGHT: Int = 8
+
+
+        const val TEXT_COLOR_NORMAL = 0xFF_00_00_00.toInt()
+        const val TEXT_COLOR_CRITICAL = 0xFF_FF_00_00.toInt()
     }
 
     fun scheme(
@@ -119,6 +131,115 @@ abstract class AbstractSchemeIndicatorStateService(
     }
 
     protected abstract fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement>
+
+    protected fun getErrorText(sensorId: Int): Pair<Int?, String?> {
+        var errorTime: Int? = null
+        var errorValue: String? = null
+        ApplicationService.withConnection(entityManager) { conn ->
+            val rs = conn.executeQuery(
+                """
+                    SELECT ontime_1, message_0
+                    FROM MMS_text_${sensorId}
+                    WHERE ontime_1 = (
+                        SELECT MAX(ontime_1) FROM MMS_text_${sensorId} 
+                    )
+                """
+            )
+            if (rs.next()) {
+                errorTime = rs.getInt(1)
+                errorValue = rs.getString(2)
+            }
+            rs.close()
+        }
+
+        return errorTime to errorValue
+    }
+
+    protected fun addTitleElement(
+        sensorEntity: SensorEntity,
+        sensorTime: Int?,
+        errorTime: Int?,
+        elementType: String,
+        x: Int,
+        y: Int,
+        scale: Float,
+        alResult: MutableList<XyElement>,
+    ) {
+        val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
+        XyElement(elementType, -getRandomInt(), sensorEntity.id).apply {
+            isReadOnly = true
+            alPoint = listOf(XyPoint(x, y))
+            anchorX = XyElement.Anchor.CC
+            anchorY = XyElement.Anchor.RB
+            text = sensorEntity.descr ?: "-"
+            textColor = if (isErrorStatus) {
+                TEXT_COLOR_CRITICAL
+            } else {
+                TEXT_COLOR_NORMAL
+            }
+            fillColor = null
+            drawColor = null
+            lineWidth = null
+            fontSize = when {
+                scale <= 12_000 -> 18
+                scale <= 24_000 -> 14
+                scale <= 36_000 -> 12
+                scale <= 48_000 -> 11
+                scale <= 60_000 -> 10
+                else -> 9
+            }
+            isFontBold = true
+        }.let { xyElement ->
+            alResult.add(xyElement)
+        }
+    }
+
+    protected fun addTimeElement(
+        userConfig: ServerUserConfig,
+        sensorId: Int,
+        sensorTime: Int?,
+        errorTime: Int?,
+        elementType: String,
+        x: Int,
+        y: Int,
+        scale: Float,
+        alResult: MutableList<XyElement>,
+    ) {
+        val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
+        val lastDataTime = if (isErrorStatus) {
+            errorTime
+        } else {
+            sensorTime
+        }
+        lastDataTime?.let {
+            XyElement(elementType, -getRandomInt(), sensorId).apply {
+                isReadOnly = true
+                alPoint = listOf(XyPoint(x, y))
+                anchorX = XyElement.Anchor.CC
+                anchorY = XyElement.Anchor.LT
+                text = getDateTimeDMYHMSString(userConfig.timeOffset, lastDataTime)
+                textColor = if (isErrorStatus || getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD) {
+                    TEXT_COLOR_CRITICAL
+                } else {
+                    TEXT_COLOR_NORMAL
+                }
+                fillColor = null
+                drawColor = null
+                lineWidth = null
+                fontSize = when {
+                    scale <= 12_000 -> 18
+                    scale <= 24_000 -> 14
+                    scale <= 36_000 -> 12
+                    scale <= 48_000 -> 11
+                    scale <= 60_000 -> 10
+                    else -> 9
+                }
+                isFontBold = isErrorStatus || getCurrentTimeInt() - lastDataTime > SensorConfig.CRITICAL_OFF_PERIOD
+            }.let { xyElement ->
+                alResult.add(xyElement)
+            }
+        }
+    }
 
     protected fun getArcConfig(name: String, layer: Int) = XyElementConfig(
         name = name,

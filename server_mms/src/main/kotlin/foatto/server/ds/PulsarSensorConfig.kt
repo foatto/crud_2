@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 class PulsarSensorConfig(
     val id: Int,            // ID (тип) датчика
 
-    val group: String,      // группа датчиков
     val descr: String,      // описание датчика
     val serialNo: String,   // серийный номер датчика
 

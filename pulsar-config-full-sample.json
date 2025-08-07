@@ -1,0 +1,75 @@
+{
+  "name": "Контроллер ДГУ1",
+  "serialNo": "1089",
+  "sensors": [
+    {
+      "id": 1234,
+      "descr": "объёмный расход 1",
+      "serialNo": "2334508",
+      "minIgnore": 0.0,
+      "maxIgnore": 1000000.0,
+      "dim": "кг/с",
+
+      //--- только для датчиков работы оборудования:
+
+      "isAboveBorder": true,
+      "onOffBorder": 0.0,
+      "idleBorder": 5.0,
+      "limitBorder": 100.0,
+      "minOffTime": 1,
+      "minOnTime": 1,
+      "minIdleTime": 1,
+      "minOverTime": 1,
+
+      //--- для контрольных датчиков
+
+      "minView": 0.0,
+      "maxView": 100.0,
+      "minLimit": 5.0,
+      "maxLimit": 90.0,
+      "smoothTime": 0,
+
+      //--- для счётных/накопительных датчиков
+
+      "isAbsoluteCount": true,
+      "inOutType": 1,
+
+      //--- для уровнемеров
+
+      "containerType": 1,
+
+      //--- для энерго-датчиков
+
+      "phase": 0,
+
+      //--- для расчёта расхода топлива по нормативам
+
+      "liquidName": "ДТ-200",
+      "liquidNorm": 15.0,
+
+      //--- тарировка
+
+      "sensorValues": [
+        0.0,
+        1.0,
+        2.0,
+        3.0
+      ],
+
+      "dataValues": [
+        0.0,
+        1000.0,
+        2000.0,
+        3000.0
+      ]
+    },
+
+    {
+      ... ещё датчик ...
+    },
+
+    {
+      ... ещё датчик ...
+    }
+  ]
+}

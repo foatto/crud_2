@@ -103,7 +103,7 @@ class MMSPulsarConfigService(
                 id = recordId,
                 obj = objectEntity,
                 name = "",
-                group = sensor.group,
+                group = "",
                 descr = sensor.descr,
                 portNum = (lastDeviceIndex + 1) * CoreTelematicFunction.MAX_PORT_PER_DEVICE + portNum + sensorIndex,
                 sensorType = sensorType,

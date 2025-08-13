@@ -110,9 +110,6 @@ class SensorService(
         private const val FIELD_CONTAINER_TYPE = "containerType"
         private const val FIELD_PHASE = "phase"
 
-        private const val FIELD_LIQUID_NAME = "liquidName"
-        private const val FIELD_LIQUID_NORM = "liquidNorm"
-
         private const val FIELD_SCHEME_X = "schemeX"
         private const val FIELD_SCHEME_Y = "schemeY"
 
@@ -277,6 +274,8 @@ class SensorService(
         pageButtons: MutableList<TablePageButton>,
     ): Int? {
 
+        val chartableSensorTypes = setOf(SensorConfig.SENSOR_GEO) + SensorConfig.analogueSensorTypes + SensorConfig.counterSensorTypes
+
         val zoneLocal = getTimeZone(userConfig.timeOffset)
 
         var currentRowNo: Int? = null
@@ -397,6 +396,19 @@ class SensorService(
                     inNewTab = true,
                 )
             }
+            if (sensorEntity.sensorType in chartableSensorTypes && checkAccessPermission(AppModuleMMS.CHART_SENSOR, userConfig.roles)) {
+                popupDatas += TablePopup(
+                    action = AppAction(
+                        type = ActionType.MODULE_CHART,
+                        module = AppModuleMMS.CHART_SENSOR,
+                        id = sensorEntity.id,
+                        timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
+                        //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
+                    ),
+                    text = appModuleConfigs[AppModuleMMS.CHART_SENSOR]?.caption ?: "(неизвестный тип модуля: '${AppModuleMMS.CHART_SENSOR}')",
+                    inNewTab = true,
+                )
+            }
 
             tableRows += TableRow(
                 rowAction = if (isFormEnabled) {
@@ -460,12 +472,12 @@ class SensorService(
             SensorConfig.SENSOR_VOLUME_ACCUMULATED,
         ).map { it.toString() }.toSet()
 
-        val energoSummarySensorTypes = setOf(
-            SensorConfig.SENSOR_ENERGO_COUNT_AD,
-            SensorConfig.SENSOR_ENERGO_COUNT_AR,
-            SensorConfig.SENSOR_ENERGO_COUNT_RD,
-            SensorConfig.SENSOR_ENERGO_COUNT_RR,
-        ).map { it.toString() }.toSet()
+//        val energoSummarySensorTypes = setOf(
+//            SensorConfig.SENSOR_ENERGO_COUNT_AD,
+//            SensorConfig.SENSOR_ENERGO_COUNT_AR,
+//            SensorConfig.SENSOR_ENERGO_COUNT_RD,
+//            SensorConfig.SENSOR_ENERGO_COUNT_RR,
+//        ).map { it.toString() }.toSet()
 
         val phasedEnergoSensorTypes = setOf(
             SensorConfig.SENSOR_ENERGO_VOLTAGE,
@@ -977,40 +989,7 @@ class SensorService(
             ),
         )
 
-        //--- common for geo sensors, discrete, counting, liquid level, density, total mass and total volume
-
-        formCells += FormSimpleCell(
-            name = FIELD_LIQUID_NAME,
-            caption = "Наименование топлива",
-            isEditable = changeEnabled,
-            value = sensorEntity?.liquidName ?: "",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType + workSensorType + counterAndSummarySensorTypes + liquidLevelSensorType,
-            ),
-        )
-
         //--- common for geo and discrete sensors ------------------------------------------------------------------------------------------------
-
-        formCells += FormSimpleCell(
-            name = FIELD_LIQUID_NORM,
-            caption = "-",
-            isEditable = changeEnabled,
-            value = sensorEntity?.liquidNorm?.toString() ?: "0.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType + workSensorType,
-            ),
-            captions = FormCellCaption(
-                name = FIELD_SENSOR_TYPE,
-                captions = mapOf(
-                    "Норматив расхода топлива [л/100км]" to geoSensorType,
-                    "Норматив расхода топлива [л/час]" to workSensorType,
-                ),
-            ),
-        )
 
         formCells += FormSimpleCell(
             name = FIELD_SCHEME_X,
@@ -1109,8 +1088,6 @@ class SensorService(
             inOutType = formActionData[FIELD_IN_OUT_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigCounter.CALC_TYPE_OUT,
             containerType = formActionData[FIELD_CONTAINER_TYPE]?.stringValue?.toIntOrNull() ?: SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
             phase = formActionData[FIELD_PHASE]?.stringValue?.toIntOrNull() ?: 0,
-            liquidName = formActionData[FIELD_LIQUID_NAME]?.stringValue ?: "",
-            liquidNorm = formActionData[FIELD_LIQUID_NORM]?.stringValue?.toDoubleOrNull() ?: 0.0,
             schemeX = formActionData[FIELD_SCHEME_X]?.stringValue?.toIntOrNull(),
             schemeY = formActionData[FIELD_SCHEME_Y]?.stringValue?.toIntOrNull(),
         )

@@ -4,10 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class PulsarSensorConfig(
-    val id: Int,            // ID (тип) датчика
+    val id: String,         // IDxxxx - тип датчика в hex
 
     val descr: String,      // описание датчика
-    val serialNo: String,   // серийный номер датчика
 
     //--- для всех типов датчиков
 
@@ -76,11 +75,6 @@ class PulsarSensorConfig(
     //--- 2 - фаза B
     //--- 3 - фаза C
     val phase: Int? = null,
-
-    //--- наименование топлива для расчёта по нормативам
-    val liquidName: String? = null,
-    //--- норматив расхода (л/100км или л/моточас)
-    val liquidNorm: Double? = null,
 
     //--- тарировка
     val sensorValues: List<Double> = emptyList(),     // значения датчика

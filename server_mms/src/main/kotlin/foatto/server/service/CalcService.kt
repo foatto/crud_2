@@ -24,22 +24,12 @@ class CalcService(
         objectEntity: ObjectEntity,
         begTime: Int,
         endTime: Int,
-        byGroupLiquidSum: SortedMap<String, SortedMap<String, Double>>,
-        allLiquidSum: SortedMap<String, Double>,
     ): SortedMap<String, WorkCalcData> {
         val tmWork = sortedMapOf<String, WorkCalcData>()
 
         sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_WORK, begTime, endTime).forEach { sensorEntity ->
             val wcd = calcWorkSensor(sensorEntity, begTime, endTime)
             tmWork[sensorEntity.descr ?: ""] = wcd
-
-            addLiquidUsingSum(
-                groupName = wcd.group,
-                liquidName = wcd.liquidName,
-                using = wcd.liquidCalc,
-                byGroupLiquidSum = byGroupLiquidSum,
-                allLiquidSum = allLiquidSum,
-            )
         }
 
         return tmWork
@@ -84,18 +74,10 @@ class CalcService(
                 wpd.endTime - wpd.begTime
             }
 
-        val liquidCalc = if (!sensorEntity.liquidName.isNullOrBlank()) {
-            (sensorEntity.liquidNorm ?: 0.0) * onTime / 60.0 / 60.0
-        } else {
-            null
-        }
-
         return WorkCalcData(
             group = sensorEntity.group ?: "",
             states = states,
             onTime = onTime,
-            liquidName = sensorEntity.liquidName,
-            liquidCalc = liquidCalc,
         )
     }
 
@@ -135,99 +117,6 @@ class CalcService(
     }
 
 //---------------------------------------------------------------------------------------------------------------------
-
-    fun calcLiquidUsing(
-        objectEntity: ObjectEntity,
-        begTime: Int,
-        endTime: Int,
-        byGroupLiquidSum: SortedMap<String, SortedMap<String, Double>>,
-        allLiquidSum: SortedMap<String, Double>,
-    ) {
-        listOf(
-            SensorConfig.SENSOR_MASS_ACCUMULATED,
-            SensorConfig.SENSOR_VOLUME_ACCUMULATED,
-            SensorConfig.SENSOR_LIQUID_USING,
-        ).forEach { sensorType ->
-            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
-                if (!sensorEntity.liquidName.isNullOrBlank()) {
-                    val result = calcCounterSensor(sensorEntity, begTime, endTime)
-
-                    addLiquidUsingSum(
-                        groupName = sensorEntity.group,
-                        liquidName = sensorEntity.liquidName,
-                        using = result,
-                        byGroupLiquidSum = byGroupLiquidSum,
-                        allLiquidSum = allLiquidSum,
-                    )
-                }
-            }
-        }
-    }
-
-//---------------------------------------------------------------------------------------------------------------------
-
-    fun calcLiquidLevel(
-        objectEntity: ObjectEntity,
-        begTime: Int,
-        endTime: Int,
-        byGroupLiquidSum: SortedMap<String, SortedMap<String, Double>>,
-        allLiquidSum: SortedMap<String, Double>,
-    ) {
-    }
-//    val tmLiquidLevel = sortedMapOf<String, LiquidLevelCalcData>()
-
-//            //--- liquid level sensors
-//            oc.hmSensorConfig[SensorConfig.SENSOR_LIQUID_LEVEL]?.values?.forEach { sc ->
-//                calcLiquidLevel(alRawTime, alRawData, conn, oc, sc as SensorConfigLiquidLevel, begTime, endTime, 0, result)
-//            }
-//
-
-//        private fun calcLiquidLevel(
-//            alRawTime: List<Int>,
-//            alRawData: List<AdvancedByteBuffer>,
-//            conn: CoreAdvancedConnection,
-//            oc: ObjectConfig,
-//            scll: SensorConfigLiquidLevel,
-//            begTime: Int,
-//            endTime: Int,
-//            axisIndex: Int,
-//            result: ObjectCalc
-//        ) {
-//            val llcd = calcLiquidLevelSensor(conn, oc, scll, alRawTime, alRawData, begTime, endTime, axisIndex)
-//
-//            result.tmLiquidLevel[scll.descr] = llcd
-//
-//            result.tmLiquidUsing["${scll.descr} ${scll.liquidName}"] = llcd.usingTotal
-//            addLiquidUsingSum(scll.group, scll.liquidName, llcd.usingTotal, result)
-//
-//            val groupSum = result.tmGroupSum.getOrPut(scll.group) { CalcSumData() }
-//            groupSum.addLiquidLevel(scll.descr, llcd.incTotal, llcd.decTotal)
-//
-//            result.allSumData.addLiquidLevel(scll.descr, llcd.incTotal, llcd.decTotal)
-//        }
-//
-
-//        fun calcLiquidLevelSensor(
-//            conn: CoreAdvancedConnection,
-//            oc: ObjectConfig,
-//            sca: SensorConfigLiquidLevel,
-//            alRawTime: List<Int>,
-//            alRawData: List<AdvancedByteBuffer>,
-//            begTime: Int,
-//            endTime: Int,
-//            axisIndex: Int,
-//        ): LiquidLevelCalcData {
-//
-//            val aLine = ChartElementDTO(ChartElementTypeDTO.LINE, 0, 2, false)
-//            val alLSPD = mutableListOf<LiquidStatePeriodData>()
-//            getSmoothLiquidGraphicData(conn, alRawTime, alRawData, oc.scg, sca, begTime, endTime, axisIndex, aLine, alLSPD)
-//
-//            val llcd = LiquidLevelCalcData(sca.containerType, aLine, alLSPD)
-//            calcLiquidUsingByLevel(sca, llcd, conn, oc, begTime, endTime, axisIndex)
-//
-//            return llcd
-//        }
-//
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -353,25 +242,6 @@ class CalcService(
         }
 
         return result
-    }
-
-    private fun addLiquidUsingSum(
-        groupName: String?,
-        liquidName: String?,
-        using: Double?,
-        byGroupLiquidSum: SortedMap<String, SortedMap<String, Double>>,
-        allLiquidSum: SortedMap<String, Double>,
-    ) {
-        liquidName?.let {
-            using?.let {
-                val groupSum = byGroupLiquidSum.getOrPut(groupName ?: "") { sortedMapOf() }
-                val prevGroupValue = groupSum[liquidName] ?: 0.0
-                groupSum[liquidName] = prevGroupValue + using
-
-                val prevAllValue = allLiquidSum[liquidName] ?: 0.0
-                allLiquidSum[liquidName] = prevAllValue + using
-            }
-        }
     }
 
 }

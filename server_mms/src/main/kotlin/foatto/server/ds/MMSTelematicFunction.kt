@@ -442,6 +442,7 @@ object MMSTelematicFunction {
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
         }
+
         val dataValue = getDataValue(sensorCalibration, sensorValue)
 
         val smoothPeriod = sensorEntity.smoothTime ?: 0
@@ -483,8 +484,8 @@ object MMSTelematicFunction {
 
         conn.executeUpdate(
             """
-                INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
-                VALUES ( $pointTime , $pointTime , 0 , $dataValue , $smoothValue , 0 , 0 )  
+                INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , value_0 , value_1 ) 
+                VALUES ( $pointTime , $pointTime , $dataValue , $smoothValue )  
             """
         )
     }
@@ -533,21 +534,7 @@ object MMSTelematicFunction {
             deltaValue = 0.0
         }
 
-        var rs = conn.executeQuery(
-            """
-                SELECT SUM(value_1)
-                FROM MMS_agg_${sensorEntity.id}
-                WHERE ontime_0 > ${pointTime - 60}
-            """
-        )
-        val lastMinuteSum = if (rs.next()) {
-            rs.getDouble(1)
-        } else {
-            0.0
-        }
-        rs.close()
-
-        rs = conn.executeQuery(
+        val rs = conn.executeQuery(
             """
                 SELECT SUM(value_1)
                 FROM MMS_agg_${sensorEntity.id}
@@ -563,8 +550,8 @@ object MMSTelematicFunction {
 
         conn.executeUpdate(
             """
-                INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
-                VALUES ( $pointTime , $pointTime , 0 , $dataValue , $deltaValue , ${lastMinuteSum + deltaValue} , ${lastHourSum + deltaValue} )  
+                INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , value_0 , value_1 , value_2 ) 
+                VALUES ( $pointTime , $pointTime , $dataValue , $deltaValue , ${lastHourSum + deltaValue} )  
             """
         )
     }
@@ -684,8 +671,8 @@ object MMSTelematicFunction {
     private fun createNewWorkPeriod(conn: CoreAdvancedConnection, sensorId: Int, pointTime: Int, workState: Int) {
         conn.executeUpdate(
             """
-                INSERT INTO MMS_agg_${sensorId} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
-                VALUES ( $pointTime , $pointTime , $workState , 0 , 0 , 0 , 0 )  
+                INSERT INTO MMS_agg_${sensorId} ( ontime_0 , ontime_1 , type_0 ) 
+                VALUES ( $pointTime , $pointTime , $workState )  
             """
         )
     }

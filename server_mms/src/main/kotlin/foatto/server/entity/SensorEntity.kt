@@ -149,12 +149,6 @@ class SensorEntity(
 
     //--- base sensor attributes
 
-    @Column(name = "liquid_name")
-    val liquidName: String?,
-
-    @Column(name = "liquid_norm")
-    val liquidNorm: Double?,
-
     @Column(name = "scheme_x")
     val schemeX: Int?,
 
@@ -181,12 +175,12 @@ class SensorEntity(
         if (minIgnore != other.minIgnore) return false
         if (maxIgnore != other.maxIgnore) return false
         if (isWorkAboveBorder != other.isWorkAboveBorder) return false
-        if (workIdleBorder != other.workIdleBorder) return false
         if (workOnBorder != other.workOnBorder) return false
+        if (workIdleBorder != other.workIdleBorder) return false
         if (workOverBorder != other.workOverBorder) return false
         if (workMinOffTime != other.workMinOffTime) return false
-        if (workMinIdleTime != other.workMinIdleTime) return false
         if (workMinOnTime != other.workMinOnTime) return false
+        if (workMinIdleTime != other.workMinIdleTime) return false
         if (workMinOverTime != other.workMinOverTime) return false
         if (minView != other.minView) return false
         if (maxView != other.maxView) return false
@@ -199,7 +193,6 @@ class SensorEntity(
         if (inOutType != other.inOutType) return false
         if (containerType != other.containerType) return false
         if (phase != other.phase) return false
-        if (liquidNorm != other.liquidNorm) return false
         if (schemeX != other.schemeX) return false
         if (schemeY != other.schemeY) return false
         if (obj != other.obj) return false
@@ -208,7 +201,6 @@ class SensorEntity(
         if (descr != other.descr) return false
         if (serialNo != other.serialNo) return false
         if (dim != other.dim) return false
-        if (liquidName != other.liquidName) return false
 
         return true
     }
@@ -230,12 +222,12 @@ class SensorEntity(
         result = 31 * result + (minIgnore?.hashCode() ?: 0)
         result = 31 * result + (maxIgnore?.hashCode() ?: 0)
         result = 31 * result + (isWorkAboveBorder?.hashCode() ?: 0)
-        result = 31 * result + (workIdleBorder?.hashCode() ?: 0)
         result = 31 * result + (workOnBorder?.hashCode() ?: 0)
+        result = 31 * result + (workIdleBorder?.hashCode() ?: 0)
         result = 31 * result + (workOverBorder?.hashCode() ?: 0)
         result = 31 * result + (workMinOffTime ?: 0)
-        result = 31 * result + (workMinIdleTime ?: 0)
         result = 31 * result + (workMinOnTime ?: 0)
+        result = 31 * result + (workMinIdleTime ?: 0)
         result = 31 * result + (workMinOverTime ?: 0)
         result = 31 * result + (minView?.hashCode() ?: 0)
         result = 31 * result + (maxView?.hashCode() ?: 0)
@@ -248,7 +240,6 @@ class SensorEntity(
         result = 31 * result + (inOutType ?: 0)
         result = 31 * result + (containerType ?: 0)
         result = 31 * result + (phase ?: 0)
-        result = 31 * result + (liquidNorm?.hashCode() ?: 0)
         result = 31 * result + (schemeX ?: 0)
         result = 31 * result + (schemeY ?: 0)
         result = 31 * result + (obj?.hashCode() ?: 0)
@@ -257,7 +248,6 @@ class SensorEntity(
         result = 31 * result + (descr?.hashCode() ?: 0)
         result = 31 * result + (serialNo?.hashCode() ?: 0)
         result = 31 * result + (dim?.hashCode() ?: 0)
-        result = 31 * result + (liquidName?.hashCode() ?: 0)
         return result
     }
 }

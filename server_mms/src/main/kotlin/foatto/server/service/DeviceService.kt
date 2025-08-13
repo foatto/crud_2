@@ -926,9 +926,6 @@ class DeviceService(
 
             phase = phase,
 
-            liquidName = null,
-            liquidNorm = null,
-
             schemeX = null,
             schemeY = null,
         )

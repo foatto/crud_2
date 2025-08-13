@@ -103,10 +103,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                     ignore_min_sensor , ignore_max_sensor , dim ,
                     active_value , bound_value , idle_border , limit_border , min_off_time , min_on_time , min_idle_time , min_over_time ,  
                     analog_min_view , analog_max_view , analog_min_limit , analog_max_limit , smooth_time ,   
-                    is_absolute_count , in_out_type ,  
-                    container_type ,
-                    energo_phase ,                             
-                    liquid_name , liquid_norm
+                    is_absolute_count , in_out_type , container_type , energo_phase
                 FROM MMS_sensor
                 WHERE id <> 0 
                 AND object_id = ${dc.objectId}                         
@@ -165,13 +162,8 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
 
                 isAbsoluteCount = rs.getInt(pos++) != 0,
                 inOutType = rs.getInt(pos++),
-
                 containerType = rs.getInt(pos++),
-
                 phase = rs.getInt(pos++),
-
-                liquidName = rs.getString(pos++),
-                liquidNorm = rs.getDouble(pos++),
 
                 schemeX = null,
                 schemeY = null,

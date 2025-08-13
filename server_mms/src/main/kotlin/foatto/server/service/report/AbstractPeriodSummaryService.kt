@@ -97,9 +97,9 @@ abstract class AbstractPeriodSummaryService(
         val byGroupLiquidSum = sortedMapOf<String, SortedMap<String, Double>>()
         val allLiquidSum = sortedMapOf<String, Double>()
 
-        val tmWork = calcService.calcWork(objectEntity, begTime, endTime, byGroupLiquidSum, allLiquidSum)
+        val tmWork = calcService.calcWork(objectEntity, begTime, endTime)
         val tmEnergo = calcService.calcEnergo(objectEntity, begTime, endTime)
-        calcService.calcLiquidUsing(objectEntity, begTime, endTime, byGroupLiquidSum, allLiquidSum)
+//        calcService.calcLiquidUsing(objectEntity, begTime, endTime, byGroupLiquidSum, allLiquidSum)
 
         var offsY = aOffsY
 

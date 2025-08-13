@@ -11,6 +11,8 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
 
     fun findByObj(obj: ObjectEntity): List<SensorEntity>
 
+    fun findByPortNumAndSensorType(portNum: Int, sensorType: Int): List<SensorEntity>
+
     @Query(
         """
             SELECT se

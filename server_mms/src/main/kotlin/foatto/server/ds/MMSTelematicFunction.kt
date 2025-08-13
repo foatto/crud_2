@@ -580,18 +580,18 @@ object MMSTelematicFunction {
         val isWorkAboveBorder = sensorEntity.isWorkAboveBorder ?: true
         val workState =
             if (sensorEntity.workOverBorder != null &&
-                (isWorkAboveBorder && sensorValue >= sensorEntity.workOverBorder ||
-                        !isWorkAboveBorder && sensorValue <= sensorEntity.workOverBorder)
+                (isWorkAboveBorder && sensorValue >= sensorEntity.workOverBorder!! ||
+                        !isWorkAboveBorder && sensorValue <= sensorEntity.workOverBorder!!)
             ) {
                 SensorConfigWork.STATE_OVER
             } else if (sensorEntity.workOnBorder != null &&
-                (isWorkAboveBorder && sensorValue < sensorEntity.workOnBorder ||
-                        !isWorkAboveBorder && sensorValue > sensorEntity.workOnBorder)
+                (isWorkAboveBorder && sensorValue < sensorEntity.workOnBorder!! ||
+                        !isWorkAboveBorder && sensorValue > sensorEntity.workOnBorder!!)
             ) {
                 SensorConfigWork.STATE_OFF
             } else if (sensorEntity.workIdleBorder != null &&
-                (isWorkAboveBorder && sensorValue < sensorEntity.workIdleBorder ||
-                        !isWorkAboveBorder && sensorValue > sensorEntity.workIdleBorder)
+                (isWorkAboveBorder && sensorValue < sensorEntity.workIdleBorder!! ||
+                        !isWorkAboveBorder && sensorValue > sensorEntity.workIdleBorder!!)
             ) {
                 SensorConfigWork.STATE_IDLE
             } else {

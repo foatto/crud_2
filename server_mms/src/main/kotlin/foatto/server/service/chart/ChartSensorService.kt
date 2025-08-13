@@ -160,11 +160,11 @@ class ChartSensorService(
             lineWidth = 3,
             colorFun = { value: Double ->
                 when {
-                    sensorEntity.minLimit != null && sensorEntity.minLimit != sensorEntity.maxLimit && value < sensorEntity.minLimit -> {
+                    sensorEntity.minLimit != null && sensorEntity.minLimit != sensorEntity.maxLimit && value < sensorEntity.minLimit!! -> {
                         getChartLineBelowColor(axisIndex)
                     }
 
-                    sensorEntity.maxLimit != null && sensorEntity.minLimit != sensorEntity.maxLimit && value > sensorEntity.maxLimit -> {
+                    sensorEntity.maxLimit != null && sensorEntity.minLimit != sensorEntity.maxLimit && value > sensorEntity.maxLimit!! -> {
                         getChartLineAboveColor(axisIndex)
                     }
 

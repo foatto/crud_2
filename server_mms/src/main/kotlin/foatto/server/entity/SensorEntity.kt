@@ -19,7 +19,7 @@ class SensorEntity(
     @Column(name = "group_name")
     val group: String?,      // sensor group name for sensors logical linking and/or grouping
 
-    val descr: String?,      // sensor visible description
+    var descr: String?,      // sensor visible description
 
     @Column(name = "port_num")
     var portNum: Int?,
@@ -71,56 +71,56 @@ class SensorEntity(
     //--- for all sensor tpes (exclude geo-sensor)
 
     @Column(name = "ignore_min_sensor")
-    val minIgnore: Double?,
+    var minIgnore: Double?,
 
     @Column(name = "ignore_max_sensor")
-    val maxIgnore: Double?,
+    var maxIgnore: Double?,
 
-    val dim: String?,
+    var dim: String?,
 
     //--- equipment working sensors
 
     @Convert(converter = BooleanToIntConverter::class)
     @Column(name = "active_value")
-    val isWorkAboveBorder: Boolean?,
+    var isWorkAboveBorder: Boolean?,
 
     @Column(name = "bound_value")
-    val workOnBorder: Double?,
+    var workOnBorder: Double?,
 
     @Column(name = "idle_border")
-    val workIdleBorder: Double?,
+    var workIdleBorder: Double?,
 
     @Column(name = "limit_border")
-    val workOverBorder: Double?,
+    var workOverBorder: Double?,
 
     @Column(name = "min_off_time")
-    val workMinOffTime: Int?,
+    var workMinOffTime: Int?,
 
     @Column(name = "min_on_time")
-    val workMinOnTime: Int?,
+    var workMinOnTime: Int?,
 
     @Column(name = "min_idle_time")
-    val workMinIdleTime: Int?,
+    var workMinIdleTime: Int?,
 
     @Column(name = "min_over_time")
-    val workMinOverTime: Int?,
+    var workMinOverTime: Int?,
 
     //--- analogue sensor attributes
 
     @Column(name = "analog_min_view")
-    val minView: Double?,
+    var minView: Double?,
 
     @Column(name = "analog_max_view")
-    val maxView: Double?,
+    var maxView: Double?,
 
     @Column(name = "analog_min_limit")
-    val minLimit: Double?,
+    var minLimit: Double?,
 
     @Column(name = "analog_max_limit")
-    val maxLimit: Double?,
+    var maxLimit: Double?,
 
     @Column(name = "smooth_time")
-    val smoothTime: Int?,
+    var smoothTime: Int?,
 
     @Column(name = "analog_indicator_delimiter_count")
     val indicatorDelimiterCount: Int?,
@@ -132,10 +132,10 @@ class SensorEntity(
 
     @Convert(converter = BooleanToIntConverter::class)
     @Column(name = "is_absolute_count")
-    val isAbsoluteCount: Boolean?,
+    var isAbsoluteCount: Boolean?,
 
     @Column(name = "in_out_type")
-    val inOutType: Int?,
+    var inOutType: Int?,
 
     //--- liquid level sensors only
 
@@ -145,7 +145,7 @@ class SensorEntity(
     //--- energo sensor attributes
 
     @Column(name = "energo_phase")
-    val phase: Int?,
+    var phase: Int?,
 
     //--- base sensor attributes
 

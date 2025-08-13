@@ -112,28 +112,28 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
 //    )
 //    fun findByObjAndGroupAndSensorTypeIn(obj: ObjectEntity, group: String?, sensorTypes: Collection<Int>): List<SensorEntity>
 
-    @Query(
-        """
-            SELECT se
-            FROM SensorEntity se
-            LEFT JOIN se.obj oe
-            WHERE se.id <> 0
-                AND oe = ?1
-                AND se.group = ?2
-                AND se.sensorType IN ?3
-                AND (
-                       se.endTime IS NULL
-                    OR ?4 IS NULL
-                    OR ?4 <= se.endTime
-                )
-                AND (
-                       se.begTime IS NULL
-                    OR ?5 IS NULL 
-                    OR ?5 >= se.begTime
-                )
-        """
-    )
-    fun findByObjAndGroupAndSensorTypeInAndPeriod(obj: ObjectEntity, group: String?, sensorTypes: Collection<Int>, begTime: Int?, endTime: Int?): List<SensorEntity>
+//    @Query(
+//        """
+//            SELECT se
+//            FROM SensorEntity se
+//            LEFT JOIN se.obj oe
+//            WHERE se.id <> 0
+//                AND oe = ?1
+//                AND se.group = ?2
+//                AND se.sensorType IN ?3
+//                AND (
+//                       se.endTime IS NULL
+//                    OR ?4 IS NULL
+//                    OR ?4 <= se.endTime
+//                )
+//                AND (
+//                       se.begTime IS NULL
+//                    OR ?5 IS NULL
+//                    OR ?5 >= se.begTime
+//                )
+//        """
+//    )
+//    fun findByObjAndGroupAndSensorTypeInAndPeriod(obj: ObjectEntity, group: String?, sensorTypes: Collection<Int>, begTime: Int?, endTime: Int?): List<SensorEntity>
 
 //    fun findByObjAndDescr(obj: ObjectEntity, descr: String): List<SensorEntity>
 

@@ -14,7 +14,4 @@ class ChartActionRequest(
 ) : BaseRequest(
     url = appModuleUrls[action.module]?.chartActionUrl ?: ApiUrl.ERROR,
 )
-//{
-//    val hmParam: MutableMap<String, String> = mutableMapOf()
-//}
 

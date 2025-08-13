@@ -3,4 +3,8 @@ package foatto.core.model.response.chart
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class ChartElementType { BACK, LINE, TEXT }
+class ChartElementBackData(
+    val x1: Int,
+    val x2: Int,
+    val color: Int,
+)

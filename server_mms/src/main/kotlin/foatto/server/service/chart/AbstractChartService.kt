@@ -7,22 +7,13 @@ import foatto.core.model.response.AppResponse
 import foatto.core.model.response.ChartActionResponse
 import foatto.core.model.response.HeaderData
 import foatto.core.model.response.ResponseCode
-import foatto.core.model.response.TitleData
-import foatto.core.model.response.chart.ChartColorIndex
-import foatto.core.model.response.chart.ChartElement
-import foatto.core.model.response.chart.ChartElementLine
 import foatto.core.model.response.chart.ChartResponse
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
-import foatto.server.entity.SensorEntity
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
-import foatto.server.service.ApplicationService
-import foatto.server.service.SensorService
 import jakarta.persistence.EntityManager
-import org.springframework.data.repository.findByIdOrNull
-import kotlin.math.abs
 
 abstract class AbstractChartService(
     private val entityManager: EntityManager,
@@ -31,61 +22,97 @@ abstract class AbstractChartService(
 ) {
 
     companion object {
+        val FILL_NEUTRAL: ULong = 0xFF_E0_FF_FF.toULong()
+        val FILL_NORMAL: ULong = 0xFF_E0_FF_E0.toULong()
+        val FILL_WARNING: ULong = 0xFF_FF_FF_E0.toULong()
+        val FILL_CRITICAL: ULong = 0xFF_FF_E0_E0.toULong()
 
-        val hmIndexColor: Map<ChartColorIndex, Int> = mapOf(
-            ChartColorIndex.FILL_NEUTRAL to 0xFF_E0_FF_FF.toInt(),
-            ChartColorIndex.FILL_NORMAL to 0xFF_E0_FF_E0.toInt(),
-            ChartColorIndex.FILL_WARNING to 0xFF_FF_FF_E0.toInt(),
-            ChartColorIndex.FILL_CRITICAL to 0xFF_FF_E0_E0.toInt(),
+        val BORDER_NEUTRAL: ULong = 0xFF_C0_FF_FF.toULong()
+        val BORDER_NORMAL: ULong = 0xFF_B0_F0_B0.toULong()
+        val BORDER_WARNING: ULong = 0xFF_E0_E0_C0.toULong()
+        val BORDER_CRITICAL: ULong = 0xFF_FF_C0_C0.toULong()
 
-            ChartColorIndex.BORDER_NEUTRAL to 0xFF_C0_FF_FF.toInt(),
-            ChartColorIndex.BORDER_NORMAL to 0xFF_B0_F0_B0.toInt(),
-            ChartColorIndex.BORDER_WARNING to 0xFF_E0_E0_C0.toInt(),
-            ChartColorIndex.BORDER_CRITICAL to 0xFF_FF_C0_C0.toInt(),
+        val TEXT_NEUTRAL: ULong = 0xFF_00_00_80.toULong()
+        val TEXT_NORMAL: ULong = 0xFF_00_80_00.toULong()
+        val TEXT_WARNING: ULong = 0xFF_80_80_00.toULong()
+        val TEXT_CRITICAL: ULong = 0xFF_80_00_00.toULong()
 
-            ChartColorIndex.TEXT_NEUTRAL to 0xFF_00_00_80.toInt(),
-            ChartColorIndex.TEXT_NORMAL to 0xFF_00_80_00.toInt(),
-            ChartColorIndex.TEXT_WARNING to 0xFF_80_80_00.toInt(),
-            ChartColorIndex.TEXT_CRITICAL to 0xFF_80_00_00.toInt(),
+        val POINT_NEUTRAL: ULong = 0xFF_C0_C0_FF.toULong()
+        val POINT_NORMAL: ULong = 0xFF_C0_FF_C0.toULong()
+        val POINT_BELOW: ULong = 0xFF_E0_E0_A0.toULong()
+        val POINT_ABOVE: ULong = 0xFF_FF_C0_C0.toULong()
 
-            ChartColorIndex.POINT_NEUTRAL to 0xFF_C0_C0_FF.toInt(),
-            ChartColorIndex.POINT_NORMAL to 0xFF_C0_FF_C0.toInt(),
-            ChartColorIndex.POINT_BELOW to 0xFF_E0_E0_A0.toInt(),
-            ChartColorIndex.POINT_ABOVE to 0xFF_FF_C0_C0.toInt(),
+        val AXIS_0: ULong = 0xFF_80_C0_80.toULong()
+        val AXIS_1: ULong = 0xFF_80_80_C0.toULong()
+        val AXIS_2: ULong = 0xFF_C0_80_80.toULong()
+        val AXIS_3: ULong = 0xFF_C0_80_C0.toULong()
 
-            ChartColorIndex.AXIS_0 to 0xFF_80_C0_80.toInt(),
-            ChartColorIndex.AXIS_1 to 0xFF_80_80_C0.toInt(),
-            ChartColorIndex.AXIS_2 to 0xFF_C0_80_80.toInt(),
-            ChartColorIndex.AXIS_3 to 0xFF_C0_80_C0.toInt(),
+        val LINE_LIMIT: ULong = 0xFF_FF_A0_A0.toULong()
 
-            ChartColorIndex.LINE_LIMIT to 0xFF_FF_A0_A0.toInt(),
+        val LINE_NONE_0: ULong = 0x00_80_80_80.toULong()
+        val LINE_NORMAL_0: ULong = 0xFF_00_E0_00.toULong()
+        val LINE_BELOW_0: ULong = 0xFF_00_60_E0.toULong()
+        val LINE_ABOVE_0: ULong = 0xFF_E0_60_00.toULong()
 
-            ChartColorIndex.LINE_NONE_0 to 0x00_80_80_80.toInt(),
-            ChartColorIndex.LINE_NORMAL_0 to 0xFF_00_E0_00.toInt(),
-            ChartColorIndex.LINE_BELOW_0 to 0xFF_00_60_E0.toInt(),
-            ChartColorIndex.LINE_ABOVE_0 to 0xFF_E0_60_00.toInt(),
+        val LINE_NONE_1: ULong = 0x00_90_90_90.toULong()
+        val LINE_NORMAL_1: ULong = 0xFF_00_00_E0.toULong()
 
-            ChartColorIndex.LINE_NONE_1 to 0x00_90_90_90.toInt(),
-            ChartColorIndex.LINE_NORMAL_1 to 0xFF_00_00_E0.toInt(),
+        val LINE_NONE_2: ULong = 0x00_A0_A0_A0.toULong()
+        val LINE_NORMAL_2: ULong = 0xFF_E0_00_00.toULong()
 
-            ChartColorIndex.LINE_NONE_2 to 0x00_A0_A0_A0.toInt(),
-            ChartColorIndex.LINE_NORMAL_2 to 0xFF_E0_00_00.toInt(),
+        val LINE_NONE_3: ULong = 0x00_B0_B0_B0.toULong()
+        val LINE_NORMAL_3: ULong = 0xFF_E0_00_E0.toULong()
 
-            ChartColorIndex.LINE_NONE_3 to 0x00_B0_B0_B0.toInt(),
-            ChartColorIndex.LINE_NORMAL_3 to 0xFF_E0_00_E0.toInt(),
+        private val chartAxisColor: List<ULong> = listOf(
+            AXIS_0,
+            AXIS_1,
+            AXIS_2,
+            AXIS_3,
         )
 
-        const val UP_GRAPHIC_VISIBLE: String = "graphic_visible_"
+        private val chartLineNoneColor: List<ULong> = listOf(
+            LINE_NONE_0,
+            LINE_NONE_1,
+            LINE_NONE_2,
+            LINE_NONE_3,
+        )
+
+        private val chartLineNormalColor: List<ULong> = listOf(
+            LINE_NORMAL_0,
+            LINE_NORMAL_1,
+            LINE_NORMAL_2,
+            LINE_NORMAL_3,
+        )
+
+        private val chartLineBelowColor: List<ULong> = listOf(
+            LINE_BELOW_0,
+            LINE_BELOW_0,
+            LINE_BELOW_0,
+            LINE_BELOW_0,
+        )
+
+        private val chartLineAboveColor: List<ULong> = listOf(
+            LINE_ABOVE_0,
+            LINE_ABOVE_0,
+            LINE_ABOVE_0,
+            LINE_ABOVE_0,
+        )
+
+        fun getChartAxisColor(index: Int): ULong = chartAxisColor[index % chartAxisColor.size]
+        fun getChartLineNoneColor(index: Int): ULong = chartLineNoneColor[index % chartLineNoneColor.size]
+        fun getChartLineNormalColor(index: Int): ULong = chartLineNormalColor[index % chartLineNormalColor.size]
+        fun getChartLineBelowColor(index: Int): ULong = chartLineBelowColor[index % chartLineBelowColor.size]
+        fun getChartLineAboveColor(index: Int): ULong = chartLineAboveColor[index % chartLineAboveColor.size]
     }
 
-/*
-    //--- данные по гео-датчику ( движение/стоянка/ошибка ) показываем только на первом/верхнем графике
-    protected var isGeoSensorShowed = false
+    /*
+        //--- данные по гео-датчику ( движение/стоянка/ошибка ) показываем только на первом/верхнем графике
+        protected var isGeoSensorShowed = false
 
-    //--- общие нештатные ситуации показываем только на первом/верхнем графике
-    protected var isCommonTroubleShowed = false
-*/
-    
+        //--- общие нештатные ситуации показываем только на первом/верхнем графике
+        protected var isCommonTroubleShowed = false
+    */
+
     fun chart(
         sessionId: Long,
         action: AppAction,
@@ -98,28 +125,13 @@ abstract class AbstractChartService(
             return AppResponse(ResponseCode.LOGON_NEED)
         }
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        val objectEntity = objectRepository.findByIdOrNull(action.id) ?: return AppResponse(ResponseCode.LOGON_NEED)
 
-        val caption = moduleConfig.caption
-        val rows = listOf(
-            "Наименование объекта" to (objectEntity.name ?: "-"),
-            "Модель" to (objectEntity.model ?: "-"),
-        )
 
         return AppResponse(
             responseCode = ResponseCode.MODULE_CHART,
             chart = ChartResponse(
-                tabCaption = caption,
-                headerData = HeaderData(
-                    titles = listOf(
-                        TitleData(
-                            action = null,
-                            text = caption,
-                            isBold = true,
-                        )
-                    ),
-                    rows = rows,
-                ),
+                tabCaption = moduleConfig.caption,
+                headerData = getChartHeader(action),
             )
         )
     }
@@ -147,43 +159,9 @@ abstract class AbstractChartService(
         }
     }
 
+    protected abstract fun getChartHeader(action: AppAction): HeaderData
+
     protected abstract fun getCharts(chartActionRequest: ChartActionRequest): ChartActionResponse
-
-    protected fun getLines(
-        sensorEntity: SensorEntity,
-        valueIndex: Int,
-        begTime: Int,
-        endTime: Int,
-        xScale: Float,
-        yScale: Float,
-        colorIndexFun: (value: Double) -> ChartColorIndex,
-        lines: ChartElement,
-    ) {
-        SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
-
-        ApplicationService.withConnection(entityManager) { conn ->
-            val rs = conn.executeQuery(
-                """
-                    SELECT ontime_0, value_$valueIndex
-                    FROM MMS_agg_${sensorEntity.id}
-                    WHERE ontime_0 BETWEEN $begTime AND $endTime
-                    ORDER BY ontime_0
-                """
-            )
-            while (rs.next()) {
-                val time = rs.getInt(1)
-                val value = rs.getDouble(2)
-
-                val curColorIndex = colorIndexFun(value)
-
-                val lastPoint = lines.lines.lastOrNull()
-                if (lastPoint == null || time - lastPoint.x > xScale || abs(value - lastPoint.y) > yScale || curColorIndex != lastPoint.colorIndex) {
-                    lines.lines += ChartElementLine(time, value.toFloat(), curColorIndex)
-                }
-            }
-            rs.close()
-        }
-    }
 
 }
 

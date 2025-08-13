@@ -712,13 +712,10 @@ class CompositeControl(
                 continue
             }
             block.chartBlock?.doChartRefresh(null, false)
-//                ?: run {
-//                    block.chartBlock?.doChartRefresh(null, false)
                 ?: block.mapBlock?.mapRefreshView(null, false)
                 ?: block.schemeBlock?.schemeRefreshView(null, false)
                 ?: block.tableBlock?.refreshTableFromComposite()
                 ?: println("refreshAll: не задан тип блока!")
-//                }
         }
     }
 

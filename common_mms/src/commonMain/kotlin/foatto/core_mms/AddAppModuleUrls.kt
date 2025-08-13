@@ -45,19 +45,19 @@ fun addAppModuleUrls() {
         formActionUrl = ApiUrlMMS.DEVICE_MANAGE_FORM_ACTION,
     )
 
-    appModuleUrls[AppModuleMMS.DAY_WORK] = AppModuleUrl(
-        appUrl = ApiUrlMMS.DAY_WORK,
-        formActionUrl = ApiUrlMMS.DAY_WORK_FORM_ACTION,
-    )
+//    appModuleUrls[AppModuleMMS.DAY_WORK] = AppModuleUrl(
+//        appUrl = ApiUrlMMS.DAY_WORK,
+//        formActionUrl = ApiUrlMMS.DAY_WORK_FORM_ACTION,
+//    )
 
-    appModuleUrls[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleUrl(
-        appUrl = ApiUrlMMS.CHART_LIQUID_LEVEL,
-        chartActionUrl = ApiUrlMMS.CHART_LIQUID_LEVEL_ACTION,
+    appModuleUrls[AppModuleMMS.CHART_SENSOR] = AppModuleUrl(
+        appUrl = ApiUrlMMS.CHART_SENSOR,
+        chartActionUrl = ApiUrlMMS.CHART_SENSOR_ACTION,
     )
-    appModuleUrls[AppModuleMMS.CHART_ANALOGUE_BY_TYPE] = AppModuleUrl(
-        appUrl = ApiUrlMMS.CHART_ANALOGUE_BY_TYPE,
-        chartActionUrl = ApiUrlMMS.CHART_ANALOGUE_BY_TYPE_ACTION,
-    )
+//    appModuleUrls[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleUrl(
+//        appUrl = ApiUrlMMS.CHART_LIQUID_LEVEL,
+//        chartActionUrl = ApiUrlMMS.CHART_LIQUID_LEVEL_ACTION,
+//    )
 
     appModuleUrls[AppModuleMMS.MAP_TRACE] = AppModuleUrl(
         appUrl = ApiUrlMMS.MAP_TRACE,
@@ -77,17 +77,26 @@ fun addAppModuleUrls() {
         schemeActionUrl = ApiUrlMMS.SCHEME_WORK_INDICATOR_STATE_ACTION,
     )
 
-    appModuleUrls[AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD] = AppModuleUrl(
-        appUrl = ApiUrlMMS.COMPOSITE_OBJECT_DASHBOARD,
-        compositeActionUrl = ApiUrlMMS.COMPOSITE_OBJECT_DASHBOARD_ACTION,
+    appModuleUrls[AppModuleMMS.OBJECT_SCHEME_DASHBOARD] = AppModuleUrl(
+        appUrl = ApiUrlMMS.OBJECT_SCHEME_DASHBOARD,
+        compositeActionUrl = ApiUrlMMS.OBJECT_SCHEME_DASHBOARD_ACTION,
     )
-    appModuleUrls[AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD] = AppModuleUrl(
-        appUrl = ApiUrlMMS.COMPOSITE_OBJECT_LIST_DASHBOARD,
-        compositeActionUrl = ApiUrlMMS.COMPOSITE_OBJECT_LIST_DASHBOARD_ACTION,
+    appModuleUrls[AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD] = AppModuleUrl(
+        appUrl = ApiUrlMMS.OBJECT_LIST_SCHEME_DASHBOARD,
+        compositeActionUrl = ApiUrlMMS.OBJECT_LIST_SCHEME_DASHBOARD_ACTION,
     )
 
-    appModuleUrls[AppModuleMMS.REPORT_SUMMARY] = AppModuleUrl(
-        appUrl = ApiUrlMMS.REPORT_SUMMARY,
-        formActionUrl = ApiUrlMMS.REPORT_SUMMARY_FORM_ACTION,
+    appModuleUrls[AppModuleMMS.OBJECT_CHART_DASHBOARD] = AppModuleUrl(
+        appUrl = ApiUrlMMS.OBJECT_CHART_DASHBOARD,
+        compositeActionUrl = ApiUrlMMS.OBJECT_CHART_DASHBOARD_ACTION,
     )
+    appModuleUrls[AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD] = AppModuleUrl(
+        appUrl = ApiUrlMMS.OBJECT_LIST_CHART_DASHBOARD,
+        compositeActionUrl = ApiUrlMMS.OBJECT_LIST_CHART_DASHBOARD_ACTION,
+    )
+
+//    appModuleUrls[AppModuleMMS.REPORT_SUMMARY] = AppModuleUrl(
+//        appUrl = ApiUrlMMS.REPORT_SUMMARY,
+//        formActionUrl = ApiUrlMMS.REPORT_SUMMARY_FORM_ACTION,
+//    )
 }

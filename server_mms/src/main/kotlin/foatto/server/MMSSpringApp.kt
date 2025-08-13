@@ -320,47 +320,47 @@ class MMSSpringApp : SpringApp() {
             ),
         )
 
-        appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
-            caption = "Журнал суточных работ",
-            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
-//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-//            disabledAccessRoles = mutableSetOf(),
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
-            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT, AppRole.USER),
-            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
-            disabledFormAddRoles = mutableSetOf(AppRole.USER),
-            rowPermissions = mutableMapOf(
-                ActionType.MODULE_TABLE to Permission(
-                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
-                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
-                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
-                    },
-                ),
-                ActionType.MODULE_FORM to Permission(
-                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-                ),
-                ActionType.FORM_EDIT to Permission(
-                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-                ),
-                ActionType.FORM_DELETE to Permission(
-                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-                ),
-            ),
-        )
+//        appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
+//            caption = "Журнал суточных работ",
+//            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+////            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+////            disabledAccessRoles = mutableSetOf(),
+//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
+//            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT, AppRole.USER),
+//            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+//            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+//            rowPermissions = mutableMapOf(
+//                ActionType.MODULE_TABLE to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+//                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+//                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+//                    },
+//                ),
+//                ActionType.MODULE_FORM to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//                ),
+//                ActionType.FORM_EDIT to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//                ),
+//                ActionType.FORM_DELETE to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//                ),
+//            ),
+//        )
 
-        appModuleConfigs[AppModuleMMS.CHART_ANALOGUE_BY_TYPE] = AppModuleConfig(
-            caption = "Графики по типам датчиков",
+        appModuleConfigs[AppModuleMMS.CHART_SENSOR] = AppModuleConfig(
+            caption = "График по датчику",
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
         )
-        appModuleConfigs[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleConfig(
-            caption = "Графики уровня топлива",
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
-            disabledAccessRoles = mutableSetOf(),
-        )
+//        appModuleConfigs[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleConfig(
+//            caption = "Графики уровня топлива",
+//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
+//            disabledAccessRoles = mutableSetOf(),
+//        )
 
         appModuleConfigs[AppModuleMMS.MAP_TRACE] = AppModuleConfig(
             caption = "Траектория на карте",
@@ -384,42 +384,52 @@ class MMSSpringApp : SpringApp() {
             disabledAccessRoles = mutableSetOf(),
         )
 
-        appModuleConfigs[AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD] = AppModuleConfig(
-            caption = "Контрольная панель объекта: все датчики",
+        appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD] = AppModuleConfig(
+            caption = "Контрольные показатели объекта: все датчики",
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
-        appModuleConfigs[AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD] = AppModuleConfig(
-            caption = "Контрольная панель объектов",
+        appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD] = AppModuleConfig(
+            caption = "Контрольные показатели объектов",
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+        )
+        appModuleConfigs[AppModuleMMS.OBJECT_CHART_DASHBOARD] = AppModuleConfig(
+            caption = "Контрольные графики объекта: все датчики",
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+        )
+        appModuleConfigs[AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD] = AppModuleConfig(
+            caption = "Контрольные графики объектов",
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
 
-        appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
-            caption = "Суммарный отчёт",
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-            disabledAccessRoles = mutableSetOf(),
-            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-            disabledFormAddRoles = mutableSetOf(),
-            rowPermissions = mutableMapOf(
-////                ActionType.MODULE_TABLE to Permission(
-////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-////                ),
-                ActionType.MODULE_FORM to Permission(
-                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
-//                    disabledRoles = getRoleAllPermissions(),
-                ),
-////                ActionType.FORM_EDIT to Permission(
-////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-////                ),
-////                ActionType.FORM_DELETE to Permission(
-////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-////                ),
-            ),
-        )
+//        appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
+//            caption = "Суммарный отчёт",
+//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+//            disabledAccessRoles = mutableSetOf(),
+//            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+//            disabledFormAddRoles = mutableSetOf(),
+//            rowPermissions = mutableMapOf(
+//////                ActionType.MODULE_TABLE to Permission(
+//////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//////                ),
+//                ActionType.MODULE_FORM to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
+////                    disabledRoles = getRoleAllPermissions(),
+//                ),
+//////                ActionType.FORM_EDIT to Permission(
+//////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//////                ),
+//////                ActionType.FORM_DELETE to Permission(
+//////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//////                ),
+//            ),
+//        )
 
     }
 
@@ -429,7 +439,8 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.COMPOSITE_OBJECT_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
 
                 if (size > 0) {
                     alMenu += MenuData("Контроль", null, this)
@@ -439,7 +450,7 @@ class MMSSpringApp : SpringApp() {
             mutableListOf<MenuData>().apply {
 
                 addMenuItem(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+//                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
 
                 if (size > 0) {
                     alMenu += MenuData("Учёт", null, this)

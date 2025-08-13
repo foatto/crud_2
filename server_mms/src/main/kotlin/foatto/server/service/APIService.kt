@@ -139,9 +139,8 @@ class APIService(
                         in SensorConfig.analogueSensorTypes -> {
                             data += mapOf(
                                 "time" to Instant.fromEpochSeconds(ontime0.toLong()).toString(),
+                                //--- сразу выводим значение после сглаживания
                                 "value" to value1.toString(),
-                                //"value" to value0.toString(),
-                                //"smoothValue" to value1.toString(),
                             )
                         }
 
@@ -150,8 +149,8 @@ class APIService(
                                 "time" to Instant.fromEpochSeconds(ontime0.toLong()).toString(),
                                 "value" to value0.toString(),
                                 "delta" to value1.toString(),
-                                "avgMinute" to value2.toString(),
-                                "avgHour" to value3.toString(),
+                                "avgHour" to value2.toString(),
+                                "avgMinute" to (value2 / 60).toString(), // оставлено для совместимости с ИНКами
                             )
                         }
                     }

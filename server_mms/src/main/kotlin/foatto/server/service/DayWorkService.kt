@@ -267,10 +267,9 @@ class DayWorkService(
             )
         }
 
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, objectId, begTime, endTime, alPopupData)
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ANALOGUE_BY_TYPE, objectId, begTime, endTime, alPopupData)
+//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, objectId, begTime, endTime, alPopupData)
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, objectId, begTime, endTime, alPopupData)
+//        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, objectId, begTime, endTime, alPopupData)
 
         if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
             alPopupData += TablePopup(
@@ -298,18 +297,18 @@ class DayWorkService(
 //                inNewTab = true,
 //            )
 //        }
-        if (checkAccessPermission(AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Контрольные панели",
-                action = AppAction(
-                    type = ActionType.MODULE_COMPOSITE,
-                    module = AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD,
-                    id = objectId,
-                ),
-                text = appModuleConfigs[AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
-                inNewTab = true,
-            )
-        }
+//        if (checkAccessPermission(AppModuleMMS.OBJECT_SCHEME_DASHBOARD, userConfig.roles)) {
+//            alPopupData += TablePopup(
+//                group = "Контрольные панели",
+//                action = AppAction(
+//                    type = ActionType.MODULE_COMPOSITE,
+//                    module = AppModuleMMS.OBJECT_SCHEME_DASHBOARD,
+//                    id = objectId,
+//                ),
+//                text = appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
+//                inNewTab = true,
+//            )
+//        }
 
         return alPopupData
     }

@@ -1,6 +1,6 @@
 package foatto.server.service.report
 
-import foatto.core.model.response.chart.ChartElement
+import foatto.core.model.response.chart.ChartElementData
 import foatto.server.calc.getPrecision
 import foatto.server.entity.ObjectEntity
 import foatto.server.model.sensor.SensorConfig
@@ -86,7 +86,7 @@ abstract class AbstractPeriodSummaryService(
         isOutTemperature: Boolean,
         isOutDensity: Boolean,
         isKeepPlaceForComment: Boolean,
-        troubles: ChartElement?,
+        troubles: ChartElementData?,
         isOutGroupSum: Boolean,
     ): Int {
         //--- получить данные по правам доступа

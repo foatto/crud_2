@@ -228,16 +228,15 @@ class ObjectService(
         val begTime = getCurrentTimeInt() / 86_400 * 86_400 - userConfig.timeOffset
         val endTime = begTime + 86_400
 
-        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, id, alPopupData)
+//        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, id, alPopupData)
 
         getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, id, alPopupData)
         getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, id, alPopupData)
         getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, id, alPopupData)
 
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, id, alPopupData)
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ANALOGUE_BY_TYPE, id, alPopupData)
+//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, id, alPopupData)
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, id, begTime, endTime, alPopupData)
+//        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, id, begTime, endTime, alPopupData)
 
         if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
             alPopupData += TablePopup(
@@ -264,15 +263,27 @@ class ObjectService(
 //                inNewTab = true,
 //            )
 //        }
-        if (checkAccessPermission(AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD, userConfig.roles)) {
+        if (checkAccessPermission(AppModuleMMS.OBJECT_SCHEME_DASHBOARD, userConfig.roles)) {
             alPopupData += TablePopup(
                 group = "Контрольные панели",
                 action = AppAction(
                     type = ActionType.MODULE_COMPOSITE,
-                    module = AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD,
+                    module = AppModuleMMS.OBJECT_SCHEME_DASHBOARD,
                     id = id,
                 ),
-                text = appModuleConfigs[AppModuleMMS.COMPOSITE_OBJECT_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
+                text = appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
+                inNewTab = true,
+            )
+        }
+        if (checkAccessPermission(AppModuleMMS.OBJECT_CHART_DASHBOARD, userConfig.roles)) {
+            alPopupData += TablePopup(
+                group = "Контрольные панели",
+                action = AppAction(
+                    type = ActionType.MODULE_COMPOSITE,
+                    module = AppModuleMMS.OBJECT_CHART_DASHBOARD,
+                    id = id,
+                ),
+                text = appModuleConfigs[AppModuleMMS.OBJECT_CHART_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
                 inNewTab = true,
             )
         }

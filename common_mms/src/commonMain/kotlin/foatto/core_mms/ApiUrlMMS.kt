@@ -33,11 +33,11 @@ object ApiUrlMMS {
     const val DAY_WORK: String = "${ApiUrl.URL_BASE}/day_work/${ApiUrl.CURRENT_VERSION}"
     const val DAY_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_work_form_action/${ApiUrl.CURRENT_VERSION}"
 
-    const val CHART_LIQUID_LEVEL: String = "${ApiUrl.URL_BASE}/chart_liquid_level/${ApiUrl.CURRENT_VERSION}"
-    const val CHART_LIQUID_LEVEL_ACTION: String = "${ApiUrl.URL_BASE}/chart_liquid_level_action/${ApiUrl.CURRENT_VERSION}"
+    const val CHART_SENSOR: String = "${ApiUrl.URL_BASE}/chart_sensor/${ApiUrl.CURRENT_VERSION}"
+    const val CHART_SENSOR_ACTION: String = "${ApiUrl.URL_BASE}/chart_sensor_action/${ApiUrl.CURRENT_VERSION}"
 
-    const val CHART_ANALOGUE_BY_TYPE: String = "${ApiUrl.URL_BASE}/chart_analogue_by_type/${ApiUrl.CURRENT_VERSION}"
-    const val CHART_ANALOGUE_BY_TYPE_ACTION: String = "${ApiUrl.URL_BASE}/chart_analogue_by_type_action/${ApiUrl.CURRENT_VERSION}"
+//    const val CHART_LIQUID_LEVEL: String = "${ApiUrl.URL_BASE}/chart_liquid_level/${ApiUrl.CURRENT_VERSION}"
+//    const val CHART_LIQUID_LEVEL_ACTION: String = "${ApiUrl.URL_BASE}/chart_liquid_level_action/${ApiUrl.CURRENT_VERSION}"
 
     const val MAP_TRACE: String = "${ApiUrl.URL_BASE}/map_trace/${ApiUrl.CURRENT_VERSION}"
     const val MAP_TRACE_ACTION: String = "${ApiUrl.URL_BASE}/map_trace_action/${ApiUrl.CURRENT_VERSION}"
@@ -51,11 +51,17 @@ object ApiUrlMMS {
     const val SCHEME_WORK_INDICATOR_STATE: String = "${ApiUrl.URL_BASE}/scheme_work_indicator_state/${ApiUrl.CURRENT_VERSION}"
     const val SCHEME_WORK_INDICATOR_STATE_ACTION: String = "${ApiUrl.URL_BASE}/scheme_work_indicator_state_action/${ApiUrl.CURRENT_VERSION}"
 
-    const val COMPOSITE_OBJECT_DASHBOARD: String = "${ApiUrl.URL_BASE}/composite_object_dashboard/${ApiUrl.CURRENT_VERSION}"
-    const val COMPOSITE_OBJECT_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/composite_object_dashboard_action/${ApiUrl.CURRENT_VERSION}"
+    const val OBJECT_SCHEME_DASHBOARD: String = "${ApiUrl.URL_BASE}/object_scheme_dashboard/${ApiUrl.CURRENT_VERSION}"
+    const val OBJECT_SCHEME_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/object_scheme_dashboard_action/${ApiUrl.CURRENT_VERSION}"
 
-    const val COMPOSITE_OBJECT_LIST_DASHBOARD: String = "${ApiUrl.URL_BASE}/composite_object_list_dashboard/${ApiUrl.CURRENT_VERSION}"
-    const val COMPOSITE_OBJECT_LIST_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/composite_object_list_dashboard_action/${ApiUrl.CURRENT_VERSION}"
+    const val OBJECT_LIST_SCHEME_DASHBOARD: String = "${ApiUrl.URL_BASE}/object_list_scheme_dashboard/${ApiUrl.CURRENT_VERSION}"
+    const val OBJECT_LIST_SCHEME_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/object_list_scheme_dashboard_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val OBJECT_CHART_DASHBOARD: String = "${ApiUrl.URL_BASE}/object_chart_dashboard/${ApiUrl.CURRENT_VERSION}"
+    const val OBJECT_CHART_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/object_chart_dashboard_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val OBJECT_LIST_CHART_DASHBOARD: String = "${ApiUrl.URL_BASE}/object_list_chart_dashboard/${ApiUrl.CURRENT_VERSION}"
+    const val OBJECT_LIST_CHART_DASHBOARD_ACTION: String = "${ApiUrl.URL_BASE}/object_list_chart_dashboard_action/${ApiUrl.CURRENT_VERSION}"
 
     const val REPORT_SUMMARY: String = "${ApiUrl.URL_BASE}/report_summary/${ApiUrl.CURRENT_VERSION}"
     const val REPORT_SUMMARY_FORM_ACTION: String = "${ApiUrl.URL_BASE}/report_summary_form_action/${ApiUrl.CURRENT_VERSION}"

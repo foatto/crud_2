@@ -21,7 +21,6 @@ import foatto.compose.colorToolBar
 import foatto.compose.control.composable.RefreshSubToolBar
 import foatto.compose.control.composable.ToolBarBlock
 import foatto.compose.control.composable.ToolBarIconButton
-import foatto.compose.control.model.chart.ChartVisibleData
 import foatto.compose.control.model.chart.ChartWorkMode
 import foatto.compose.getStyleToolbarIconNameSuffix
 
@@ -30,15 +29,10 @@ internal fun ChartToolBar(
     isWideScreen: Boolean,
     isPanButtonEnabled: Boolean,
     isZoomButtonEnabled: Boolean,
-    isShowChartList: Boolean,
-    alChartVisibleData: SnapshotStateList<ChartVisibleData>,
     refreshInterval: Int,
     setMode: (chartWorkMode: ChartWorkMode) -> Unit,
     zoomIn: () -> Unit,
     zoomOut: () -> Unit,
-    onShowChartList: () -> Unit,
-    doCloseChartList: () -> Unit,
-    onChartListClick: (data: ChartVisibleData) -> Unit,
     setInterval: (interval: Int) -> Unit,
 ) {
 
@@ -87,45 +81,6 @@ internal fun ChartToolBar(
                 name = "/images/ic_zoom_out_${getStyleToolbarIconNameSuffix()}.png",
             ) {
                 zoomOut()
-            }
-        }
-        ToolBarBlock {
-            ToolBarIconButton(
-                isEnabled = refreshInterval == 0,
-                name = "/images/ic_timeline_${getStyleToolbarIconNameSuffix()}.png",
-            ) {
-                onShowChartList()
-            }
-            if (refreshInterval == 0 && isShowChartList) {
-//                                        backgroundColor(getColorPopupMenuBack())
-//                                        color(colorMenuTextDefault)
-//                                        setBorder(color = getColorMenuBorder(), radius = styleFormBorderRadius)
-                DropdownMenu(
-                    expanded = isShowChartList,
-                    onDismissRequest = {
-                        doCloseChartList()
-                    },
-                ) {
-                    for (data in alChartVisibleData) {
-                        DropdownMenuItem(
-//                                                backgroundColor(getColorButtonBack())
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                )
-                            },
-                            text = {
-                                Text(data.descr)
-                            },
-                            contentPadding = PaddingValues(16.dp),
-                            onClick = {
-                                doCloseChartList()
-                                onChartListClick(data)
-                            },
-                        )
-                    }
-                }
             }
         }
         ToolBarBlock {

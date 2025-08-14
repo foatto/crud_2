@@ -97,7 +97,7 @@ class MMSPulsarConfigService(
             }
 
             val portNum = (deviceEntity.index ?: 0 ) * CoreTelematicFunction.MAX_PORT_PER_DEVICE + localPortNum + sensorIndex
-            val sensorEntity = sensorRepository.findByPortNumAndSensorType(portNum, sensorType).firstOrNull()?.let { prevSensorEntity ->
+            val sensorEntity: SensorEntity = sensorRepository.findByObjAndPortNumAndSensorType(objectEntity, portNum, sensorType).firstOrNull()?.let { prevSensorEntity ->
                 prevSensorEntity.apply {
                     descr = sensor.descr
                     begTime = getCurrentTimeInt()

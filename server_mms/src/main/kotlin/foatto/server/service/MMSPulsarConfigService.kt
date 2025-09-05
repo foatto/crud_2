@@ -32,10 +32,25 @@ class MMSPulsarConfigService(
         deviceEntity.name = pulsarConfig.name
         deviceRepository.saveAndFlush(deviceEntity)
 
+        val deviceIndex = deviceEntity.index ?: 0
+
+        sensorRepository.findByObjAndPortNumBetween(
+            obj = objectEntity,
+            startPort = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE,
+            endPort = (deviceIndex + 1) * CoreTelematicFunction.MAX_PORT_PER_DEVICE - 1,
+        ).forEach { oldSensorEntity ->
+            SensorService.deleteSensor(
+                entityManager = entityManager,
+                sensorRepository = sensorRepository,
+                sensorCalibrationRepository = sensorCalibrationRepository,
+                sensorId = oldSensorEntity.id,
+            )
+        }
+
         pulsarConfig.sensors.forEach { sensor ->
             val sensorId: Int = try {
                 sensor.id.substring(startIndex = 2).toInt(radix = 16)
-            } catch(_: Throwable) {
+            } catch (_: Throwable) {
                 return PulsarConfigResult(3)
             }
             val (sensorType, localPortNum, sensorIndex) = when (sensorId) {
@@ -96,93 +111,62 @@ class MMSPulsarConfigService(
                 else -> return PulsarConfigResult(4)
             }
 
-            val portNum = (deviceEntity.index ?: 0 ) * CoreTelematicFunction.MAX_PORT_PER_DEVICE + localPortNum + sensorIndex
-            val sensorEntity: SensorEntity = sensorRepository.findByObjAndPortNumAndSensorType(objectEntity, portNum, sensorType).firstOrNull()?.let { prevSensorEntity ->
-                prevSensorEntity.apply {
-                    descr = sensor.descr
-                    begTime = getCurrentTimeInt()
+            val portNum = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE + localPortNum + sensorIndex
 
-                    minIgnore = sensor.minIgnore
-                    maxIgnore = sensor.maxIgnore
-                    dim = sensor.dim
+            val recordId = getNextId { nextId -> sensorRepository.existsById(nextId) }
+            val sensorEntity = SensorEntity(
+                id = recordId,
+                obj = objectEntity,
+                name = "",
+                group = "",
+                descr = sensor.descr,
+                portNum = portNum,
+                sensorType = sensorType,
+                begTime = getCurrentTimeInt(),
+                endTime = null,
+                serialNo = "",
 
-                    isWorkAboveBorder = sensor.isAboveBorder
-                    workOnBorder = sensor.onOffBorder
-                    workIdleBorder = sensor.idleBorder
-                    workOverBorder = sensor.limitBorder
-                    workMinOffTime = sensor.minOffTime
-                    workMinOnTime = sensor.minOnTime
-                    workMinIdleTime = sensor.minIdleTime
-                    workMinOverTime = sensor.minOverTime
+                minMovingTime = 1,
+                minParkingTime = 300,
+                minOverSpeedTime = 60,
+                isAbsoluteRun = true,
+                speedRoundRule = SensorConfigGeo.SPEED_ROUND_RULE_STANDART,
+                runKoef = 1.0,
+                isUsePos = true,
+                isUseSpeed = true,
+                isUseRun = true,
 
-                    minView = sensor.minView
-                    maxView = sensor.maxView
-                    minLimit = sensor.minLimit
-                    maxLimit = sensor.maxLimit
-                    smoothTime = sensor.smoothTime
+                minIgnore = sensor.minIgnore,
+                maxIgnore = sensor.maxIgnore,
+                dim = sensor.dim,
 
-                    isAbsoluteCount = sensor.isAbsoluteCount
-                    inOutType = sensor.inOutType
+                isWorkAboveBorder = sensor.isAboveBorder,
+                workOnBorder = sensor.onOffBorder,
+                workIdleBorder = sensor.idleBorder,
+                workOverBorder = sensor.limitBorder,
+                workMinOffTime = sensor.minOffTime,
+                workMinOnTime = sensor.minOnTime,
+                workMinIdleTime = sensor.minIdleTime,
+                workMinOverTime = sensor.minOverTime,
 
-                    phase = sensor.phase
-                }
-            } ?: run {
-                val recordId = getNextId { nextId -> sensorRepository.existsById(nextId) }
+                minView = sensor.minView,
+                maxView = sensor.maxView,
+                minLimit = sensor.minLimit,
+                maxLimit = sensor.maxLimit,
+                smoothTime = sensor.smoothTime,
+                indicatorDelimiterCount = 4,
+                indicatorMultiplicator = 1.0,
 
-                SensorEntity(
-                    id = recordId,
-                    obj = objectEntity,
-                    name = "",
-                    group = "",
-                    descr = sensor.descr,
-                    portNum = portNum,
-                    sensorType = sensorType,
-                    begTime = getCurrentTimeInt(),
-                    endTime = null,
-                    serialNo = "",
+                isAbsoluteCount = sensor.isAbsoluteCount,
+                inOutType = sensor.inOutType,
 
-                    minMovingTime = 1,
-                    minParkingTime = 300,
-                    minOverSpeedTime = 60,
-                    isAbsoluteRun = true,
-                    speedRoundRule = SensorConfigGeo.SPEED_ROUND_RULE_STANDART,
-                    runKoef = 1.0,
-                    isUsePos = true,
-                    isUseSpeed = true,
-                    isUseRun = true,
+                containerType = 1,
 
-                    minIgnore = sensor.minIgnore,
-                    maxIgnore = sensor.maxIgnore,
-                    dim = sensor.dim,
+                phase = sensor.phase,
 
-                    isWorkAboveBorder = sensor.isAboveBorder,
-                    workOnBorder = sensor.onOffBorder,
-                    workIdleBorder = sensor.idleBorder,
-                    workOverBorder = sensor.limitBorder,
-                    workMinOffTime = sensor.minOffTime,
-                    workMinOnTime = sensor.minOnTime,
-                    workMinIdleTime = sensor.minIdleTime,
-                    workMinOverTime = sensor.minOverTime,
-
-                    minView = sensor.minView,
-                    maxView = sensor.maxView,
-                    minLimit = sensor.minLimit,
-                    maxLimit = sensor.maxLimit,
-                    smoothTime = sensor.smoothTime,
-                    indicatorDelimiterCount = 4,
-                    indicatorMultiplicator = 1.0,
-
-                    isAbsoluteCount = sensor.isAbsoluteCount,
-                    inOutType = sensor.inOutType,
-
-                    containerType = 1,
-
-                    phase = sensor.phase,
-
-                    schemeX = null,
-                    schemeY = null,
-                )
-            }
+                schemeX = null,
+                schemeY = null,
+            )
             sensorRepository.save(sensorEntity)
 
             sensorCalibrationRepository.deleteBySensor(sensorEntity)
@@ -197,11 +181,11 @@ class MMSPulsarConfigService(
                 )
                 sensorCalibrationRepository.save(sensorCalibrationEntity)
             }
-            sensorCalibrationRepository.flush()
 
             SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
         }
         sensorRepository.flush()
+        sensorCalibrationRepository.flush()
 
         return PulsarConfigResult(0)
     }

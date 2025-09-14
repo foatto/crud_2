@@ -119,10 +119,10 @@ open class Root {
 
     private var lastTabId: Int = 0
 
-    private var dialogActionFun: () -> Unit = {}
-    private var dialogContent by mutableStateOf<@Composable (() -> Unit)>({})
-    private var showDialogCancel by mutableStateOf(false)
-    private var showDialog by mutableStateOf(false)
+    var dialogActionFun: suspend () -> Unit = {}
+    var dialogContent by mutableStateOf<@Composable (() -> Unit)>({})
+    var showDialogCancel by mutableStateOf(false)
+    var showDialog by mutableStateOf(false)
     private val dialogButtonOkText by mutableStateOf("OK")
     private val dialogButtonCancelText by mutableStateOf("Отмена")
 
@@ -237,7 +237,9 @@ open class Root {
                         showCancelButton = showDialogCancel,
                         onOkClick = {
                             showDialog = false
-                            dialogActionFun()
+                            coroutineScope.launch {
+                                dialogActionFun()
+                            }
                         },
                         onCancelClick = { showDialog = false },
                     )

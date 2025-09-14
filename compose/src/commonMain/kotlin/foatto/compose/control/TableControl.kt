@@ -1007,17 +1007,34 @@ class TableControl(
                 }
             }
         } else {
-            if (inNewTab) {
-                root.openTab(newAppAction)
-            } else {
-                appControl.call(
-                    AppRequest(
-                        action = newAppAction.copy(
-                            prevAction = tableAction,
-                        )
+            newAppAction.question?.let { question ->
+                root.dialogActionFun = {
+                    root.showDialogCancel = false
+                    doCall(newAppAction, inNewTab)
+                }
+
+                root.dialogContent = {
+                    Text(text = question)
+                }
+                root.showDialogCancel = true
+                root.showDialog = true
+            } ?: run {
+                doCall(newAppAction, inNewTab)
+            }
+        }
+    }
+
+    suspend fun doCall(newAppAction: AppAction, inNewTab: Boolean) {
+        if (inNewTab) {
+            root.openTab(newAppAction)
+        } else {
+            appControl.call(
+                AppRequest(
+                    action = newAppAction.copy(
+                        prevAction = tableAction,
                     )
                 )
-            }
+            )
         }
     }
 

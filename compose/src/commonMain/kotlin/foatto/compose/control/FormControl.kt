@@ -1742,7 +1742,7 @@ class FormControl(
                     module = formAction.module,
                     id = formResponse.id,
                     prevAction = formResponse.prevAction,
-                    params = formButton.params,
+                    params = formButton.params.toMutableMap(),
                 ),
                 formActionData = formActionData,
             )

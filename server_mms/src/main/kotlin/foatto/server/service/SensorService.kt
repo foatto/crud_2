@@ -377,7 +377,7 @@ class SensorService(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.SENSOR_CALIBRATION,
-                        parentModule = AppModuleMMS.SENSOR,
+                        parentModule = action.module,
                         parentId = sensorEntity.id,
                     ),
                     text = appModuleConfigs[AppModuleMMS.SENSOR_CALIBRATION]?.caption ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_CALIBRATION})",
@@ -389,7 +389,7 @@ class SensorService(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.SENSOR_DATA,
-                        parentModule = AppModuleMMS.SENSOR,
+                        parentModule = action.module,
                         parentId = sensorEntity.id,
                     ),
                     text = appModuleConfigs[AppModuleMMS.SENSOR_DATA]?.caption ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_DATA})",

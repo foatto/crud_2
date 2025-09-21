@@ -368,7 +368,7 @@ class DeviceService(
                     action = AppAction(
                         type = ActionType.MODULE_TABLE,
                         module = AppModuleMMS.DEVICE_MANAGE,
-                        parentModule = AppModuleMMS.DEVICE,
+                        parentModule = action.module,
                         parentId = deviceEntity.id,
                     ),
                     text = appModuleConfigs[AppModuleMMS.DEVICE_MANAGE]?.caption ?: "(неизвестный тип модуля: '${AppModuleMMS.DEVICE_MANAGE}')",

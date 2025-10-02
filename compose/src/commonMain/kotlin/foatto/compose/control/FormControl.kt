@@ -148,11 +148,12 @@ import foatto.core.util.getTimeZone
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 var filePickerDialogSettings: FileKitDialogSettings = FileKitDialogSettings.createDefault()
 var formComboCellPreSetFun: ((formCell: FormComboCell) -> Unit)? = null
@@ -256,7 +257,7 @@ class FormControl(
     private var showFileLinkLifeTimeInputDialog by mutableStateOf(false)
     private var copyFileRef: Long = 0
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
     @Composable
     override fun Body() {
         val density = LocalDensity.current

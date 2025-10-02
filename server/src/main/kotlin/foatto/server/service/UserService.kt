@@ -41,7 +41,6 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.UserRepository
 import foatto.server.util.encodePassword
 import foatto.server.util.getNextId
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
@@ -50,6 +49,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Service
 class UserService(
@@ -325,6 +326,7 @@ class UserService(
         return currentRowNo
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun getFormCells(
         action: AppAction,
         userConfig: ServerUserConfig,
@@ -560,6 +562,7 @@ class UserService(
         return super.getFormButtons(action, userConfig, moduleConfig, addEnabled, editEnabled, deleteEnabled && !isExistsDepencies)
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun formActionSave(
         action: AppAction,
         userConfig: ServerUserConfig,

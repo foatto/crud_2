@@ -28,7 +28,9 @@ import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Service
 class MapService(
     private val entityManager: EntityManager,
@@ -167,7 +169,9 @@ class MapService(
             return AppResponse(ResponseCode.LOGON_NEED)
         }
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        val objectEntity = objectRepository.findByIdOrNull(action.id) ?: return AppResponse(ResponseCode.LOGON_NEED)
+        val objectEntity = action.id?.let { id ->
+            objectRepository.findByIdOrNull(id) ?: return AppResponse(ResponseCode.LOGON_NEED)
+        } ?: return AppResponse(ResponseCode.LOGON_NEED)
 
         val caption = moduleConfig.caption
         val rows = mutableListOf(
@@ -177,13 +181,13 @@ class MapService(
 
         if (action.timeRangeType != 0) {
             rows += "Период" to "за последние " +
-                if (action.timeRangeType % 3600 == 0) {
-                    "${action.timeRangeType / 3600} час(а,ов)"
-                } else if (action.timeRangeType % 60 == 0) {
-                    "${action.timeRangeType / 60} минут"
-                } else {
-                    "${action.timeRangeType} секунд"
-                }
+                    if (action.timeRangeType % 3600 == 0) {
+                        "${action.timeRangeType / 3600} час(а,ов)"
+                    } else if (action.timeRangeType % 60 == 0) {
+                        "${action.timeRangeType / 60} минут"
+                    } else {
+                        "${action.timeRangeType} секунд"
+                    }
         }
 
         return AppResponse(
@@ -244,30 +248,32 @@ class MapService(
 
         val (begTime, endTime) = getBegEndTime(appAction)
 
-        objectRepository.findByIdOrNull(appAction.id)?.let { objectEntity ->
-            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
-                SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+        appAction.id?.let { id ->
+            objectRepository.findByIdOrNull(id)?.let { objectEntity ->
+                sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
+                    SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
-                ApplicationService.withConnection(entityManager) { conn ->
-                    val rs = conn.executeQuery(
-                        """
+                    ApplicationService.withConnection(entityManager) { conn ->
+                        val rs = conn.executeQuery(
+                            """
                             SELECT COUNT(ontime_0) , MIN(value_0) , MAX(value_0) , MIN(value_1) , MAX(value_1)
                             FROM MMS_agg_${sensorEntity.id}
                             WHERE ontime_0 BETWEEN $begTime AND $endTime
                         """
-                    )
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        val minWgsX = rs.getDouble(2)
-                        val maxWgsX = rs.getDouble(3)
-                        val minWgsY = rs.getDouble(4)
-                        val maxWgsY = rs.getDouble(5)
+                        )
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            val minWgsX = rs.getDouble(2)
+                            val maxWgsX = rs.getDouble(3)
+                            val minWgsY = rs.getDouble(4)
+                            val maxWgsY = rs.getDouble(5)
 
-                        isFound = true
+                            isFound = true
 
-                        minPoint = XyProjection.wgs_pix(minWgsX, maxWgsY, minPoint)
-                        maxPoint = XyProjection.wgs_pix(maxWgsX, minWgsY, maxPoint)
+                            minPoint = XyProjection.wgs_pix(minWgsX, maxWgsY, minPoint)
+                            maxPoint = XyProjection.wgs_pix(maxWgsX, minWgsY, maxPoint)
+                        }
+                        rs.close()
                     }
-                    rs.close()
                 }
             }
         }
@@ -297,28 +303,30 @@ class MapService(
         val drawColors = mutableListOf<Int>()
         val fillColors = mutableListOf<Int>()
 
-        objectRepository.findByIdOrNull(appAction.id)?.let { objectEntity ->
-            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
-                SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+        appAction.id?.let { id ->
+            objectRepository.findByIdOrNull(id)?.let { objectEntity ->
+                sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
+                    SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
-                ApplicationService.withConnection(entityManager) { conn ->
-                    val rs = conn.executeQuery(
-                        """
+                    ApplicationService.withConnection(entityManager) { conn ->
+                        val rs = conn.executeQuery(
+                            """
                             SELECT value_0 , value_1
                             FROM MMS_agg_${sensorEntity.id}
                             WHERE ontime_0 BETWEEN $begTime AND $endTime
                             ORDER BY ontime_0 
                         """
-                    )
-                    while (rs.next()) {
-                        val wgsX = rs.getDouble(1)
-                        val wgsY = rs.getDouble(2)
+                        )
+                        while (rs.next()) {
+                            val wgsX = rs.getDouble(1)
+                            val wgsY = rs.getDouble(2)
 
-                        points += XyProjection.wgs_pix(wgsX, wgsY)
-                        drawColors += 0xFF_00_00_FF.toInt()
-                        fillColors += 0xFF_00_FF_FF.toInt()
+                            points += XyProjection.wgs_pix(wgsX, wgsY)
+                            drawColors += 0xFF_00_00_FF.toInt()
+                            fillColors += 0xFF_00_FF_FF.toInt()
+                        }
+                        rs.close()
                     }
-                    rs.close()
                 }
             }
         }

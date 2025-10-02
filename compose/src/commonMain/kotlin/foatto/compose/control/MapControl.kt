@@ -161,7 +161,6 @@ class MapControl(
                 val height = abs(mouseRect.y2.value - mouseRect.y1.value)
 
                 drawRectOnCanvas(
-                    drawScope = this,
                     x = x,
                     y = y,
                     width = width,
@@ -211,7 +210,6 @@ class MapControl(
             addElement.value?.let { element ->
                 if (element.type == XyElementDataType.POLY) {
                     drawPathOnCanvas(
-                        drawScope = this,
                         path = element.getPath(),
                         fillColor = element.fillColor,
                         fillAlpha = element.alpha,

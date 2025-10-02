@@ -114,7 +114,6 @@ class SchemeControl(
         drawScope.apply {
             if (isMoveRectVisible) {
                 drawRectOnCanvas(
-                    drawScope = this,
                     x = moveRectX,
                     y = moveRectY,
                     width = 64.0f,

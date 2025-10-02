@@ -1,17 +1,20 @@
 package foatto.core.util
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.FixedOffsetTimeZone
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 //-------------------------------------------------------------------------------------------------
 
+@OptIn(ExperimentalTime::class)
 fun getCurrentTimeInt(): Int = Clock.System.now().epochSeconds.toInt()
+@OptIn(ExperimentalTime::class)
 fun getCurrentTimeLong(): Long = Clock.System.now().epochSeconds
 
 //-------------------------------------------------------------------------------------------------
@@ -38,6 +41,7 @@ fun getTimeZone(timeOffset: Int?): FixedOffsetTimeZone = FixedOffsetTimeZone(
 //-------------------------------------------------------------------------------------------------
 
 fun getLocalDateTime(timeOffset: Int, seconds: Int): LocalDateTime = getLocalDateTime(getTimeZone(timeOffset), seconds)
+@OptIn(ExperimentalTime::class)
 fun getLocalDateTime(timeZone: TimeZone, seconds: Int): LocalDateTime = Instant.fromEpochSeconds(seconds.toLong()).toLocalDateTime(timeZone)
 
 //-------------------------------------------------------------------------------------------------

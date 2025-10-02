@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
 val isBuildSupressWarning: String by project
 
 val kotlinLanguageVersion: String by project
@@ -28,13 +31,13 @@ allOpen {
 
 tasks {
     compileKotlin {
-        kotlinOptions {
-            languageVersion = kotlinLanguageVersion
-            apiVersion = kotlinApiVersion
-            jvmTarget = kotlinJvmTarget
-            freeCompilerArgs = listOf("-Xjsr305=strict")
+        compilerOptions {
+            apiVersion = KotlinVersion.fromVersion(kotlinApiVersion)
+            jvmTarget = JvmTarget.fromTarget(kotlinJvmTarget)
+            languageVersion = KotlinVersion.fromVersion(kotlinLanguageVersion)
             suppressWarnings = isBuildSupressWarning.toBoolean()
         }
+//                freeCompilerArgs = listOf("-Xjsr305=strict")
     }
     jar {
         enabled = true

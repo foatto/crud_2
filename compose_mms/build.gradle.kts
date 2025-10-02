@@ -1,5 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 val isBuildSupressWarning: String by project
 
@@ -26,33 +28,25 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "compose_mms"
+        outputModuleName = "compose_mms"
         browser {}
         binaries.executable()
     }
 
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = kotlinJvmTarget
-            }
+        compilerOptions {
+            jvmTarget = JvmTarget.fromTarget(kotlinJvmTarget)
         }
-//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-//        compilerOptions {
-//            jvmTarget.set(JvmTarget.JVM_17)
-//        }
     }
 
     jvm {
-        val main by compilations.getting {
-            kotlinOptions {
-                languageVersion = kotlinLanguageVersion
-                apiVersion = kotlinApiVersion
-                jvmTarget = kotlinJvmTarget
-                freeCompilerArgs = listOf("-Xjsr305=strict")
-                suppressWarnings = isBuildSupressWarning.toBoolean()
-            }
+        compilerOptions {
+            apiVersion = KotlinVersion.fromVersion(kotlinApiVersion)
+            jvmTarget = JvmTarget.fromTarget(kotlinJvmTarget)
+            languageVersion = KotlinVersion.fromVersion(kotlinLanguageVersion)
+            suppressWarnings = isBuildSupressWarning.toBoolean()
         }
+//                freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 
     sourceSets {
@@ -130,27 +124,27 @@ compose.desktop {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec> {
-    binaryenArgs = mutableListOf(
-        // Required flags:
-        "--enable-gc",
-        "--enable-reference-types",
-        "--enable-exception-handling",
-        "--enable-bulk-memory",
-        "--enable-nontrapping-float-to-int",
-
-        // Optional flags (can be removed):
-        "--inline-functions-with-loops",
-//        "--traps-never-happen",
-//        "--fast-math",
-//        "-O3",
-//        "-O3",
-//        "--gufa",
-//        "-O3",
-//        "-O3",
-//        "-Oz",
-    )
-}
+//tasks.withType<org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec> {
+//    binaryenArgs = mutableListOf(
+//        // Required flags:
+//        "--enable-gc",
+//        "--enable-reference-types",
+//        "--enable-exception-handling",
+//        "--enable-bulk-memory",
+//        "--enable-nontrapping-float-to-int",
+//
+//        // Optional flags (can be removed):
+//        "--inline-functions-with-loops",
+////        "--traps-never-happen",
+////        "--fast-math",
+////        "-O3",
+////        "-O3",
+////        "--gufa",
+////        "-O3",
+////        "-O3",
+////        "-Oz",
+//    )
+//}
 
 tasks {
     build {

@@ -12,11 +12,13 @@ import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.repository.UserRepository
 import jakarta.persistence.EntityManager
-import kotlinx.datetime.Instant
 import org.springframework.stereotype.Service
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 @Service
 class APIService(
     private val entityManager: EntityManager,

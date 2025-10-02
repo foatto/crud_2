@@ -33,8 +33,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.SortedMap
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Service
 class DayWorkService(
     private val entityManager: EntityManager,

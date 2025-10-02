@@ -63,7 +63,9 @@ abstract class AbstractSchemeIndicatorStateService(
             return AppResponse(ResponseCode.LOGON_NEED)
         }
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        val objectEntity = objectRepository.findByIdOrNull(action.id) ?: return AppResponse(ResponseCode.LOGON_NEED)
+        val objectEntity = action.id?.let { id ->
+            objectRepository.findByIdOrNull(id) ?: return AppResponse(ResponseCode.LOGON_NEED)
+        } ?: return AppResponse(ResponseCode.LOGON_NEED)
 
         val caption = moduleConfig.caption
         val rows = listOf(

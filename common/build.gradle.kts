@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 val isBuildSupressWarning: String by project
 
@@ -28,27 +30,19 @@ kotlin {
     }
 
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = kotlinJvmTarget
-            }
+        compilerOptions {
+            jvmTarget = JvmTarget.fromTarget(kotlinJvmTarget)
         }
-//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-//        compilerOptions {
-//            jvmTarget.set(JvmTarget.JVM_17)
-//        }
     }
 
     jvm {
-        val main by compilations.getting {
-            kotlinOptions {
-                languageVersion = kotlinLanguageVersion
-                apiVersion = kotlinApiVersion
-                jvmTarget = kotlinJvmTarget
-                freeCompilerArgs = listOf("-Xjsr305=strict")
-                suppressWarnings = isBuildSupressWarning.toBoolean()
-            }
+        compilerOptions {
+            apiVersion = KotlinVersion.fromVersion(kotlinApiVersion)
+            jvmTarget = JvmTarget.fromTarget(kotlinJvmTarget)
+            languageVersion = KotlinVersion.fromVersion(kotlinLanguageVersion)
+            suppressWarnings = isBuildSupressWarning.toBoolean()
         }
+//                freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 
     sourceSets {

@@ -37,7 +37,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Service
 class DeviceManageService(
     private val deviceManageRepository: DeviceManageRepository,
@@ -372,10 +374,13 @@ class DeviceManageService(
         return FormActionResponse(responseCode = ResponseCode.OK)
     }
 
-    private fun getParentDeviceEntity(action: AppAction): DeviceEntity? = if (action.parentModule == AppModuleMMS.DEVICE) {
-        deviceRepository.findByIdOrNull(action.parentId)
-    } else {
-        null
-    }
+    private fun getParentDeviceEntity(action: AppAction): DeviceEntity? =
+        if (action.parentModule == AppModuleMMS.DEVICE) {
+            action.parentId?.let { parentId ->
+                deviceRepository.findByIdOrNull(parentId)
+            }
+        } else {
+            null
+        }
 
 }

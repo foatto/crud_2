@@ -37,7 +37,7 @@ class ChartSensorService(
     override fun getChartHeader(action: AppAction): HeaderData {
         val moduleConfig = appModuleConfigs[action.module]// ?: return AppResponse(ResponseCode.LOGON_NEED)
 
-        val sensorEntity = sensorRepository.findByIdOrNull(action.id)
+        val sensorEntity = action.id?.let { id -> sensorRepository.findByIdOrNull(id) }
 
         val caption = moduleConfig?.caption ?: "(неизвестный модуль: ${action.module})"
         val rows = listOf(

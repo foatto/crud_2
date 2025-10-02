@@ -48,14 +48,16 @@ import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Service
 class DeviceService(
     private val entityManager: EntityManager,

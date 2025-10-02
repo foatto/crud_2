@@ -18,11 +18,12 @@ import foatto.server.checkRowPermission
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.UserRepository
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Service
 class UserPropertyEditService(
@@ -45,6 +46,7 @@ class UserPropertyEditService(
 
     override fun fillTableGridData(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, tableCells: MutableList<TableBaseCell>, tableRows: MutableList<TableRow>, pageButtons: MutableList<TablePageButton>): Int? = null
 
+    @OptIn(ExperimentalTime::class)
     override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> {
         val formCells = mutableListOf<FormBaseCell>()
 
@@ -109,6 +111,7 @@ class UserPropertyEditService(
         formButton.actionType != ActionType.FORM_EXIT
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun formActionSave(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, formActionData: Map<String, FormActionData>): FormActionResponse {
         val id = action.id ?: return FormActionResponse(responseCode = ResponseCode.ERROR)
 

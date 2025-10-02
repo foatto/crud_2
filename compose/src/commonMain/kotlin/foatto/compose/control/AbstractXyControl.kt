@@ -168,7 +168,6 @@ abstract class AbstractXyControl(
 
                             XyElementDataType.CIRCLE -> {
                                 drawCircleOnCanvas(
-                                    drawScope = this,
                                     x = element.x,
                                     y = element.y,
                                     radius = element.radius,
@@ -250,7 +249,6 @@ abstract class AbstractXyControl(
 
                             XyElementDataType.POLY -> {
                                 drawPathOnCanvas(
-                                    drawScope = this,
                                     path = element.getPath(),
                                     fillColor = element.fillColor,
                                     fillAlpha = element.alpha,
@@ -272,7 +270,6 @@ abstract class AbstractXyControl(
 
                             XyElementDataType.RECT -> {
                                 drawRectOnCanvas(
-                                    drawScope = this,
                                     x = element.x,
                                     y = element.y,
                                     width = element.width,
@@ -294,7 +291,6 @@ abstract class AbstractXyControl(
                             XyElementDataType.TEXT -> {
                                 if (element.isVisible) {
                                     drawTextOnCanvas(
-                                        drawScope = this,
                                         scaleKoef = root.scaleKoef,
                                         canvasWidth = xyCanvasWidth,
                                         canvasHeight = xyCanvasHeight,

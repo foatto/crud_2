@@ -405,31 +405,31 @@ class MMSSpringApp : SpringApp() {
             disabledAccessRoles = mutableSetOf(),
         )
 
-//        appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
-//            caption = "Суммарный отчёт",
-//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-//            disabledAccessRoles = mutableSetOf(),
-//            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-//            disabledFormAddRoles = mutableSetOf(),
-//            rowPermissions = mutableMapOf(
-//////                ActionType.MODULE_TABLE to Permission(
-//////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//////                ),
-//                ActionType.MODULE_FORM to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
-////                    disabledRoles = getRoleAllPermissions(),
+        appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
+            caption = "Суммарный отчёт",
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),   //, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),  //, AppRole.USER),
+            disabledFormAddRoles = mutableSetOf(),
+            rowPermissions = mutableMapOf(
+//                ActionType.MODULE_TABLE to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
 //                ),
-//////                ActionType.FORM_EDIT to Permission(
-//////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//////                ),
-//////                ActionType.FORM_DELETE to Permission(
-//////                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//////                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//////                ),
-//            ),
-//        )
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
+//                    disabledRoles = getRoleAllPermissions(),
+                ),
+//                ActionType.FORM_EDIT to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//                ),
+//                ActionType.FORM_DELETE to Permission(
+//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+//                ),
+            ),
+        )
 
     }
 
@@ -451,6 +451,7 @@ class MMSSpringApp : SpringApp() {
 
                 addMenuItem(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
 //                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM, null, serverUserConfig, this)
 
                 if (size > 0) {
                     alMenu += MenuData("Учёт", null, this)

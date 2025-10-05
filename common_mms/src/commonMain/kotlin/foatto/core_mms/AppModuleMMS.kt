@@ -32,5 +32,5 @@ object AppModuleMMS {
     const val OBJECT_CHART_LIST_DASHBOARD: String = "object_chart_list_dashboard"
     const val OBJECT_CHART_DASHBOARD: String = "object_chart_dashboard"
 
-//    const val REPORT_SUMMARY: String = "report_summary"
+    const val REPORT_SUMMARY: String = "report_summary"
 }

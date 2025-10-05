@@ -367,7 +367,14 @@ abstract class ReportService(
     }
 
     //--- число в различном формате: в виде нередактируемой строки или в виде редактируемого числа
-    protected fun getNumberCell(col: Int, row: Int, value: Number, precision: Int, wcf: WritableCellFormat, reportUnlocked: Boolean = false): WritableCell {
+    protected fun getNumberCell(
+        col: Int,
+        row: Int,
+        value: Number,
+        precision: Int,
+        wcf: WritableCellFormat,
+        reportUnlocked: Boolean = false,
+    ): WritableCell {
         return if (reportUnlocked) {
             val wcfNum = WritableCellFormat(
                 WritableFont(
@@ -408,7 +415,14 @@ abstract class ReportService(
 //--- common app part --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> = emptyList()
-    override fun fillTableGridData(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, tableCells: MutableList<TableBaseCell>, tableRows: MutableList<TableRow>, pageButtons: MutableList<TablePageButton>): Int? = null
+    override fun fillTableGridData(
+        action: AppAction,
+        userConfig: ServerUserConfig,
+        moduleConfig: AppModuleConfig,
+        tableCells: MutableList<TableBaseCell>,
+        tableRows: MutableList<TableRow>,
+        pageButtons: MutableList<TablePageButton>
+    ): Int? = null
 
     override fun getFormButtons(
         action: AppAction,
@@ -425,7 +439,7 @@ abstract class ReportService(
             alFormButton += FormButton(
                 actionType = ActionType.FORM_ADD,
                 withNewData = true,
-                name = IconName.PRINT_FORM,
+                name = IconName.PRINT,
                 key = FormButtonKey.SAVE,
             )
         }

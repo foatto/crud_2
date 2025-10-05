@@ -46,7 +46,7 @@ abstract class AbstractPeriodSummaryService(
 
     protected fun defineSummaryReportHeaders(sheet: WritableSheet, aOffsY: Int): Int {
         var offsY = aOffsY
-        val alDim = ArrayList<Int>()
+        val alDim = mutableListOf<Int>()
 
         offsY++
 

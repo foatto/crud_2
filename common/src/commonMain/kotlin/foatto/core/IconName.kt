@@ -15,7 +15,7 @@ object IconName {
     const val FOLDER: String = "folder"
     const val MAP: String = "map"
     const val PRINT_TABLE: String = "print_table"
-    const val PRINT_FORM: String = "print_form"
+    const val PRINT: String = "print_form"
     const val SAVE: String = "save"
     const val SCHEME: String = "scheme"
     const val SELECT: String = "select"

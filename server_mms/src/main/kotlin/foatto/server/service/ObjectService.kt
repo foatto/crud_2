@@ -236,7 +236,7 @@ class ObjectService(
 
 //        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, id, alPopupData)
 
-//        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, id, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, id, begTime, endTime, alPopupData)
 
         if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
             alPopupData += TablePopup(

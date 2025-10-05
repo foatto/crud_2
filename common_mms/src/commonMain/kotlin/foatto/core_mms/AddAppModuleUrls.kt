@@ -95,8 +95,8 @@ fun addAppModuleUrls() {
         compositeActionUrl = ApiUrlMMS.OBJECT_LIST_CHART_DASHBOARD_ACTION,
     )
 
-//    appModuleUrls[AppModuleMMS.REPORT_SUMMARY] = AppModuleUrl(
-//        appUrl = ApiUrlMMS.REPORT_SUMMARY,
-//        formActionUrl = ApiUrlMMS.REPORT_SUMMARY_FORM_ACTION,
-//    )
+    appModuleUrls[AppModuleMMS.REPORT_SUMMARY] = AppModuleUrl(
+        appUrl = ApiUrlMMS.REPORT_SUMMARY,
+        formActionUrl = ApiUrlMMS.REPORT_SUMMARY_FORM_ACTION,
+    )
 }

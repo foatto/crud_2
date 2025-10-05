@@ -9,6 +9,7 @@ import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.util.getCurrentTimeInt
+import foatto.core.util.getDateTimeDMYString
 import foatto.core_mms.AppModuleMMS
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
@@ -18,6 +19,8 @@ import foatto.server.service.CalcService
 import foatto.server.service.FileStoreService
 import foatto.server.service.ObjectService
 import jakarta.persistence.EntityManager
+import jxl.CellView
+import jxl.write.Label
 import jxl.write.WritableSheet
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -204,6 +207,50 @@ class SummaryReportService(
         private const val FIELD_SUM_OBJECT = "_sum_object"
          */
 
+        defineFormats(8, 2, 0)
+
+        //--- setting the sizes of headers (total width = 90 for A4-portrait margins of 10 mm)
+        //--- setting the sizes of headers (total width = 140 for A4-landscape margins of 10 mm)
+        val alDim = mutableListOf<Int>()
+        alDim.add(5)    // "№ п/п"
+        alDim.add(22)   // "Идентификатор"
+        alDim.add(13)   // "Продукт"
+        alDim.add(8)    // "Тип"
+        alDim.add(5)    // "Длитель-ность [мес]"
+        alDim.add(22)   // "Устройство"
+        alDim.add(10)   // "Активация"
+        alDim.add(5)    // "Для тести-рования"
+
+        for (i in alDim.indices) {
+            val cvNN = CellView()
+            cvNN.size = alDim[i] * 256
+            sheet.setColumnView(i, cvNN)
+        }
+
+        var offsY = 0
+
+        sheet.addCell(Label(0, offsY++, moduleConfig.caption, wcfTitleL))
+//        sheet.addCell(
+//            Label(
+//                0,
+//                offsY++,
+//                "за период с ${getDateTimeDMYString(0, begTime.epochSecond.toInt())}" +
+//                    " по ${getDateTimeDMYString(0, endTime.epochSecond.toInt())}",
+//                wcfTitleL,
+//            )
+//        )
+
+        offsY += 2
+
+        sheet.addCell(Label(0, offsY, "№ п/п", wcfCaptionHC))
+        sheet.addCell(Label(1, offsY, "Идентификатор", wcfCaptionHC))
+        sheet.addCell(Label(2, offsY, "Продукт", wcfCaptionHC))
+        sheet.addCell(Label(3, offsY, "Тип", wcfCaptionHC))
+        sheet.addCell(Label(4, offsY, "Дли-тель-ность [мес]", wcfCaptionHC))
+        sheet.addCell(Label(5, offsY, "Устройство", wcfCaptionHC))
+        sheet.addCell(Label(6, offsY, "Активация", wcfCaptionHC))
+        sheet.addCell(Label(7, offsY, "Для тести-рования", wcfCaptionHC))
+        offsY++
     }
 
 }

@@ -38,9 +38,10 @@ val colorTabActive: Color = colorMainBack2
 val colorTabInactive: Color = colorMainBack3
 val colorHeader: Color = colorTabActive
 val colorToolBar: Color = colorHeader
-val colorBottomBar: Color = colorToolBar
-val colorScrollBarBack: Color = colorMainBack2
-val colorScrollBarFore: Color = Color.hsl(0f, 0f, 0.85f)
+var colorCaptionBar: Color = colorHeader
+val colorBottomBar: Color = colorHeader
+val colorScrollBarBack: Color = colorFormBack   //colorMainBack2
+val colorScrollBarFore: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
 
 var colorWait: Color? = null
 var colorWaitTrack: Color? = null
@@ -48,12 +49,14 @@ var colorWaitTrack: Color? = null
 var colorTabSelected: Color? = null
 var colorTabUnselected: Color? = null
 
-var colorTableCellBorder: Color = Color.hsl(0f, 0f, 0.9f)
-var colorTableGroupBack0: Color = Color.hsl(0f, 0f, 0.85f)
-var colorTableGroupBack1: Color = Color.hsl(0f, 0f, 0.80f)
-var colorTableRowBack0: Color = Color.hsl(0f, 0f, 1.0f)
-var colorTableRowBack1: Color = Color.hsl(0f, 0f, 0.95f)
+var colorTableCellBorder: Color = colorMainBack3
+//--- table-group-back цвета не должны совпадать с основными фоновыми цветами - поэтому располагаем их между ними посередине
+var colorTableGroupBack0: Color = Color.hsl(0f, 0f, (MAIN_BACK_LIGHTNESS_2 + MAIN_BACK_LIGHTNESS_3) / 2)
+var colorTableGroupBack1: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
+var colorTableRowBack0: Color = colorMainBack0
+var colorTableRowBack1: Color = colorMainBack1
 var colorTableCurrentRow: Color = colorMainBack4    // по дефолту - максимальмо мрачный цвет, чтобы сразу переделать захотелось
+var colorTablePageButton: ButtonColors? = null
 
 val colorMainText: Color = Color.Black
 

@@ -11,6 +11,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import foatto.compose.Root
+import foatto.compose.colorCaptionBar
 import foatto.compose.colorCheckBox
 import foatto.compose.colorCompositeMovedBlockBack
 import foatto.compose.colorDatePicker
@@ -22,6 +23,7 @@ import foatto.compose.colorRadioButton
 import foatto.compose.colorTabSelected
 import foatto.compose.colorTabUnselected
 import foatto.compose.colorTableCurrentRow
+import foatto.compose.colorTablePageButton
 import foatto.compose.colorTextButton
 import foatto.compose.colorTextButtonDefault
 import foatto.compose.colorTimePicker
@@ -60,8 +62,9 @@ class MMSRoot : Root() {
         settings.putString(SETTINGS_SERVER_ADDRESS, "192.168.0.44")
         settings.putInt(SETTINGS_SERVER_PORT, 19998)
 
-        defaultStartModule = AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD
-        
+//        defaultStartModule = AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD
+        defaultStartModule = AppModuleMMS.OBJECT
+
         addAppModuleUrls()
     }
 
@@ -146,8 +149,14 @@ class MMSRoot : Root() {
 //            timeSelectorUnselectedContentColor = ,
         )
 
+        colorCaptionBar = darkBlueColor
         //--- чуть светлее брендового цвета, чтобы на его фоне были видны кнопки селекторов
         colorTableCurrentRow = Color.hsl(MMS_FIRM_COLOR_2_H, MMS_FIRM_COLOR_2_S, 0.80f)
+        colorTablePageButton = ButtonDefaults.buttonColors().copy(
+            containerColor = darkBlueColor,
+            contentColor = colorMainBack0,
+            disabledContentColor = colorMainText,
+        )
 
         colorCompositeMovedBlockBack = darkBlueColor.copy(alpha = 0.7f)
     }

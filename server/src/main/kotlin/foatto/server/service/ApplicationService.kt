@@ -333,53 +333,108 @@ abstract class ApplicationService(
             parentId = parentId,
         )
 
-    /*
-        protected fun jvmInstantToString(currentUserTimeZone: TimeZone, instant: Instant?): String = instant?.let {
-            getDateTimeDMYHMSString(currentUserTimeZone, instant.epochSecond.toInt())
-        } ?: "-"
-     */
+//    protected fun fillTablePageButtons(
+//        action: AppAction,
+//        pageCount: Int,
+//        alPageButton: MutableList<TablePageButton>,
+//    ) {
+//        val pageNo = action.pageNo
+//        //--- first page
+//        if (pageNo > 0) {
+//            alPageButton += getPageButton(action, 0)
+//        }
+//        //--- empty
+//        if (pageNo > 2) {
+//            alPageButton += TablePageButton(null, "...")
+//        }
+//        //--- prev page
+//        if (pageNo > 1) {
+//            alPageButton += getPageButton(action, pageNo - 1)
+//        }
+//
+//        //--- current page
+//        alPageButton += TablePageButton(null, "${pageNo + 1}")
+//
+//        //--- next page
+//        if (pageNo < pageCount - 2) {
+//            alPageButton += getPageButton(action, pageNo + 1)
+//        }
+//        //--- empty
+//        if (pageNo < pageCount - 3) {
+//            alPageButton += TablePageButton(null, "...")
+//        }
+//        //--- last page
+//        if (pageNo < pageCount - 1) {
+//            alPageButton += getPageButton(action, pageCount - 1)
+//        }
+//    }
+//
+//    private fun getPageButton(action: AppAction, pageNo: Int): TablePageButton =
+//        TablePageButton(
+//            action = action.copy(pageNo = pageNo),
+//            text = "${pageNo + 1}",
+//        )
 
     protected fun fillTablePageButtons(
         action: AppAction,
         pageCount: Int,
-        alPageButton: MutableList<TablePageButton>,
+        pageButtons: MutableList<TablePageButton>,
     ) {
+        val NEAR_PAGE_BUTTON_COUNT = 10 // 5
         val pageNo = action.pageNo
-        //--- first page
-        if (pageNo > 0) {
-            alPageButton += getPageButton(action, 0)
-        }
-        //--- empty
-        if (pageNo > 2) {
-            alPageButton += TablePageButton(null, "...")
-        }
-        //--- prev page
-        if (pageNo > 1) {
-            alPageButton += getPageButton(action, pageNo - 1)
-        }
 
         //--- current page
-        alPageButton += TablePageButton(null, "${pageNo + 1}")
+        pageButtons += getPageButton(null, pageNo)
 
-        //--- next page
-        if (pageNo < pageCount - 2) {
-            alPageButton += getPageButton(action, pageNo + 1)
+        //--- previous pages
+        for (i in 1..NEAR_PAGE_BUTTON_COUNT) {
+            val prevPageNo = pageNo - i
+            if (prevPageNo >= 0) {
+                pageButtons.add(0, getPageButton(action, prevPageNo))
+            } else {
+                break
+            }
         }
-        //--- empty
-        if (pageNo < pageCount - 3) {
-            alPageButton += TablePageButton(null, "...")
+
+        //--- previous pages / left side
+        if (pageNo - NEAR_PAGE_BUTTON_COUNT > 2) {
+            pageButtons.add(0, TablePageButton(null, "..."))
+            pageButtons.add(0, getPageButton(action, 0))
+        } else if (pageNo - NEAR_PAGE_BUTTON_COUNT > 1) {
+            pageButtons.add(0, getPageButton(action, 1))
+            pageButtons.add(0, getPageButton(action, 0))
+        } else if (pageNo - NEAR_PAGE_BUTTON_COUNT > 0) {
+            pageButtons.add(0, getPageButton(action, 0))
         }
-        //--- last page
-        if (pageNo < pageCount - 1) {
-            alPageButton += getPageButton(action, pageCount - 1)
+
+        //--- next pages
+        for (i in 1..NEAR_PAGE_BUTTON_COUNT) {
+            val nextPageNo = pageNo + i
+            if (nextPageNo <= pageCount - 1) {
+                pageButtons += getPageButton(action, nextPageNo)
+            } else {
+                break
+            }
+        }
+
+        //--- next pages / right side
+        if (pageNo + NEAR_PAGE_BUTTON_COUNT < pageCount - 3) {
+            pageButtons += TablePageButton(null, "...")
+            pageButtons += getPageButton(action, pageCount - 1)
+        } else if (pageNo + NEAR_PAGE_BUTTON_COUNT < pageCount - 2) {
+            pageButtons += getPageButton(action, pageCount - 2)
+            pageButtons += getPageButton(action, pageCount - 1)
+        } else if (pageNo + NEAR_PAGE_BUTTON_COUNT < pageCount - 1) {
+            pageButtons += getPageButton(action, pageCount - 1)
         }
     }
 
-    private fun getPageButton(action: AppAction, pageNo: Int): TablePageButton =
-        TablePageButton(
-            action = action.copy(pageNo = pageNo),
-            text = "${pageNo + 1}",
-        )
+    private fun getPageButton(
+        action: AppAction? = null,
+        pageNo: Int,
+    ): TablePageButton = action?.let {
+        TablePageButton(action.copy(pageNo = pageNo), "${pageNo + 1}")
+    } ?: TablePageButton(null, "${pageNo + 1}")
 
     private fun getFormResponse(
         action: AppAction,

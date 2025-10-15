@@ -1,11 +1,9 @@
 package foatto.compose.control
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -51,6 +49,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
@@ -63,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.colorBottomBar
+import foatto.compose.colorCaptionBar
 import foatto.compose.colorCheckBox
 import foatto.compose.colorIconButton
 import foatto.compose.colorMainBack0
@@ -73,11 +73,11 @@ import foatto.compose.colorTableCellBorder
 import foatto.compose.colorTableCurrentRow
 import foatto.compose.colorTableGroupBack0
 import foatto.compose.colorTableGroupBack1
+import foatto.compose.colorTablePageButton
 import foatto.compose.colorTableRowBack0
 import foatto.compose.colorTableRowBack1
 import foatto.compose.colorTableSelectorBack
 import foatto.compose.colorTextButton
-import foatto.compose.colorToolBar
 import foatto.compose.composable.GenerateMenuBody
 import foatto.compose.composable.ImageOrTextFromNameControl
 import foatto.compose.control.composable.onPointerEvents
@@ -117,6 +117,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 typealias SelectorFunType = ((selectorData: Map<String, String>) -> Unit)
+
 val tableSelectorFuns: MutableMap<Long, SelectorFunType> = mutableMapOf()
 
 var tableClientActionFun: (
@@ -219,7 +220,7 @@ class TableControl(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(colorToolBar)
+                    .background(colorCaptionBar)
                     .horizontalScroll(state = horizontalScrollState)
             ) {
                 alCaptionData.forEachIndexed { col, captionData ->
@@ -260,18 +261,11 @@ class TableControl(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-//                            borderTop(
-//                                width = getStyleTableCaptionBorderTop().width,
-//                                lineStyle = getStyleTableCaptionBorderTop().style,
-//                                color = getStyleTableCaptionBorderTop().color,
-//                            )
-//                            backgroundColor(getColorTablePagebarBack())
-
                     for (pageButton in tablePageButtonData) {
                         TextButton(
-                            modifier = Modifier.padding(1.dp),
-                            shape = RoundedCornerShape(0.dp),   // чтобы получился почти сплошной ряд кнопок
-                            colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
+                            modifier = Modifier.padding(2.dp),
+                            shape = singleButtonShape,
+                            colors = colorTablePageButton ?: ButtonDefaults.textButtonColors(),
                             enabled = pageButton.action != null,
 //                                cursor("pointer")
                             onClick = {
@@ -282,7 +276,10 @@ class TableControl(
                                 }
                             }
                         ) {
-                            Text(pageButton.text)
+                            Text(
+                                text = pageButton.text,
+                                fontWeight = pageButton.action?.let { _ -> FontWeight.Normal } ?: FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -340,9 +337,12 @@ class TableControl(
                         alGridRows.forEachIndexed { index, alGridRow ->
                             Row(
                                 modifier = Modifier
+                                    .fillMaxWidth()
                                     //.width(intrinsicSize = IntrinsicSize.Max) - оставлю на память, чтобы опять не искать, но пользы/разницы не увидел
                                     //--- чтобы ячейки занимали всю отведённую им (общую) высоту (работает только совместно с .fillMaxHeight())
                                     .height(intrinsicSize = IntrinsicSize.Max)
+                                    .background(color = colorTableCellBorder)
+                                    .padding(bottom = 2.dp)
                                     .onSizeChanged { size ->
                                         rowHeights[index] = size.height.toFloat()
                                     }
@@ -361,8 +361,6 @@ class TableControl(
                                                     }
                                                 } ?: colorMainBack0
                                             )
-                                            .border(BorderStroke(width = 0.1.dp, color = colorTableCellBorder))
-                                            //.wrapContentSize(align = Alignment.Center, unbounded = true)  //- ничем не помогает
                                             //--- Непрямой метод поймать правую кнопку мыши. Ждём, когда завезут официальную реакцию на правую мышь.
                                             .pointerInput(Unit) {
                                                 awaitEachGesture {
@@ -572,8 +570,9 @@ class TableControl(
 
         Canvas(
             modifier = Modifier
-                .width(SCROLL_BAR_TICKNESS)
                 .fillMaxHeight()
+                .width(SCROLL_BAR_TICKNESS)
+                .background(color = colorScrollBarBack)
                 .onSizeChanged { size ->
                     vScrollBarLength = size.height.toFloat()
                 }
@@ -614,11 +613,12 @@ class TableControl(
             } else {
                 (vScrollBarLength - scrollBarH) * verticalScrollState.value / verticalScrollState.maxValue
             }
-            drawRect(
-                topLeft = Offset(0.0f, scrollBarY),
-                size = Size(with(density) { SCROLL_BAR_TICKNESS.toPx() }, scrollBarH),
+            drawLine(
+                start = Offset(with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }, scrollBarY),
+                end = Offset(with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }, scrollBarY + scrollBarH),
                 color = colorScrollBarFore,
-                style = Fill,
+                strokeWidth = with(density) { SCROLL_BAR_TICKNESS.toPx() * 2 / 3 },
+                cap = StrokeCap.Round,
             )
         }
     }
@@ -632,6 +632,8 @@ class TableControl(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(SCROLL_BAR_TICKNESS)
+                .background(color = colorScrollBarBack)
+                .padding(end = SCROLL_BAR_TICKNESS)
                 .onSizeChanged { size ->
                     hScrollBarLength = size.width.toFloat()
                 }
@@ -651,7 +653,6 @@ class TableControl(
                                 val colWidthSum = colWidths.values.sum()
                                 val incScaleX = max(1.0f, colWidthSum / hScrollBarLength)
                                 horizontalScrollState.scrollBy(dx * incScaleX)
-                                //horizontalScrollState.scrollTo((horizontalScrollState.value + dx * incScaleX).toInt())
                             }
                         }
                     },

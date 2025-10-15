@@ -74,6 +74,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -221,13 +222,17 @@ class FormControl(
         private val SCROLL_BAR_TICKNESS = 16.dp
     }
 
-    private val alHiddenCells = mutableListOf<FormBaseCellClient>()
-    private val alGridRows = mutableStateListOf<MutableList<FormBaseCellClient?>>()
+    private val hiddenCells = mutableListOf<FormBaseCellClient>()
+    private val gridRows = mutableStateListOf<MutableList<FormBaseCellClient?>>()
 
+    private var formBodyWidth: Float by mutableFloatStateOf(0.0f)
     private var formBodyHeight: Float by mutableFloatStateOf(0.0f)
 
     private var vScrollBarLength: Float by mutableFloatStateOf(0.0f)
     private val rowHeights = mutableStateMapOf<Int, Float>()
+
+    private var hScrollBarLength: Float by mutableFloatStateOf(0.0f)
+    private val colWidths = mutableStateMapOf<Int, Float>()
 
     private val verticalScrollState = ScrollState(0)
     private val horizontalScrollState = ScrollState(0)
@@ -434,6 +439,7 @@ class FormControl(
                             .weight(1.0f)
                             .fillMaxHeight()
                             .onSizeChanged { size ->
+                                formBodyWidth = size.width.toFloat()
                                 formBodyHeight = size.height.toFloat()
                             }
                             .verticalScroll(state = verticalScrollState)
@@ -457,7 +463,7 @@ class FormControl(
                             .weight(1.0f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        alGridRows.forEachIndexed { index, alGridRow ->
+                        gridRows.forEachIndexed { index, gridRow ->
                             Row(
                                 modifier = Modifier
                                     //.width(intrinsicSize = IntrinsicSize.Max) - оставлю на память, чтобы опять не искать, но пользы/разницы не увидел
@@ -468,7 +474,7 @@ class FormControl(
                                     },
 //?                        horizontalArrangement = Arrangement.aligned(Alignment.CenterHorizontally),
                             ) {
-                                alGridRow.forEachIndexed { col, gridData ->
+                                gridRow.forEachIndexed { col, gridData ->
                                     //--- специальное хитрое условие: показывать если gridData == null или isVisible == true
                                     if (gridData?.isVisible?.value != false) {
                                         Row(
@@ -487,6 +493,9 @@ class FormControl(
                                                         }
                                                         gridData.componentWidth = maxDp(gridData.componentWidth, componentWidth)
                                                         hmColumnMaxWidth[col] = maxDp(hmColumnMaxWidth[col] ?: 0.dp, componentWidth)
+                                                        colWidths[col] = with(density) {
+                                                            hmColumnMaxWidth[col]?.toPx() ?: 0.0f
+                                                        }
                                                     }
                                                 }
                                                 .then(
@@ -991,6 +1000,7 @@ class FormControl(
                     }
                     VerticalScrollBody()
                 }
+                HorizontalScrollBody()
             }
 
             //--- Form Button Bar
@@ -1079,8 +1089,9 @@ class FormControl(
 
         Canvas(
             modifier = Modifier
-                .width(SCROLL_BAR_TICKNESS)
                 .fillMaxHeight()
+                .width(SCROLL_BAR_TICKNESS)
+                .background(color = colorScrollBarBack)
                 .onSizeChanged { size ->
                     vScrollBarLength = size.height.toFloat()
                 }
@@ -1100,7 +1111,6 @@ class FormControl(
                                 val rowHeightSum = rowHeights.values.sum()
                                 val incScaleY = max(1.0f, rowHeightSum / vScrollBarLength)
                                 verticalScrollState.scrollBy(dy * incScaleY)
-                                //verticalScrollState.scrollTo((verticalScrollState.value + dy * incScaleY).toInt())
                             }
                         }
                     },
@@ -1122,15 +1132,77 @@ class FormControl(
             } else {
                 (vScrollBarLength - scrollBarH) * verticalScrollState.value / verticalScrollState.maxValue
             }
-            drawRect(
-                topLeft = Offset(0.0f, scrollBarY),
-                size = Size(with(density) { SCROLL_BAR_TICKNESS.toPx() }, scrollBarH),
+            drawLine(
+                start = Offset(with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }, scrollBarY),
+                end = Offset(with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }, scrollBarY + scrollBarH),
                 color = colorScrollBarFore,
-                style = Fill,
+                strokeWidth = with(density) { SCROLL_BAR_TICKNESS.toPx() * 2 / 3 },
+                cap = StrokeCap.Round,
             )
         }
     }
 
+    @Composable
+    private fun HorizontalScrollBody() {
+        val density = LocalDensity.current
+        val coroutineScope = rememberCoroutineScope()
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(SCROLL_BAR_TICKNESS)
+                .background(color = colorScrollBarBack)
+                .padding(end = SCROLL_BAR_TICKNESS)
+                .onSizeChanged { size ->
+                    hScrollBarLength = size.width.toFloat()
+                }
+                .clipToBounds()
+                .onPointerEvents(
+                    withInteractive = true,
+                    onPointerDown = { pointerInputChange -> },
+                    onPointerUp = { pointerInputChange -> },
+                    onDragStart = { offset -> },
+                    onDrag = { pointerInputChange, offset ->
+                        val dx = offset.x
+                        if (
+                            dx < 0 && horizontalScrollState.value > 0 ||
+                            dx > 0 && horizontalScrollState.value < horizontalScrollState.maxValue
+                        ) {
+                            coroutineScope.launch {
+                                val colWidthSum = colWidths.values.sum()
+                                val incScaleX = max(1.0f, colWidthSum / hScrollBarLength)
+                                horizontalScrollState.scrollBy(dx * incScaleX)
+                            }
+                        }
+                    },
+                    onDragEnd = { },
+                    onDragCancel = { },
+                )
+        ) {
+            drawRect(
+                topLeft = Offset(0.0f, 0.0f),
+                size = Size(hScrollBarLength, with(density) { SCROLL_BAR_TICKNESS.toPx() }),
+                color = colorScrollBarBack,
+                style = Fill,
+            )
+            val colWidthSum = colWidths.values.sum()
+            val decScaleX = min(1.0f, formBodyWidth / colWidthSum)
+            val scrollBarW = hScrollBarLength * decScaleX
+            val scrollBarX = if (formBodyWidth >= colWidthSum) {
+                0.0f
+            } else {
+                (hScrollBarLength - scrollBarW) * horizontalScrollState.value / horizontalScrollState.maxValue
+            }
+            drawLine(
+                start = Offset(scrollBarX, with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }),
+                end = Offset(scrollBarX + scrollBarW, with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }),
+                color = colorScrollBarFore,
+                strokeWidth = with(density) { SCROLL_BAR_TICKNESS.toPx() * 2 / 3 },
+                cap = StrokeCap.Round,
+            )
+        }
+    }
+    
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     override suspend fun start() {
@@ -1145,8 +1217,8 @@ class FormControl(
     }
 
     private fun readClassicForm() {
-        alHiddenCells.clear()
-        alGridRows.clear()
+        hiddenCells.clear()
+        gridRows.clear()
 
         var rowIndex = 0
         var colIndex = 0
@@ -1160,7 +1232,7 @@ class FormControl(
                 val formGridData = getFormDataCell(
                     formCell = formCell,
                 )
-                alHiddenCells += formGridData
+                hiddenCells += formGridData
 
                 if (formCell is FormBooleanCell || formCell is FormComboCell) {
                     hmFormCellVisible[formCell.name] = mutableMapOf()
@@ -1190,7 +1262,7 @@ class FormControl(
 
                 //--- добавляем левый заголовок поля
                 addCellToGrid(
-                    alGridRows = alGridRows,
+                    alGridRows = gridRows,
                     maxColCount = maxColCount,
                     row = rowIndex,
                     col = colIndex,
@@ -1220,7 +1292,7 @@ class FormControl(
                     formCell = formCell,
                 )
                 addCellToGrid(
-                    alGridRows = alGridRows,
+                    alGridRows = gridRows,
                     maxColCount = maxColCount,
                     row = rowIndex,
                     col = colIndex,
@@ -1302,8 +1374,8 @@ class FormControl(
     }
 
     private fun readGridForm() {
-        alHiddenCells.clear()
-        alGridRows.clear()
+        hiddenCells.clear()
+        gridRows.clear()
 
         val maxColCount = formResponse.alFormColumn.size + 2
 
@@ -1319,12 +1391,12 @@ class FormControl(
                     formCell = formCell,
                     isGridForm = true,
                 )
-                alHiddenCells += formGridData
+                hiddenCells += formGridData
             } else {
                 //--- если это первое поле в строке GRID-формы, то добавляем левый заголовок поля
                 if (colIndex == 0) {
                     addCellToGrid(
-                        alGridRows = alGridRows,
+                        alGridRows = gridRows,
                         maxColCount = maxColCount,
                         row = rowIndex,
                         col = colIndex,
@@ -1350,7 +1422,7 @@ class FormControl(
                     isGridForm = true,
                 )
                 addCellToGrid(
-                    alGridRows = alGridRows,
+                    alGridRows = gridRows,
                     maxColCount = maxColCount,
                     row = rowIndex,
                     col = colIndex,
@@ -1361,7 +1433,7 @@ class FormControl(
 
                 if (colIndex == maxColCount - 1) {
                     addCellToGrid(
-                        alGridRows = alGridRows,
+                        alGridRows = gridRows,
                         maxColCount = maxColCount,
                         row = rowIndex,
                         col = colIndex,
@@ -1411,7 +1483,7 @@ class FormControl(
                 align = Arrangement.Center,
             )
             addCellToGrid(
-                alGridRows = alGridRows,
+                alGridRows = gridRows,
                 maxColCount = alFormColumn.size,
                 row = rowIndex,
                 col = colIndex,
@@ -1545,7 +1617,7 @@ class FormControl(
             }
 
         hmFormCellVisible[gdMaster.cellName]?.let { hmFCVI ->
-            alGridRows.forEach { alGridRow ->
+            gridRows.forEach { alGridRow ->
                 alGridRow.forEach { gdSlave ->
                     gdSlave?.let {
                         hmFCVI[gdSlave.cellName]?.let { fcvi ->
@@ -1557,7 +1629,7 @@ class FormControl(
         }
 
         hmFormCellCaption[gdMaster.cellName]?.let { hmFCCI ->
-            alGridRows.forEach { alGridRow ->
+            gridRows.forEach { alGridRow ->
                 alGridRow.forEach { gdSlave ->
                     gdSlave?.let {
                         hmFCCI[gdSlave.cellName]?.let { alFCCI ->
@@ -1578,7 +1650,7 @@ class FormControl(
         }
 
         hmFormCellComboValues[gdMaster.cellName]?.let { hmFCCV ->
-            alGridRows.forEach { alGridRow ->
+            gridRows.forEach { alGridRow ->
                 alGridRow.forEach { gdSlave ->
                     gdSlave?.let {
                         hmFCCV[gdSlave.cellName]?.let { alFCVV ->
@@ -1720,10 +1792,10 @@ class FormControl(
     private suspend fun doInvoke(formButton: FormButton) {
         val formActionData = mutableMapOf<String, FormActionData>()
 
-        alHiddenCells.forEach { gridData ->
+        hiddenCells.forEach { gridData ->
             fillFormData(gridData, formButton.withNewData, formActionData)
         }
-        alGridRows.forEach { alGridRow ->
+        gridRows.forEach { alGridRow ->
             alGridRow.forEach { gridData ->
                 gridData?.let {
                     fillFormData(gridData, formButton.withNewData, formActionData)
@@ -1829,7 +1901,7 @@ class FormControl(
     }
 
     private fun prepareErrors(errors: Map<String, String>) {
-        alGridRows.forEach { alGridRow ->
+        gridRows.forEach { alGridRow ->
             alGridRow.forEach { gridData ->
                 gridData?.error = when (gridData) {
                     is FormSimpleCellClient -> errors[gridData.data.name]
@@ -1844,7 +1916,7 @@ class FormControl(
     }
 
     private suspend fun callSelector(selectorAction: AppAction) {
-        if (formSelectorPreCall?.invoke(selectorAction, alGridRows) == true) {
+        if (formSelectorPreCall?.invoke(selectorAction, gridRows) == true) {
             return
         }
 
@@ -1853,10 +1925,10 @@ class FormControl(
         val selectorFunId = getRandomLong()
         val selectorFun: SelectorFunType = { selectorData ->
             selectorAction.selectorPath.forEach { (fromField, toField) ->
-                alHiddenCells.forEach { gridData ->
+                hiddenCells.forEach { gridData ->
                     setSelectorData(selectorData, fromField, toField, gridData)
                 }
-                alGridRows.forEach { alGridRow ->
+                gridRows.forEach { alGridRow ->
                     alGridRow.forEach { gridData ->
                         setSelectorData(selectorData, fromField, toField, gridData)
                     }
@@ -1896,10 +1968,10 @@ class FormControl(
 
     private fun clearSelector(selectorAction: AppAction) {
         selectorAction.selectorClear.forEach { (toField, clearValue) ->
-            alHiddenCells.forEach { gridData ->
+            hiddenCells.forEach { gridData ->
                 clearSelectorData(toField, clearValue, gridData)
             }
-            alGridRows.forEach { alGridRow ->
+            gridRows.forEach { alGridRow ->
                 alGridRow.forEach { gridData ->
                     clearSelectorData(toField, clearValue, gridData)
                 }

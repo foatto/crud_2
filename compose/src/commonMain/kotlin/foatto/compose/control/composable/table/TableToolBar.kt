@@ -47,7 +47,7 @@ fun TableToolBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(colorToolBar)
-            .padding(start = 4.dp, end = 4.dp),
+            .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

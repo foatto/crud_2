@@ -65,17 +65,10 @@ abstract class AbstractControl(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(colorHeader),
+                    .background(colorHeader)
+                    .padding(top = 16.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-//                    borderTop(
-//                        width = if (!styleIsNarrowScreen) 0.px else 1.px,
-//                        lineStyle = LineStyle.Solid,
-//                        color = colorMainBorder,
-//                    )
-//                    if (withBottomBorder) {
-//                        borderBottom(width = 1.px, lineStyle = LineStyle.Solid, color = colorMainBorder)
-//                    }
             ) {
                 for (titleData in hd.titles) {
                     titleData.action?.let { action ->

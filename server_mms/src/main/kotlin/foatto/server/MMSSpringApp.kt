@@ -408,7 +408,7 @@ class MMSSpringApp : SpringApp() {
         appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
             caption = "Суммарный отчёт",
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),   //, AppRole.USER),
-            disabledAccessRoles = mutableSetOf(),
+            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),  //, AppRole.USER),
             disabledFormAddRoles = mutableSetOf(),
             rowPermissions = mutableMapOf(

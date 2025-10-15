@@ -1,7 +1,9 @@
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenExec
 
 val isBuildSupressWarning: String by project
 
@@ -124,27 +126,27 @@ compose.desktop {
     }
 }
 
-//tasks.withType<org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec> {
-//    binaryenArgs = mutableListOf(
-//        // Required flags:
-//        "--enable-gc",
-//        "--enable-reference-types",
-//        "--enable-exception-handling",
-//        "--enable-bulk-memory",
-//        "--enable-nontrapping-float-to-int",
-//
-//        // Optional flags (can be removed):
-//        "--inline-functions-with-loops",
-////        "--traps-never-happen",
-////        "--fast-math",
-////        "-O3",
-////        "-O3",
-////        "--gufa",
-////        "-O3",
-////        "-O3",
-////        "-Oz",
-//    )
-//}
+tasks.withType<BinaryenExec> {
+    binaryenArgs = mutableListOf(
+        // Required flags:
+        "--enable-gc",
+        "--enable-reference-types",
+        "--enable-exception-handling",
+        "--enable-bulk-memory",
+        "--enable-nontrapping-float-to-int",
+
+        // Optional flags (can be removed):
+        "--inline-functions-with-loops",
+//        "--traps-never-happen",
+//        "--fast-math",
+//        "-O3",
+//        "-O3",
+//        "--gufa",
+//        "-O3",
+//        "-O3",
+//        "-Oz",
+    )
+}
 
 tasks {
     build {

@@ -195,7 +195,7 @@ class ChartSensorService(
         isReversedY: Boolean,
         axisIndex: Int,
         lineWidth: Int,
-        colorFun: (value: Double) -> ULong,
+        colorFun: (value: Double) -> Int,
     ): ChartElementData {
         val lines = mutableListOf<ChartElementLineData>()
 

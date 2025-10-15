@@ -7,7 +7,7 @@ class ChartAxisData(
     val title: String,
     var min: Float,
     var max: Float,
-    val color: ULong,
+    val color: Int,
     val isReversedY: Boolean,
 ) {
     //--- set on client-side

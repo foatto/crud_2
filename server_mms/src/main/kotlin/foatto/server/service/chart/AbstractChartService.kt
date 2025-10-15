@@ -22,87 +22,87 @@ abstract class AbstractChartService(
 ) {
 
     companion object {
-        val FILL_NEUTRAL: ULong = 0xFF_E0_FF_FF.toULong()
-        val FILL_NORMAL: ULong = 0xFF_E0_FF_E0.toULong()
-        val FILL_WARNING: ULong = 0xFF_FF_FF_E0.toULong()
-        val FILL_CRITICAL: ULong = 0xFF_FF_E0_E0.toULong()
+        val FILL_NEUTRAL: Int = 0xFF_E0_FF_FF.toInt()
+        val FILL_NORMAL: Int = 0xFF_E0_FF_E0.toInt()
+        val FILL_WARNING: Int = 0xFF_FF_FF_E0.toInt()
+        val FILL_CRITICAL: Int = 0xFF_FF_E0_E0.toInt()
 
-        val BORDER_NEUTRAL: ULong = 0xFF_C0_FF_FF.toULong()
-        val BORDER_NORMAL: ULong = 0xFF_B0_F0_B0.toULong()
-        val BORDER_WARNING: ULong = 0xFF_E0_E0_C0.toULong()
-        val BORDER_CRITICAL: ULong = 0xFF_FF_C0_C0.toULong()
+        val BORDER_NEUTRAL: Int = 0xFF_C0_FF_FF.toInt()
+        val BORDER_NORMAL: Int = 0xFF_B0_F0_B0.toInt()
+        val BORDER_WARNING: Int = 0xFF_E0_E0_C0.toInt()
+        val BORDER_CRITICAL: Int = 0xFF_FF_C0_C0.toInt()
 
-        val TEXT_NEUTRAL: ULong = 0xFF_00_00_80.toULong()
-        val TEXT_NORMAL: ULong = 0xFF_00_80_00.toULong()
-        val TEXT_WARNING: ULong = 0xFF_80_80_00.toULong()
-        val TEXT_CRITICAL: ULong = 0xFF_80_00_00.toULong()
+        val TEXT_NEUTRAL: Int = 0xFF_00_00_80.toInt()
+        val TEXT_NORMAL: Int = 0xFF_00_80_00.toInt()
+        val TEXT_WARNING: Int = 0xFF_80_80_00.toInt()
+        val TEXT_CRITICAL: Int = 0xFF_80_00_00.toInt()
 
-        val POINT_NEUTRAL: ULong = 0xFF_C0_C0_FF.toULong()
-        val POINT_NORMAL: ULong = 0xFF_C0_FF_C0.toULong()
-        val POINT_BELOW: ULong = 0xFF_E0_E0_A0.toULong()
-        val POINT_ABOVE: ULong = 0xFF_FF_C0_C0.toULong()
+        val POINT_NEUTRAL: Int = 0xFF_C0_C0_FF.toInt()
+        val POINT_NORMAL: Int = 0xFF_C0_FF_C0.toInt()
+        val POINT_BELOW: Int = 0xFF_E0_E0_A0.toInt()
+        val POINT_ABOVE: Int = 0xFF_FF_C0_C0.toInt()
 
-        val AXIS_0: ULong = 0xFF_80_C0_80.toULong()
-        val AXIS_1: ULong = 0xFF_80_80_C0.toULong()
-        val AXIS_2: ULong = 0xFF_C0_80_80.toULong()
-        val AXIS_3: ULong = 0xFF_C0_80_C0.toULong()
+        val AXIS_0: Int = 0xFF_80_C0_80.toInt()
+        val AXIS_1: Int = 0xFF_80_80_C0.toInt()
+        val AXIS_2: Int = 0xFF_C0_80_80.toInt()
+        val AXIS_3: Int = 0xFF_C0_80_C0.toInt()
 
-        val LINE_LIMIT: ULong = 0xFF_FF_A0_A0.toULong()
+        val LINE_LIMIT: Int = 0xFF_FF_A0_A0.toInt()
 
-        val LINE_NONE_0: ULong = 0x00_80_80_80.toULong()
-        val LINE_NORMAL_0: ULong = 0xFF_00_E0_00.toULong()
-        val LINE_BELOW_0: ULong = 0xFF_00_60_E0.toULong()
-        val LINE_ABOVE_0: ULong = 0xFF_E0_60_00.toULong()
+        val LINE_NONE_0: Int = 0x00_80_80_80.toInt()
+        val LINE_NORMAL_0: Int = 0xFF_00_E0_00.toInt()
+        val LINE_BELOW_0: Int = 0xFF_00_60_E0.toInt()
+        val LINE_ABOVE_0: Int = 0xFF_E0_60_00.toInt()
 
-        val LINE_NONE_1: ULong = 0x00_90_90_90.toULong()
-        val LINE_NORMAL_1: ULong = 0xFF_00_00_E0.toULong()
+        val LINE_NONE_1: Int = 0x00_90_90_90.toInt()
+        val LINE_NORMAL_1: Int = 0xFF_00_00_E0.toInt()
 
-        val LINE_NONE_2: ULong = 0x00_A0_A0_A0.toULong()
-        val LINE_NORMAL_2: ULong = 0xFF_E0_00_00.toULong()
+        val LINE_NONE_2: Int = 0x00_A0_A0_A0.toInt()
+        val LINE_NORMAL_2: Int = 0xFF_E0_00_00.toInt()
 
-        val LINE_NONE_3: ULong = 0x00_B0_B0_B0.toULong()
-        val LINE_NORMAL_3: ULong = 0xFF_E0_00_E0.toULong()
+        val LINE_NONE_3: Int = 0x00_B0_B0_B0.toInt()
+        val LINE_NORMAL_3: Int = 0xFF_E0_00_E0.toInt()
 
-        private val chartAxisColor: List<ULong> = listOf(
+        private val chartAxisColor: List<Int> = listOf(
             AXIS_0,
             AXIS_1,
             AXIS_2,
             AXIS_3,
         )
 
-        private val chartLineNoneColor: List<ULong> = listOf(
+        private val chartLineNoneColor: List<Int> = listOf(
             LINE_NONE_0,
             LINE_NONE_1,
             LINE_NONE_2,
             LINE_NONE_3,
         )
 
-        private val chartLineNormalColor: List<ULong> = listOf(
+        private val chartLineNormalColor: List<Int> = listOf(
             LINE_NORMAL_0,
             LINE_NORMAL_1,
             LINE_NORMAL_2,
             LINE_NORMAL_3,
         )
 
-        private val chartLineBelowColor: List<ULong> = listOf(
+        private val chartLineBelowColor: List<Int> = listOf(
             LINE_BELOW_0,
             LINE_BELOW_0,
             LINE_BELOW_0,
             LINE_BELOW_0,
         )
 
-        private val chartLineAboveColor: List<ULong> = listOf(
+        private val chartLineAboveColor: List<Int> = listOf(
             LINE_ABOVE_0,
             LINE_ABOVE_0,
             LINE_ABOVE_0,
             LINE_ABOVE_0,
         )
 
-        fun getChartAxisColor(index: Int): ULong = chartAxisColor[index % chartAxisColor.size]
-        fun getChartLineNoneColor(index: Int): ULong = chartLineNoneColor[index % chartLineNoneColor.size]
-        fun getChartLineNormalColor(index: Int): ULong = chartLineNormalColor[index % chartLineNormalColor.size]
-        fun getChartLineBelowColor(index: Int): ULong = chartLineBelowColor[index % chartLineBelowColor.size]
-        fun getChartLineAboveColor(index: Int): ULong = chartLineAboveColor[index % chartLineAboveColor.size]
+        fun getChartAxisColor(index: Int): Int = chartAxisColor[index % chartAxisColor.size]
+        fun getChartLineNoneColor(index: Int): Int = chartLineNoneColor[index % chartLineNoneColor.size]
+        fun getChartLineNormalColor(index: Int): Int = chartLineNormalColor[index % chartLineNormalColor.size]
+        fun getChartLineBelowColor(index: Int): Int = chartLineBelowColor[index % chartLineBelowColor.size]
+        fun getChartLineAboveColor(index: Int): Int = chartLineAboveColor[index % chartLineAboveColor.size]
     }
 
     /*

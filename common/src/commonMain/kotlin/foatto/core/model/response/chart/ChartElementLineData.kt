@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 class ChartElementLineData(
     val x: Int,
     var y: Float,
-    val color: ULong,
+    val color: Int,
 )

@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -148,8 +149,40 @@ abstract class AbstractControl(
         alGridRow[col] = cell
     }
 
-    protected fun drawCircleOnCanvas(
-        drawScope: DrawScope,
+    protected fun DrawScope.drawLineOnCanvas(
+        canvasWidth: Float,
+        canvasHeight: Float,
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float,
+        color: Color,
+        strokeWidth: Float,
+        strokeDash: FloatArray? = null,
+    ) {
+        try {
+            drawLine(
+                start = Offset(x1, y1),
+                end = Offset(x2, y2),
+                color = color,
+                strokeWidth = strokeWidth,
+                pathEffect = strokeDash?.let {
+                    PathEffect.dashPathEffect(strokeDash)
+                },
+            )
+        } catch (t: Throwable) {
+            println("--- AbstractControl.drawLineOnCanvas.drawLine error:")
+            println("canvasWidth = $canvasWidth")
+            println("canvasHeight = $canvasHeight")
+            println("x1 = $x1")
+            println("y1 = $y1")
+            println("x2 = $x2")
+            println("y2 = $y2")
+            println("---")
+        }
+    }
+
+    protected fun DrawScope.drawCircleOnCanvas(
         x: Float,
         y: Float,
         radius: Float,
@@ -159,30 +192,27 @@ abstract class AbstractControl(
         strokeAlpha: Float,
         strokeStyle: DrawStyle?,
     ) {
-        drawScope.apply {
-            fillColor?.let {
-                drawCircle(
-                    center = Offset(x, y),
-                    radius = radius,
-                    color = fillColor,
-                    alpha = fillAlpha,
-                    style = Fill,
-                )
-            }
-            if (strokeColor != null && strokeStyle != null) {
-                drawCircle(
-                    center = Offset(x, y),
-                    radius = radius,
-                    color = strokeColor,
-                    alpha = strokeAlpha,
-                    style = strokeStyle
-                )
-            }
+        fillColor?.let {
+            drawCircle(
+                center = Offset(x, y),
+                radius = radius,
+                color = fillColor,
+                alpha = fillAlpha,
+                style = Fill,
+            )
+        }
+        if (strokeColor != null && strokeStyle != null) {
+            drawCircle(
+                center = Offset(x, y),
+                radius = radius,
+                color = strokeColor,
+                alpha = strokeAlpha,
+                style = strokeStyle
+            )
         }
     }
 
-    protected fun drawPathOnCanvas(
-        drawScope: DrawScope,
+    protected fun DrawScope.drawPathOnCanvas(
         path: Path,
         fillColor: Color?,
         fillAlpha: Float,
@@ -190,28 +220,25 @@ abstract class AbstractControl(
         strokeAlpha: Float,
         strokeStyle: DrawStyle?,
     ) {
-        drawScope.apply {
-            fillColor?.let {
-                drawPath(
-                    path = path,
-                    color = fillColor,
-                    alpha = fillAlpha,
-                    style = Fill,
-                )
-            }
-            if (strokeColor != null && strokeStyle != null) {
-                drawPath(
-                    path = path,
-                    color = strokeColor,
-                    alpha = strokeAlpha,
-                    style = strokeStyle,
-                )
-            }
+        fillColor?.let {
+            drawPath(
+                path = path,
+                color = fillColor,
+                alpha = fillAlpha,
+                style = Fill,
+            )
+        }
+        if (strokeColor != null && strokeStyle != null) {
+            drawPath(
+                path = path,
+                color = strokeColor,
+                alpha = strokeAlpha,
+                style = strokeStyle,
+            )
         }
     }
 
-    protected fun drawRectOnCanvas(
-        drawScope: DrawScope,
+    protected fun DrawScope.drawRectOnCanvas(
         x: Float,
         y: Float,
         width: Float,
@@ -222,32 +249,29 @@ abstract class AbstractControl(
         strokeAlpha: Float,
         strokeStyle: DrawStyle?,
     ) {
-        drawScope.apply {
-            fillColor?.let {
-                drawRect(
-                    topLeft = Offset(x, y),
-                    size = Size(width, height),
-                    color = fillColor,
-                    alpha = fillAlpha,
-                    style = Fill,
-                )
-            }
-            if (strokeColor != null && strokeStyle != null) {
-                drawRect(
-                    topLeft = Offset(x, y),
-                    size = Size(width, height),
-                    color = strokeColor,
-                    alpha = strokeAlpha,
-                    style = strokeStyle,
-                )
-            }
+        fillColor?.let {
+            drawRect(
+                topLeft = Offset(x, y),
+                size = Size(width, height),
+                color = fillColor,
+                alpha = fillAlpha,
+                style = Fill,
+            )
+        }
+        if (strokeColor != null && strokeStyle != null) {
+            drawRect(
+                topLeft = Offset(x, y),
+                size = Size(width, height),
+                color = strokeColor,
+                alpha = strokeAlpha,
+                style = strokeStyle,
+            )
         }
 //        rx(element.rx)
 //        ry(element.ry)
     }
 
-    protected fun drawTextOnCanvas(
-        drawScope: DrawScope,
+    protected fun DrawScope.drawTextOnCanvas(
         scaleKoef: Float,
         canvasWidth: Float,
         canvasHeight: Float,
@@ -302,33 +326,35 @@ abstract class AbstractControl(
                 softWrap = false,
             ).size.toSize()
         }
-
         val startX = x - (anchor.horizontalBias + 1) * (textSize.width / 2 + paddingX) - anchor.horizontalBias * constOffsetX
         val topY = y - (anchor.verticalBias + 1) * (textSize.height / 2 + paddingY) - anchor.verticalBias * constOffsetY
 
-        drawScope.apply {
-            drawRectOnCanvas(
-                drawScope = this,
-                x = startX,
-                y = topY,
-                width = textSize.width + 2 * paddingX,
-                height = textSize.height + 2 * paddingY,
-                fillColor = fillColor,
-                fillAlpha = fillAlpha,
-                strokeColor = strokeColor,
-                strokeAlpha = 1.0f,
-                strokeStyle = Stroke(width = borderWidth),
-            )
-            rotate(
-                degrees = rotateDegree ?: 0.0f,
-                pivot = Offset(x, y),
-            ) {
-                text.split('\n').forEachIndexed { index, textLine ->
-                    try {
-                        drawText(
-                            textMeasurer = textMeasurer,
-                            topLeft = Offset(startX + paddingX, topY + paddingY + index * 16 * scaleKoef),
-                            text = textLine,
+        drawRectOnCanvas(
+            x = startX,
+            y = topY,
+            width = textSize.width + 2 * paddingX,
+            height = textSize.height + 2 * paddingY,
+            fillColor = fillColor,
+            fillAlpha = fillAlpha,
+            strokeColor = strokeColor,
+            strokeAlpha = 1.0f,
+            strokeStyle = Stroke(width = borderWidth),
+        )
+        rotate(
+            degrees = rotateDegree ?: 0.0f,
+            pivot = Offset(x, y),
+        ) {
+            text.split('\n').forEachIndexed { index, textLine ->
+                val textX = startX + paddingX
+                val textY = topY + paddingY + index * 16 * scaleKoef
+                try {
+//                    println("--- TEXT = '$text'")
+//                    println("--- x = $textX")
+//                    println("--- y = $textY")
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        topLeft = Offset(textX, textY),
+                        text = textLine,
 //!!! BUG: выводится только первая строка многострочного текста
 //                        text = text,
 //!!! BUG: buildAnnotatedString через SpanStyle не выводит вторую и последующие строки друг под другом,
@@ -358,37 +384,36 @@ abstract class AbstractControl(
 //                                }
 //                            }
 //                        },
-                            style = textStyle,
-                            softWrap = false,
-                            overflow = if (isTextSizeLimited) {
-                                TextOverflow.Ellipsis
-                            } else {
-                                TextOverflow.Visible
-                            },
-                            size = if (isTextSizeLimited) {
+                        style = textStyle,
+                        softWrap = false,
+                        overflow = if (isTextSizeLimited) {
+                            TextOverflow.Ellipsis
+                        } else {
+                            TextOverflow.Visible
+                        },
+                        size = if (isTextSizeLimited) {
+                            textSize
+                        } else {
+                            Size.Unspecified
+                        },
+                    )
+                } catch (t: Throwable) {
+                    println("--- AbstractControl.drawTextOnCanvas.drawText error:")
+                    println("text = '$text'")
+                    println("canvasWidth = $canvasWidth")
+                    println("canvasHeight = $canvasHeight")
+                    println("x = $textX")
+                    println("y = $textY")
+                    println(
+                        "size = ${
+                            if (isTextSizeLimited) {
                                 textSize
                             } else {
                                 Size.Unspecified
-                            },
-                        )
-                    } catch (t: Throwable) {
-//                        println("--- TEXT = $text")
-//                        println("--- canvasWidth = $canvasWidth")
-//                        println("--- canvasHeight = $canvasHeight")
-//                        println("--- x = ${startX + paddingX}")
-//                        println("--- y = ${topY + paddingY}")
-//                        println(
-//                            "--- size = ${
-//                                if (isTextSizeLimited) {
-//                                    textSize
-//                                } else {
-//                                    Size.Unspecified
-//                                }
-//                            }"
-//                        )
-//                        t.printStackTrace()
-                    }
-
+                            }
+                        }"
+                    )
+                    println("---")
                 }
             }
         }

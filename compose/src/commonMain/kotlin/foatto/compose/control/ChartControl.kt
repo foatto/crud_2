@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,7 +21,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.hsl
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
@@ -58,6 +58,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+import kotlin.io.println
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max
@@ -177,7 +178,6 @@ class ChartControl(
 
     private var chartViewCoord = ChartViewCoord(0, 0)
 //    private var grTooltipOffTime = 0.0
-//    private var refreshHandlerId = 0
 
     @Composable
     override fun Body() {
@@ -270,19 +270,20 @@ class ChartControl(
         ) {
             for (chartGroup in chartDrawDatas) {
                 for (axisLine in chartGroup.yAxisLines) {
-                    drawLine(
-                        start = Offset(axisLine.x1, axisLine.y1),
-                        end = Offset(axisLine.x2, axisLine.y2),
+                    drawLineOnCanvas(
+                        canvasWidth = axisCanvasWidth,
+                        canvasHeight = canvasHeight,
+                        x1 = axisLine.x1,
+                        y1 = axisLine.y1,
+                        x2 = axisLine.x2,
+                        y2 = axisLine.y2,
                         color = axisLine.strokeColor,
                         strokeWidth = axisLine.strokeWidth,
-                        pathEffect = axisLine.strokeDash?.let {
-                            PathEffect.dashPathEffect(axisLine.strokeDash)
-                        },
+                        strokeDash = axisLine.strokeDash,
                     )
                 }
                 for (axisText in chartGroup.yAxisTexts) {
                     drawTextOnCanvas(
-                        drawScope = this,
                         scaleKoef = root.scaleKoef,
                         canvasWidth = axisCanvasWidth,
                         canvasHeight = canvasHeight,
@@ -327,7 +328,6 @@ class ChartControl(
         ) {
             for (chartGroup in chartDrawDatas) {
                 drawTextOnCanvas(
-                    drawScope = this,
                     scaleKoef = root.scaleKoef,
                     canvasWidth = bodyCanvasWidth,
                     canvasHeight = canvasHeight,
@@ -350,7 +350,6 @@ class ChartControl(
 //                            fontSize((1.0 * scaleKoef).cssRem)
                 for (graphicBack in chartGroup.chartBacks) {
                     drawRectOnCanvas(
-                        drawScope = this,
                         x = graphicBack.x + screenOffsetX,
                         y = graphicBack.y,
                         width = graphicBack.width,
@@ -363,19 +362,20 @@ class ChartControl(
                     )
                 }
                 for (axisLine in chartGroup.xAxisLines) {
-                    drawLine(
-                        start = Offset(axisLine.x1 + screenOffsetX, axisLine.y1),
-                        end = Offset(axisLine.x2 + screenOffsetX, axisLine.y2),
+                    drawLineOnCanvas(
+                        canvasWidth = bodyCanvasWidth,
+                        canvasHeight = canvasHeight,
+                        x1 = axisLine.x1 + screenOffsetX,
+                        y1 = axisLine.y1,
+                        x2 = axisLine.x2 + screenOffsetX,
+                        y2 = axisLine.y2,
                         color = axisLine.strokeColor,
                         strokeWidth = axisLine.strokeWidth,    // 2.dp.toPx()
-                        pathEffect = axisLine.strokeDash?.let {
-                            PathEffect.dashPathEffect(axisLine.strokeDash)
-                        },
+                        strokeDash = axisLine.strokeDash,
                     )
                 }
                 for (axisText in chartGroup.xAxisTexts) {
                     drawTextOnCanvas(
-                        drawScope = this,
                         scaleKoef = root.scaleKoef,
                         canvasWidth = bodyCanvasWidth,
                         canvasHeight = canvasHeight,
@@ -418,14 +418,16 @@ class ChartControl(
 ////                            }
 //                }
                 for (graphicLine in chartGroup.chartLines) {
-                    drawLine(
-                        start = Offset(graphicLine.x1 + screenOffsetX, graphicLine.y1),
-                        end = Offset(graphicLine.x2 + screenOffsetX, graphicLine.y2),
+                    drawLineOnCanvas(
+                        canvasWidth = bodyCanvasWidth,
+                        canvasHeight = canvasHeight,
+                        x1 = graphicLine.x1 + screenOffsetX,
+                        y1 = graphicLine.y1,
+                        x2 = graphicLine.x2 + screenOffsetX,
+                        y2 = graphicLine.y2,
                         color = graphicLine.strokeColor,
                         strokeWidth = graphicLine.strokeWidth,    // 2.dp.toPx()
-                        pathEffect = graphicLine.strokeDash?.let {
-                            PathEffect.dashPathEffect(graphicLine.strokeDash)
-                        },
+                        strokeDash = graphicLine.strokeDash,
                     )
 //                            onMouseEnter { syntheticMouseEvent ->
 //                                onGrMouseOver(syntheticMouseEvent, graphicLine)
@@ -436,7 +438,6 @@ class ChartControl(
                 }
                 for (graphicText in chartGroup.chartTexts) {
                     drawTextOnCanvas(
-                        drawScope = this,
                         scaleKoef = root.scaleKoef,
                         canvasWidth = bodyCanvasWidth,
                         canvasHeight = canvasHeight,
@@ -466,9 +467,13 @@ class ChartControl(
             }
 
             if (grTimeLine.isVisible.value) {
-                drawLine(
-                    start = Offset(grTimeLine.x1.value, grTimeLine.y1.value),
-                    end = Offset(grTimeLine.x2.value, grTimeLine.y2.value),
+                drawLineOnCanvas(
+                    canvasWidth = bodyCanvasWidth,
+                    canvasHeight = canvasHeight,
+                    x1 = grTimeLine.x1.value,
+                    y1 = grTimeLine.y1.value,
+                    x2 = grTimeLine.x2.value,
+                    y2 = grTimeLine.y2.value,
                     color = COLOR_CHART_TIME_LINE,
                     strokeWidth = grTimeLine.width.value,
                 )
@@ -476,7 +481,6 @@ class ChartControl(
 
             if (withInteractive && refreshInterval == 0 && mouseRect.isVisible.value) {
                 drawRectOnCanvas(
-                    drawScope = this,
                     x = min(mouseRect.x1.value, mouseRect.x2.value),
                     y = min(mouseRect.y1.value, mouseRect.y2.value),
                     width = abs(mouseRect.x2.value - mouseRect.x1.value),
@@ -494,7 +498,6 @@ class ChartControl(
                 for (timeLabel in timeLabels) {
                     if (timeLabel.isVisible.value) {
                         drawTextOnCanvas(
-                            drawScope = this,
                             scaleKoef = root.scaleKoef,
                             canvasWidth = bodyCanvasWidth,
                             canvasHeight = canvasHeight,
@@ -572,7 +575,6 @@ class ChartControl(
             for (chartGroup in chartDrawDatas) {
                 for (legendBack in chartGroup.legendBacks) {
                     drawRectOnCanvas(
-                        drawScope = this,
                         x = legendBack.x,
                         y = legendBack.y,
                         width = legendBack.width,
@@ -586,7 +588,6 @@ class ChartControl(
                 }
                 for (legendText in chartGroup.legendTexts) {
                     drawTextOnCanvas(
-                        drawScope = this,
                         scaleKoef = root.scaleKoef,
                         canvasWidth = legendCanvasWidth,
                         canvasHeight = canvasHeight,
@@ -744,7 +745,6 @@ class ChartControl(
                 )
                 localPixEndY += oneChartHeight
             }
-
 //        //--- перезагрузка данных может быть связана с изменением показываемого временнОго диапазона,
 //        //--- поэтому переотобразим его
 //        val arrBegDT = DateTime_Arr( appContainer.timeZone, grModel.viewCoord.t1 )
@@ -888,10 +888,7 @@ class ChartControl(
 
                 var prevDrawX = -1.0f
                 var prevDrawY = -1.0f
-                var prevDrawColor: ULong? = null
-println("axisIndex = $axisIndex")
-println("chartData = ${chartData.axises.size}")
-println("alAxisYDataIndex = ${alAxisYDataIndex.size}")
+                var prevDrawColor: Int? = null
                 val ayd = chartData.axises[axisIndex]
                 val yDiff = ayd.max - ayd.min
 
@@ -934,7 +931,6 @@ println("alAxisYDataIndex = ${alAxisYDataIndex.size}")
                     while (true) {
                         var crossNotFound = true
                         for (otherRect in prevTextBounds) {
-                            //System.out.println(  "Bounds = " + b  );
                             //--- если блок текста пересекается с кем-то предыдущим, опустимся ниже его
                             if (rect.isIntersects(otherRect)) {
                                 rect.y += rect.height
@@ -942,7 +938,9 @@ println("alAxisYDataIndex = ${alAxisYDataIndex.size}")
                                 break
                             }
                         }
-                        if (crossNotFound) break
+                        if (crossNotFound) {
+                            break
+                        }
                     }
                     //--- для следующих текстов
                     prevTextBounds.add(rect)
@@ -1630,32 +1628,6 @@ private fun onGrMouseWheel(syntheticWheelEvent: SyntheticWheelEvent) {
 //        )
 //    }
 //}
-
-/*
-                <!-- текст теперь выводится по-другому, но может ещё пригодиться для других прямоугольников
-                    <rect v-for="graphicText in element.arrGraphicText"
-                          v-bind:x="graphicText.x"
-                          v-bind:y="graphicText.y"
-                          v-bind:width="graphicText.width"
-                          v-bind:height="graphicText.height"
-                          v-bind:stroke="graphicText.stroke"
-                          v-bind:fill="graphicText.fill"
-                          v-bind:strokeWidth="graphicText.strokeWidth"
-                          v-bind:rx="graphicText.rx"
-                          v-bind:ry="graphicText.ry"
-        """ +
-    if (withInteractive) {
-        """
-                          v-on:mouseenter="onMouseOver( ${'$'}event, graphicText )"
-                          v-on:mouseleave="onMouseOut()"
-                """
-    } else {
-        ""
-    } +
-    """
-                    />
-                -->
-*/
 
 /*
 private val panTimeBar = HBox( iAppContainer.DEFAULT_SPACING )

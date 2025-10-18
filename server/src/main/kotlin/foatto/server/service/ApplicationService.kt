@@ -226,11 +226,7 @@ abstract class ApplicationService(
             listOf(
                 ServerActionButton(
                     name = IconName.ADD_ITEM,
-                    action = getTableAddAction(
-                        action = action,
-                        parentModule = action.parentModule,
-                        parentId = action.parentId,
-                    ),
+                    action = getTableAddAction(action),
                     inNewTab = false,
                     isForWideScreenOnly = true,
                 )
@@ -247,14 +243,16 @@ abstract class ApplicationService(
         alColumnInfo.map { (fieldName, fieldCaption) ->
             TableCaption(
                 name = fieldCaption,
-                action = action.copy(
-                    sortName = fieldName,
-                    isSortAsc = if (fieldName == action.sortName) {
-                        !action.isSortAsc
-                    } else {
-                        true
-                    }
-                )
+                action = fieldName?.let {
+                    action.copy(
+                        sortName = fieldName,
+                        isSortAsc = if (fieldName == action.sortName) {
+                            !action.isSortAsc
+                        } else {
+                            true
+                        }
+                    )
+                },
             )
         }
 
@@ -276,7 +274,20 @@ abstract class ApplicationService(
             pageSize = Int.MAX_VALUE
         }
 
-        return PageRequest.of(action.pageNo, pageSize, Sort.by(*orders))
+        return PageRequest.of(
+            action.pageNo,
+            pageSize,
+            action.sortName?.let {
+                Sort.by(
+                    if (action.isSortAsc) {
+                        Sort.Direction.ASC
+                    } else {
+                        Sort.Direction.DESC
+                    },
+                    action.sortName,
+                )
+            } ?: Sort.by(*orders)
+        )
     }
 
     protected fun getTableSelectorButtonCell(row: Int, col: Int, selectorAction: AppAction): TableBaseCell = TableButtonCell(
@@ -325,62 +336,20 @@ abstract class ApplicationService(
         }
     } ?: emptyList()
 
-    protected open fun getTableAddAction(action: AppAction, parentModule: String?, parentId: Int?): AppAction =
+    protected open fun getTableAddAction(action: AppAction): AppAction =
         AppAction(
             type = ActionType.MODULE_FORM,
             module = action.module,
-            parentModule = parentModule,
-            parentId = parentId,
+            parentModule = action.parentModule,
+            parentId = action.parentId,
         )
-
-//    protected fun fillTablePageButtons(
-//        action: AppAction,
-//        pageCount: Int,
-//        alPageButton: MutableList<TablePageButton>,
-//    ) {
-//        val pageNo = action.pageNo
-//        //--- first page
-//        if (pageNo > 0) {
-//            alPageButton += getPageButton(action, 0)
-//        }
-//        //--- empty
-//        if (pageNo > 2) {
-//            alPageButton += TablePageButton(null, "...")
-//        }
-//        //--- prev page
-//        if (pageNo > 1) {
-//            alPageButton += getPageButton(action, pageNo - 1)
-//        }
-//
-//        //--- current page
-//        alPageButton += TablePageButton(null, "${pageNo + 1}")
-//
-//        //--- next page
-//        if (pageNo < pageCount - 2) {
-//            alPageButton += getPageButton(action, pageNo + 1)
-//        }
-//        //--- empty
-//        if (pageNo < pageCount - 3) {
-//            alPageButton += TablePageButton(null, "...")
-//        }
-//        //--- last page
-//        if (pageNo < pageCount - 1) {
-//            alPageButton += getPageButton(action, pageCount - 1)
-//        }
-//    }
-//
-//    private fun getPageButton(action: AppAction, pageNo: Int): TablePageButton =
-//        TablePageButton(
-//            action = action.copy(pageNo = pageNo),
-//            text = "${pageNo + 1}",
-//        )
 
     protected fun fillTablePageButtons(
         action: AppAction,
         pageCount: Int,
         pageButtons: MutableList<TablePageButton>,
     ) {
-        val NEAR_PAGE_BUTTON_COUNT = 10 // 5
+        val NEAR_PAGE_BUTTON_COUNT = 11
         val pageNo = action.pageNo
 
         //--- current page
@@ -706,7 +675,7 @@ abstract class ApplicationService(
             }
         } ?: "-"
 
-    protected fun getDateTimeEntityDMYString(dateTimeEntity: DateTimeEntity?): String =
+    protected fun getDateTimeEntityDMYHMSString(dateTimeEntity: DateTimeEntity?): String =
         dateTimeEntity?.let { dte ->
             if (dte.ye != null && dte.mo != null && dte.da != null && dte.ho != null && dte.mi != null && dte.se != null) {
                 getDateTimeDMYHMSString(dte.ye, dte.mo, dte.da, dte.ho, dte.mi, dte.se)

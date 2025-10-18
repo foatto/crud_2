@@ -14,6 +14,7 @@ abstract class TableBaseCellClient(
     val dataRow: Int?,
     val minWidth: Int,
     val align: Alignment,
+    val isStaticBackColor: Boolean,
     val backColor: Color,
     val textColor: Color,
     val isBoldText: Boolean,

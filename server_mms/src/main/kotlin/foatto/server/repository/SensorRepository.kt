@@ -153,8 +153,11 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                      OR LOWER(se.group) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(se.descr) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(se.serialNo) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
+                     OR CAST(se.portNum AS String) LIKE CONCAT( '%', ?2, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + se.begTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + se.endTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
                 )
         """
     )
-    fun findByObjAndFilter(obj: ObjectEntity, findText: String, pageRequest: Pageable): Page<SensorEntity>
+    fun findByObjAndFilter(obj: ObjectEntity, findText: String, timeOffset: Int, pageRequest: Pageable): Page<SensorEntity>
 }

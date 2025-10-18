@@ -23,11 +23,18 @@ interface UserRepository : JpaRepository<UserEntity, Int> {
                 AND (
                         ?3 = ''
                      OR LOWER(ue.login) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(ue.shortName) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.fullName) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.eMail) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.contactInfo) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(ue.lastIP) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR CAST(ue.timeOffset AS String) LIKE CONCAT( '%', ?3, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(
+                        ue.lastLoginDateTime.ye, ue.lastLoginDateTime.mo, ue.lastLoginDateTime.da, 
+                        ue.lastLoginDateTime.ho, ue.lastLoginDateTime.mi, ue.lastLoginDateTime.se
+                     ), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
                 )
         """
     )
-    fun findByParentIdAndUserIdInAndFilter(parentId: Int, userIds: List<Int>, findText: String, pageRequest: Pageable): Page<UserEntity>
+    fun findByParentIdAndUserIdInAndFilter(parentId: Int, userIds: List<Int>, findText: String, timeOffset: Int, pageRequest: Pageable): Page<UserEntity>
 }

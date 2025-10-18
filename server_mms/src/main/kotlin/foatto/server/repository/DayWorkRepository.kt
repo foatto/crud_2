@@ -24,6 +24,7 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                      OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
+                     OR TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
                 )
         """
     )
@@ -45,6 +46,7 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                      OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
                 )
         """
     )

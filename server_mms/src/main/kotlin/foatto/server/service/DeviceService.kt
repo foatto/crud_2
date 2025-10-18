@@ -195,20 +195,6 @@ class DeviceService(
                 SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE, portNum = PortNumbers.MERCURY_TRANSFORM_KOEF_VOLTAGE_370, descrBody = "Коэффициент трансформации по напряжению"),
             ),
         )
-        /*
-        SensorInfo(
-            sensorType = ,
-            portNum = ,
-            descrBody = ,
-        //    minView = ,
-        //    maxView = ,
-        //    minLimit = ,
-        //    maxLimit = ,
-        //    indicatorDelimiterCount = ,
-        //    indicatorMultiplicator = ,
-        //    phase = ,
-        )
-        */
     }
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
@@ -276,9 +262,9 @@ class DeviceService(
         )
 
         val page: Page<DeviceEntity> = parentObjectEntity?.let {
-            deviceRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, pageRequest)
+            deviceRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, userConfig.timeOffset, pageRequest)
         } ?: run {
-            deviceRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
+            deviceRepository.findByUserIdInAndFilter(enabledUserIds, findText, userConfig.timeOffset, pageRequest)
         }
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceEntities = page.content

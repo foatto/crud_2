@@ -122,7 +122,7 @@ class DeviceManageService(
 
         val parentDeviceEntity = getParentDeviceEntity(action) ?: return null
 
-        val page: Page<DeviceManageEntity> = deviceManageRepository.findByDeviceAndFilter(parentDeviceEntity, findText, pageRequest)
+        val page: Page<DeviceManageEntity> = deviceManageRepository.findByDeviceAndFilter(parentDeviceEntity, findText, userConfig.timeOffset, pageRequest)
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceManageEntities = page.content
 

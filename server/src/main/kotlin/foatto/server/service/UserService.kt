@@ -168,6 +168,7 @@ class UserService(
         }
         alColumnInfo += FIELD_TIME_OFFSET to "Time Offset"
         if (isAdminOnly(userConfig)) {
+            alColumnInfo += FIELD_LAST_LOGIN to "Last Login Time (UTC)"
             alColumnInfo += FIELD_LAST_IP to "Last IP"
         }
 
@@ -206,7 +207,7 @@ class UserService(
             roles = userConfig.roles,
         )
 
-        val page: Page<UserEntity> = userRepository.findByParentIdAndUserIdInAndFilter(parentId, enabledUserIds, findText, pageRequest)
+        val page: Page<UserEntity> = userRepository.findByParentIdAndUserIdInAndFilter(parentId, enabledUserIds, findText, userConfig.timeOffset, pageRequest)
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val userEntities = page.content
 
@@ -276,6 +277,12 @@ class UserService(
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.timeOffset?.toString() ?: "-")
             if (isAdminOnly(userConfig)) {
+                tableCells += TableSimpleCell(
+                    row = row,
+                    col = col++,
+                    dataRow = row,
+                    name = getDateTimeEntityDMYHMSString(userEntity.lastLoginDateTime)
+                )
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.lastIP?.removePrefix("/") ?: "-")
             }
 
@@ -511,11 +518,12 @@ class UserService(
             value = userEntity?.lastLoginDateTime?.let { dt ->
                 LocalDateTime(
                     year = dt.ye ?: 2000,
-                    monthNumber = dt.mo ?: 1,
-                    dayOfMonth = dt.da ?: 1,
+                    month = dt.mo ?: 1,
+                    day = dt.da ?: 1,
                     hour = dt.ho ?: 0,
                     minute = dt.mi ?: 0,
-                    second = dt.se ?: 0
+                    second = dt.se ?: 0,
+                    nanosecond = 0,
                 ).toInstant(getTimeZone(userConfig.timeOffset)).epochSeconds.toInt()
             },
             visibility = nonVisibleForDivision,
@@ -535,11 +543,12 @@ class UserService(
             value = userEntity?.passwordLastChangeDate?.let { dt ->
                 LocalDateTime(
                     year = dt.ye ?: 2000,
-                    monthNumber = dt.mo ?: 1,
-                    dayOfMonth = dt.da ?: 1,
+                    month = dt.mo ?: 1,
+                    day = dt.da ?: 1,
                     hour = 0,
                     minute = 0,
-                    second = 0
+                    second = 0,
+                    nanosecond = 0
                 ).toInstant(getTimeZone(userConfig.timeOffset)).epochSeconds.toInt()
             },
             visibility = nonVisibleForDivision,

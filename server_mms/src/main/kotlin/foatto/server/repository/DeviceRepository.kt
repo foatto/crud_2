@@ -55,10 +55,13 @@ interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
                      OR LOWER(de.fwVersion) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(de.lastSessionStatus) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(de.lastSessionError) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
+                     OR CAST(de.index AS String) LIKE CONCAT( '%', ?2, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + de.lastSessionTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
                 )
         """
     )
-    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, pageRequest: Pageable): Page<DeviceEntity>
+    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, timeOffset: Int, pageRequest: Pageable): Page<DeviceEntity>
 
     @Query(
         """
@@ -85,8 +88,11 @@ interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
                      OR LOWER(de.fwVersion) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(de.lastSessionStatus) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(de.lastSessionError) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR CAST(de.index AS String) LIKE CONCAT( '%', ?3, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + de.lastSessionTime second + ?4 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     OR TO_CHAR(MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
                 )
         """
     )
-    fun findByObjAndUserIdInAndFilter(obj: ObjectEntity, userIds: List<Int>, findText: String, pageRequest: Pageable): Page<DeviceEntity>
+    fun findByObjAndUserIdInAndFilter(obj: ObjectEntity, userIds: List<Int>, findText: String, timeOffset: Int, pageRequest: Pageable): Page<DeviceEntity>
 }

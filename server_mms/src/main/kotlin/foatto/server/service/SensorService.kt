@@ -291,7 +291,7 @@ class SensorService(
         }
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
-        val page: Page<SensorEntity> = sensorRepository.findByObjAndFilter(parentObjectEntity, findText, pageRequest)
+        val page: Page<SensorEntity> = sensorRepository.findByObjAndFilter(parentObjectEntity, findText, userConfig.timeOffset, pageRequest)
 
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val sensorEntities = page.content

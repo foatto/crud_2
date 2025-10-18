@@ -150,7 +150,7 @@ class TableControl(
     private val rowClientButtons = mutableStateListOf<ClientActionButton>()
     private val tablePageButtonData = mutableStateListOf<TablePageButton>()
 
-    private var alCaptionData = mutableStateListOf<TableCaption>()
+    private var captions = mutableStateListOf<TableCaption>()
 
     private val alGridRows = mutableStateListOf<MutableList<TableBaseCellClient?>>()
 
@@ -221,9 +221,10 @@ class TableControl(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(colorCaptionBar)
+                    .padding(end = SCROLL_BAR_TICKNESS)
                     .horizontalScroll(state = horizontalScrollState)
             ) {
-                alCaptionData.forEachIndexed { col, captionData ->
+                captions.forEachIndexed { col, captionData ->
                     TextButton(
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(0.dp),   // чтобы получился сплошной ряд заголовков
@@ -334,7 +335,7 @@ class TableControl(
                                 },
                             )
                     ) {
-                        alGridRows.forEachIndexed { index, alGridRow ->
+                        alGridRows.forEachIndexed { index, gridRow ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -347,7 +348,7 @@ class TableControl(
                                         rowHeights[index] = size.height.toFloat()
                                     }
                             ) {
-                                alGridRow.forEachIndexed { col, gridData ->
+                                gridRow.forEachIndexed { col, gridData ->
                                     Box(
                                         contentAlignment = gridData?.align ?: Alignment.Center,
                                         modifier = Modifier
@@ -355,7 +356,11 @@ class TableControl(
                                             .background(
                                                 gridData?.let {
                                                     if (gridData.dataRow == currentRowNo) {
-                                                        colorTableCurrentRow
+                                                        if (gridData.isStaticBackColor) {
+                                                            gridData.backColor
+                                                        } else {
+                                                            colorTableCurrentRow
+                                                        }
                                                     } else {
                                                         gridData.backColor
                                                     }
@@ -674,11 +679,12 @@ class TableControl(
             } else {
                 (hScrollBarLength - scrollBarW) * horizontalScrollState.value / horizontalScrollState.maxValue
             }
-            drawRect(
-                topLeft = Offset(scrollBarX, 0.0f),
-                size = Size(scrollBarW, with(density) { SCROLL_BAR_TICKNESS.toPx() }),
+            drawLine(
+                start = Offset(scrollBarX, with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }),
+                end = Offset(scrollBarX + scrollBarW, with(density) { SCROLL_BAR_TICKNESS.toPx() / 2 }),
                 color = colorScrollBarFore,
-                style = Fill,
+                strokeWidth = with(density) { SCROLL_BAR_TICKNESS.toPx() * 2 / 3 },
+                cap = StrokeCap.Round,
             )
         }
     }
@@ -744,8 +750,8 @@ class TableControl(
     }
 
     private fun readTable() {
-        alCaptionData.clear()
-        alCaptionData.addAll(tableResponse.columnCaptions)
+        captions.clear()
+        captions.addAll(tableResponse.columnCaptions)
 
         alGridRows.clear()
 
@@ -754,15 +760,15 @@ class TableControl(
         for (tc in tableResponse.tableCells) {
             maxColCount = max(maxColCount, tc.col + tc.colSpan)
 
-            val backColor = tc.backColor?.let { bc ->
-                Color(bc)
+            val (isStaticBackColor, backColor) = tc.backColor?.let { bc ->
+                true to Color(bc)
             } ?: when (tc.backColorType) {
-                TableCellBackColorType.GROUP_0 -> colorTableGroupBack0
-                TableCellBackColorType.GROUP_1 -> colorTableGroupBack1
+                TableCellBackColorType.GROUP_0 -> false to colorTableGroupBack0
+                TableCellBackColorType.GROUP_1 -> false to colorTableGroupBack1
                 else -> if (tc.dataRow % 2 == 0) {
-                    colorTableRowBack0
+                    false to colorTableRowBack0
                 } else {
-                    colorTableRowBack1
+                    false to colorTableRowBack1
                 }
             }
             val textColor = tc.foreColor?.let { fc ->
@@ -783,6 +789,7 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
+                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -796,6 +803,7 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
+                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -812,6 +820,7 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
+                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -831,6 +840,7 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
+                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,

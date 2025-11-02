@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package foatto.compose.external
 
 import org.khronos.webgl.Uint8Array

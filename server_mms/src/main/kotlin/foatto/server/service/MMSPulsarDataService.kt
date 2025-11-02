@@ -20,6 +20,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.io.File
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 @Service
@@ -184,7 +185,11 @@ class MMSPulsarDataService(
 
         for (i in 1..arrData.lastIndex) {
             val pulsarData = arrData[i]
-            pulsarData.dateTime?.epochSeconds?.toInt()?.let { pointTime ->
+            //--- kotlinx.serialization + kotlinx.time при обновлениях версий иногда внезапно перестаёт работать.
+            //--- надёжнее будет парсить вручную.
+            //--- 2025-10-20T07:08:40.010Z
+            pulsarData.dateTime?.let { dateTimeStr ->
+                val pointTime = Instant.parse(dateTimeStr).epochSeconds.toInt()
 
                 val curTime = getCurrentTimeInt()
                 if (pointTime > curTime - CoreTelematicFunction.MAX_PAST_TIME && pointTime < curTime + CoreTelematicFunction.MAX_FUTURE_TIME) {

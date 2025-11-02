@@ -1,16 +1,14 @@
 package foatto.server.ds
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 //--- outer JSON-class, don't rename fields!
-@OptIn(ExperimentalTime::class)
 @Serializable
 data class PulsarData(
-    @Contextual
-    val dateTime: Instant? = null,
+    //--- kotlinx.serialization при обновлениях версий иногда внезапно перестаёт работать.
+    //--- надёжнее будет парсить вручную.
+    //--- 2025-10-20T07:08:40.010Z
+    val dateTime: String? = null,
 
     val deviceID: String? = null,
     val blockID: String? = null,

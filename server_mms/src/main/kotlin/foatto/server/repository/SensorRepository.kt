@@ -154,10 +154,45 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                      OR LOWER(se.descr) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(se.serialNo) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR CAST(se.portNum AS String) LIKE CONCAT( '%', ?2, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + se.begTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + se.endTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     OR (
+                            se.begTime IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + se.begTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     )
+                     OR (
+                            se.endTime IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + se.endTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     )
+                )
+                AND (
+                        ?4 = -1
+                     OR (
+                            se.begTime IS NOT NULL
+                        AND se.begTime >= ?4
+                     )
+                     OR (
+                            se.endTime IS NOT NULL
+                        AND se.endTime >= ?4
+                     )
+                )
+                AND (
+                        ?5 = -1
+                     OR (
+                            se.begTime IS NOT NULL
+                        AND se.begTime <= ?5
+                     )
+                     OR (
+                            se.endTime IS NOT NULL
+                        AND se.endTime <= ?5
+                     )
                 )
         """
     )
-    fun findByObjAndFilter(obj: ObjectEntity, findText: String, timeOffset: Int, pageRequest: Pageable): Page<SensorEntity>
+    fun findByObjAndFilter(
+        obj: ObjectEntity,
+        findText: String,
+        timeOffset: Int,
+        begDateTime: Int,
+        endDateTime: Int,
+        pageRequest: Pageable,
+    ): Page<SensorEntity>
 }

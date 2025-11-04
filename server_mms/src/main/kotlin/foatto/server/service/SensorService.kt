@@ -247,6 +247,9 @@ class SensorService(
         }
     }
 
+    //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
+    //override fun isDateTimeIntervalPanelVisible(): Boolean = true
+
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
@@ -291,7 +294,14 @@ class SensorService(
         }
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
-        val page: Page<SensorEntity> = sensorRepository.findByObjAndFilter(parentObjectEntity, findText, userConfig.timeOffset, pageRequest)
+        val page: Page<SensorEntity> = sensorRepository.findByObjAndFilter(
+            obj = parentObjectEntity,
+            findText = findText,
+            timeOffset = userConfig.timeOffset,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
 
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val sensorEntities = page.content

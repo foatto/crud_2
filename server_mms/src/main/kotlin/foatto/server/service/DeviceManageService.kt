@@ -62,6 +62,8 @@ class DeviceManageService(
         private const val FIELD_OWNER_FULL_NAME = "_ownerFullName"   // псевдополе для селектора
     }
 
+    override fun isDateTimeIntervalPanelVisible(): Boolean = true
+
     override fun getTableHeaderData(
         action: AppAction,
         userConfig: ServerUserConfig,
@@ -122,7 +124,14 @@ class DeviceManageService(
 
         val parentDeviceEntity = getParentDeviceEntity(action) ?: return null
 
-        val page: Page<DeviceManageEntity> = deviceManageRepository.findByDeviceAndFilter(parentDeviceEntity, findText, userConfig.timeOffset, pageRequest)
+        val page: Page<DeviceManageEntity> = deviceManageRepository.findByDeviceAndFilter(
+            device = parentDeviceEntity,
+            findText = findText,
+            timeOffset = userConfig.timeOffset,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceManageEntities = page.content
 

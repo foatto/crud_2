@@ -150,6 +150,7 @@ import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlin.math.max
 import kotlin.math.min
@@ -359,8 +360,8 @@ class FormControl(
                         onClick = {
                             dateTimeData.current.value = LocalDateTime(
                                 year = localDateTime.year,
-                                monthNumber = localDateTime.monthNumber,
-                                dayOfMonth = localDateTime.dayOfMonth,
+                                month = localDateTime.month.number,
+                                day = localDateTime.day,
                                 hour = timePickerState.hour,
                                 minute = timePickerState.minute,
                                 second = 0

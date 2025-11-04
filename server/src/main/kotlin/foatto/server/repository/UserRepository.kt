@@ -29,12 +29,57 @@ interface UserRepository : JpaRepository<UserEntity, Int> {
                      OR LOWER(ue.contactInfo) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.lastIP) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR CAST(ue.timeOffset AS String) LIKE CONCAT( '%', ?3, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(
-                        ue.lastLoginDateTime.ye, ue.lastLoginDateTime.mo, ue.lastLoginDateTime.da, 
-                        ue.lastLoginDateTime.ho, ue.lastLoginDateTime.mi, ue.lastLoginDateTime.se
-                     ), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     OR ( 
+                            ue.lastLoginDateTime.ye IS NOT NULL
+                        AND ue.lastLoginDateTime.mo IS NOT NULL
+                        AND ue.lastLoginDateTime.da IS NOT NULL 
+                        AND ue.lastLoginDateTime.ho IS NOT NULL
+                        AND ue.lastLoginDateTime.mi IS NOT NULL
+                        AND ue.lastLoginDateTime.se IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(
+                            ue.lastLoginDateTime.ye, ue.lastLoginDateTime.mo, ue.lastLoginDateTime.da, 
+                            ue.lastLoginDateTime.ho, ue.lastLoginDateTime.mi, ue.lastLoginDateTime.se
+                        ), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     )
+                )
+                AND (
+                        ?4 = -1
+                     OR (  
+                            ue.lastLoginDateTime.ye IS NOT NULL
+                        AND ue.lastLoginDateTime.mo IS NOT NULL
+                        AND ue.lastLoginDateTime.da IS NOT NULL 
+                        AND ue.lastLoginDateTime.ho IS NOT NULL
+                        AND ue.lastLoginDateTime.mi IS NOT NULL
+                        AND ue.lastLoginDateTime.se IS NOT NULL
+                        AND MAKE_TIMESTAMP(
+                            ue.lastLoginDateTime.ye, ue.lastLoginDateTime.mo, ue.lastLoginDateTime.da, 
+                            ue.lastLoginDateTime.ho, ue.lastLoginDateTime.mi, ue.lastLoginDateTime.se
+                        ) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                     )
+                )
+                AND (
+                        ?5 = -1
+                     OR (  
+                            ue.lastLoginDateTime.ye IS NOT NULL
+                        AND ue.lastLoginDateTime.mo IS NOT NULL
+                        AND ue.lastLoginDateTime.da IS NOT NULL 
+                        AND ue.lastLoginDateTime.ho IS NOT NULL
+                        AND ue.lastLoginDateTime.mi IS NOT NULL
+                        AND ue.lastLoginDateTime.se IS NOT NULL
+                        AND MAKE_TIMESTAMP(
+                            ue.lastLoginDateTime.ye, ue.lastLoginDateTime.mo, ue.lastLoginDateTime.da, 
+                            ue.lastLoginDateTime.ho, ue.lastLoginDateTime.mi, ue.lastLoginDateTime.se
+                        ) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?5 second )
+                     )
                 )
         """
     )
-    fun findByParentIdAndUserIdInAndFilter(parentId: Int, userIds: List<Int>, findText: String, timeOffset: Int, pageRequest: Pageable): Page<UserEntity>
+    fun findByParentIdAndUserIdInAndFilter(
+        parentId: Int,
+        userIds: List<Int>,
+        findText: String,
+        begDateTime: Int,
+        endDateTime: Int,
+        pageRequest: Pageable,
+    ): Page<UserEntity>
 }

@@ -24,11 +24,40 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                      OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                    )
+                )
+                AND (
+                        ?3 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?3 second )
+                     )
+                )
+                AND (
+                        ?4 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                     )
                 )
         """
     )
-    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, pageRequest: Pageable): Page<DayWorkEntity>
+    fun findByUserIdInAndFilter(
+        userIds: List<Int>,
+        findText: String,
+        begDateTime: Int,
+        endDateTime: Int,
+        pageRequest: Pageable,
+    ): Page<DayWorkEntity>
 
     @Query(
         """
@@ -46,9 +75,39 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                      OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
-                     OR TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                    )
+                )
+                AND (
+                        ?4 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                     )
+                )
+                AND (
+                        ?5 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?5 second )
+                     )
                 )
         """
     )
-    fun findByObjAndUserIdInAndFilter(obj: ObjectEntity, userIds: List<Int>, findText: String, pageRequest: Pageable): Page<DayWorkEntity>
+    fun findByObjAndUserIdInAndFilter(
+        obj: ObjectEntity,
+        userIds: List<Int>,
+        findText: String,
+        begDateTime: Int,
+        endDateTime: Int,
+        pageRequest: Pageable,
+    ): Page<DayWorkEntity>
 }

@@ -56,12 +56,53 @@ interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
                      OR LOWER(de.lastSessionStatus) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(de.lastSessionError) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR CAST(de.index AS String) LIKE CONCAT( '%', ?2, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + de.lastSessionTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     OR (
+                            de.lastSessionTime IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + de.lastSessionTime second + ?3 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     )
+                     OR (
+                            de.usingStartDate.ye IS NOT NULL
+                        AND de.usingStartDate.mo IS NOT NULL
+                        AND de.usingStartDate.da IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
+                     )
+                )
+                AND (
+                        ?4 = -1
+                     OR (
+                            de.lastSessionTime IS NOT NULL
+                        AND de.lastSessionTime >= ?4
+                     )
+                     OR (
+                            de.usingStartDate.ye IS NOT NULL
+                        AND de.usingStartDate.mo IS NOT NULL
+                        AND de.usingStartDate.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                     )
+                )
+                AND (
+                        ?5 = -1
+                     OR (
+                            de.lastSessionTime IS NOT NULL
+                        AND de.lastSessionTime <= ?5
+                     )
+                     OR (
+                            de.usingStartDate.ye IS NOT NULL
+                        AND de.usingStartDate.mo IS NOT NULL
+                        AND de.usingStartDate.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?5 second )
+                     )
                 )
         """
     )
-    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, timeOffset: Int, pageRequest: Pageable): Page<DeviceEntity>
+    fun findByUserIdInAndFilter(
+        userIds: List<Int>,
+        findText: String,
+        timeOffset: Int,
+        begDateTime: Int,
+        endDateTime: Int,
+        pageRequest: Pageable,
+    ): Page<DeviceEntity>
 
     @Query(
         """
@@ -89,10 +130,52 @@ interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
                      OR LOWER(de.lastSessionStatus) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(de.lastSessionError) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR CAST(de.index AS String) LIKE CONCAT( '%', ?3, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + de.lastSessionTime second + ?4 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
-                     OR TO_CHAR(MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     OR (
+                            de.lastSessionTime IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + de.lastSessionTime second + ?4 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     )
+                     OR (
+                            de.usingStartDate.ye IS NOT NULL
+                        AND de.usingStartDate.mo IS NOT NULL
+                        AND de.usingStartDate.da IS NOT NULL
+                        AND TO_CHAR(MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                     )
+                )
+                AND (
+                        ?5 = -1
+                     OR (
+                            de.lastSessionTime IS NOT NULL
+                        AND de.lastSessionTime >= ?5
+                     )
+                     OR (
+                            de.usingStartDate.ye IS NOT NULL
+                        AND de.usingStartDate.mo IS NOT NULL
+                        AND de.usingStartDate.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?5 second )
+                     )
+                )
+                AND (
+                        ?6 = -1
+                     OR (
+                            de.lastSessionTime IS NOT NULL
+                        AND de.lastSessionTime <= ?6
+                     )
+                     OR (
+                            de.usingStartDate.ye IS NOT NULL
+                        AND de.usingStartDate.mo IS NOT NULL
+                        AND de.usingStartDate.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?6 second )
+                     )
                 )
         """
     )
-    fun findByObjAndUserIdInAndFilter(obj: ObjectEntity, userIds: List<Int>, findText: String, timeOffset: Int, pageRequest: Pageable): Page<DeviceEntity>
+    fun findByObjAndUserIdInAndFilter(
+        obj: ObjectEntity,
+        userIds: List<Int>,
+        findText: String,
+        timeOffset: Int,
+        begDateTime: Int,
+        endDateTime: Int,
+        pageRequest: Pageable,
+    ): Page<DeviceEntity>
 }

@@ -49,6 +49,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.Instant
+import kotlin.text.toLong
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -88,6 +90,9 @@ class UserService(
         private const val FIELD_OWNER_FULL_NAME = "ownerFullName"   // псевдополе для селектора
         private const val FIELD_PARENT_FULL_NAME = "parentFullName"   // псевдополе для селектора
     }
+
+    //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
+    //override fun isDateTimeIntervalPanelVisible(): Boolean = true
 
     override fun getTableHeaderData(
         action: AppAction,
@@ -207,7 +212,14 @@ class UserService(
             roles = userConfig.roles,
         )
 
-        val page: Page<UserEntity> = userRepository.findByParentIdAndUserIdInAndFilter(parentId, enabledUserIds, findText, userConfig.timeOffset, pageRequest)
+        val page: Page<UserEntity> = userRepository.findByParentIdAndUserIdInAndFilter(
+            parentId = parentId,
+            userIds = enabledUserIds,
+            findText = findText,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val userEntities = page.content
 

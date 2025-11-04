@@ -197,6 +197,9 @@ class DeviceService(
         )
     }
 
+    //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
+    //override fun isDateTimeIntervalPanelVisible(): Boolean = true
+
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
@@ -262,9 +265,24 @@ class DeviceService(
         )
 
         val page: Page<DeviceEntity> = parentObjectEntity?.let {
-            deviceRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, userConfig.timeOffset, pageRequest)
+            deviceRepository.findByObjAndUserIdInAndFilter(
+                obj = parentObjectEntity,
+                userIds = enabledUserIds,
+                findText = findText,
+                timeOffset = userConfig.timeOffset,
+                begDateTime = action.begDateTimeValue ?: -1,
+                endDateTime = action.endDateTimeValue ?: -1,
+                pageRequest = pageRequest,
+            )
         } ?: run {
-            deviceRepository.findByUserIdInAndFilter(enabledUserIds, findText, userConfig.timeOffset, pageRequest)
+            deviceRepository.findByUserIdInAndFilter(
+                userIds = enabledUserIds,
+                findText = findText,
+                timeOffset = userConfig.timeOffset,
+                begDateTime = action.begDateTimeValue ?: -1,
+                endDateTime = action.endDateTimeValue ?: -1,
+                pageRequest = pageRequest,
+            )
         }
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceEntities = page.content

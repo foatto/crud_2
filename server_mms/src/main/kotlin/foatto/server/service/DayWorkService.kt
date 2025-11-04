@@ -65,6 +65,9 @@ class DayWorkService(
             private const val FIELD_COPY_SENSORS = "_copySensors"
      */
 
+    //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
+    //override fun isDateTimeIntervalPanelVisible(): Boolean = true
+
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
@@ -115,9 +118,22 @@ class DayWorkService(
         }
 
         val page: Page<DayWorkEntity> = parentObjectEntity?.let {
-            dayWorkRepository.findByObjAndUserIdInAndFilter(parentObjectEntity, enabledUserIds, findText, pageRequest)
+            dayWorkRepository.findByObjAndUserIdInAndFilter(
+                obj = parentObjectEntity,
+                userIds = enabledUserIds,
+                findText = findText,
+                begDateTime = action.begDateTimeValue ?: -1,
+                endDateTime = action.endDateTimeValue ?: -1,
+                pageRequest = pageRequest,
+            )
         } ?: run {
-            dayWorkRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
+            dayWorkRepository.findByUserIdInAndFilter(
+                userIds = enabledUserIds,
+                findText = findText,
+                begDateTime = action.begDateTimeValue ?: -1,
+                endDateTime = action.endDateTimeValue ?: -1,
+                pageRequest = pageRequest,
+            )
         }
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val dayWorkEntities = page.content

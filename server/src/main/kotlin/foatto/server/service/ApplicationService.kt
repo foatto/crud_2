@@ -164,17 +164,17 @@ abstract class ApplicationService(
         val tableCaption = moduleConfig.caption
         val columnCaptions = getTableColumnCaptions(action, userConfig)
 
-        val alTableCell = mutableListOf<TableBaseCell>()
-        val alTableRowData = mutableListOf<TableRow>()
-        val tablePageButtonData = mutableListOf<TablePageButton>()
+        val tableCells = mutableListOf<TableBaseCell>()
+        val tableRows = mutableListOf<TableRow>()
+        val pageButtons = mutableListOf<TablePageButton>()
 
         val currentRowNo = fillTableGridData(
             action = action,
             userConfig = userConfig,
             moduleConfig = moduleConfig,
-            tableCells = alTableCell,
-            tableRows = alTableRowData,
-            pageButtons = tablePageButtonData,
+            tableCells = tableCells,
+            tableRows = tableRows,
+            pageButtons = pageButtons,
         )
 
         return AppResponse(
@@ -186,14 +186,20 @@ abstract class ApplicationService(
                     userConfig = userConfig,
                     moduleConfig = moduleConfig,
                 ),
+                isFindPanelVisible = isFindPanelVisible(),
                 findText = action.findText ?: "",
+                isDateTimeIntervalPanelVisible = isDateTimeIntervalPanelVisible(),
+                withTime = isDateTimeIntervalPanelWithTime(),
+                begDateTimeValue = action.begDateTimeValue,
+                endDateTimeValue = action.endDateTimeValue,
                 serverActionButtons = getTableServerActionButtons(action, userConfig, moduleConfig),
                 clientActionButtons = getTableClientActionButtons(),
+                isRefreshEnabled = getRefreshEnabled(),
                 columnCaptions = columnCaptions,
-                tableCells = alTableCell,
-                tableRows = alTableRowData,
+                tableCells = tableCells,
+                tableRows = tableRows,
                 selectedRowNo = currentRowNo,
-                tablePageButtonData = tablePageButtonData,
+                pageButtons = pageButtons,
             )
         )
     }
@@ -217,6 +223,11 @@ abstract class ApplicationService(
         rows = emptyList()
     )
 
+    protected open fun isFindPanelVisible(): Boolean = true
+
+    protected open fun isDateTimeIntervalPanelVisible(): Boolean = false
+    protected open fun isDateTimeIntervalPanelWithTime(): Boolean = true
+
     protected open fun getTableServerActionButtons(
         action: AppAction,
         userConfig: ServerUserConfig,
@@ -236,6 +247,8 @@ abstract class ApplicationService(
         }
 
     protected open fun getTableClientActionButtons(): List<ClientActionButton> = emptyList()
+
+    protected open fun getRefreshEnabled(): Boolean = true
 
     protected abstract fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption>
 

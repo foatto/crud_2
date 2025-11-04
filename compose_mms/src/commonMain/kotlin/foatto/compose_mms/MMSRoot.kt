@@ -92,6 +92,7 @@ class MMSRoot : Root() {
         )
         colorIconButton = IconButtonDefaults.iconButtonColors().copy(
             containerColor = orangeColor,
+            contentColor = colorMainText,
         )
 
         colorOutlinedTextInput = OutlinedTextFieldDefaults.colors().copy(

@@ -12,10 +12,18 @@ class TableResponse(
 
     val headerData: HeaderData,
 
+    val isFindPanelVisible: Boolean,
     val findText: String,
+
+    val isDateTimeIntervalPanelVisible: Boolean,
+    val withTime: Boolean,
+    val begDateTimeValue: Int?,
+    val endDateTimeValue: Int?,
 
     val serverActionButtons: List<ServerActionButton>,
     val clientActionButtons: List<ClientActionButton>,
+
+    val isRefreshEnabled: Boolean,
 
     val columnCaptions: List<TableCaption>,
 
@@ -23,5 +31,5 @@ class TableResponse(
     val tableRows: List<TableRow>,
     val selectedRowNo: Int?,
 
-    val tablePageButtonData: List<TablePageButton>
+    val pageButtons: List<TablePageButton>
 )

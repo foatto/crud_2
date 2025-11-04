@@ -141,8 +141,10 @@ class TableControl(
         private val TABLE_CELL_PADDING = 16.dp
     }
 
-    private var isFindTextVisible by mutableStateOf(root.isWideScreen)
-    private var findText by mutableStateOf("")
+    private var findText by mutableStateOf(tableResponse.findText)
+
+    private var begDateTimeValue by mutableStateOf(tableResponse.begDateTimeValue)
+    private var endDateTimeValue by mutableStateOf(tableResponse.endDateTimeValue)
 
     private val commonServerButtons = mutableStateListOf<ServerActionButton>()
     private val commonClientButtons = mutableStateListOf<ClientActionButton>()
@@ -197,26 +199,32 @@ class TableControl(
                 }
             }
             TableToolBar(
-                isSelectorMode = tableAction.isSelectorMode,
                 isWideScreen = root.isWideScreen,
+                isSelectorMode = tableAction.isSelectorMode,
                 selectorCancelAction = if (tableAction.isSelectorMode) {
                     { closeSelector() }
                 } else {
                     null
                 },
-                isFindTextVisible = isFindTextVisible,
+                isFindTextVisible = tableResponse.isFindPanelVisible,
                 findText = findText,
+                onFindInput = { newText: String -> findText = newText },
+                timeOffset = root.appUserConfig.timeOffset,
+                isDateTimeIntervalPanelVisible = tableResponse.isDateTimeIntervalPanelVisible,
+                withTime = tableResponse.withTime,
+                begDateTimeValue = begDateTimeValue,
+                onBegDateTimeClick = { newTime: Int -> begDateTimeValue = newTime },
+                endDateTimeValue = endDateTimeValue,
+                onEndDateTimeClick = { newTime: Int -> endDateTimeValue = newTime },
+                doFindAndFilter = { coroutineScope.launch { doFindAndFilter() } },
                 commonServerButtons = commonServerButtons,
                 commonClientButtons = commonClientButtons,
                 rowServerButtons = rowServerButtons,
                 rowClientButtons = rowClientButtons,
+                isRefreshEnabled = tableResponse.isRefreshEnabled,
                 tableAction = tableAction,
-                onFindInput = { newText: String -> findText = newText },
-                doFind = { isClear: Boolean -> coroutineScope.launch { doFind(isClear) } },
                 clientAction = { action: AppAction -> clientAction(action) },
-                call = { action: AppAction, inNewTab: Boolean -> coroutineScope.launch { call(action, inNewTab) } },
-            )
-
+            ) { action: AppAction, inNewTab: Boolean -> coroutineScope.launch { call(action, inNewTab) } }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -699,8 +707,6 @@ class TableControl(
         //--- вынесено сюда для использования во внешнем CompositeControl
         headerData = tableResponse.headerData
 
-        findText = tableResponse.findText
-
         commonServerButtons.clear()
         commonServerButtons.addAll(tableResponse.serverActionButtons)
 
@@ -733,7 +739,7 @@ class TableControl(
 
         var isEmptyPassed = false
         //--- вывести новую разметку страниц
-        for (pageButton in tableResponse.tablePageButtonData) {
+        for (pageButton in tableResponse.pageButtons) {
             tablePageButtonData.add(pageButton)
 
             pageButton.action?.let { action ->
@@ -869,26 +875,20 @@ class TableControl(
         alRowData.addAll(tableResponse.tableRows)
     }
 
-    private fun closeTabById() {
-        root.closeTabById(tabId)
-    }
+//    private fun closeTabById() {
+//        root.closeTabById(tabId)
+//    }
 
-    private suspend fun doFind(isClear: Boolean) {
-        if (isClear) {
-            findText = ""
-        }
-
-        if (!isClear && !isFindTextVisible) {
-            isFindTextVisible = true
-        } else {
-            call(
-                newAppAction = tableAction.copy(
-                    findText = findText.trim(),
-                    pageNo = 0,
-                ),
-                inNewTab = false,
-            )
-        }
+    private suspend fun doFindAndFilter() {
+        call(
+            newAppAction = tableAction.copy(
+                pageNo = 0,
+                findText = findText.trim(),
+                begDateTimeValue = begDateTimeValue,
+                endDateTimeValue = endDateTimeValue,
+            ),
+            inNewTab = false,
+        )
     }
 
     private fun setCurrentRow(rowNo: Int?) {

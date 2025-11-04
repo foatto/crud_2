@@ -29,6 +29,9 @@ data class AppAction(
 
     val findText: String? = null,
 
+    val begDateTimeValue: Int? = null,
+    val endDateTimeValue: Int? = null,
+
     val url: String? = null,
     val isAutoClose: Boolean = false,
 

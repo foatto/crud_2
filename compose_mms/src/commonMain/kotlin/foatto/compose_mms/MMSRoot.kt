@@ -11,7 +11,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import foatto.compose.Root
-import foatto.compose.colorCaptionBar
+import foatto.compose.colorTableCaptionBar
 import foatto.compose.colorCheckBox
 import foatto.compose.colorCompositeMovedBlockBack
 import foatto.compose.colorDatePicker
@@ -22,6 +22,7 @@ import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorRadioButton
 import foatto.compose.colorTabSelected
 import foatto.compose.colorTabUnselected
+import foatto.compose.colorTableCaptionSortCurrent
 import foatto.compose.colorTableCurrentRow
 import foatto.compose.colorTablePageButton
 import foatto.compose.colorTextButton
@@ -40,7 +41,7 @@ import foatto.core_mms.addAppModuleUrls
 //--- фирменный тёмно-синий         #0C386D = hsl(213,80%,24%) и градиент до #209dcb = hsl(196,73%,46%)
 private const val MMS_FIRM_COLOR_1_H = 213f
 private const val MMS_FIRM_COLOR_1_S = 0.80f
-private const val MMS_FIRM_COLOR_1_L = 0.24f
+private const val MMS_FIRM_COLOR_1_L = 0.40f    //0.24f <- слишком тяжёлый/сочный/тёмный цвет - 0.60f
 //--- фирменный тёмно-синий         #0D54A2 = hsl(211,85%,34%) - с сайта - получается светлее и не очень контрастным с рыжим
 //private const val MMS_FIRM_COLOR_1_H = 211f
 //private const val MMS_FIRM_COLOR_1_S = 0.85f
@@ -49,7 +50,7 @@ private const val MMS_FIRM_COLOR_1_L = 0.24f
 //--- фирменный терракотовый        #F7AA47 = hsl(34,92%,62%)
 private const val MMS_FIRM_COLOR_2_H = 34f
 private const val MMS_FIRM_COLOR_2_S = 0.92f
-private const val MMS_FIRM_COLOR_2_L = 0.62f
+private const val MMS_FIRM_COLOR_2_L = 0.70f    //0.62f <- слишком тяжёлый/сочный/тёмный цвет - 0.80f
 
 //--- фирменный тёмно-красный       #BF0D0E = hsl(359.7,87.3%,40%) - logon button
 private const val MMS_FIRM_COLOR_3_H = 360f
@@ -76,11 +77,11 @@ class MMSRoot : Root() {
         val darkBlueColor = Color.hsl(MMS_FIRM_COLOR_1_H, MMS_FIRM_COLOR_1_S, MMS_FIRM_COLOR_1_L)
         val orangeColor = Color.hsl(MMS_FIRM_COLOR_2_H, MMS_FIRM_COLOR_2_S, MMS_FIRM_COLOR_2_L)
 
-        colorTabSelected = darkBlueColor
-        colorTabUnselected = Color.hsl(0.0f, 0.0f, 0.5f)
-
         colorWait = darkBlueColor
         colorWaitTrack = orangeColor
+
+        colorTabSelected = darkBlueColor
+        colorTabUnselected = Color.hsl(0.0f, 0.0f, 0.5f)
 
         colorTextButton = ButtonDefaults.textButtonColors().copy(
             containerColor = darkBlueColor,
@@ -105,6 +106,16 @@ class MMSRoot : Root() {
         )
         colorRadioButton = RadioButtonDefaults.colors().copy(
             selectedColor = darkBlueColor,
+        )
+
+        colorTableCaptionBar = darkBlueColor
+        colorTableCaptionSortCurrent = orangeColor
+        //--- чуть светлее брендового цвета, чтобы на его фоне были видны кнопки селекторов
+        colorTableCurrentRow = Color.hsl(MMS_FIRM_COLOR_2_H, MMS_FIRM_COLOR_2_S, (MMS_FIRM_COLOR_2_L + 1.0f) / 2)
+        colorTablePageButton = ButtonDefaults.buttonColors().copy(
+            containerColor = darkBlueColor,
+            contentColor = colorMainBack0,
+            disabledContentColor = colorMainText,
         )
 
         colorDatePicker = DatePickerDefaults.colors().copy(
@@ -148,15 +159,6 @@ class MMSRoot : Root() {
 //            timeSelectorUnselectedContainerColor = ,
             timeSelectorSelectedContentColor = darkBlueColor,
 //            timeSelectorUnselectedContentColor = ,
-        )
-
-        colorCaptionBar = darkBlueColor
-        //--- чуть светлее брендового цвета, чтобы на его фоне были видны кнопки селекторов
-        colorTableCurrentRow = Color.hsl(MMS_FIRM_COLOR_2_H, MMS_FIRM_COLOR_2_S, 0.80f)
-        colorTablePageButton = ButtonDefaults.buttonColors().copy(
-            containerColor = darkBlueColor,
-            contentColor = colorMainBack0,
-            disabledContentColor = colorMainText,
         )
 
         colorCompositeMovedBlockBack = darkBlueColor.copy(alpha = 0.7f)

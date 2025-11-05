@@ -153,16 +153,17 @@ class ObjectService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            tableCells += TableBooleanCell(row = row, col = col++, dataRow = row, value = objectEntity.isDisabled ?: false)
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.name ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.model ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.department?.name ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = objectEntity.group?.name ?: "-")
+            tableCells += TableBooleanCell(row = row, col = col++, dataRow = row, minWidth = 100, value = objectEntity.isDisabled ?: false)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.model ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.department?.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.group?.name ?: "-")
             if (isAdminOnly(userConfig)) {
                 tableCells += TableButtonCell(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     values = getTableFileButtonCellData(objectEntity.fileId),
                 )
             }

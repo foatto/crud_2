@@ -31,34 +31,11 @@ val colorMainBack2: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_1)    // a
 private val colorMainBack3: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_2)    // non-active tab
 val colorMainBack4: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_3)    // ?
 
-val colorControlBack: Color = colorMainBack0
-val colorTableSelectorBack: Color = colorMainBack0  //.copy(alpha = 0.9f)
-val colorFormBack: Color = colorMainBack1
-val colorTabActive: Color = colorMainBack2
-val colorTabInactive: Color = colorMainBack3
-val colorHeader: Color = colorTabActive
-val colorToolBar: Color = colorHeader
-var colorCaptionBar: Color = colorHeader
-val colorBottomBar: Color = colorHeader
-val colorScrollBarBack: Color = colorFormBack   //colorMainBack2
-val colorScrollBarFore: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
-
 var colorWait: Color? = null
 var colorWaitTrack: Color? = null
 
-var colorTabSelected: Color? = null
-var colorTabUnselected: Color? = null
-
-var colorTableCellBorder: Color = colorMainBack3
-//--- table-group-back цвета не должны совпадать с основными фоновыми цветами - поэтому располагаем их между ними посередине
-var colorTableGroupBack0: Color = Color.hsl(0f, 0f, (MAIN_BACK_LIGHTNESS_2 + MAIN_BACK_LIGHTNESS_3) / 2)
-var colorTableGroupBack1: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
-var colorTableRowBack0: Color = colorMainBack0
-var colorTableRowBack1: Color = colorMainBack1
-var colorTableCurrentRow: Color = colorMainBack4    // по дефолту - максимальмо мрачный цвет, чтобы сразу переделать захотелось
-var colorTablePageButton: ButtonColors? = null
-
 val colorMainText: Color = Color.Black
+val colorControlBack: Color = colorMainBack0
 
 var colorTextButton: ButtonColors? = null
 var colorTextButtonDefault: ButtonColors? = null
@@ -66,6 +43,30 @@ var colorIconButton: IconButtonColors? = null
 var colorOutlinedTextInput: TextFieldColors? = null
 var colorCheckBox: CheckboxColors? = null
 var colorRadioButton: RadioButtonColors? = null
+
+val colorTabActive: Color = colorMainBack2
+val colorTabInactive: Color = colorMainBack3
+var colorTabSelected: Color? = null
+var colorTabUnselected: Color? = null
+
+val colorHeader: Color = colorTabActive
+val colorToolBar: Color = colorHeader
+val colorFormBack: Color = colorMainBack1
+val colorBottomBar: Color = colorHeader
+val colorScrollBarBack: Color = colorFormBack   //colorMainBack2
+val colorScrollBarFore: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
+
+var colorTableCaptionBar: Color = colorHeader
+var colorTableCaptionSortCurrent: Color = colorMainText
+var colorTableCellBorder: Color = colorMainBack3
+//--- table-group-back цвета не должны совпадать с основными фоновыми цветами - поэтому располагаем их между ними посередине
+var colorTableGroupBack0: Color = Color.hsl(0f, 0f, (MAIN_BACK_LIGHTNESS_2 + MAIN_BACK_LIGHTNESS_3) / 2)
+var colorTableGroupBack1: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
+var colorTableRowBack0: Color = colorMainBack0
+var colorTableRowBack1: Color = colorMainBack1
+var colorTableCurrentRow: Color = colorMainBack4    // по дефолту - максимальмо мрачный цвет, чтобы сразу переделать захотелось
+val colorTableSelectorBack: Color = colorMainBack0  //.copy(alpha = 0.9f)
+var colorTablePageButton: ButtonColors? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 var colorDatePicker: DatePickerColors? = null

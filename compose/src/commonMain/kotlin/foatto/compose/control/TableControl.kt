@@ -26,11 +26,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,13 +66,14 @@ import androidx.compose.ui.unit.dp
 import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.colorBottomBar
-import foatto.compose.colorCaptionBar
 import foatto.compose.colorCheckBox
 import foatto.compose.colorIconButton
 import foatto.compose.colorMainBack0
 import foatto.compose.colorMainText
 import foatto.compose.colorScrollBarBack
 import foatto.compose.colorScrollBarFore
+import foatto.compose.colorTableCaptionBar
+import foatto.compose.colorTableCaptionSortCurrent
 import foatto.compose.colorTableCellBorder
 import foatto.compose.colorTableCurrentRow
 import foatto.compose.colorTableGroupBack0
@@ -228,7 +233,7 @@ class TableControl(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(colorCaptionBar)
+                    .background(colorTableCaptionBar)
                     .padding(end = SCROLL_BAR_TICKNESS)
                     .horizontalScroll(state = horizontalScrollState)
             ) {
@@ -250,6 +255,19 @@ class TableControl(
                             }
                         }
                     ) {
+                        captionData.action?.let { action ->
+                            if (captionData.action?.sortName == tableAction.sortName) {
+                                Icon(
+                                    imageVector = if (action.isSortAsc) {
+                                        Icons.Filled.KeyboardArrowDown
+                                    } else {
+                                        Icons.Filled.KeyboardArrowUp
+                                    },
+                                    contentDescription = null,
+                                    tint = colorTableCaptionSortCurrent,
+                                )
+                            }
+                        }
                         Text(
                             text = captionData.name,
                             softWrap = false,

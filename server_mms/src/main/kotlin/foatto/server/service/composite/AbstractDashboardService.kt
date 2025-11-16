@@ -1,6 +1,7 @@
 package foatto.server.service.composite
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.CompositeActionRequest
 import foatto.core.model.response.AppResponse
@@ -29,9 +30,6 @@ import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
-import foatto.server.service.scheme.SchemeAnalogueIndicatorStateService
-import foatto.server.service.scheme.SchemeCounterIndicatorStateService
-import foatto.server.service.scheme.SchemeWorkIndicatorStateService
 import kotlinx.serialization.json.Json
 import org.springframework.data.repository.findByIdOrNull
 import kotlin.math.ceil
@@ -63,7 +61,7 @@ abstract class AbstractDashboardService(
         return AppResponse(
             responseCode = ResponseCode.MODULE_COMPOSITE,
             composite = CompositeResponse(
-                tabCaption = moduleConfig.caption,
+                tabCaption = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                 action = getCompositeResponseAction(action),
                 items = getCompositeItems(sessionId)
             )
@@ -117,7 +115,7 @@ abstract class AbstractDashboardService(
             }
         }
 
-        val caption = moduleConfig.caption
+        val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
         val rows = getHeaderRows(objectEntity, deviceEntity)
 
         val sensorEntities = mutableListOf<Pair<DashboardSensorTypeEnum, SensorEntity>>()

@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -80,7 +81,7 @@ class DeviceManageService(
             titles = listOf(
                 TitleData(
                     action = null,
-                    text = moduleConfig.caption,
+                    text = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                     isBold = true,
                 )
             ),
@@ -240,7 +241,7 @@ class DeviceManageService(
             titles = listOf(
                 TitleData(
                     action = null,
-                    text = moduleConfig.caption,
+                    text = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                     isBold = true,
                 )
             ),

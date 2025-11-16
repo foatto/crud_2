@@ -1,5 +1,6 @@
 package foatto.server.service.chart
 
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.ChartActionRequest
 import foatto.core.model.response.ChartActionResponse
@@ -13,6 +14,7 @@ import foatto.core.model.response.chart.ChartElementLineData
 import foatto.core.model.response.chart.ChartLegendData
 import foatto.server.appModuleConfigs
 import foatto.server.entity.SensorEntity
+import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
@@ -34,12 +36,12 @@ class ChartSensorService(
     sensorRepository = sensorRepository,
 ) {
 
-    override fun getChartHeader(action: AppAction): HeaderData {
-        val moduleConfig = appModuleConfigs[action.module]// ?: return AppResponse(ResponseCode.LOGON_NEED)
-
+    override fun getChartHeader(userConfig: ServerUserConfig, action: AppAction): HeaderData {
         val sensorEntity = action.id?.let { id -> sensorRepository.findByIdOrNull(id) }
 
-        val caption = moduleConfig?.caption ?: "(неизвестный модуль: ${action.module})"
+        val caption = appModuleConfigs[action.module]?.captions?.let { captions ->
+            getLocalizedMessage(captions, userConfig.lang)
+        } ?: "(неизвестный модуль: ${action.module})"
         val rows = listOf(
             "Наименование объекта" to (sensorEntity?.obj?.name ?: "-"),
             "Модель" to (sensorEntity?.obj?.model ?: "-"),

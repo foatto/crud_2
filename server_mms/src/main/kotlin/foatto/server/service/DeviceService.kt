@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -377,7 +378,9 @@ class DeviceService(
                         parentModule = action.module,
                         parentId = deviceEntity.id,
                     ),
-                    text = appModuleConfigs[AppModuleMMS.DEVICE_MANAGE]?.caption ?: "(неизвестный тип модуля: '${AppModuleMMS.DEVICE_MANAGE}')",
+                    text = appModuleConfigs[AppModuleMMS.DEVICE_MANAGE]?.captions?.let { captions ->
+                        getLocalizedMessage(captions, userConfig.lang)
+                    } ?: "(неизвестный тип модуля: '${AppModuleMMS.DEVICE_MANAGE}')",
                     inNewTab = true,
                 )
             }

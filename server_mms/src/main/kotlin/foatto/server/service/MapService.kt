@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.model.xy.XyProjection
@@ -173,7 +174,7 @@ class MapService(
             objectRepository.findByIdOrNull(id) ?: return AppResponse(ResponseCode.LOGON_NEED)
         } ?: return AppResponse(ResponseCode.LOGON_NEED)
 
-        val caption = moduleConfig.caption
+        val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
         val rows = mutableListOf(
             "Наименование объекта" to (objectEntity.name ?: "-"),
             "Модель" to (objectEntity.model ?: "-"),

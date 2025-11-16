@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -295,7 +296,9 @@ class DayWorkService(
                     begTime = begTime,
                     endTime = endTime,
                 ),
-                text = appModuleConfigs[AppModuleMMS.MAP_TRACE]?.caption ?: "(неизвестный тип карты)",
+                text = appModuleConfigs[AppModuleMMS.MAP_TRACE]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип карты)",
                 inNewTab = true,
             )
         }
@@ -347,7 +350,9 @@ class DayWorkService(
                     endTime = endTime,
                     //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
                 ),
-                text = appModuleConfigs[module]?.caption ?: "(неизвестный тип модуля: '$module')",
+                text = appModuleConfigs[module]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип модуля: '$module')",
                 inNewTab = true,
             )
         }
@@ -373,7 +378,9 @@ class DayWorkService(
                     begTime = begTime,
                     endTime = endTime,
                 ),
-                text = appModuleConfigs[module]?.caption ?: "(неизвестный тип модуля: '$module')",
+                text = appModuleConfigs[module]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип модуля: '$module')",
                 inNewTab = true,
             )
         }

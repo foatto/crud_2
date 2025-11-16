@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -33,11 +34,11 @@ import foatto.server.checkRowPermission
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.model.AppModuleConfig
+import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.sensor.SensorConfigCounter
 import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.model.sensor.SensorConfigLiquidLevel
-import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
@@ -348,13 +349,13 @@ class SensorService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = sensorEntity.begTime?.let { begTime -> getDateTimeDMYHMSString(zoneLocal, begTime)} ?: "-",
+                name = sensorEntity.begTime?.let { begTime -> getDateTimeDMYHMSString(zoneLocal, begTime) } ?: "-",
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = sensorEntity.endTime?.let { endTime -> getDateTimeDMYHMSString(zoneLocal, endTime)} ?: "-",
+                name = sensorEntity.endTime?.let { endTime -> getDateTimeDMYHMSString(zoneLocal, endTime) } ?: "-",
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.serialNo ?: "-")
 
@@ -390,7 +391,9 @@ class SensorService(
                         parentModule = action.module,
                         parentId = sensorEntity.id,
                     ),
-                    text = appModuleConfigs[AppModuleMMS.SENSOR_CALIBRATION]?.caption ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_CALIBRATION})",
+                    text = appModuleConfigs[AppModuleMMS.SENSOR_CALIBRATION]?.captions?.let { captions ->
+                        getLocalizedMessage(captions, userConfig.lang)
+                    } ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_CALIBRATION})",
                     inNewTab = true,
                 )
             }
@@ -402,7 +405,9 @@ class SensorService(
                         parentModule = action.module,
                         parentId = sensorEntity.id,
                     ),
-                    text = appModuleConfigs[AppModuleMMS.SENSOR_DATA]?.caption ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_DATA})",
+                    text = appModuleConfigs[AppModuleMMS.SENSOR_DATA]?.captions?.let { captions ->
+                        getLocalizedMessage(captions, userConfig.lang)
+                    } ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_DATA})",
                     inNewTab = true,
                 )
             }
@@ -415,7 +420,9 @@ class SensorService(
                         timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
                         //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
                     ),
-                    text = appModuleConfigs[AppModuleMMS.CHART_SENSOR]?.caption ?: "(неизвестный тип модуля: '${AppModuleMMS.CHART_SENSOR}')",
+                    text = appModuleConfigs[AppModuleMMS.CHART_SENSOR]?.captions?.let { captions ->
+                        getLocalizedMessage(captions, userConfig.lang)
+                    } ?: "(неизвестный тип модуля: '${AppModuleMMS.CHART_SENSOR}')",
                     inNewTab = true,
                 )
             }

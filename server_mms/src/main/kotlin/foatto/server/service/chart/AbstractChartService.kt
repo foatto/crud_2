@@ -1,6 +1,7 @@
 package foatto.server.service.chart
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.ChartActionRequest
 import foatto.core.model.response.AppResponse
@@ -11,6 +12,7 @@ import foatto.core.model.response.chart.ChartResponse
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
+import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
@@ -130,8 +132,8 @@ abstract class AbstractChartService(
         return AppResponse(
             responseCode = ResponseCode.MODULE_CHART,
             chart = ChartResponse(
-                tabCaption = moduleConfig.caption,
-                headerData = getChartHeader(action),
+                tabCaption = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
+                headerData = getChartHeader(userConfig, action),
             )
         )
     }
@@ -159,7 +161,7 @@ abstract class AbstractChartService(
         }
     }
 
-    protected abstract fun getChartHeader(action: AppAction): HeaderData
+    protected abstract fun getChartHeader(userConfig: ServerUserConfig, action: AppAction): HeaderData
 
     protected abstract fun getCharts(chartActionRequest: ChartActionRequest): ChartActionResponse
 

@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -248,7 +249,9 @@ class ObjectService(
                     id = id,
                     timeRangeType = 30 * 24 * 60 * 60,   //!!! траектория за последние 24 часа (а не 30 дней, как сейчас)
                 ),
-                text = appModuleConfigs[AppModuleMMS.MAP_TRACE]?.caption ?: "(неизвестный тип карты)",
+                text = appModuleConfigs[AppModuleMMS.MAP_TRACE]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип карты)",
                 inNewTab = true,
             )
         }
@@ -272,7 +275,9 @@ class ObjectService(
                     module = AppModuleMMS.OBJECT_SCHEME_DASHBOARD,
                     id = id,
                 ),
-                text = appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
+                text = appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип контрольной панели)",
                 inNewTab = true,
             )
         }
@@ -284,7 +289,9 @@ class ObjectService(
                     module = AppModuleMMS.OBJECT_CHART_DASHBOARD,
                     id = id,
                 ),
-                text = appModuleConfigs[AppModuleMMS.OBJECT_CHART_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
+                text = appModuleConfigs[AppModuleMMS.OBJECT_CHART_DASHBOARD]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип контрольной панели)",
                 inNewTab = true,
             )
         }
@@ -301,7 +308,9 @@ class ObjectService(
                     parentModule = AppModuleMMS.OBJECT,
                     parentId = id,
                 ),
-                text = appModuleConfigs[module]?.caption ?: "(неизвестный тип модуля: '$module')",
+                text = appModuleConfigs[module]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип модуля: '$module')",
                 inNewTab = true,
             )
         }
@@ -318,7 +327,9 @@ class ObjectService(
                     timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
                     //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
                 ),
-                text = appModuleConfigs[module]?.caption ?: "(неизвестный тип модуля: '$module')",
+                text = appModuleConfigs[module]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип модуля: '$module')",
                 inNewTab = true,
             )
         }
@@ -344,7 +355,9 @@ class ObjectService(
                     begTime = begTime,
                     endTime = endTime,
                 ),
-                text = appModuleConfigs[module]?.caption ?: "(неизвестный тип модуля: '$module')",
+                text = appModuleConfigs[module]?.captions?.let { captions ->
+                    getLocalizedMessage(captions, userConfig.lang)
+                } ?: "(неизвестный тип модуля: '$module')",
                 inNewTab = true,
             )
         }

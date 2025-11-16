@@ -1,6 +1,7 @@
 package foatto.server.service.report
 
 import foatto.core.ActionType
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.form.FormDateTimeCellMode
@@ -229,7 +230,7 @@ class SummaryReportService(
 
         var offsY = 0
 
-        sheet.addCell(Label(0, offsY++, moduleConfig.caption, wcfTitleL))
+        sheet.addCell(Label(0, offsY++, getLocalizedMessage(moduleConfig.captions, userConfig.lang), wcfTitleL))
 //        sheet.addCell(
 //            Label(
 //                0,

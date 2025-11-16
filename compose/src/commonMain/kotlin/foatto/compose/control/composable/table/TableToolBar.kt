@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -51,6 +50,9 @@ import foatto.compose.control.composable.ToolBarBlock
 import foatto.compose.control.composable.ToolBarIconButton
 import foatto.compose.getStyleToolbarIconNameSuffix
 import foatto.compose.singleButtonShape
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.response.ClientActionButton
 import foatto.core.model.response.ServerActionButton
@@ -67,6 +69,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun TableToolBar(
     isWideScreen: Boolean,
+    lang: LanguageEnum,
 
     isSelectorMode: Boolean,
     selectorCancelAction: (() -> Unit)?,
@@ -140,7 +143,7 @@ fun TableToolBar(
                         isShowBegDatePicker = false
                     }
                 ) {
-                    Text(text = "OK")
+                    Text(text = getLocalizedMessage(LocalizedMessages.OK, lang))
                 }
             },
             dismissButton = {
@@ -151,7 +154,7 @@ fun TableToolBar(
                         isShowBegDatePicker = false
                     }
                 ) {
-                    Text(text = "Отмена")
+                    Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, lang))
                 }
             },
         )
@@ -197,7 +200,7 @@ fun TableToolBar(
                         isShowBegTimePicker = false
                     }
                 ) {
-                    Text(text = "OK")
+                    Text(text = getLocalizedMessage(LocalizedMessages.OK, lang))
                 }
             },
             dismissButton = {
@@ -208,7 +211,7 @@ fun TableToolBar(
                         isShowBegTimePicker = false
                     }
                 ) {
-                    Text(text = "Отмена")
+                    Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, lang))
                 }
             },
         )
@@ -241,7 +244,7 @@ fun TableToolBar(
                         isShowEndDatePicker = false
                     }
                 ) {
-                    Text(text = "OK")
+                    Text(text = getLocalizedMessage(LocalizedMessages.OK, lang))
                 }
             },
             dismissButton = {
@@ -252,7 +255,7 @@ fun TableToolBar(
                         isShowEndDatePicker = false
                     }
                 ) {
-                    Text(text = "Отмена")
+                    Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, lang))
                 }
             },
         )
@@ -298,7 +301,7 @@ fun TableToolBar(
                         isShowEndTimePicker = false
                     }
                 ) {
-                    Text(text = "OK")
+                    Text(text = getLocalizedMessage(LocalizedMessages.OK, lang))
                 }
             },
             dismissButton = {
@@ -309,7 +312,7 @@ fun TableToolBar(
                         isShowEndTimePicker = false
                     }
                 ) {
-                    Text(text = "Отмена")
+                    Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, lang))
                 }
             },
         )
@@ -348,7 +351,7 @@ fun TableToolBar(
                         onFindInput(newText)
                     },
                     //label = { Text("Поиск...") }, - появляется паразитный белый фон вокруг рамки
-                    placeholder = { Text("Поиск...") },
+                    placeholder = { Text("${getLocalizedMessage(LocalizedMessages.SEARCH, lang)}...") },
                     singleLine = true,
                     trailingIcon = if (isDateTimeIntervalPanelVisible) {
                         null

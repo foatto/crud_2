@@ -32,11 +32,15 @@ import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorTextButton
 import foatto.compose.singleButtonShape
 import foatto.compose.utils.getFullUrl
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 
 @Composable
 fun LogonForm(
+    lang: LanguageEnum,
     modifier: Modifier,
     errorText: String?,
     loginError: String?,
@@ -90,7 +94,7 @@ fun LogonForm(
             onValueChange = { newText ->
                 onLoginInput(newText)
             },
-            label = { Text("Имя") },
+            label = { Text(getLocalizedMessage(LocalizedMessages.LOGIN, lang)) },
             isError = loginError != null,
             supportingText = loginError?.let {
                 {
@@ -117,7 +121,7 @@ fun LogonForm(
             onValueChange = { newText ->
                 onPasswordInput(newText)
             },
-            label = { Text("Пароль") },
+            label = { Text(getLocalizedMessage(LocalizedMessages.PASSWORD, lang)) },
             isError = passwordError != null,
             supportingText = passwordError?.let {
                 {
@@ -143,7 +147,7 @@ fun LogonForm(
             )
             Text(
                 modifier = Modifier.align(Alignment.CenterVertically),
-                text = "Запомнить меня",
+                text = getLocalizedMessage(LocalizedMessages.REMEMBER_ME, lang),
             )
         }
         TextButton(
@@ -153,7 +157,7 @@ fun LogonForm(
             onClick = logon,
         ) {
             Text(
-                text = "Вход",
+                text = getLocalizedMessage(LocalizedMessages.LOGON, lang),
             )
         }
     }

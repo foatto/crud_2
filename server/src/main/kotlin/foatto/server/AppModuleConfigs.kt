@@ -2,13 +2,14 @@ package foatto.server
 
 import foatto.core.ActionType
 import foatto.core.AppModule
+import foatto.core.i18n.LanguageEnum
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.Permission
 
 val appModuleConfigs: MutableMap<String, AppModuleConfig> = mutableMapOf(
 
     AppModule.USER to AppModuleConfig(
-        caption = "Пользователи",
+        captions = mapOf(LanguageEnum.EN to "Users", LanguageEnum.RU to "Пользователи"),
         enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
         disabledAccessRoles = mutableSetOf(AppRole.USER),
         enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -34,7 +35,7 @@ val appModuleConfigs: MutableMap<String, AppModuleConfig> = mutableMapOf(
     ),
 
     AppModule.USER_PROPERTY_EDIT to AppModuleConfig(
-        caption = "Мои настройки",
+        captions = mapOf(LanguageEnum.EN to "My settings", LanguageEnum.RU to "Мои настройки"),
         enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
         disabledAccessRoles = mutableSetOf(),
         disabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),

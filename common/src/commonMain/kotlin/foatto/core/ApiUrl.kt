@@ -12,6 +12,7 @@ object ApiUrl {
     const val LOGON: String = "$URL_BASE/logon/$CURRENT_VERSION"
     const val LOGOFF: String = "$URL_BASE/logoff/$CURRENT_VERSION"
     const val CHANGE_PASSWORD: String = "$URL_BASE/change_password/$CURRENT_VERSION"
+    const val CHANGE_LANGUAGE: String = "$URL_BASE/change_language/$CURRENT_VERSION"
 
     const val SAVE_USER_PROPERTY: String = "$URL_BASE/save_user_property/$CURRENT_VERSION"
 

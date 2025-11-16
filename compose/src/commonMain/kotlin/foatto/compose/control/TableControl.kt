@@ -100,6 +100,7 @@ import foatto.compose.singleButtonShape
 import foatto.compose.styleOtherIconSize
 import foatto.compose.utils.maxDp
 import foatto.core.ActionType
+import foatto.core.i18n.LanguageEnum
 import foatto.core.model.AppAction
 import foatto.core.model.request.AppRequest
 import foatto.core.model.response.AppResponse
@@ -126,9 +127,10 @@ typealias SelectorFunType = ((selectorData: Map<String, String>) -> Unit)
 val tableSelectorFuns: MutableMap<Long, SelectorFunType> = mutableMapOf()
 
 var tableClientActionFun: (
+    lang: LanguageEnum,
     action: AppAction,
     tableControl: TableControl
-) -> Unit = { _: AppAction, _: TableControl ->
+) -> Unit = { _: LanguageEnum, _: AppAction, _: TableControl ->
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -205,6 +207,7 @@ class TableControl(
             }
             TableToolBar(
                 isWideScreen = root.isWideScreen,
+                lang = root.appUserConfig.lang,
                 isSelectorMode = tableAction.isSelectorMode,
                 selectorCancelAction = if (tableAction.isSelectorMode) {
                     { closeSelector() }
@@ -803,7 +806,6 @@ class TableControl(
                 TableCellAlign.LEFT -> Alignment.CenterStart
                 TableCellAlign.CENTER -> Alignment.Center
                 TableCellAlign.RIGHT -> Alignment.CenterEnd
-                else -> Alignment.Center
             }
 
             val tableCellClient = when (tc) {
@@ -926,7 +928,7 @@ class TableControl(
     }
 
     private fun clientAction(action: AppAction) {
-        tableClientActionFun(action, this)
+        tableClientActionFun(root.appUserConfig.lang, action, this)
     }
 
     private suspend fun doKeyEnter() {

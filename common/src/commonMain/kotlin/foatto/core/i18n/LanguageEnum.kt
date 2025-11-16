@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 enum class LanguageEnum(
     val descr: String
 ) {
-    EN("en"),
-    RU("ru"),
+    EN("En"),
+    RU("Ru"),
 }

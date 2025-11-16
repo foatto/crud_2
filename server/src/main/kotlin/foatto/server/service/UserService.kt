@@ -3,6 +3,9 @@ package foatto.server.service
 import foatto.core.ActionType
 import foatto.core.AppModule
 import foatto.core.IconName
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -29,6 +32,7 @@ import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getTimeZone
 import foatto.server.OrgType
+import foatto.server.SpringApp
 import foatto.server.appRoleConfigs
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
@@ -49,8 +53,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.Instant
-import kotlin.text.toLong
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -76,6 +78,7 @@ class UserService(
         private const val FIELD_ROLES = "roles"
 
         private const val FIELD_TIME_OFFSET = "timeOffset"
+        private const val FIELD_LANG = "lang"
         private const val FIELD_EMAIL = "eMail"
         private const val FIELD_CONTACT_INFO = "contactInfo"
         private const val FIELD_USE_THOUSANDS_DIVIDER = "useThousandsDivider"
@@ -136,10 +139,10 @@ class UserService(
                     action.copy(parentId = 0)
                 },
                 text = if (action.isSelectorMode) {
-                    "Выбор: "
+                    "${getLocalizedMessage(LocalizedMessages.SELECT, userConfig.lang)}: "
                 } else {
                     ""
-                } + moduleConfig.caption,
+                } + getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                 isBold = true,
             )
         )
@@ -151,35 +154,36 @@ class UserService(
     }
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
-        val alColumnInfo = mutableListOf<Pair<String?, String>>()
+        val columnInfos = mutableListOf<Pair<String?, String>>()
 
         if (action.isSelectorMode) {
-            alColumnInfo += null to "" // selector button
+            columnInfos += null to "" // selector button
         }
-        alColumnInfo += null to "" // userId
-        alColumnInfo += null to "" // orgType
-        alColumnInfo += FIELD_IS_DISABLED to "Заблокирован"
-        alColumnInfo += FIELD_LOGIN to "Логин"
-        alColumnInfo += FIELD_SHORT_NAME to "Краткое имя"
-        alColumnInfo += FIELD_FULL_NAME to "Полное имя"
+        columnInfos += null to "" // userId
+        columnInfos += null to "" // orgType
+        columnInfos += FIELD_IS_DISABLED to getLocalizedMessage(LocalizedMessages.BLOCKED, userConfig.lang)
+        columnInfos += FIELD_LOGIN to "Логин"
+        columnInfos += FIELD_SHORT_NAME to "Краткое имя"
+        columnInfos += FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.FULL_NAME, userConfig.lang)
 
         if (isAdminOnly(userConfig)) {
-            alColumnInfo += FIELD_ROLES to "Роли"
+            columnInfos += FIELD_ROLES to "Роли"
         }
-        alColumnInfo += FIELD_EMAIL to "E-mail"
-        alColumnInfo += FIELD_CONTACT_INFO to "Контактная информация"
+        columnInfos += FIELD_EMAIL to "E-mail"
+        columnInfos += FIELD_CONTACT_INFO to getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang)
         if (isAdminOnly(userConfig)) {
-            alColumnInfo += null to "Файлы"
+            columnInfos += null to "Файлы"
         }
-        alColumnInfo += FIELD_TIME_OFFSET to "Time Offset"
+        columnInfos += FIELD_TIME_OFFSET to getLocalizedMessage(LocalizedMessages.TIME_OFFSET, userConfig.lang)
+        columnInfos += FIELD_LANG to getLocalizedMessage(LocalizedMessages.LANG, userConfig.lang)
         if (isAdminOnly(userConfig)) {
-            alColumnInfo += FIELD_LAST_LOGIN to "Last Login Time (UTC)"
-            alColumnInfo += FIELD_LAST_IP to "Last IP"
+            columnInfos += FIELD_LAST_LOGIN to "Last Login Time (UTC)"
+            columnInfos += FIELD_LAST_IP to "Last IP"
         }
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            alColumnInfo = columnInfos,
         )
     }
 
@@ -271,31 +275,33 @@ class UserService(
             } else {
                 TableBooleanCell(row = row, col = col++, dataRow = row, value = userEntity.isDisabled ?: false)
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.login ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.shortName ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.fullName ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.login ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.shortName ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.fullName ?: "-")
             if (isAdminOnly(userConfig)) {
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.roles.joinToString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.roles.joinToString())
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.eMail ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.contactInfo ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.eMail ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.contactInfo ?: "-")
             if (isAdminOnly(userConfig)) {
                 tableCells += TableButtonCell(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     values = getTableFileButtonCellData(userEntity.fileId),
                 )
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.timeOffset?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.timeOffset?.toString() ?: "-")
             if (isAdminOnly(userConfig)) {
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     name = getDateTimeEntityDMYHMSString(userEntity.lastLoginDateTime)
                 )
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = userEntity.lastIP?.removePrefix("/") ?: "-")
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.lastIP?.removePrefix("/") ?: "-")
             }
 
             val formAction = AppAction(
@@ -311,7 +317,7 @@ class UserService(
             if (isFormEnabled) {
                 popupDatas += TablePopup(
                     action = formAction,
-                    text = "Открыть",
+                    text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
                 )
             }
@@ -432,14 +438,14 @@ class UserService(
         )
         formCells += FormBooleanCell(
             name = FIELD_IS_DISABLED,
-            caption = "Заблокирован",
+            caption = getLocalizedMessage(LocalizedMessages.BLOCKED, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.isDisabled ?: false,
             visibility = nonVisibleForDivision,
         )
         formCells += FormSimpleCell(
             name = FIELD_FULL_NAME,
-            caption = "Полное имя",
+            caption = getLocalizedMessage(LocalizedMessages.FULL_NAME, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.fullName ?: "",
         )
@@ -451,14 +457,14 @@ class UserService(
         )
         formCells += FormSimpleCell(
             name = FIELD_LOGIN,
-            caption = "Логин",
+            caption = getLocalizedMessage(LocalizedMessages.LOGIN, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.login ?: "",
             visibility = nonVisibleForDivision,
         )
         formCells += FormSimpleCell(
             name = FIELD_PASSWORD,
-            caption = "Пароль",
+            caption = getLocalizedMessage(LocalizedMessages.PASSWORD, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.password ?: "",
             isPassword = true,
@@ -477,10 +483,18 @@ class UserService(
         }
         formCells += FormSimpleCell(
             name = FIELD_TIME_OFFSET,
-            caption = "Сдвиг часового пояса [сек]",
+            caption = getLocalizedMessage(LocalizedMessages.TIME_OFFSET, userConfig.lang),
             isEditable = changeEnabled,
             value = (userEntity?.timeOffset ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds).toString(),
             visibility = nonVisibleForDivision,
+        )
+        formCells += FormComboCell(
+            name = FIELD_LANG,
+            caption = getLocalizedMessage(LocalizedMessages.LANG, userConfig.lang),
+            isEditable = changeEnabled,
+            value = (userEntity?.lang ?: SpringApp.defaultLang).name,
+            values = LanguageEnum.entries.map { v -> v.name to v.descr },
+            asRadioButtons = true,
         )
         formCells += FormSimpleCell(
             name = FIELD_EMAIL,
@@ -490,7 +504,7 @@ class UserService(
         )
         formCells += FormSimpleCell(
             name = FIELD_CONTACT_INFO,
-            caption = "Контактная информация",
+            caption = getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.contactInfo ?: "",
             rows = 5,
@@ -592,25 +606,25 @@ class UserService(
     ): FormActionResponse {
         val id = action.id
 
-        val fullName = formActionData[FIELD_FULL_NAME]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to "Не введёно полное имя"))
+        val fullName = formActionData[FIELD_FULL_NAME]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.ERROR_FULL_NAME_NOT_ENTERED, userConfig.lang)))
         if (fullName.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to "Не введёно полное имя"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.ERROR_FULL_NAME_NOT_ENTERED, userConfig.lang)))
         }
         if (userRepository.findByFullName(fullName).any { ue -> ue.id != id }) {
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to "Такое полное имя уже существует"))
         }
 
-        val login = formActionData[FIELD_LOGIN]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to "Не введён логин"))
+        val login = formActionData[FIELD_LOGIN]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to getLocalizedMessage(LocalizedMessages.ERROR_LOGIN_NOT_ENTERED, userConfig.lang)))
         if (login.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to "Не введён логин"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to getLocalizedMessage(LocalizedMessages.ERROR_LOGIN_NOT_ENTERED, userConfig.lang)))
         }
         if (userRepository.findByLogin(login).any { ue -> ue.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to "Такой логин уже существует"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to getLocalizedMessage(LocalizedMessages.ERROR_SUCH_LOGIN_ALREADY_EXISTS, userConfig.lang)))
         }
 
-        val password = formActionData[FIELD_PASSWORD]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PASSWORD to "Не введён пароль"))
+        val password = formActionData[FIELD_PASSWORD]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PASSWORD to getLocalizedMessage(LocalizedMessages.ERROR_PASSWORD_NOT_ENTERED, userConfig.lang)))
         if (password.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PASSWORD to "Не введён пароль"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PASSWORD to getLocalizedMessage(LocalizedMessages.ERROR_PASSWORD_NOT_ENTERED, userConfig.lang)))
         }
         val encodedPassword: String = id?.let {
             userRepository.findByIdOrNull(id)?.let { userEntity ->
@@ -644,6 +658,7 @@ class UserService(
             password = encodedPassword,
             roles = roles,
             timeOffset = formActionData[FIELD_TIME_OFFSET]?.stringValue?.toIntOrNull() ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
+            lang = formActionData[FIELD_LANG]?.stringValue?.let { s -> LanguageEnum.valueOf(s) } ?: SpringApp.defaultLang,
             eMail = formActionData[FIELD_EMAIL]?.stringValue,
             contactInfo = formActionData[FIELD_CONTACT_INFO]?.stringValue,
             useThousandsDivider = formActionData[FIELD_USE_THOUSANDS_DIVIDER]?.booleanValue ?: true,

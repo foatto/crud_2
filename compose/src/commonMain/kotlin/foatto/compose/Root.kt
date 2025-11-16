@@ -40,7 +40,6 @@ import foatto.compose.control.TableControl
 import foatto.compose.i18n.lang
 import foatto.compose.model.MenuDataClient
 import foatto.compose.model.TabInfo
-import foatto.compose.utils.SETTINGS_LANGUAGE
 import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
 import foatto.compose.utils.SETTINGS_PASSWORD
@@ -50,33 +49,18 @@ import foatto.compose.utils.openFileByUrl
 import foatto.compose.utils.settings
 import foatto.core.ActionType
 import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.AppUserConfig
+import foatto.core.model.request.ChangeLanguageRequest
 import foatto.core.model.request.ChangePasswordRequest
 import foatto.core.model.request.LogoffRequest
+import foatto.core.model.response.ChangeLanguageResponse
 import foatto.core.model.response.ChangePasswordResponse
 import foatto.core.model.response.LogoffResponse
 import kotlinx.coroutines.launch
 
-/* !!! для перекрытия в MMSRoot:
-    var getMenu: (
-        root: Root,
-        arrMenuData: Array<MenuDataClient>,
-    ) -> Menu = { root: Root,
-                  arrMenuData: Array<MenuDataClient> ->
-        Menu(root, arrMenuData)
-    }
-
-    var getAppControl: (
-        root: Root,
-        startAppParam: String,
-        tabId: Int,
-    ) -> AppControl = { root: Root,
-                        startAppParam: String,
-                        tabId: Int ->
-        AppControl(root, startAppParam, tabId)
-    }
-*/
 var defaultStartModule: String? = null
 
 open class Root {
@@ -85,6 +69,8 @@ open class Root {
         //--- новый рекорд: Samsung A52, inner width = 509, outer width = 412
         private const val WIDE_SCREEN_WIDTH = 600
     }
+
+    var defaultLang: LanguageEnum = LanguageEnum.RU
 
     var scaledWindowWidth: Int = 0
         private set
@@ -98,6 +84,7 @@ open class Root {
             currentUserName = "",
             isAdmin = false,
             timeOffset = 0,
+            lang = defaultLang,
             userProperties = mutableMapOf(),
         )
     )
@@ -123,8 +110,8 @@ open class Root {
     var dialogContent by mutableStateOf<@Composable (() -> Unit)>({})
     var showDialogCancel by mutableStateOf(false)
     var showDialog by mutableStateOf(false)
-    private val dialogButtonOkText by mutableStateOf("OK")
-    private val dialogButtonCancelText by mutableStateOf("Отмена")
+    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, appUserConfig.lang))
+    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, appUserConfig.lang))
 
     private var showPasswordChangeDialog by mutableStateOf(false)
 
@@ -202,11 +189,12 @@ open class Root {
 
                 if (showPasswordChangeDialog) {
                     PasswordChangeDialog(
+                        lang = appUserConfig.lang,
                         onOkClick = { newPassword ->
                             showPasswordChangeDialog = false
                             coroutineScope.launch {
                                 invokeRequest(ChangePasswordRequest(encodePassword(newPassword))) { changePasswordResponse: ChangePasswordResponse ->
-                                    showAlert("Пароль успешно сменён.")
+                                    showAlert(getLocalizedMessage(LocalizedMessages.PASSWORD_CHANGED_SUCCESSFULLY, appUserConfig.lang))
                                 }
                             }
                         },
@@ -296,8 +284,11 @@ open class Root {
 
             ActionType.SET_LANGUAGE -> {
                 action.module?.let { module ->
-                    lang = LanguageEnum.valueOf(module)
-                    settings.putString(SETTINGS_LANGUAGE, module)
+                    val lang = LanguageEnum.valueOf(module)
+
+                    invokeRequest(ChangeLanguageRequest(lang)) { changeLanguageResponse: ChangeLanguageResponse ->
+                        appUserConfig.lang = lang
+                    }
                 }
             }
 

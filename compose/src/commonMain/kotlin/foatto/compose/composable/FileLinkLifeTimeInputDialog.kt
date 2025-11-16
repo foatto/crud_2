@@ -21,9 +21,13 @@ import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorTextButton
 import foatto.compose.colorTextButtonDefault
 import foatto.compose.singleButtonShape
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 
 @Composable
 fun FileLinkLifeTimeInputDialog(
+    lang: LanguageEnum,
     onOkClick: (Int) -> Unit,
     onCancelClick: () -> Unit,
 ) {
@@ -34,7 +38,7 @@ fun FileLinkLifeTimeInputDialog(
         shape = alertDialogShape,
         text = {
             Column {
-                Text(text = "Введите время жизни короткой ссылки [час]:")
+                Text(text = "${getLocalizedMessage(LocalizedMessages.ENTER_SHORT_LINK_LIFETIME, lang)}:")
                 OutlinedTextField(
                     colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
                     value = text,
@@ -64,11 +68,11 @@ fun FileLinkLifeTimeInputDialog(
                         errorMessage = ""
                         onOkClick(hour)
                     } ?: run {
-                        errorMessage = "Введите целое число"
+                        errorMessage = getLocalizedMessage(LocalizedMessages.ENTER_INTEGER, lang)
                     }
                 }
             ) {
-                Text(text = "OK")
+                Text(text = getLocalizedMessage(LocalizedMessages.OK, lang))
             }
         },
         dismissButton = {
@@ -80,7 +84,7 @@ fun FileLinkLifeTimeInputDialog(
                     onCancelClick()
                 }
             ) {
-                Text(text = "Отмена")
+                Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, lang))
             }
         },
     )

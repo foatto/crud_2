@@ -122,6 +122,9 @@ import foatto.compose.singleButtonShape
 import foatto.compose.styleOtherIconSize
 import foatto.compose.utils.maxDp
 import foatto.core.IconName
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.FormActionData
@@ -158,7 +161,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 var filePickerDialogSettings: FileKitDialogSettings = FileKitDialogSettings.createDefault()
-var formComboCellPreSetFun: ((formCell: FormComboCell) -> Unit)? = null
+var formComboCellPreSetFun: ((lang: LanguageEnum, formCell: FormComboCell) -> Unit)? = null
 /*
         formComboCellPreSetFun = { formCell: FormComboCell ->
             if (formCell.name == EquipActionParameters.FIELD_PORT_SELECT) {
@@ -195,7 +198,7 @@ var formSelectorPreCall: ((selectorAction: AppAction, alGridRows: SnapshotStateL
             }
         }
  */
-var formActionPreInvokeFun: ((formButton: FormButton, formActionData: MutableMap<String, FormActionData>) -> Map<String, String>?)? = null
+var formActionPreInvokeFun: ((lang: LanguageEnum, formButton: FormButton, formActionData: MutableMap<String, FormActionData>) -> Map<String, String>?)? = null
 /*
         formActionPreInvokeFun = { formButton, formActionData ->
             if (formButton.params.contains(EquipActionParameters.PARAM_RUN_SCRIPT)) {
@@ -257,8 +260,8 @@ class FormControl(
     private var dialogQuestion by mutableStateOf("")
     private var showDialogCancel by mutableStateOf(false)
     private var showDialog by mutableStateOf(false)
-    private val dialogButtonOkText by mutableStateOf("OK")
-    private val dialogButtonCancelText by mutableStateOf("Отмена")
+    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.lang))
+    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.lang))
 
     private var showFileLinkLifeTimeInputDialog by mutableStateOf(false)
     private var copyFileRef: Long = 0
@@ -271,7 +274,7 @@ class FormControl(
         val coroutineScope = rememberCoroutineScope()
 
         val filePickerLauncher = rememberFilePickerLauncher(
-            title = "Выбор файла",
+            title = getLocalizedMessage(LocalizedMessages.FILE_SELECT, root.appUserConfig.lang),
             dialogSettings = filePickerDialogSettings,
         ) { platformFile ->
             platformFile?.let {
@@ -314,7 +317,7 @@ class FormControl(
                             datePickerData = null
                         }
                     ) {
-                        Text(text = "OK")
+                        Text(text = getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.lang))
                     }
                 },
                 dismissButton = {
@@ -325,7 +328,7 @@ class FormControl(
                             datePickerData = null
                         }
                     ) {
-                        Text(text = "Отмена")
+                        Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.lang))
                     }
                 },
             )
@@ -369,7 +372,7 @@ class FormControl(
                             timePickerData = null
                         }
                     ) {
-                        Text(text = "OK")
+                        Text(text = getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.lang))
                     }
                 },
                 dismissButton = {
@@ -380,7 +383,7 @@ class FormControl(
                             timePickerData = null
                         }
                     ) {
-                        Text(text = "Отмена")
+                        Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.lang))
                     }
                 },
             )
@@ -402,6 +405,7 @@ class FormControl(
 
         if (showFileLinkLifeTimeInputDialog) {
             FileLinkLifeTimeInputDialog(
+                lang = root.appUserConfig.lang,
                 onOkClick = { hour ->
                     showFileLinkLifeTimeInputDialog = false
                     coroutineScope.launch {
@@ -409,7 +413,7 @@ class FormControl(
                             clipboardManager.setText(AnnotatedString(getShortFileLinkResponse.url))
 
                             dialogActionFun = {}
-                            dialogQuestion = "Новая ссылка скопирована в буфер обмена"
+                            dialogQuestion = getLocalizedMessage(LocalizedMessages.NEW_URL_COPIED_TO_CLIPBOARD, root.appUserConfig.lang)
                             showDialogCancel = false
                             showDialog = true
                         }
@@ -786,7 +790,7 @@ class FormControl(
                                                             colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
                                                             value = gridData.values.find { (value, _) ->
                                                                 gridData.current == value
-                                                            }?.second ?: "(неизвестное значение)",
+                                                            }?.second ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_VALUE, root.appUserConfig.lang)})",
                                                             onValueChange = {},
                                                             readOnly = !gridData.data.isEditable,
                                                             //!!! label = { Text("Имя") }, - использовать для мобильной версии без FormCellTypeClient.LABEL
@@ -1559,7 +1563,7 @@ class FormControl(
             }
 
             is FormComboCell -> {
-                formComboCellPreSetFun?.invoke(formCell)
+                formComboCellPreSetFun?.invoke(root.appUserConfig.lang, formCell)
                 FormComboCellClient(
                     cellName = formCell.name,
                     minWidth = formCell.minWidth,
@@ -1804,7 +1808,7 @@ class FormControl(
             }
         }
 
-        formActionPreInvokeFun?.invoke(formButton, formActionData)?.let { errors ->
+        formActionPreInvokeFun?.invoke(root.appUserConfig.lang, formButton, formActionData)?.let { errors ->
             prepareErrors(errors)
             return
         }

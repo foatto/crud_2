@@ -1,5 +1,6 @@
 package foatto.server.service
 
+import foatto.core.i18n.LanguageEnum
 import foatto.core.model.request.AppRequest
 import foatto.core.model.response.ResponseCode
 import foatto.server.OrgType
@@ -32,9 +33,10 @@ class LogonService(
             if (responseCode == ResponseCode.LOGON_SUCCESS) {
                 val serverUserConfig = ServerUserConfig(
                     id = userEntity.id,
-                    currentUserName = userEntity.fullName ?: "(неизвестно)",    //return LogonResult(ResponseCode.LOGON_FAILED),
+                    currentUserName = userEntity.fullName ?: "(неизвестно)",
                     roles = userEntity.roles,
-                    timeOffset = userEntity.timeOffset ?: (3 * 3600), //return LogonResult(ResponseCode.LOGON_FAILED),
+                    timeOffset = userEntity.timeOffset ?: (3 * 3600),
+                    lang = userEntity.lang ?: SpringApp.defaultLang,
                     fullNames = loadFullUserNames(),
                     shortNames = loadShortUserNames(),
                     relatedUserIds = loadRelatedUserIds(

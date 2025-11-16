@@ -72,6 +72,8 @@ import foatto.compose.singleButtonShape
 import foatto.compose.styleToolbarIconSize
 import foatto.compose.utils.getFullUrl
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.request.CompositeActionRequest
 import foatto.core.model.request.SaveUserPropertyRequest
 import foatto.core.model.response.CompositeActionResponse
@@ -163,7 +165,7 @@ class CompositeControl(
                                     filterListItems()
                                 },
                                 //label = { Text("Поиск...") }, - появляется паразитный белый фон вокруг рамки
-                                placeholder = { Text("Поиск...") },
+                                placeholder = { Text("${getLocalizedMessage(LocalizedMessages.SEARCH, root.appUserConfig.lang)}...") },
                                 singleLine = true,
                             )
                             FilledIconButton(
@@ -264,7 +266,7 @@ class CompositeControl(
                                         ?: block.schemeBlock?.getXyElementTemplate(false)
                                         ?: block.tableBlock?.TableBody(Modifier)
                                         ?: run {
-                                            Text(text = "Не задан тип блока!")
+                                            Text(text = "${getLocalizedMessage(LocalizedMessages.BLOCK_TYPE_NOT_SPECIFIED, root.appUserConfig.lang)}!")
                                         }
                                 }
                             }
@@ -293,7 +295,7 @@ class CompositeControl(
                                     ?: block.schemeBlock?.getXyElementTemplate(false)
                                     ?: block.tableBlock?.TableBody(Modifier)
                                     ?: run {
-                                        Text(text = "Не задан тип блока!")
+                                        Text(text = "${getLocalizedMessage(LocalizedMessages.BLOCK_TYPE_NOT_SPECIFIED, root.appUserConfig.lang)}!")
                                     }
                             }
                         }
@@ -715,7 +717,7 @@ class CompositeControl(
                 ?: block.mapBlock?.mapRefreshView(null, false)
                 ?: block.schemeBlock?.schemeRefreshView(null, false)
                 ?: block.tableBlock?.refreshTableFromComposite()
-                ?: println("refreshAll: не задан тип блока!")
+                ?: println("refreshAll: block type not specified!")
         }
     }
 

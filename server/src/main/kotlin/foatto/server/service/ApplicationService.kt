@@ -3,6 +3,8 @@ package foatto.server.service
 import foatto.core.ActionType
 import foatto.core.AppModule
 import foatto.core.IconName
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.AppResponse
@@ -161,7 +163,6 @@ abstract class ApplicationService(
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
     ): AppResponse {
-        val tableCaption = moduleConfig.caption
         val columnCaptions = getTableColumnCaptions(action, userConfig)
 
         val tableCells = mutableListOf<TableBaseCell>()
@@ -180,7 +181,7 @@ abstract class ApplicationService(
         return AppResponse(
             responseCode = ResponseCode.MODULE_TABLE,
             table = TableResponse(
-                tabCaption = tableCaption,
+                tabCaption = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                 headerData = getTableHeaderData(
                     action = action,
                     userConfig = userConfig,
@@ -213,10 +214,10 @@ abstract class ApplicationService(
             TitleData(
                 action = null,
                 text = if (action.isSelectorMode) {
-                    "Выбор: "
+                    "${getLocalizedMessage(LocalizedMessages.SELECT, userConfig.lang)}: "
                 } else {
                     ""
-                } + moduleConfig.caption,
+                } + getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                 isBold = true,
             ),
         ),
@@ -342,7 +343,7 @@ abstract class ApplicationService(
     protected fun getTableFileButtonCellData(fileId: Int?): List<TableButtonCellData> = fileId?.let {
         fileStoreService.getFileList(fileId, fileAccessPeriod.toIntOrNull() ?: 24).map { ref ->
             TableButtonCellData(
-                name = "${fileStoreService.getFileName(ref)} [${((fileStoreService.getFileSize(ref) ?: 0) / 1000) + 1} Кб]",
+                name = "${fileStoreService.getFileName(ref)} [${((fileStoreService.getFileSize(ref) ?: 0) / 1000) + 1} Kb]",
                 action = AppAction(type = ActionType.FILE, url = fileStoreService.getFileRefUrl(ref)),
                 inNewTab = true,
             )
@@ -449,7 +450,7 @@ abstract class ApplicationService(
             responseCode = ResponseCode.MODULE_FORM,
             form = FormResponse(
                 id = action.id,
-                tabCaption = moduleConfig.caption,
+                tabCaption = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                 headerData = getFormHeaderData(
                     action = action,
                     userConfig = userConfig,
@@ -471,7 +472,7 @@ abstract class ApplicationService(
         titles = listOf(
             TitleData(
                 action = null,
-                text = moduleConfig.caption,
+                text = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
                 isBold = true,
             ),
         ),

@@ -1,6 +1,7 @@
 package foatto.server
 
 import foatto.core.SESSION_EXPIRE_TIME
+import foatto.core.i18n.LanguageEnum
 import foatto.core.util.getCurrentTimeInt
 import foatto.server.model.SessionData
 import foatto.server.util.MinioProxy
@@ -10,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap
 abstract class SpringApp {
 
     companion object {
+        var defaultLang: LanguageEnum = LanguageEnum.RU
+
         var minioProxy: MinioProxy? = null
 
         private val sessionDataTime = ConcurrentHashMap<Long, Int>()

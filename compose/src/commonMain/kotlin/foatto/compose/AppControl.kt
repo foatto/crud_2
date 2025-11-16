@@ -29,6 +29,8 @@ import foatto.compose.utils.encodePassword
 import foatto.compose.utils.settings
 import foatto.core.ActionType
 import foatto.core.SESSION_EXPIRE_TIME
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.LogonRequest
@@ -67,9 +69,10 @@ class AppControl(
             when (responseCode) {
                 ResponseCode.LOGON_NEED, ResponseCode.LOGON_FAILED -> {
                     LogonForm(
+                        lang = root.defaultLang,
                         modifier = Modifier.align(Alignment.Center),
                         errorText = if (responseCode == ResponseCode.LOGON_FAILED) {
-                            "Неправильное имя или пароль!"
+                            getLocalizedMessage(LocalizedMessages.INCORRECT_LOGIN_OR_PASSWORD, root.appUserConfig.lang)
                         } else {
                             null
                         },
@@ -89,11 +92,11 @@ class AppControl(
                         },
                         logon = {
                             if (login.isBlank()) {
-                                loginError = "Пустой логин!"
+                                loginError = getLocalizedMessage(LocalizedMessages.EMPTY_LOGIN, root.appUserConfig.lang)
                                 passwordError = null
                             } else if (password.isBlank()) {
                                 loginError = null
-                                passwordError = "Пустой пароль!"
+                                passwordError = getLocalizedMessage(LocalizedMessages.EMPTY_PASSWORD, root.appUserConfig.lang)
                             } else {
                                 loginError = null
                                 passwordError = null
@@ -108,7 +111,7 @@ class AppControl(
                 ResponseCode.LOGON_SYSTEM_BLOCKED -> {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = "Пользователь заблокирован системой.",
+                        text = getLocalizedMessage(LocalizedMessages.USER_BLOCKED_BY_SYSTEM, root.appUserConfig.lang),
                         color = Color.Red,
                         fontWeight = FontWeight.Bold,
                     )
@@ -117,7 +120,7 @@ class AppControl(
                 ResponseCode.LOGON_ADMIN_BLOCKED -> {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = "Пользователь заблокирован администратором.",
+                        text = getLocalizedMessage(LocalizedMessages.USER_BLOCKED_BY_ADMIN, root.appUserConfig.lang),
                         color = Color.Red,
                         fontWeight = FontWeight.Bold,
                     )
@@ -293,7 +296,9 @@ class AppControl(
             ) {
 //                            if( appResponse.code == Code.LOGON_SUCCESS_BUT_OLD )
 //                                showWarning( "Система безопасности", "Срок действия пароля истек.\nПожалуйста, смените пароль." )
-                root.appUserConfig = logonResponse.appUserConfig!!
+                logonResponse.appUserConfig?.let { appUserConfig ->
+                    root.appUserConfig = appUserConfig
+                }
                 logonResponse.menuDatas?.let { menuDatas ->
                     root.setMenuBarData(
                         alMenuData = menuDatas.map { menuDataServer ->

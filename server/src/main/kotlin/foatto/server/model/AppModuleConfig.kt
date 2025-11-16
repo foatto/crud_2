@@ -1,7 +1,9 @@
 package foatto.server.model
 
+import foatto.core.i18n.LanguageEnum
+
 class AppModuleConfig(
-    val caption: String,
+    val captions: Map<LanguageEnum, String>,
     val pageSize: Int? = null,
     val enabledAccessRoles: MutableSet<String>,
     val disabledAccessRoles: MutableSet<String>,

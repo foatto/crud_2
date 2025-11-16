@@ -10,6 +10,4 @@ const val SETTINGS_LOGIN: String = "login"
 const val SETTINGS_PASSWORD: String = "password"
 const val SETTINGS_LOGON_EXPIRE: String = "logon_expire"
 
-const val SETTINGS_LANGUAGE: String = "language"
-
 val settings: Settings = Settings()

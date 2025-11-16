@@ -59,7 +59,7 @@ class FileStoreService(
             chmRefTime[newRef] = getCurrentTimeInt() + hour * 3600
 
             serverUrl + "/" + getFileRefUrl(newRef)
-        } ?: "(файл не найден)"
+        } ?: "(file not found!)"
     }
 
     fun getFileList(fileId: Int, expireHour: Int): List<Long> =

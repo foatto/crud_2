@@ -1,8 +1,10 @@
 package foatto.server.entity
 
+import foatto.core.i18n.LanguageEnum
 import foatto.server.entity.converter.BooleanToIntConverter
 import foatto.server.entity.converter.SetToStringConverter
 import jakarta.persistence.*
+import kotlin.hashCode
 
 @Entity
 @Table(name = "SYSTEM_users")
@@ -41,6 +43,9 @@ class UserEntity(
 
     @Column(name = "time_offset")
     var timeOffset: Int?,
+
+    @Enumerated(EnumType.STRING)
+    var lang: LanguageEnum?,
 
     @Column(name = "e_mail")
     var eMail: String?,
@@ -82,7 +87,7 @@ class UserEntity(
     @Embedded
     val passwordLastChangeDate: DateEntity,
 
-) {
+    ) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -98,6 +103,7 @@ class UserEntity(
         if (password != other.password) return false
         if (roles != other.roles) return false
         if (timeOffset != other.timeOffset) return false
+        if (lang != other.lang) return false
         if (eMail != other.eMail) return false
         if (contactInfo != other.contactInfo) return false
         if (useThousandsDivider != other.useThousandsDivider) return false
@@ -122,6 +128,7 @@ class UserEntity(
         result = 31 * result + (password?.hashCode() ?: 0)
         result = 31 * result + roles.hashCode()
         result = 31 * result + (timeOffset ?: 0)
+        result = 31 * result + (lang?.hashCode() ?: 0)
         result = 31 * result + (eMail?.hashCode() ?: 0)
         result = 31 * result + (contactInfo?.hashCode() ?: 0)
         result = 31 * result + (useThousandsDivider?.hashCode() ?: 0)

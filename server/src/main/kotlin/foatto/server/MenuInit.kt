@@ -1,5 +1,6 @@
 package foatto.server
 
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.response.MenuData
 import foatto.server.model.ServerUserConfig
@@ -10,7 +11,7 @@ fun addMenuItem(module: String, actionType: String, id: Int?, serverUserConfig: 
     appModuleConfigs[module]?.let { moduleConfig ->
         if (checkAccessPermission(module, serverUserConfig.roles)) {
             alMenu += MenuData(
-                caption = moduleConfig.caption,
+                caption = getLocalizedMessage(moduleConfig.captions, serverUserConfig.lang),
                 action = AppAction(
                     type = actionType,
                     module = module,

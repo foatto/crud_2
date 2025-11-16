@@ -2,6 +2,8 @@ package foatto.server.service
 
 import foatto.core.ActionType
 import foatto.core.IconName
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -410,7 +412,7 @@ abstract class ReportService(
         }
     }
 
-    protected fun getPreparedAt(userConfig: ServerUserConfig) = "Подготовлено: ${getDateTimeDMYHMSString(userConfig.timeOffset, getCurrentTimeInt())}"
+    protected fun getPreparedAt(userConfig: ServerUserConfig) = "${getLocalizedMessage(LocalizedMessages.PREPARED, userConfig.lang)}: ${getDateTimeDMYHMSString(userConfig.timeOffset, getCurrentTimeInt())}"
 
 //--- common app part --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

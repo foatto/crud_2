@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,10 +20,14 @@ import foatto.compose.control.composable.ToolBarIconButton
 import foatto.compose.control.model.map.MapWorkMode
 import foatto.compose.getStyleToolbarIconNameSuffix
 import foatto.compose.singleButtonShape
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.response.xy.XyElementConfig
 
 @Composable
 internal fun MapToolBar(
+    lang: LanguageEnum,
     isWideScreen: Boolean,
     isToolBarsVisible: Boolean,
     isPanButtonEnabled: Boolean,
@@ -118,7 +121,7 @@ internal fun MapToolBar(
         ToolBarBlock {
             if (isAddElementButtonVisible) {
                 if (alAddEC.isNotEmpty()) {
-                    Text(text = "Добавить:")
+                    Text(text = "${getLocalizedMessage(LocalizedMessages.ADD, lang)}:")
                 }
                 for (ec in alAddEC) {
                     TextButton(

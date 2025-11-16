@@ -22,9 +22,13 @@ import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorTextButton
 import foatto.compose.colorTextButtonDefault
 import foatto.compose.singleButtonShape
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 
 @Composable
 fun PasswordChangeDialog(
+    lang: LanguageEnum,
     onOkClick: (String) -> Unit,
     onCancelClick: () -> Unit,
 ) {
@@ -35,7 +39,7 @@ fun PasswordChangeDialog(
         shape = alertDialogShape,
         text = {
             Column {
-                Text(text = "Введите новый пароль:")
+                Text(text = "${getLocalizedMessage(LocalizedMessages.ENTER_NEW_PASSWORD, lang)}:")
                 OutlinedTextField(
                     colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
                     value = password1,
@@ -43,7 +47,7 @@ fun PasswordChangeDialog(
                         password1 = newPass
                         errorMessage = ""
                     },
-                    label = { Text("Новый пароль") },
+                    label = { Text(getLocalizedMessage(LocalizedMessages.NEW_PASSWORD, lang)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                 )
@@ -54,7 +58,7 @@ fun PasswordChangeDialog(
                         password2 = newPass
                         errorMessage = ""
                     },
-                    label = { Text("Ещё раз") },
+                    label = { Text(getLocalizedMessage(LocalizedMessages.AGAIN, lang)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                 )
@@ -75,16 +79,16 @@ fun PasswordChangeDialog(
                 colors = colorTextButtonDefault ?: ButtonDefaults.textButtonColors(),
                 onClick = {
                     if (password1 != password2) {
-                        errorMessage = "Вы ввели разные пароли. Попробуйте ввести ещё раз."
+                        errorMessage = getLocalizedMessage(LocalizedMessages.DIFFERENT_PASSWORD, lang)
                     } else if (password1.length < 3) {
-                        errorMessage = "Слишком короткий пароль. Попробуйте ввести ещё раз."
+                        errorMessage = getLocalizedMessage(LocalizedMessages.TOO_SHORT_PASSWORD, lang)
                     } else {
                         errorMessage = ""
                         onOkClick(password1)
                     }
                 }
             ) {
-                Text(text = "OK")
+                Text(text = getLocalizedMessage(LocalizedMessages.OK, lang))
             }
         },
         dismissButton = {
@@ -96,7 +100,7 @@ fun PasswordChangeDialog(
                     onCancelClick()
                 }
             ) {
-                Text(text = "Отмена")
+                Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, lang))
             }
         },
     )

@@ -230,7 +230,7 @@ class ObjectService(
         val begTime = getCurrentTimeInt() / 86_400 * 86_400 - userConfig.timeOffset
         val endTime = begTime + 86_400
 
-//        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, id, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, id, alPopupData)
 
         getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, id, alPopupData)
         getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, id, alPopupData)

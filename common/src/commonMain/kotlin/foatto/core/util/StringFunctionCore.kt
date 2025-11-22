@@ -1,5 +1,6 @@
 package foatto.core.util
 
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.round
@@ -43,33 +44,35 @@ fun getSplittedLong(value: Long, radix: Int = 10): String {
 
 fun getSplittedDouble(
     value: Double,
-    precision: Int,
+    precision: Int? = null,
     isUseThousandsDivider: Boolean = true,
     decimalDivider: Char = '.'
 ): String {
 //    println("--------------------------------------")
 //    println("value = $value")
 //    println("precision = $precision")
+
+    val prec = precision ?: getPrecision(value)
     //--- additionally change the decimal point (for the Russian locale) to the universal decimal point
     val strValue: String =
         //--- negative precision - remove the zero ending of the fractional part
-        if (precision < 0) {
+        if (prec < 0) {
             var s = value.toString().replace(',', '.')
             s = s.dropLastWhile { it == '0' }
             //--- if the accuracy turned out to be zero, then additionally remove the decimal point that is now unnecessary
             s.dropLastWhile { it == '.' }
         }
         //--- zero precision - round to integer
-        else if (precision == 0) {
+        else if (prec == 0) {
             value.roundToLong().toString()
         }
         //--- positive precision - round to the specified decimal place / dot
         else {
-            val pow10 = 10.0.pow(precision)
+            val pow10 = 10.0.pow(prec)
             val s = (round(value * pow10) / pow10).toString().replace(",", ".")
             val intPart = s.substringBefore('.')
             var fracPart = s.substringAfter('.', "")
-            fracPart = fracPart.substring(0, min(fracPart.length, precision)).padEnd(precision, '0')
+            fracPart = fracPart.substring(0, min(fracPart.length, prec)).padEnd(prec, '0')
             "$intPart.$fracPart"
         }
 
@@ -104,3 +107,23 @@ fun getSplittedDouble(
     }
 
 }
+
+fun getPrecision(value: Double): Int {
+    val absValue = abs(value)
+    //--- updated / simplified version of the output accuracy - more cubic meters - in whole liters, less - in hundreds of milliliters / gram
+    return if (absValue >= 1000) {
+        0
+    }
+    else if (absValue >= 100) {
+        1
+    }
+    else if (absValue >= 10) {
+        2
+    }
+    else {
+        3
+    }
+}
+
+fun getPrecision(value: Float): Int = getPrecision(value.toDouble())
+

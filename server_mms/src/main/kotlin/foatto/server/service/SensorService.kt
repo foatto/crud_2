@@ -750,7 +750,7 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = false,
-                values = geoSensorType,
+                values = geoSensorType + workSensorType,
             ),
         )
 

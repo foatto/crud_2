@@ -1,7 +1,7 @@
 package foatto.server.service.report
 
 import foatto.core.model.response.chart.ChartElementData
-import foatto.server.calc.getPrecision
+import foatto.core.util.getPrecision
 import foatto.server.entity.ObjectEntity
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.ServerUserConfig
@@ -97,8 +97,8 @@ abstract class AbstractPeriodSummaryService(
         val byGroupLiquidSum = sortedMapOf<String, SortedMap<String, Double>>()
         val allLiquidSum = sortedMapOf<String, Double>()
 
-        val tmWork = calcService.calcWork(objectEntity, begTime, endTime)
-        val tmEnergo = calcService.calcEnergo(objectEntity, begTime, endTime)
+//        val tmWork = calcService.calcWork(objectEntity, begTime, endTime)
+//        val tmEnergo = calcService.calcEnergo(objectEntity, begTime, endTime)
 //        calcService.calcLiquidUsing(objectEntity, begTime, endTime, byGroupLiquidSum, allLiquidSum)
 
         var offsY = aOffsY
@@ -166,79 +166,79 @@ abstract class AbstractPeriodSummaryService(
                 }
         */
 
-        //--- report on sensors of equipment operation
-        if (tmWork.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Оборудование", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Время работы [час]", wcfCaptionHC))
-            sheet.addCell(Label(3, offsY, "Топливо", wcfCaptionHC))
-            sheet.addCell(Label(4, offsY, "Расход", wcfCaptionHC))
-            sheet.addCell(Label(5, offsY, "Сред. расх. [на 1 час]", wcfCaptionHC))
-            offsY++
-
-            tmWork.forEach { (workDescr, wcd) ->
-                sheet.addCell(Label(1, offsY, workDescr, wcfCellC))
-                sheet.addCell(getNumberCell(2, offsY, wcd.onTime.toDouble() / 60.0 / 60.0, 1, wcfCellC))
-
-                val groupLiquidSums = byGroupLiquidSum[wcd.group] ?: Collections.emptySortedMap()
-                val (liquidName, liquidValue) = if (groupLiquidSums.size == 1) {
-                    val name = groupLiquidSums.firstKey()
-                    name to groupLiquidSums[name]
-                } else {
-                    "-" to null
-                }
-                sheet.addCell(Label(3, offsY, liquidName, wcfCellC))
-                liquidValue?.let {
-                    sheet.addCell(getNumberCell(4, offsY, liquidValue, 1, wcfCellC))
-                } ?: run {
-                    sheet.addCell(Label(4, offsY, "-", wcfCellC))
-                }
-                if (wcd.onTime > 0 && liquidValue != null) {
-                    sheet.addCell(getNumberCell(5, offsY, liquidValue / (wcd.onTime.toDouble() / 60.0 / 60.0), 1, wcfCellC))
-                } else {
-                    sheet.addCell(Label(5, offsY, "-", wcfCellC))
-                }
-                if (isKeepPlaceForComment) {
-                    sheet.addCell(Label(6, offsY, "", wcfComment))
-                    sheet.mergeCells(6, offsY, getColumnCount(1), offsY)
-                }
-                offsY++
-            }
-            offsY++
-        }
-
-        //--- report on energo sensors
-        if (tmEnergo.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Расход/Генерация", wcfCaptionHC))
-            offsY++
-            tmEnergo.forEach { (energoDescr, energoValue) ->
-                sheet.addCell(Label(1, offsY, energoDescr, wcfCellC))
-                sheet.addCell(getNumberCell(2, offsY, energoValue, getPrecision(energoValue), wcfCellC))
-                if (isKeepPlaceForComment) {
-                    sheet.addCell(Label(3, offsY, "", wcfComment))
-                    sheet.mergeCells(3, offsY, getColumnCount(1), offsY)
-                }
-                offsY++
-            }
-            offsY++
-        }
-
-        //--- report on liquid/fuel using
-        if (allLiquidSum.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Расход", wcfCaptionHC))
-            offsY++
-            allLiquidSum.forEach { (liquidName, liquidValue) ->
-                sheet.addCell(Label(1, offsY, liquidName, wcfCellC))
-                sheet.addCell(getNumberCell(2, offsY, liquidValue, getPrecision(liquidValue), wcfCellC))
-                if (isKeepPlaceForComment) {
-                    sheet.addCell(Label(3, offsY, "", wcfComment))
-                    sheet.mergeCells(3, offsY, getColumnCount(1), offsY)
-                }
-                offsY++
-            }
-            offsY++
-        }
+//        //--- report on sensors of equipment operation
+//        if (tmWork.isNotEmpty()) {
+//            sheet.addCell(Label(1, offsY, "Оборудование", wcfCaptionHC))
+//            sheet.addCell(Label(2, offsY, "Время работы [час]", wcfCaptionHC))
+//            sheet.addCell(Label(3, offsY, "Топливо", wcfCaptionHC))
+//            sheet.addCell(Label(4, offsY, "Расход", wcfCaptionHC))
+//            sheet.addCell(Label(5, offsY, "Сред. расх. [на 1 час]", wcfCaptionHC))
+//            offsY++
+//
+//            tmWork.forEach { (workDescr, wcd) ->
+//                sheet.addCell(Label(1, offsY, workDescr, wcfCellC))
+//                sheet.addCell(getNumberCell(2, offsY, wcd.onTime.toDouble() / 60.0 / 60.0, 1, wcfCellC))
+//
+//                val groupLiquidSums = byGroupLiquidSum[wcd.group] ?: Collections.emptySortedMap()
+//                val (liquidName, liquidValue) = if (groupLiquidSums.size == 1) {
+//                    val name = groupLiquidSums.firstKey()
+//                    name to groupLiquidSums[name]
+//                } else {
+//                    "-" to null
+//                }
+//                sheet.addCell(Label(3, offsY, liquidName, wcfCellC))
+//                liquidValue?.let {
+//                    sheet.addCell(getNumberCell(4, offsY, liquidValue, 1, wcfCellC))
+//                } ?: run {
+//                    sheet.addCell(Label(4, offsY, "-", wcfCellC))
+//                }
+//                if (wcd.onTime > 0 && liquidValue != null) {
+//                    sheet.addCell(getNumberCell(5, offsY, liquidValue / (wcd.onTime.toDouble() / 60.0 / 60.0), 1, wcfCellC))
+//                } else {
+//                    sheet.addCell(Label(5, offsY, "-", wcfCellC))
+//                }
+//                if (isKeepPlaceForComment) {
+//                    sheet.addCell(Label(6, offsY, "", wcfComment))
+//                    sheet.mergeCells(6, offsY, getColumnCount(1), offsY)
+//                }
+//                offsY++
+//            }
+//            offsY++
+//        }
+//
+//        //--- report on energo sensors
+//        if (tmEnergo.isNotEmpty()) {
+//            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
+//            sheet.addCell(Label(2, offsY, "Расход/Генерация", wcfCaptionHC))
+//            offsY++
+//            tmEnergo.forEach { (energoDescr, energoValue) ->
+//                sheet.addCell(Label(1, offsY, energoDescr, wcfCellC))
+//                sheet.addCell(getNumberCell(2, offsY, energoValue, getPrecision(energoValue), wcfCellC))
+//                if (isKeepPlaceForComment) {
+//                    sheet.addCell(Label(3, offsY, "", wcfComment))
+//                    sheet.mergeCells(3, offsY, getColumnCount(1), offsY)
+//                }
+//                offsY++
+//            }
+//            offsY++
+//        }
+//
+//        //--- report on liquid/fuel using
+//        if (allLiquidSum.isNotEmpty()) {
+//            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
+//            sheet.addCell(Label(2, offsY, "Расход", wcfCaptionHC))
+//            offsY++
+//            allLiquidSum.forEach { (liquidName, liquidValue) ->
+//                sheet.addCell(Label(1, offsY, liquidName, wcfCellC))
+//                sheet.addCell(getNumberCell(2, offsY, liquidValue, getPrecision(liquidValue), wcfCellC))
+//                if (isKeepPlaceForComment) {
+//                    sheet.addCell(Label(3, offsY, "", wcfComment))
+//                    sheet.mergeCells(3, offsY, getColumnCount(1), offsY)
+//                }
+//                offsY++
+//            }
+//            offsY++
+//        }
 
 //        //--- отчёт по датчикам уровня жидкости
 //        if (objectCalc.tmLiquidLevel.isNotEmpty()) {
@@ -364,29 +364,29 @@ abstract class AbstractPeriodSummaryService(
 //            offsY++
 //        }
 
-        if (isOutTemperature) {
-            val result = calcService.calcAnalogueSensorValue(objectEntity, begTime, endTime, SensorConfig.SENSOR_TEMPERATURE)
-            if (result.isNotEmpty()) {
-                sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-                sheet.addCell(Label(2, offsY, "Температура начальная", wcfCaptionHC))
-                sheet.addCell(Label(3, offsY, "Температура конечная", wcfCaptionHC))
-                offsY++
-                offsY = outAnalogueRows(sheet, offsY, result, isKeepPlaceForComment)
-                offsY++
-            }
-        }
-
-        if (isOutDensity) {
-            val result = calcService.calcAnalogueSensorValue(objectEntity, begTime, endTime, SensorConfig.SENSOR_DENSITY)
-            if (result.isNotEmpty()) {
-                sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-                sheet.addCell(Label(2, offsY, "Плотность начальная", wcfCaptionHC))
-                sheet.addCell(Label(3, offsY, "Плотность конечная", wcfCaptionHC))
-                offsY++
-                offsY = outAnalogueRows(sheet, offsY, result, isKeepPlaceForComment)
-                offsY++
-            }
-        }
+//        if (isOutTemperature) {
+//            val result = calcService.calcAnalogueSensorValue(objectEntity, begTime, endTime, SensorConfig.SENSOR_TEMPERATURE)
+//            if (result.isNotEmpty()) {
+//                sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
+//                sheet.addCell(Label(2, offsY, "Температура начальная", wcfCaptionHC))
+//                sheet.addCell(Label(3, offsY, "Температура конечная", wcfCaptionHC))
+//                offsY++
+//                offsY = outAnalogueRows(sheet, offsY, result, isKeepPlaceForComment)
+//                offsY++
+//            }
+//        }
+//
+//        if (isOutDensity) {
+//            val result = calcService.calcAnalogueSensorValue(objectEntity, begTime, endTime, SensorConfig.SENSOR_DENSITY)
+//            if (result.isNotEmpty()) {
+//                sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
+//                sheet.addCell(Label(2, offsY, "Плотность начальная", wcfCaptionHC))
+//                sheet.addCell(Label(3, offsY, "Плотность конечная", wcfCaptionHC))
+//                offsY++
+//                offsY = outAnalogueRows(sheet, offsY, result, isKeepPlaceForComment)
+//                offsY++
+//            }
+//        }
 
 //        troubles?.alGTD?.let { alGTD ->
 //            if (alGTD.isNotEmpty()) {

@@ -325,36 +325,36 @@ class MMSSpringApp : SpringApp() {
             ),
         )
 
-//        appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
-//            caption = "Журнал суточных работ",
-//            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
-////            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-////            disabledAccessRoles = mutableSetOf(),
-//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
-//            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT, AppRole.USER),
-//            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
-//            disabledFormAddRoles = mutableSetOf(AppRole.USER),
-//            rowPermissions = mutableMapOf(
-//                ActionType.MODULE_TABLE to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
-//                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
-//                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
-//                    },
-//                ),
-//                ActionType.MODULE_FORM to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//                ),
-//                ActionType.FORM_EDIT to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//                ),
-//                ActionType.FORM_DELETE to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//                ),
-//            ),
-//        )
+        appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Daily work log", LanguageEnum.RU to "Журнал суточных работ"),
+            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+//            disabledAccessRoles = mutableSetOf(),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
+            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT, AppRole.USER),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
 
         appModuleConfigs[AppModuleMMS.CHART_SENSOR] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "Chart by sensor", LanguageEnum.RU to "График по датчику"),
@@ -455,7 +455,7 @@ class MMSSpringApp : SpringApp() {
             mutableListOf<MenuData>().apply {
 
                 addMenuItem(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-//                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
                 addMenuItem(AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM, null, serverUserConfig, this)
 
                 if (size > 0) {

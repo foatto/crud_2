@@ -155,21 +155,17 @@ tasks {
                 from("build/dist/wasmJs/productionExecutable")
                 into("/home/foatto/MMSServerSpring/web_2")
             }
-
-            delete("/home/foatto/MMSDesktop/lib")
-            copy {
-                from("build/compose/binaries/main/app/foatto.compose_mms/lib/app")
-                into("/home/foatto/MMSDesktop/lib")
-            }
-
-/* native distributable
-            delete("/home/foatto/MMSDesktop/bin")
-            delete("/home/foatto/MMSDesktop/lib")
-            copy {
-                from("build/compose/binaries/main/app/foatto.compose_mms")
-                into("/home/foatto/MMSDesktop")
-            }
-*/
         }
     }
+    // fatjar
+//    val fatJar = register("fatjar") {
+//        dependsOn("build", "packageUberJarForCurrentOS")
+//        doLast {
+//            copy {
+//                from("build/compose/jars")
+//                into("/home/foatto/MMSDesktop/lib")
+//            }
+//            delete("build/compose/jars/XXX.jar")
+//        }
+//    }
 }

@@ -1,14 +1,18 @@
 package foatto.server.service
 
+import foatto.server.calc.AnalogueCalcData
+import foatto.server.calc.CounterCalcData
 import foatto.server.calc.WorkCalcData
 import foatto.server.calc.WorkPeriodData
 import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfig.Companion.SENSOR_LIQUID_USING
+import foatto.server.model.sensor.SensorConfig.Companion.SENSOR_MASS_ACCUMULATED
+import foatto.server.model.sensor.SensorConfig.Companion.SENSOR_VOLUME_ACCUMULATED
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -20,22 +24,22 @@ class CalcService(
 
 //---------------------------------------------------------------------------------------------------------------------
 
-    fun calcWork(
+    fun calcWorks(
         objectEntity: ObjectEntity,
         begTime: Int,
         endTime: Int,
-    ): SortedMap<String, WorkCalcData> {
-        val tmWork = sortedMapOf<String, WorkCalcData>()
+    ): List<WorkCalcData> {
+        val works = mutableListOf<WorkCalcData>()
 
         sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_WORK, begTime, endTime).forEach { sensorEntity ->
             val wcd = calcWorkSensor(sensorEntity, begTime, endTime)
-            tmWork[sensorEntity.descr ?: ""] = wcd
+            works += wcd
         }
 
-        return tmWork
+        return works
     }
 
-    fun calcWorkSensor(
+    private fun calcWorkSensor(
         sensorEntity: SensorEntity,
         begTime: Int,
         endTime: Int,
@@ -75,7 +79,7 @@ class CalcService(
             }
 
         return WorkCalcData(
-            group = sensorEntity.group ?: "",
+            sensorEntity = sensorEntity,
             states = states,
             onTime = onTime,
         )
@@ -83,12 +87,33 @@ class CalcService(
 
 //---------------------------------------------------------------------------------------------------------------------
 
-    fun calcEnergo(
+    fun calcUsings(
         objectEntity: ObjectEntity,
         begTime: Int,
         endTime: Int,
-    ): SortedMap<String, Double> {
-        val tmEnergo = sortedMapOf<String, Double>()
+    ): List<CounterCalcData> {
+        val counts = mutableListOf<CounterCalcData>()
+
+        listOf(
+            SENSOR_MASS_ACCUMULATED,
+            SENSOR_VOLUME_ACCUMULATED,
+            SENSOR_LIQUID_USING,
+        ).forEach { sensorType ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
+                val ccd = calcCounterSensor(sensorEntity, begTime, endTime)
+                counts += ccd
+            }
+        }
+
+        return counts
+    }
+
+    fun calcEnergos(
+        objectEntity: ObjectEntity,
+        begTime: Int,
+        endTime: Int,
+    ): List<CounterCalcData> {
+        val counts = mutableListOf<CounterCalcData>()
 
         listOf(
             SensorConfig.SENSOR_ENERGO_COUNT_AD,
@@ -97,8 +122,8 @@ class CalcService(
             SensorConfig.SENSOR_ENERGO_COUNT_RR,
         ).forEach { sensorType ->
             sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
-                val result = calcCounterSensor(sensorEntity, begTime, endTime)
-                tmEnergo[sensorEntity.descr ?: ""] = result
+                val ccd = calcCounterSensor(sensorEntity, begTime, endTime)
+                counts += ccd
 
 //!!!
 //            //--- calculate the group amount
@@ -113,118 +138,16 @@ class CalcService(
             }
         }
 
-        return tmEnergo
+        return counts
     }
-
-//---------------------------------------------------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------------------------------------------------
-
-    fun calcAnalogueSensorValue(
-        objectEntity: ObjectEntity,
-        begTime: Int,
-        endTime: Int,
-        sensorType: Int,
-    ): SortedMap<String, Pair<Double?, Double?>> {
-        val result = sortedMapOf<String, Pair<Double?, Double?>>()
-
-        ApplicationService.withConnection(entityManager) { conn ->
-            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
-                SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
-
-                var rs = conn.executeQuery(
-                    """
-                        SELECT value_1
-                        FROM MMS_agg_${sensorEntity.id}
-                        WHERE ontime_0 = ( SELECT MIN(ontime_0) FROM MMS_agg_${sensorEntity.id} WHERE ontime_0 BETWEEN $begTime AND $endTime )
-                    """
-                )
-                val begValue = if (rs.next()) {
-                    rs.getDouble(1)
-                } else {
-                    null
-                }
-                rs.close()
-
-                rs = conn.executeQuery(
-                    """
-                        SELECT value_1
-                        FROM MMS_agg_${sensorEntity.id}
-                        WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} WHERE ontime_0 BETWEEN $begTime AND $endTime )
-                    """
-                )
-                val endValue = if (rs.next()) {
-                    rs.getDouble(1)
-                } else {
-                    null
-                }
-                rs.close()
-
-                result[sensorEntity.descr] = begValue to endValue
-            }
-        }
-
-        return result
-    }
-//            //--- some analogue sensors
-//            oc.hmSensorConfig[]?.values?.forEach { sc ->
-//                val sca = sc as SensorConfigAnalogue
-//                val aLine = ChartElementDTO(ChartElementTypeDTO.LINE, 0, 2, false)
-//                getSmoothAnalogGraphicData(
-//                    conn = conn,
-//                    alRawTime = alRawTime,
-//                    alRawData = alRawData,
-//                    scg = oc.scg,
-//                    sca = sca,
-//                    begTime = begTime,
-//                    endTime = endTime,
-//                    xScale = 0,
-//                    yScale = 0.0,
-//                    axisIndex = 0,
-//                    aMinLimit = null,
-//                    aMaxLimit = null,
-//                    aLine = aLine,
-//                    graphicHandler = AnalogGraphicHandler()
-//                )
-//                result.tmTemperature[sc.descr] = aLine
-//            }
-//
-//            oc.hmSensorConfig[]?.values?.forEach { sc ->
-//                val sca = sc as SensorConfigAnalogue
-//                val aLine = ChartElementDTO(ChartElementTypeDTO.LINE, 0, 2, false)
-//                getSmoothAnalogGraphicData(
-//                    conn = conn,
-//                    alRawTime = alRawTime,
-//                    alRawData = alRawData,
-//                    scg = oc.scg,
-//                    sca = sca,
-//                    begTime = begTime,
-//                    endTime = endTime,
-//                    xScale = 0,
-//                    yScale = 0.0,
-//                    axisIndex = 0,
-//                    aMinLimit = null,
-//                    aMaxLimit = null,
-//                    aLine = aLine,
-//                    graphicHandler = AnalogGraphicHandler()
-//                )
-//                result.tmDensity[sc.descr] = aLine
-//                //--- прикрепить данные по плотности с данным по расходомеру
-//                result.tmCounterData.forEach { (_, counterCalcData) ->
-//                    if (counterCalcData.scc.group == sc.group) {
-//                        counterCalcData.density = aLine
-//                    }
-//                }
-//            }
-
-//---------------------------------------------------------------------------------------------------------------------
 
     private fun calcCounterSensor(
         sensorEntity: SensorEntity,
         begTime: Int,
         endTime: Int,
-    ): Double {
+    ): CounterCalcData {
         var result = 0.0
+
         ApplicationService.withConnection(entityManager) { conn ->
             SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
 
@@ -241,14 +164,88 @@ class CalcService(
             rs.close()
         }
 
-        return result
+        return CounterCalcData(sensorEntity, result)
     }
+
+//---------------------------------------------------------------------------------------------------------------------
+
+    fun calcLiquidLevels(
+        objectEntity: ObjectEntity,
+        begTime: Int,
+        endTime: Int,
+    ): List<AnalogueCalcData> = calcAnalogueSensors(objectEntity, SensorConfig.SENSOR_LIQUID_LEVEL, begTime, endTime)
+
+    fun calcTemperatures(
+        objectEntity: ObjectEntity,
+        begTime: Int,
+        endTime: Int,
+    ): List<AnalogueCalcData> = calcAnalogueSensors(objectEntity, SensorConfig.SENSOR_TEMPERATURE, begTime, endTime)
+
+    fun calcDensities(
+        objectEntity: ObjectEntity,
+        begTime: Int,
+        endTime: Int,
+    ): List<AnalogueCalcData> = calcAnalogueSensors(objectEntity, SensorConfig.SENSOR_DENSITY, begTime, endTime)
+
+    private fun calcAnalogueSensors(
+        objectEntity: ObjectEntity,
+        sensorType: Int,
+        begTime: Int,
+        endTime: Int,
+    ): List<AnalogueCalcData> {
+        val levels = mutableListOf<AnalogueCalcData>()
+
+        sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, sensorType, begTime, endTime).forEach { sensorEntity ->
+            val acc = calcAnalogueSensor(sensorEntity, begTime, endTime)
+            levels += acc
+        }
+
+        return levels
+    }
+
+    private fun calcAnalogueSensor(
+        sensorEntity: SensorEntity,
+        begTime: Int,
+        endTime: Int,
+    ): AnalogueCalcData {
+        var begValue: Double? = null
+        var endValue: Double? = null
+
+        ApplicationService.withConnection(entityManager) { conn ->
+            SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
+
+            var rs = conn.executeQuery(
+                """
+                    SELECT value_1
+                    FROM MMS_agg_${sensorEntity.id}
+                    WHERE ontime_0 = ( SELECT MIN(ontime_0) FROM MMS_agg_${sensorEntity.id} WHERE ontime_0 BETWEEN $begTime AND $endTime )
+                """
+            )
+            if (rs.next()) {
+                begValue = rs.getDouble(1)
+            }
+            rs.close()
+
+            rs = conn.executeQuery(
+                """
+                    SELECT value_1
+                    FROM MMS_agg_${sensorEntity.id}
+                    WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_agg_${sensorEntity.id} WHERE ontime_0 BETWEEN $begTime AND $endTime )
+                """
+            )
+            if (rs.next()) {
+                endValue = rs.getDouble(1)
+            }
+            rs.close()
+        }
+
+        return AnalogueCalcData(sensorEntity, begValue, endValue)
+    }
+
+//---------------------------------------------------------------------------------------------------------------------
 
 }
 
-//    var gcd: GeoCalcData? = null
-//    val tmCounterData = sortedMapOf<String, CounterCalcData>()
-//
 //    val tmGroupSum = sortedMapOf<String, CalcSumData>() // sums by group
 //    val allSumData = CalcSumData()                  // overall sum
 //
@@ -261,23 +258,8 @@ class CalcService(
 //    var sGeoParkingTime: String = ""
 //    var sGeoParkingCount: String = ""
 //
-//    var sLiquidUsingName: String = ""
-//    var sLiquidUsingValue: String = ""
-//
 //    var sAllSumLiquidName: String = ""
 //    var sAllSumLiquidValue: String = ""
-//
-//    var sLiquidLevelName: String = ""
-//    var sLiquidLevelBeg: String = ""
-//    var sLiquidLevelEnd: String = ""
-//    var sLiquidLevelIncTotal: String = ""
-//    var sLiquidLevelDecTotal: String = ""
-//    var sLiquidLevelUsingTotal: String = ""
-//    var sLiquidLevelUsingCalc: String = ""
-//
-//    var sLiquidLevelLiquidName: String = ""
-//    var sLiquidLevelLiquidInc: String = ""
-//    var sLiquidLevelLiquidDec: String = ""
 //
 //    companion object {
 //
@@ -702,304 +684,6 @@ class CalcService(
 //            aLine.alGLD = alGLD
 //        }
 //
-//        //--- we collect periods of liquid level states (refueling, draining, consumption) and apply filters for refueling / draining / consumption
-//        fun getLiquidStatePeriodData(
-//            sca: SensorConfigLiquidLevel,
-//            axisIndex: Int,
-//            aLine: ChartElementDTO,
-//            alLSPD: MutableList<LiquidStatePeriodData>,
-//            gh: LiquidGraphicHandler
-//        ) {
-//            //--- zero pass: collecting periods from points; we start from the 1st point, because 0th point is always "normal"
-//            var begPos = 0
-//            var curColorIndex = gh.getLineNormalColorIndex(axisIndex)
-//            for (i in 1 until aLine.alGLD.size) {
-//                val gdl = aLine.alGLD[i]
-//                val newColorIndex = gdl.colorIndex
-//                //--- a period of a new type has begun, we end the previous period of a different type
-//                if (newColorIndex != curColorIndex) {
-//                    //--- the previous period ended at the previous point
-//                    val endPos = i - 1
-//                    //--- there must be at least two points in the period, we discard one-point periods (usually this is the starting point in the "normal" state)
-//                    if (begPos < endPos) {
-//                        alLSPD.add(LiquidStatePeriodData(begPos, endPos, curColorIndex))
-//                    }
-//                    //--- the new period actually starts from the previous point
-//                    begPos = i - 1
-//                    curColorIndex = newColorIndex
-//                }
-//            }
-//            //--- let's finish the last period
-//            val endPos = aLine.alGLD.size - 1
-//            if (begPos < endPos) {
-//                alLSPD.add(LiquidStatePeriodData(begPos, endPos, curColorIndex))
-//            }
-//
-//            //--- first pass: turn insignificant fillings / drains into "normal" consumption
-//            run {
-//                var pos = 0
-//                while (pos < alLSPD.size) {
-//                    val lspd = alLSPD[pos]
-//                    //--- skip empty or normal periods immediately
-//                    if (lspd.colorIndex == gh.getLineNoneColorIndex(axisIndex) || lspd.colorIndex == gh.getLineNormalColorIndex(axisIndex)) {
-//                        pos++
-//                        continue
-//                    }
-//                    //--- determine the insignificance of filling / draining
-//                    val begGDL = aLine.alGLD[lspd.begPos]
-//                    val endGDL = aLine.alGLD[lspd.endPos]
-//                    val isFound = if (lspd.colorIndex == gh.getLineAboveColorIndex(axisIndex)) {
-//                        //--- at the same time we catch periods with zero length
-//                        endGDL.y - begGDL.y < sca.detectIncMinDiff || endGDL.x - begGDL.x < max(sca.detectIncMinLen, 1)
-//                    } else if (lspd.colorIndex == gh.getLineBelowColorIndex(axisIndex)) {
-//                        //--- at the same time we catch periods with zero length
-//                        -(endGDL.y - begGDL.y) < sca.detectDecMinDiff || endGDL.x - begGDL.x < max(sca.detectDecMinLen, 1)
-//                    } else {
-//                        false
-//                    }
-//                    //--- insignificant fill / drain found
-//                    if (isFound) {
-//                        //--- looking for possible normal left / right periods for merging
-//                        var prevNormalLSPD: LiquidStatePeriodData? = null
-//                        var nextNormalLSPD: LiquidStatePeriodData? = null
-//                        if (pos > 0) {
-//                            prevNormalLSPD = alLSPD[pos - 1]
-//                            if (prevNormalLSPD.colorIndex != gh.getLineNormalColorIndex(axisIndex)) {
-//                                prevNormalLSPD = null
-//                            }
-//                        }
-//                        if (pos < alLSPD.size - 1) {
-//                            nextNormalLSPD = alLSPD[pos + 1]
-//                            if (nextNormalLSPD.colorIndex != gh.getLineNormalColorIndex(axisIndex)) {
-//                                nextNormalLSPD = null
-//                            }
-//                        }
-//                        //--- both adjacent periods are normal, all three are merged into one
-//                        if (prevNormalLSPD != null && nextNormalLSPD != null) {
-//                            prevNormalLSPD.endPos = nextNormalLSPD.endPos
-//                            alLSPD.removeAt(pos)
-//                            //--- this is not a typo or an error: after deleting the current period, the next period becomes the current one and is also deleted
-//                            alLSPD.removeAt(pos)
-//                            //--- after merging two periods, pos already points to the next position, there is no need to increase the counter
-//                            //pos++;
-//                        } else if (prevNormalLSPD != null) {    //--- no normal neighbors, we normalize ourselves
-//                            prevNormalLSPD.endPos = lspd.endPos
-//                            alLSPD.removeAt(pos)
-//                            //--- after merging two periods, pos already points to the next position, there is no need to increase the counter
-//                            //pos++;
-//                        } else if (nextNormalLSPD != null) {    //--- the right period is normal, we merge with it
-//                            nextNormalLSPD.begPos = lspd.begPos
-//                            alLSPD.removeAt(pos)
-//                            pos++
-//                        } else {                                //--- the left period is normal, we merge with it
-//                            lspd.colorIndex = gh.getLineNormalColorIndex(axisIndex)
-//                            pos++
-//                        }
-//                        //--- in any case, normalize "our" points of the smoothed graph
-//                        for (i in lspd.begPos + 1..lspd.endPos) {
-//                            aLine.alGLD[i].colorIndex = gh.getLineNormalColorIndex(axisIndex)
-//                        }
-//                    } else pos++    //--- otherwise just go to the next period
-//                }
-//            }
-//
-//            //--- second pass - we lengthen refueling and drainage by reducing neighboring normal periods
-//            for (pos in alLSPD.indices) {
-//                val lspd = alLSPD[pos]
-//                //--- skip empty or normal periods immediately
-//                if (lspd.colorIndex == gh.getLineNoneColorIndex(axisIndex) || lspd.colorIndex == gh.getLineNormalColorIndex(axisIndex)) {
-//                    continue
-//                }
-//
-//                //--- looking for a normal period on the left, if necessary
-//                val addTimeBefore = if (lspd.colorIndex == gh.getLineAboveColorIndex(axisIndex)) {
-//                    sca.incAddTimeBefore
-//                } else {
-//                    sca.decAddTimeBefore
-//                }
-//                if (addTimeBefore > 0 && pos > 0) {
-//                    val prevNormalLSPD = alLSPD[pos - 1]
-//                    if (prevNormalLSPD.colorIndex == gh.getLineNormalColorIndex(axisIndex)) {
-//                        val bt = aLine.alGLD[lspd.begPos].x
-//                        // --- lengthen the beginning of our period, shorten the previous normal period from the end
-//                        // --- namely>, not> =, in order to prevent single-point normal periods (begPos == endPos)
-//                        // --- after lengthening the current abnormal
-//                        var p = prevNormalLSPD.endPos - 1
-//                        while (p > prevNormalLSPD.begPos) {
-//                            if (bt - aLine.alGLD[p].x > addTimeBefore) {
-//                                break
-//                            }
-//                            p--
-//                        }
-//                        //--- the previous position is valid
-//                        p++
-//                        //--- is there where to lengthen?
-//                        if (p < prevNormalLSPD.endPos) {
-//                            prevNormalLSPD.endPos = p
-//                            lspd.begPos = p
-//                            //--- in any case, let's re-mark "our" points of the smoothed graph
-//                            for (i in lspd.begPos + 1..lspd.endPos) {
-//                                aLine.alGLD[i].colorIndex = lspd.colorIndex
-//                            }
-//                        }
-//                    }
-//                }
-//                //--- looking for a normal period on the right, if necessary
-//                val addTimeAfter = if (lspd.colorIndex == gh.getLineAboveColorIndex(axisIndex)) {
-//                    sca.incAddTimeAfter
-//                } else {
-//                    sca.decAddTimeAfter
-//                }
-//                if (addTimeAfter > 0 && pos < alLSPD.size - 1) {
-//                    val nextNormalLSPD = alLSPD[pos + 1]
-//                    if (nextNormalLSPD.colorIndex == gh.getLineNormalColorIndex(axisIndex)) {
-//                        val et = aLine.alGLD[lspd.endPos].x
-//                        //--- lengthen the end of our period, shorten the next normal period from the beginning
-//                        //--- exactly <, not <=, in order to prevent single-point normal periods (begPos == endPos)
-//                        //--- after lengthening the current abnormal
-//                        var p = nextNormalLSPD.begPos + 1
-//                        while (p < nextNormalLSPD.endPos) {
-//                            if (aLine.alGLD[p].x - et > addTimeAfter) {
-//                                break
-//                            }
-//                            p++
-//                        }
-//                        //--- the previous position is valid
-//                        p--
-//                        //--- is there where to lengthen?
-//                        if (p > nextNormalLSPD.begPos) {
-//                            nextNormalLSPD.begPos = p
-//                            lspd.endPos = p
-//                            //--- in any case, let's re-mark "our" points of the smoothed graph
-//                            for (i in lspd.begPos + 1..lspd.endPos) {
-//                                aLine.alGLD[i].colorIndex = lspd.colorIndex
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            //--- third pass: remove insignificant (short) "normal" periods between identical abnormal
-//            var pos = 0
-//            while (pos < alLSPD.size) {
-//                val lspd = alLSPD[pos]
-//                //--- skip abnormal periods immediately
-//                if (lspd.colorIndex != gh.getLineNormalColorIndex(axisIndex)) {
-//                    pos++
-//                    continue
-//                }
-//                //--- determine the insignificance of the expense
-//                val begGDL = aLine.alGLD[lspd.begPos]
-//                val endGDL = aLine.alGLD[lspd.endPos]
-//                //--- at the same time we catch periods with zero length
-//                if (endGDL.x - begGDL.x < max(sca.usingMinLen, 1)) {
-//                    //--- looking for abnormal periods left / right for merging
-//                    var prevAbnormalLSPD: LiquidStatePeriodData? = null
-//                    var nextAbnormalLSPD: LiquidStatePeriodData? = null
-//                    if (pos > 0) {
-//                        prevAbnormalLSPD = alLSPD[pos - 1]
-//                        if (prevAbnormalLSPD.colorIndex == gh.getLineNormalColorIndex(axisIndex)) {
-//                            prevAbnormalLSPD = null
-//                        }
-//                    }
-//                    if (pos < alLSPD.size - 1) {
-//                        nextAbnormalLSPD = alLSPD[pos + 1]
-//                        if (nextAbnormalLSPD.colorIndex == gh.getLineNormalColorIndex(axisIndex)) {
-//                            nextAbnormalLSPD = null
-//                        }
-//                    }
-//
-//                    //--- both neighboring periods are equally abnormal, all three are merged into one (two neighboring differently abnormal periods cannot be merged)
-//                    if (prevAbnormalLSPD != null && nextAbnormalLSPD != null && prevAbnormalLSPD.colorIndex == nextAbnormalLSPD.colorIndex) {
-//
-//                        prevAbnormalLSPD.endPos = nextAbnormalLSPD.endPos
-//                        alLSPD.removeAt(pos)
-//                        //--- this is not a typo or an error: after deleting the current period, the next period becomes the current one and is also deleted
-//                        alLSPD.removeAt(pos)
-//                        //--- after merging three periods, pos already points to the next position, there is no need to increase the counter
-//                        //pos++;
-//                        //--- denormalize "our" points of the smoothed graph
-//                        for (i in lspd.begPos + 1..lspd.endPos) {
-//                            aLine.alGLD[i].colorIndex = prevAbnormalLSPD.colorIndex
-//                        }
-//                    } else pos++    //--- otherwise just go to the next period
-//                } else pos++    //--- otherwise just go to the next period
-//            }
-//        }
-//
-//        //--- we collect periods, values and place of refueling / draining
-//        fun calcIncDec(
-//            conn: CoreAdvancedConnection,
-//            alRawTime: List<Int>,
-//            alRawData: List<AdvancedByteBuffer>,
-//            oc: ObjectConfig,
-//            sca: SensorConfigLiquidLevel,
-//            begTime: Int,
-//            endTime: Int,
-//            isWaybill: Boolean,
-//            alBeg: List<Int>,
-//            alEnd: List<Int>,
-//            calcMode: Int,
-//            hmZoneData: Map<Int, ZoneData>,
-//            calcZoneID: Int,
-//            axisIndex: Int,
-//        ): List<LiquidIncDecData> {
-//            val alLIDD = mutableListOf<LiquidIncDecData>()
-//
-//            val aLine = ChartElementDTO(ChartElementTypeDTO.LINE, 0, 2, false)
-//            val alLSPD = mutableListOf<LiquidStatePeriodData>()
-//            getSmoothLiquidGraphicData(conn, alRawTime, alRawData, oc.scg, sca, begTime, endTime, axisIndex, aLine, alLSPD)
-//
-//            val llcd = LiquidLevelCalcData(sca.containerType, aLine, alLSPD)
-//            calcLiquidUsingByLevel(sca, llcd, conn, oc, begTime, endTime, axisIndex)
-//
-//            for (lspd in llcd.alLSPD!!) {
-//                val begGLD = llcd.aLine!!.alGLD[lspd.begPos]
-//                val endGLD = llcd.aLine!!.alGLD[lspd.endPos]
-//                var lidd: LiquidIncDecData? = null
-//                if (lspd.colorIndex == ChartColorIndex.LINE_ABOVE_0 && calcMode >= 0) {
-//                    lidd = LiquidIncDecData(begGLD.x, endGLD.x, begGLD.y.toDouble(), endGLD.y.toDouble())
-//                } else if (lspd.colorIndex == ChartColorIndex.LINE_BELOW_0 && calcMode <= 0) {
-//                    lidd = LiquidIncDecData(begGLD.x, endGLD.x, begGLD.y.toDouble(), endGLD.y.toDouble())
-//                }
-//
-//                if (lidd != null) {
-//                    var inZoneAll = false
-//                    val tsZoneName = TreeSet<String>()
-//                    oc.scg?.let { scg ->
-//                        for (pos in lspd.begPos..lspd.endPos) {
-//                            val gd = AbstractObjectStateCalc.getGeoData(scg, alRawData[pos]) ?: continue
-//                            val pixPoint = XyProjection.wgs_pix(gd.wgs)
-//
-//                            val inZone = fillZoneList(hmZoneData, calcZoneID, pixPoint, tsZoneName)
-//                            //--- filter by geofences, if specified
-//                            if (calcZoneID != 0 && inZone) inZoneAll = true
-//                        }
-//                    }
-//                    //--- filter by geofences, if specified
-//                    if (calcZoneID != 0 && !inZoneAll) continue
-//
-//                    //--- filter by directions time, if set
-//                    if (isWaybill) {
-//                        var inWaybill = false
-//                        for (wi in alBeg.indices) if (lidd.begTime < alEnd[wi] && lidd.endTime > alBeg[wi]) {
-//                            inWaybill = true
-//                            break
-//                        }
-//                        if (inWaybill) continue
-//                    }
-//
-//                    lidd.objectConfig = oc
-//                    lidd.sca = sca
-//                    lidd.sbZoneName = getSBFromIterable(tsZoneName, ", ")
-//
-//                    alLIDD.add(lidd)
-//                }
-//            }
-//
-//            return alLIDD
-//        }
-//
 //        // --- (new condition - not academically / uselessly Ignore, but consider that equipment outside the specified limits DOES NOT WORK)
 //        //if(  sensorData < scw.minIgnore || sensorData > scw.maxIgnore  ) continue;
 //        fun getWorkSensorValue(scw: SensorConfigWork, sensorData: Double): Boolean =
@@ -1133,167 +817,6 @@ class CalcService(
 //                gh = gh
 //            )
 //        }
-//
-//        private fun calcLiquidUsingByLevel(
-//            sca: SensorConfigLiquidLevel,
-//            llcd: LiquidLevelCalcData,
-//            conn: CoreAdvancedConnection,
-//            oc: ObjectConfig,
-//            begTime: Int,
-//            endTime: Int,
-//            axisIndex: Int,
-//        ) {
-//            val aLine = llcd.aLine
-//            val alLSPD = llcd.alLSPD
-//
-//            if (alLSPD!!.isNotEmpty()) {
-//                //--- first we count the usual flow
-//                for (i in alLSPD.indices) {
-//                    val lspd = alLSPD[i]
-//                    val begGDL = aLine!!.alGLD[lspd.begPos]
-//                    val endGDL = aLine.alGLD[lspd.endPos]
-//                    when (lspd.colorIndex) {
-//                        ChartColorIndex.LINE_NORMAL_0 -> {
-//                            llcd.usingTotal += begGDL.y - endGDL.y
-//                        }
-//
-//                        ChartColorIndex.LINE_ABOVE_0 -> {
-//                            llcd.incTotal += endGDL.y - begGDL.y
-//                            if (sca.isUsingCalc) {
-//                                //--- looking for the previous normal period
-//                                val avgUsing = getPrevNormalPeriodAverageUsing(conn, oc, sca, llcd, begTime, endTime, i, axisIndex)
-//                                val calcUsing = avgUsing * (endGDL.x - begGDL.x)
-//                                llcd.usingCalc += calcUsing
-//                                llcd.usingTotal += calcUsing
-//                            }
-//                        }
-//
-//                        ChartColorIndex.LINE_BELOW_0 -> {
-//                            llcd.decTotal += begGDL.y - endGDL.y
-//                            if (sca.isUsingCalc) {
-//                                //--- looking for the previous normal period
-//                                val avgUsing = getPrevNormalPeriodAverageUsing(conn, oc, sca, llcd, begTime, endTime, i, axisIndex)
-//                                val calcUsing = avgUsing * (endGDL.x - begGDL.x)
-//                                llcd.usingCalc += calcUsing
-//                                llcd.usingTotal += calcUsing
-//                            }
-//                        }
-//
-//                        else -> {}
-//                    }
-//                }
-//            }
-//        }
-//
-//        //--- looking for the previous normal period to calculate the average consumption during refueling / draining
-//        private fun getPrevNormalPeriodAverageUsing(
-//            conn: CoreAdvancedConnection,
-//            oc: ObjectConfig,
-//            sca: SensorConfigLiquidLevel,
-//            llcd: LiquidLevelCalcData,
-//            begTime: Int,
-//            endTime: Int,
-//            curPos: Int,
-//            axisIndex: Int,
-//        ): Double {
-//
-//            var lspdPrevNorm: LiquidStatePeriodData? = null
-//            var aLinePrevNorm: ChartElementDTO? = null
-//
-//            val aLine = llcd.aLine
-//            val alLSPD = llcd.alLSPD
-//
-//            for (i in curPos - 1 downTo 0) {
-//                val lspdPrev = alLSPD!![i]
-//                val begGDLPrev = aLine!!.alGLD[lspdPrev.begPos]
-//                val endGDLPrev = aLine.alGLD[lspdPrev.endPos]
-//
-//                //--- the found normal period is not the first (no matter how long) or the first, but with a sufficient duration for calculations
-//                if (lspdPrev.colorIndex == ChartColorIndex.LINE_NORMAL_0 && (i > 0 || endGDLPrev.x - begGDLPrev.x >= MAX_CALC_PREV_NORMAL_PERIOD)) {
-//
-//                    lspdPrevNorm = lspdPrev
-//                    aLinePrevNorm = aLine
-//                    break
-//                }
-//            }
-//            //--- no suitable normal site was found in the entire requested period - we request an extended period
-//            if (lspdPrevNorm == null) {
-//                //--- let's extend the period into the past with a two-fold margin - this will not greatly affect the processing speed
-//                val (alRawTimeExt, alRawDataExt) = loadAllSensorData(conn, oc, begTime - MAX_CALC_PREV_NORMAL_PERIOD * 2, endTime)
-//
-//                val aLineExt = ChartElementDTO(ChartElementTypeDTO.LINE, 0, 2, false)
-//                val alLSPDExt = mutableListOf<LiquidStatePeriodData>()
-//                getSmoothLiquidGraphicData(conn, alRawTimeExt, alRawDataExt, oc.scg, sca, begTime - MAX_CALC_PREV_NORMAL_PERIOD * 2, endTime, axisIndex, aLineExt, alLSPDExt)
-//
-//                //--- the current period in the current range
-//                val lspdCur = alLSPD!![curPos]
-//                val begGDLPCur = aLine!!.alGLD[lspdCur.begPos]
-//                val endGDLPCur = aLine.alGLD[lspdCur.endPos]
-//                //--- find the current refueling / draining period in the new extended period
-//                var curPosExt = 0
-//                while (curPosExt < alLSPDExt.size) {
-//                    val lspdCurExt = alLSPDExt[curPosExt]
-//                    val begGDLPCurExt = aLineExt.alGLD[lspdCurExt.begPos]
-//                    val endGDLPCurExt = aLineExt.alGLD[lspdCurExt.endPos]
-//                    if (begGDLPCur.x == begGDLPCurExt.x && endGDLPCur.x == endGDLPCurExt.x) break
-//                    curPosExt++
-//                }
-//                for (i in curPosExt - 1 downTo 0) {
-//                    val lspdPrevExt = alLSPDExt[i]
-//                    if (lspdPrevExt.colorIndex == ChartColorIndex.LINE_NORMAL_0) {
-//                        lspdPrevNorm = lspdPrevExt
-//                        aLinePrevNorm = aLineExt
-//                        break
-//                    }
-//                }
-//            }
-//            //--- let's calculate the same average consumption in the previous normal period
-//            if (lspdPrevNorm != null) {
-//                var begGDLPrevNorm = aLinePrevNorm!!.alGLD[lspdPrevNorm.begPos]
-//                val endGDLPrevNorm = aLinePrevNorm.alGLD[lspdPrevNorm.endPos]
-//                //--- the normal period is too long, we take the last N hours - adjust begPos
-//                if (endGDLPrevNorm.x - begGDLPrevNorm.x > MAX_CALC_PREV_NORMAL_PERIOD) {
-//                    for (begPos in lspdPrevNorm.begPos + 1 until lspdPrevNorm.endPos) {
-//                        begGDLPrevNorm = aLinePrevNorm.alGLD[begPos]
-//                        if (endGDLPrevNorm.x - begGDLPrevNorm.x <= MAX_CALC_PREV_NORMAL_PERIOD) break
-//                    }
-//                }
-//
-//                return if (endGDLPrevNorm.x == begGDLPrevNorm.x) {
-//                    0.0
-//                } else {
-//                    (begGDLPrevNorm.y.toDouble() - endGDLPrevNorm.y) / (endGDLPrevNorm.x - begGDLPrevNorm.x)
-//                }
-//            } else {
-//                return 0.0
-//            }
-//        }
-//
-////        private fun searchGDL(aLine: GraphicDataContainer, time: Int): Double {
-////            //--- if the time is on / outside the search boundaries, then we take the boundary value
-////            if (time <= aLine.alGLD[0].x) return aLine.alGLD[0].y
-////            else if (time >= aLine.alGLD[aLine.alGLD.size - 1].x) return aLine.alGLD[aLine.alGLD.size - 1].y
-////
-////            var pos1 = 0
-////            var pos2 = aLine.alGLD.size - 1
-////            while (pos1 <= pos2) {
-////                val posMid = (pos1 + pos2) / 2
-////                val valueMid = aLine.alGLD[posMid].x
-////
-////                if (time < valueMid) {
-////                    pos2 = posMid - 1
-////                }
-////                else if (time > valueMid) {
-////                    pos1 = posMid + 1
-////                }
-////                else {
-////                    return aLine.alGLD[posMid].y
-////                }
-////            }
-////            //--- if nothing was found, then now pos2 is to the left of the desired value, and pos1 is to the right of it.
-////            //--- In this case, we approximate the value
-////            return (time - aLine.alGLD[pos2].x) / (aLine.alGLD[pos1].x - aLine.alGLD[pos2].x) * (aLine.alGLD[pos1].y - aLine.alGLD[pos2].y) + aLine.alGLD[pos2].y
-////        }
 //
 //        //--- filling in standard output lines (for tabular forms and reports) ---------------------------
 //

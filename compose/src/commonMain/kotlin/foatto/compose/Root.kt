@@ -37,7 +37,6 @@ import foatto.compose.composable.StardartDialog
 import foatto.compose.composable.TabPanel
 import foatto.compose.composable.getClientSubMenus
 import foatto.compose.control.TableControl
-import foatto.compose.i18n.lang
 import foatto.compose.model.MenuDataClient
 import foatto.compose.model.TabInfo
 import foatto.compose.utils.SETTINGS_LOGIN

@@ -11,8 +11,10 @@ import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TablePopup
 import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
+import foatto.core.model.response.table.cell.TableCellAlign
 import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getSplittedDouble
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
@@ -25,9 +27,6 @@ import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.ObjectRepository
-import foatto.server.repository.SensorCalibrationRepository
-import foatto.server.repository.SensorRepository
-import jakarta.persistence.EntityManager
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import org.springframework.data.domain.Page
@@ -39,11 +38,8 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 @Service
 class DayWorkService(
-    private val entityManager: EntityManager,
     private val dayWorkRepository: DayWorkRepository,
     private val objectRepository: ObjectRepository,
-    private val sensorRepository: SensorRepository,
-    private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val calcService: CalcService,
     private val fileStoreService: FileStoreService,
 ) : ApplicationService(
@@ -60,11 +56,7 @@ class DayWorkService(
         private const val FIELD_DAY_MO = "day.mo"
         private const val FIELD_DAY_DA = "day.da"
         private const val FIELD_OBJECT_NAME = "obj.name"    // отдельное определение для сортировки в Hibernate
-//        private const val FIELD_OBJECT_MODEL = "obj.model"  // отдельное определение для сортировки в Hibernate
     }
-    /*
-            private const val FIELD_COPY_SENSORS = "_copySensors"
-     */
 
     //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
     //override fun isDateTimeIntervalPanelVisible(): Boolean = true
@@ -74,10 +66,22 @@ class DayWorkService(
 
         alColumnInfo += null to "" // by date group
         alColumnInfo += null to "" // userId
-        alColumnInfo += null to "Наименование / Модель / Подразделение / Группа"
-        alColumnInfo += null to "Работа оборудования [час]"
-        alColumnInfo += null to "Э/энергия [кВт*ч]"
-        alColumnInfo += null to "Расход топлива [л]"
+        alColumnInfo += null to "Объект"
+        alColumnInfo += null to "Оборудование"
+        alColumnInfo += null to "Работа"
+        alColumnInfo += null to "Счётчики топлива"
+        alColumnInfo += null to "Расход топлива"
+        alColumnInfo += null to "Э/счётчики"
+        alColumnInfo += null to "Э/энергия"
+        alColumnInfo += null to "Уровень топлива"
+        alColumnInfo += null to "Показания на начало периода"
+        alColumnInfo += null to "Показания на конец периода"
+        alColumnInfo += null to "Температура"
+        alColumnInfo += null to "Показания на начало периода"
+        alColumnInfo += null to "Показания на конец периода"
+        alColumnInfo += null to "Плотность"
+        alColumnInfo += null to "Показания на начало периода"
+        alColumnInfo += null to "Показания на конец периода"
 
         return getTableColumnCaptionActions(
             action = action,
@@ -139,7 +143,14 @@ class DayWorkService(
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val dayWorkEntities = page.content
 
+        val groupColSpan = getTableColumnCaptions(action, userConfig).size
         var prevGroupName: String? = null
+//var worksTime = 0
+//var usingsTime = 0
+//var energosTime = 0
+//var liquidLevelsTime = 0
+//var temperaturesTime = 0
+//var densitiesTime = 0
         for (dayWorkEntity in dayWorkEntities) {
 
             val objectEntity = dayWorkEntity.obj ?: continue
@@ -147,6 +158,28 @@ class DayWorkService(
             val ye = dayEntity.ye ?: continue
             val mo = dayEntity.mo ?: continue
             val da = dayEntity.da ?: continue
+
+            val begTime = LocalDateTime(ye, mo, da, 0, 0).toInstant(timeZone).epochSeconds.toInt()
+            val endTime = begTime + 86_400
+
+//var bt = getCurrentTimeInt()
+            val works = calcService.calcWorks(objectEntity, begTime, endTime).sortedBy { wcd -> wcd.sensorEntity.descr ?: "-" }
+//worksTime += getCurrentTimeInt() - bt
+//bt = getCurrentTimeInt()
+            val usings = calcService.calcUsings(objectEntity, begTime, endTime).sortedBy { ccd -> ccd.sensorEntity.descr ?: "-" }
+//usingsTime += getCurrentTimeInt() - bt
+//bt = getCurrentTimeInt()
+            val energos = calcService.calcEnergos(objectEntity, begTime, endTime).sortedBy { ccd -> ccd.sensorEntity.descr ?: "-" }
+//energosTime += getCurrentTimeInt() - bt
+//bt = getCurrentTimeInt()
+            val liquidLevels = calcService.calcLiquidLevels(objectEntity, begTime, endTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
+//liquidLevelsTime += getCurrentTimeInt() - bt
+//bt = getCurrentTimeInt()
+            val temperatures = calcService.calcTemperatures(objectEntity, begTime, endTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
+//temperaturesTime += getCurrentTimeInt() - bt
+//bt = getCurrentTimeInt()
+            val densities = calcService.calcDensities(objectEntity, begTime, endTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
+//densitiesTime += getCurrentTimeInt() - bt
 
             var col = 0
 
@@ -165,7 +198,7 @@ class DayWorkService(
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col,
-                    colSpan = 6,
+                    colSpan = groupColSpan,
                     dataRow = row,
                     name = groupName,
                     backColorType = TableCellBackColorType.GROUP_0,
@@ -196,36 +229,115 @@ class DayWorkService(
                         "\n${objectEntity.group?.name ?: "-"}"
             )
 
-            val begTime = LocalDateTime(ye, mo, da, 0, 0).toInstant(timeZone).epochSeconds.toInt()
-            val endTime = begTime + 86_400
-
-            val tmWork = calcService.calcWork(objectEntity, begTime, endTime)
-            val tmEnergo = calcService.calcEnergo(objectEntity, begTime, endTime)
-
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = tmWork.map { (descr, workCalcData) ->
-                    "$descr = ${workCalcData.onTime}"
-                }.joinToString("\n")
+                name = works.joinToString("\n") { wcd -> wcd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
+                align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = tmEnergo.map { (descr, value) ->
-                    "$descr = ${getSplittedDouble(value, 1)}"
-                }.joinToString("\n")
+                name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} [час]" },
+                align = TableCellAlign.LEFT,
+            )
+
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = usings.joinToString("\n") { ccd -> ccd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
+                align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = "(пока не считается)"
-//                    allLiquidSum.map { (descr, value) ->
-//                    "$descr = ${getSplittedDouble(value, 1)}"
-//                }.joinToString("\n")
+                name = usings.joinToString("\n") { ccd -> getSplittedDouble(ccd.value) + (ccd.sensorEntity.dim ?: "") },
+                align = TableCellAlign.LEFT,
+            )
+
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = energos.joinToString("\n") { ccd -> ccd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
+                align = TableCellAlign.RIGHT,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = energos.joinToString("\n") { ccd -> getSplittedDouble(ccd.value) + (ccd.sensorEntity.dim ?: "") },
+                align = TableCellAlign.LEFT,
+            )
+
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = liquidLevels.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
+                align = TableCellAlign.RIGHT,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = liquidLevels.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(acd.begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                align = TableCellAlign.CENTER,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = liquidLevels.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(acd.endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                align = TableCellAlign.LEFT,
+            )
+
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = temperatures.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
+                align = TableCellAlign.RIGHT,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = temperatures.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(acd.begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                align = TableCellAlign.CENTER,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = temperatures.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(acd.endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                align = TableCellAlign.LEFT,
+            )
+
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = densities.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
+                align = TableCellAlign.RIGHT,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = densities.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(acd.begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                align = TableCellAlign.CENTER,
+            )
+            tableCells += TableSimpleCell(
+                row = row,
+                col = col++,
+                dataRow = row,
+                name = densities.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(acd.endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                align = TableCellAlign.LEFT,
             )
 
             val formOpenAction = AppAction(
@@ -261,6 +373,20 @@ class DayWorkService(
 
             row++
         }
+//println("works = $worksTime")
+//println("usings = $usingsTime")
+//println("energos = $energosTime")
+//println("liquidLevels = $liquidLevelsTime")
+//println("temperatures = $temperaturesTime")
+//println("densities = $densitiesTime")
+/*
+works = 12 / 4 = 3
+usings = 8 / 4 = 2
+energos = 2 / 0 = ?
+liquidLevels = 16 / 6 = 2.7
+temperatures = 6 / 2 = 3
+densities = 5 / 2 = 2.5
+*/
         return currentRowNo
     }
 
@@ -404,52 +530,6 @@ class DayWorkService(
 
 }
 /*
-    lateinit var os: ObjectSelector
-        private set
-
-    lateinit var columnDate: ColumnDate3Int
-        private set
-
-    lateinit var columnRun: ColumnString
-        private set
-
-    lateinit var columnWork: ColumnGrid
-        private set
-
-    lateinit var columnEnergo: ColumnGrid
-        private set
-
-    lateinit var columnLiquid: ColumnGrid
-        private set
-
-    lateinit var columnLevel: ColumnGrid
-        private set
-
-    lateinit var columnLevelLiquid: ColumnGrid
-        private set
-
-    val columnObject: ColumnInt
-        get() = os.columnObject
-
-    //----------------------------------------------------------------------------------------------------------------------------------------
-
-    override fun init(application: iApplication, aConn: CoreAdvancedConnection, aliasConfig: AliasConfig, userConfig: UserConfig, aHmParam: Map<String, String>, hmParentData: MutableMap<String, Int>, id: Int?) {
-
-        super.init(application, aConn, aliasConfig, userConfig, aHmParam, hmParentData, id)
-
-        //----------------------------------------------------------------------------------------------------------------------------------------
-
-        modelTableName = "MMS_day_work"
-
-        //----------------------------------------------------------------------------------------------------------------------------------------
-
-        columnId = ColumnInt(modelTableName, "id")
-        columnUser = ColumnInt(modelTableName, "user_id")
-
-        //----------------------------------------------------------------------------------------------------------------------------------------
-
-        columnDate = ColumnDate3Int(modelTableName, "ye", "mo", "da", "Дата")
-
         columnRun = ColumnString(modelTableName, "_run", "Пробег [км]", STRING_COLUMN_WIDTH).apply {
             isVirtual = true
             isSearchable = false

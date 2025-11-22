@@ -2,8 +2,8 @@ package foatto.server.calc
 
 import foatto.server.entity.SensorEntity
 
-class WorkCalcData(
+class AnalogueCalcData(
     val sensorEntity: SensorEntity,
-    val states: List<WorkPeriodData>,
-    val onTime: Int,
+    val begValue: Double?,
+    val endValue: Double?,
 )

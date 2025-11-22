@@ -3,10 +3,10 @@ package foatto.server.service.scheme
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
+import foatto.core.util.getPrecision
 import foatto.core.util.getRandomInt
 import foatto.core.util.getSplittedDouble
 import foatto.server.calc.DataValueStateEnum
-import foatto.server.calc.getPrecision
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository

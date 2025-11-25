@@ -1,7 +1,6 @@
 package foatto.server.service.report
 
 import foatto.core.util.getDateTimeDMYHMSString
-import foatto.server.entity.ObjectEntity
 import foatto.server.model.ServerUserConfig
 import foatto.server.service.FileStoreService
 import foatto.server.service.ReportService
@@ -34,9 +33,8 @@ abstract class MMSReportService(
         endDateTime: Int,
         sheet: WritableSheet,
         offsX: Int,
-        aOffsY: Int
     ): Int {
-        var offsY = aOffsY
+        var offsY = 0
 
         sheet.addCell(Label(offsX, offsY++, title, wcfTitleL))
         sheet.addCell(
@@ -44,28 +42,12 @@ abstract class MMSReportService(
                 offsX,
                 offsY++,
                 "за период с ${getDateTimeDMYHMSString(userConfig.timeOffset, begDateTime)}" +
-                    " по ${getDateTimeDMYHMSString(userConfig.timeOffset, endDateTime)}",
+                        " по ${getDateTimeDMYHMSString(userConfig.timeOffset, endDateTime)}",
                 wcfTitleL,
             )
         )
-        return offsY
-    }
-
-    //--- универсальное заполнение заголовка отчета
-    protected fun fillReportHeader(objectEntity: ObjectEntity, sheet: WritableSheet, offsX: Int, aOffsY: Int): Int {
-        var offsY = aOffsY
-
-        sheet.addCell(Label(offsX, offsY, "Подразделение:", wcfTitleName))
-        sheet.addCell(Label(offsX + 1, offsY, objectEntity.department?.name ?: "-", wcfTitleValue))
-        offsY++
-
-        sheet.addCell(Label(offsX, offsY, "Группа:", wcfTitleName))
-        sheet.addCell(Label(offsX + 1, offsY, objectEntity.group?.name ?: "-", wcfTitleValue))
-        offsY++
-
-        offsY++    // еще одна пустая строчка снизу
+        offsY++    //??? еще одна пустая строчка снизу
 
         return offsY
     }
-
 }

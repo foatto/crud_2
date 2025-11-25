@@ -465,6 +465,15 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
+                addMenuItem(AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM, null, serverUserConfig, this)
+
+                if (size > 0) {
+                    alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.REPORTS, serverUserConfig.lang), null, this)
+                }
+            }
+
+            mutableListOf<MenuData>().apply {
+
                 addMenuItem(AppModuleMMS.DEPARTMENT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
                 addMenuItem(AppModuleMMS.GROUP, ActionType.MODULE_TABLE, null, serverUserConfig, this)
 

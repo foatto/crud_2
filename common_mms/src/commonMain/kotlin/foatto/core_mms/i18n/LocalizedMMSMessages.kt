@@ -10,6 +10,7 @@ enum class LocalizedMMSMessages(
 ) {
     CONTROL(mapOf(LanguageEnum.EN to "Control", LanguageEnum.RU to "Контроль")),
     ACCOUNTING(mapOf(LanguageEnum.EN to "Accounting", LanguageEnum.RU to "Учёт")),
+    REPORTS(mapOf(LanguageEnum.EN to "Reports", LanguageEnum.RU to "Отчёты")),
     REFERENCES(mapOf(LanguageEnum.EN to "Reference books", LanguageEnum.RU to "Справочники")),
     DEVICES(mapOf(LanguageEnum.EN to "Devices", LanguageEnum.RU to "Контроллеры")),
 

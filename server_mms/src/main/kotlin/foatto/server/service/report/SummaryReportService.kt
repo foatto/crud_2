@@ -6,35 +6,30 @@ import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.form.FormDateTimeCellMode
 import foatto.core.model.response.form.cells.FormBaseCell
-import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormSimpleCell
-import foatto.core.util.getCurrentTimeInt
-import foatto.core.util.getDateTimeDMYString
 import foatto.core_mms.AppModuleMMS
+import foatto.server.entity.ObjectEntity
+import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
-import foatto.server.repository.SensorRepository
 import foatto.server.service.CalcService
 import foatto.server.service.FileStoreService
 import foatto.server.service.ObjectService
-import jakarta.persistence.EntityManager
-import jxl.CellView
 import jxl.write.Label
 import jxl.write.WritableSheet
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Service
 class SummaryReportService(
-    private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
-    private val sensorRepository: SensorRepository,
     private val calcService: CalcService,
     private val fileStoreService: FileStoreService,
 ) : AbstractPeriodSummaryService(
-    calcService,
     fileStoreService,
 ) {
 
@@ -46,32 +41,32 @@ class SummaryReportService(
         private const val FIELD_BEGIN_DATE_TIME = "_begin_date_time"
         private const val FIELD_END_DATE_TIME = "_end_date_time"
 
-        private const val FIELD_KEEP_PLACE_FOR_COMMENT = "_keep_place_for_comment"
-        private const val FIELD_OUT_LIQUID_LEVEL_MAIN_CONTAINER_USING = "_out_liquid_level_main_container_using"
-        private const val FIELD_OUT_TEMPERATURE = "_out_temperature"
-        private const val FIELD_OUT_DENSITY = "_out_density"
-        private const val FIELD_OUT_TROUBLES = "_out_troubles"
-
-        private const val FIELD_OUT_GROUP_SUM = "_out_group_sum"
-        private const val FIELD_SUM_ONLY = "_sum_only"
-        private const val FIELD_SUM_USER = "_sum_user"
-        private const val FIELD_SUM_OBJECT = "_sum_object"
+//        private const val FIELD_OUT_TROUBLES = "_out_troubles"
+//
+//        private const val FIELD_OUT_GROUP_SUM = "_out_group_sum"
+//        private const val FIELD_SUM_ONLY = "_sum_only"
+//        private const val FIELD_SUM_USER = "_sum_user"
+//        private const val FIELD_SUM_OBJECT = "_sum_object"
     }
 
-    override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> {
+    override fun getFormCells(
+        action: AppAction,
+        userConfig: ServerUserConfig,
+        moduleConfig: AppModuleConfig,
+        addEnabled: Boolean,
+        editEnabled: Boolean
+    ): List<FormBaseCell> {
 
         val formCells = mutableListOf<FormBaseCell>()
 
-        /*
-                //--- отдельная обработка перехода от журнала суточных работ/рабочих смен/путёвок/журнала сменных работ
-                val arrDT = MMSFunction.getDayShiftWorkParent(conn, zoneId, hmParentData, false)
-         */
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId ?: 0
+        val parentObjectId = if (action.parentModule in setOf(AppModuleMMS.OBJECT, AppModuleMMS.DAY_WORK)) {
+            action.parentId
         } else {
-            0
+            null
         }
-        val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId)
+        val parentObjectEntity = parentObjectId?.let {
+            objectRepository.findByIdOrNull(parentObjectId)
+        }
 
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_ID,
@@ -94,7 +89,7 @@ class SummaryReportService(
                     ObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
                 ),
                 selectorClear = mapOf(
-                    FIELD_OBJECT_ID to "0",
+                    FIELD_OBJECT_ID to "",
                     FIELD_OBJECT_NAME to "",
                     FIELD_OBJECT_MODEL to "",
                 ),
@@ -119,65 +114,40 @@ class SummaryReportService(
             caption = "Дата/время окончания периода",
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
-            value = action.endTime
+            value = action.endTime,
         )
 
-//!!!             setSavedDefault(userConfig)
-        formCells += FormBooleanCell(
-            name = FIELD_KEEP_PLACE_FOR_COMMENT,
-            caption = "Оставлять место под комментарии",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_OUT_LIQUID_LEVEL_MAIN_CONTAINER_USING,
-            caption = "Выводить показания расхода основных ёмкостей",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_OUT_TEMPERATURE,
-            caption = "Выводить показания температуры",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_OUT_DENSITY,
-            caption = "Выводить показания плотности",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_OUT_TROUBLES,
-            caption = "Выводить неисправности",
-            isEditable = true,
-            value = false,
-        )
-
-        formCells += FormBooleanCell(
-            name = FIELD_OUT_GROUP_SUM,
-            caption = "Выводить суммы по группам",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_SUM_ONLY,
-            caption = "Выводить только суммы",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_SUM_USER,
-            caption = "Выводить суммы по владельцам",
-            isEditable = true,
-            value = false,
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_SUM_OBJECT,
-            caption = "Выводить суммы по объектам",
-            isEditable = true,
-            value = false,
-        )
+//        formCells += FormBooleanCell(
+//            name = FIELD_OUT_TROUBLES,
+//            caption = "Выводить неисправности",
+//            isEditable = true,
+//            value = false,
+//        )
+//
+//        formCells += FormBooleanCell(
+//            name = FIELD_OUT_GROUP_SUM,
+//            caption = "Выводить суммы по группам",
+//            isEditable = true,
+//            value = false,
+//        )
+//        formCells += FormBooleanCell(
+//            name = FIELD_SUM_ONLY,
+//            caption = "Выводить только суммы",
+//            isEditable = true,
+//            value = false,
+//        )
+//        formCells += FormBooleanCell(
+//            name = FIELD_SUM_USER,
+//            caption = "Выводить суммы по владельцам",
+//            isEditable = true,
+//            value = false,
+//        )
+//        formCells += FormBooleanCell(
+//            name = FIELD_SUM_OBJECT,
+//            caption = "Выводить суммы по объектам",
+//            isEditable = true,
+//            value = false,
+//        )
 
         return formCells
     }
@@ -188,18 +158,12 @@ class SummaryReportService(
         formActionData: Map<String, FormActionData>,
         sheet: WritableSheet,
     ) {
-        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: 0
-        val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId)!!
+        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull()
 
-//!!! выровнять дату/время по началу суток
-        val begDateTime = formActionData[FIELD_BEGIN_DATE_TIME]?.dateTimeValue ?: (getCurrentTimeInt() - 86_400)
-        val endDateTime = formActionData[FIELD_END_DATE_TIME]?.dateTimeValue ?: getCurrentTimeInt()
+        val begDateTime = formActionData[FIELD_BEGIN_DATE_TIME]?.dateTimeValue ?: return
+        val endDateTime = formActionData[FIELD_END_DATE_TIME]?.dateTimeValue ?: return
 
-        val keepPlaceForComment = formActionData[FIELD_KEEP_PLACE_FOR_COMMENT]?.booleanValue ?: false
         /*
-        private const val FIELD_OUT_LIQUID_LEVEL_MAIN_CONTAINER_USING = "_out_liquid_level_main_container_using"
-        private const val FIELD_OUT_TEMPERATURE = "_out_temperature"
-        private const val FIELD_OUT_DENSITY = "_out_density"
         private const val FIELD_OUT_TROUBLES = "_out_troubles"
 
         private const val FIELD_OUT_GROUP_SUM = "_out_group_sum"
@@ -210,48 +174,116 @@ class SummaryReportService(
 
         defineFormats(8, 2, 0)
 
-        //--- setting the sizes of headers (total width = 90 for A4-portrait margins of 10 mm)
-        //--- setting the sizes of headers (total width = 140 for A4-landscape margins of 10 mm)
-        val alDim = mutableListOf<Int>()
-        alDim.add(5)    // "№ п/п"
-        alDim.add(22)   // "Идентификатор"
-        alDim.add(13)   // "Продукт"
-        alDim.add(8)    // "Тип"
-        alDim.add(5)    // "Длитель-ность [мес]"
-        alDim.add(22)   // "Устройство"
-        alDim.add(10)   // "Активация"
-        alDim.add(5)    // "Для тести-рования"
+        defineSummaryReportHeaders(sheet)
 
-        for (i in alDim.indices) {
-            val cvNN = CellView()
-            cvNN.size = alDim[i] * 256
-            sheet.setColumnView(i, cvNN)
+        var offsY = fillReportTitle(
+            userConfig = userConfig,
+            title = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
+            begDateTime = begDateTime,
+            endDateTime = endDateTime,
+            sheet = sheet,
+            offsX = 1,
+        )
+
+        val objectEntities = mutableListOf<ObjectEntity>()
+        parentObjectId?.let {
+            objectRepository.findByIdOrNull(parentObjectId)?.let { parentObjectEntity ->
+                objectEntities += parentObjectEntity
+            }
+        } ?: run {
+            val enabledUserIds = getEnabledUserIds(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
+            objectEntities += objectRepository.findByUserIdIn(enabledUserIds)
         }
 
-        var offsY = 0
+//        val allSumCollector = ReportSumCollector()
+        var countNN = 1
+        for (objectEntity in objectEntities) {
+            val rowOwnerShortName = userConfig.shortNames[objectEntity.userId]
+            val rowOwnerFullName = userConfig.fullNames[objectEntity.userId]
+            val userName = if (objectEntity.userId == null) {
+                null
+            } else if (objectEntity.userId == 0) {
+                null
+            } else if (objectEntity.userId == userConfig.id) {
+                null
+            } else if (!rowOwnerShortName.isNullOrEmpty()) {
+                rowOwnerShortName
+            } else {
+                rowOwnerFullName ?: "(неизвестный пользователь)"
+            }
+            var groupTitle = ""
+            if (!userName.isNullOrBlank()) {
+                groupTitle += userName + '\n'
+            }
+            if (!objectEntity.name.isNullOrBlank()) {
+                groupTitle += objectEntity.name + '\n'
+            }
+            if (!objectEntity.model.isNullOrBlank()) {
+                groupTitle += objectEntity.model + ", "
+            }
+            if (!objectEntity.department?.name.isNullOrBlank()) {
+                groupTitle += objectEntity.department.name + ", "
+            }
+            if (!objectEntity.group?.name.isNullOrBlank()) {
+                groupTitle += objectEntity.group.name + ", "
+            }
 
-        sheet.addCell(Label(0, offsY++, getLocalizedMessage(moduleConfig.captions, userConfig.lang), wcfTitleL))
-//        sheet.addCell(
-//            Label(
-//                0,
-//                offsY++,
-//                "за период с ${getDateTimeDMYString(0, begTime.epochSecond.toInt())}" +
-//                    " по ${getDateTimeDMYString(0, endTime.epochSecond.toInt())}",
-//                wcfTitleL,
-//            )
-//        )
+            val works = calcService.calcWorks(objectEntity, begDateTime, endDateTime).sortedBy { wcd -> wcd.sensorEntity.descr ?: "-" }
+            val usings = calcService.calcUsings(objectEntity, begDateTime, endDateTime).sortedBy { ccd -> ccd.sensorEntity.descr ?: "-" }
+            val energos = calcService.calcEnergos(objectEntity, begDateTime, endDateTime).sortedBy { ccd -> ccd.sensorEntity.descr ?: "-" }
+            val liquidLevels = calcService.calcLiquidLevels(objectEntity, begDateTime, endDateTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
+            val temperatures = calcService.calcTemperatures(objectEntity, begDateTime, endDateTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
+            val densities = calcService.calcDensities(objectEntity, begDateTime, endDateTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
 
-        offsY += 2
+//            allSumCollector.add(null, objectCalc)
 
-        sheet.addCell(Label(0, offsY, "№ п/п", wcfCaptionHC))
-        sheet.addCell(Label(1, offsY, "Идентификатор", wcfCaptionHC))
-        sheet.addCell(Label(2, offsY, "Продукт", wcfCaptionHC))
-        sheet.addCell(Label(3, offsY, "Тип", wcfCaptionHC))
-        sheet.addCell(Label(4, offsY, "Дли-тель-ность [мес]", wcfCaptionHC))
-        sheet.addCell(Label(5, offsY, "Устройство", wcfCaptionHC))
-        sheet.addCell(Label(6, offsY, "Активация", wcfCaptionHC))
-        sheet.addCell(Label(7, offsY, "Для тести-рования", wcfCaptionHC))
-        offsY++
+            //--- первая строка: порядковый номер и наименование объекта
+            sheet.addCell(Label(0, offsY, (countNN++).toString(), wcfNN))
+            offsY = addGroupTitle(sheet, offsY, groupTitle)
+
+            offsY = outBlock(
+                sheet = sheet,
+                aOffsY = offsY,
+                works = works,
+                usings = usings,
+                energos = energos,
+                liquidLevels = liquidLevels,
+                temperatures = temperatures,
+                densities = densities,
+//                troubles = troubles,
+//                isOutGroupSum = reportOutGroupSum,
+            )
+        }
+        outReportTrail(sheet, offsY, userConfig)
     }
+    /*
+                val troubles = if (reportOutTroubles) {
+                    val (alRawTime, alRawData) = ObjectCalc.loadAllSensorData(conn, objectConfig, begTime, endTime)
+                    val t = ChartElementDTO(ChartElementTypeDTO.TEXT, 0, 0, false)
+                    sdcAbstractAnalog.checkCommonTrouble(alRawTime, alRawData, objectConfig, begTime, endTime, t)
+                    //--- ловим ошибки с датчиков уровня топлива
+                    objectConfig.hmSensorConfig[SensorConfig.SENSOR_LIQUID_LEVEL]?.values?.forEach { sc ->
+                        sdcLiquid.checkLiquidLevelSensorTrouble(
+                            alRawTime = alRawTime,
+                            alRawData = alRawData,
+                            sca = sc as SensorConfigAnalogue,
+                            begTime = begTime,
+                            endTime = endTime,
+                            aText = t,
+                        )
+                    }
+                    t
+                } else {
+                    null
+                }
+
+            }
+
+            sheet.addCell(Label(0, offsY, "ИТОГО общее", wcfCellCBStdYellow))
+            sheet.mergeCells(0, offsY, getColumnCount(1), offsY + 2)
+            offsY += 4
+
+            offsY = outSumData(sheet, offsY, allSumCollector.sumUser, true, null)
+     */
 
 }

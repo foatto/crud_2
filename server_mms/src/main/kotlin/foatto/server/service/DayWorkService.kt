@@ -42,7 +42,7 @@ class DayWorkService(
     private val objectRepository: ObjectRepository,
     private val calcService: CalcService,
     private val fileStoreService: FileStoreService,
-) : ApplicationService(
+) : MMSService(
     fileStoreService = fileStoreService,
 ) {
 
@@ -74,14 +74,14 @@ class DayWorkService(
         alColumnInfo += null to "Э/счётчики"
         alColumnInfo += null to "Э/энергия"
         alColumnInfo += null to "Уровень топлива"
-        alColumnInfo += null to "Показания на начало периода"
-        alColumnInfo += null to "Показания на конец периода"
+        alColumnInfo += null to "Начало периода"
+        alColumnInfo += null to "Конец периода"
         alColumnInfo += null to "Температура"
-        alColumnInfo += null to "Показания на начало периода"
-        alColumnInfo += null to "Показания на конец периода"
+        alColumnInfo += null to "Начало периода"
+        alColumnInfo += null to "Конец периода"
         alColumnInfo += null to "Плотность"
-        alColumnInfo += null to "Показания на начало периода"
-        alColumnInfo += null to "Показания на конец периода"
+        alColumnInfo += null to "Начало периода"
+        alColumnInfo += null to "Конец периода"
 
         return getTableColumnCaptionActions(
             action = action,
@@ -348,7 +348,7 @@ class DayWorkService(
                 parentId = action.parentId
             )
 
-            val popupDatas = getPopupDatas(
+            val popupDatas = getTablePopupDatas(
                 userConfig = userConfig,
                 objectId = objectEntity.id,
                 begTime = begTime,
@@ -390,7 +390,7 @@ densities = 5 / 2 = 2.5
         return currentRowNo
     }
 
-    private fun getPopupDatas(
+    private fun getTablePopupDatas(
         userConfig: ServerUserConfig,
         objectId: Int,
         begTime: Int,
@@ -408,108 +408,20 @@ densities = 5 / 2 = 2.5
             )
         }
 
-//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
 
-//        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, objectId, begTime, endTime, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
 
-        if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Карты",
-                action = AppAction(
-                    type = ActionType.MODULE_MAP,
-                    module = AppModuleMMS.MAP_TRACE,
-                    id = objectId,
-                    begTime = begTime,
-                    endTime = endTime,
-                ),
-                text = appModuleConfigs[AppModuleMMS.MAP_TRACE]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип карты)",
-                inNewTab = true,
-            )
-        }
-//        if (checkAccessPermission(AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE, userConfig.roles)) {
-//            alPopupData += TablePopupData(
-//                group = "Контрольные схемы",
-//                action = AppAction(
-//                    type = ActionType.MODULE_SCHEME,
-//                    module = AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE,
-//                    id = objectId,
-//                ),
-//                text = appModuleConfigs[AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE]?.caption ?: "(неизвестный тип схемы)",
-//                inNewTab = true,
-//            )
-//        }
-//        if (checkAccessPermission(AppModuleMMS.OBJECT_SCHEME_DASHBOARD, userConfig.roles)) {
-//            alPopupData += TablePopup(
-//                group = "Контрольные панели",
-//                action = AppAction(
-//                    type = ActionType.MODULE_COMPOSITE,
-//                    module = AppModuleMMS.OBJECT_SCHEME_DASHBOARD,
-//                    id = objectId,
-//                ),
-//                text = appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD]?.caption ?: "(неизвестный тип контрольной панели)",
-//                inNewTab = true,
-//            )
-//        }
+//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
+
+        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.OBJECT, objectId, alPopupData)
 
         return alPopupData
-    }
-
-    private fun getTableChartPopupData(
-        userConfig: ServerUserConfig,
-        module: String,
-        objectId: Int,
-        begTime: Int,
-        endTime: Int,
-        alPopupData: MutableList<TablePopup>
-    ) {
-        if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Графики",
-                action = AppAction(
-                    type = ActionType.MODULE_CHART,
-                    module = module,
-                    id = objectId,
-                    timeRangeType = 0,
-                    begTime = begTime,
-                    endTime = endTime,
-                    //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
-                ),
-                text = appModuleConfigs[module]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип модуля: '$module')",
-                inNewTab = true,
-            )
-        }
-    }
-
-    private fun getTableReportPopupData(
-        userConfig: ServerUserConfig,
-        module: String,
-        objectId: Int,
-        begTime: Int,
-        endTime: Int,
-        alPopupData: MutableList<TablePopup>
-    ) {
-        if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Отчёты",
-                action = AppAction(
-                    type = ActionType.MODULE_FORM,
-                    module = module,
-                    id = null,
-                    parentModule = AppModuleMMS.OBJECT,
-                    parentId = objectId,
-                    begTime = begTime,
-                    endTime = endTime,
-                ),
-                text = appModuleConfigs[module]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип модуля: '$module')",
-                inNewTab = true,
-            )
-        }
     }
 
     override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> {

@@ -1,7 +1,6 @@
 package foatto.server.service
 
 import foatto.core.ActionType
-import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -22,8 +21,6 @@ import foatto.core.model.response.table.cell.TableButtonCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
-import foatto.server.appModuleConfigs
-import foatto.server.checkAccessPermission
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.ObjectEntity
@@ -53,7 +50,7 @@ class ObjectService(
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val deviceRepository: DeviceRepository,
     private val fileStoreService: FileStoreService,
-) : ApplicationService(
+) : MMSService(
     fileStoreService = fileStoreService,
 ) {
 
@@ -177,9 +174,9 @@ class ObjectService(
                 parentId = action.parentId
             )
 
-            val popupDatas = getPopupDatas(
+            val popupDatas = getTablePopupDatas(
                 userConfig = userConfig,
-                id = objectEntity.id,
+                objectId = objectEntity.id,
                 isFormEnabled = isFormEnabled,
                 formOpenAction = formOpenAction,
             )
@@ -211,9 +208,9 @@ class ObjectService(
         return currentRowNo
     }
 
-    private fun getPopupDatas(
+    private fun getTablePopupDatas(
         userConfig: ServerUserConfig,
-        id: Int,
+        objectId: Int,
         isFormEnabled: Boolean,
         formOpenAction: AppAction,
     ): List<TablePopup> {
@@ -230,137 +227,22 @@ class ObjectService(
         val begTime = getCurrentTimeInt() / 86_400 * 86_400 - userConfig.timeOffset
         val endTime = begTime + 86_400
 
-        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, id, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, AppModuleMMS.OBJECT, objectId, alPopupData)
 
-        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, id, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, id, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, id, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
 
-//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, id, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, id, begTime, endTime, alPopupData)
+//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
 
-        if (checkAccessPermission(AppModuleMMS.MAP_TRACE, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Карты",
-                action = AppAction(
-                    type = ActionType.MODULE_MAP,
-                    module = AppModuleMMS.MAP_TRACE,
-                    id = id,
-                    timeRangeType = 30 * 24 * 60 * 60,   //!!! траектория за последние 24 часа (а не 30 дней, как сейчас)
-                ),
-                text = appModuleConfigs[AppModuleMMS.MAP_TRACE]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип карты)",
-                inNewTab = true,
-            )
-        }
-//        if (checkAccessPermission(AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE, userConfig.roles)) {
-//            alPopupData += TablePopupData(
-//                group = "Контрольные схемы",
-//                action = AppAction(
-//                    type = ActionType.MODULE_SCHEME,
-//                    module = AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE,
-//                    id = id,
-//                ),
-//                text = appModuleConfigs[AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE]?.caption ?: "(неизвестный тип схемы)",
-//                inNewTab = true,
-//            )
-//        }
-        if (checkAccessPermission(AppModuleMMS.OBJECT_SCHEME_DASHBOARD, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Контрольные панели",
-                action = AppAction(
-                    type = ActionType.MODULE_COMPOSITE,
-                    module = AppModuleMMS.OBJECT_SCHEME_DASHBOARD,
-                    id = id,
-                ),
-                text = appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип контрольной панели)",
-                inNewTab = true,
-            )
-        }
-        if (checkAccessPermission(AppModuleMMS.OBJECT_CHART_DASHBOARD, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Контрольные панели",
-                action = AppAction(
-                    type = ActionType.MODULE_COMPOSITE,
-                    module = AppModuleMMS.OBJECT_CHART_DASHBOARD,
-                    id = id,
-                ),
-                text = appModuleConfigs[AppModuleMMS.OBJECT_CHART_DASHBOARD]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип контрольной панели)",
-                inNewTab = true,
-            )
-        }
+        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.OBJECT, objectId, alPopupData)
 
         return alPopupData
-    }
-
-    private fun getTableTablePopupData(userConfig: ServerUserConfig, module: String, id: Int, alPopupData: MutableList<TablePopup>) {
-        if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopup(
-                action = AppAction(
-                    type = ActionType.MODULE_TABLE,
-                    module = module,
-                    parentModule = AppModuleMMS.OBJECT,
-                    parentId = id,
-                ),
-                text = appModuleConfigs[module]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип модуля: '$module')",
-                inNewTab = true,
-            )
-        }
-    }
-
-    private fun getTableChartPopupData(userConfig: ServerUserConfig, module: String, id: Int, alPopupData: MutableList<TablePopup>) {
-        if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Графики",
-                action = AppAction(
-                    type = ActionType.MODULE_CHART,
-                    module = module,
-                    id = id,
-                    timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
-                    //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
-                ),
-                text = appModuleConfigs[module]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип модуля: '$module')",
-                inNewTab = true,
-            )
-        }
-    }
-
-    private fun getTableReportPopupData(
-        userConfig: ServerUserConfig,
-        module: String,
-        id: Int,
-        begTime: Int,
-        endTime: Int,
-        alPopupData: MutableList<TablePopup>
-    ) {
-        if (checkAccessPermission(module, userConfig.roles)) {
-            alPopupData += TablePopup(
-                group = "Отчёты",
-                action = AppAction(
-                    type = ActionType.MODULE_FORM,
-                    module = module,
-                    id = null,
-                    parentModule = AppModuleMMS.OBJECT,
-                    parentId = id,
-                    begTime = begTime,
-                    endTime = endTime,
-                ),
-                text = appModuleConfigs[module]?.captions?.let { captions ->
-                    getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип модуля: '$module')",
-                inNewTab = true,
-            )
-        }
     }
 
     override fun getFormCells(

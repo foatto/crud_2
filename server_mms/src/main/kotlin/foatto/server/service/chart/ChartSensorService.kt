@@ -37,7 +37,8 @@ class ChartSensorService(
 ) {
 
     override fun getChartHeader(userConfig: ServerUserConfig, action: AppAction): HeaderData {
-        val sensorEntity = action.id?.let { id -> sensorRepository.findByIdOrNull(id) }
+        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
+        val sensorEntity = action.parentId?.let { parentId -> sensorRepository.findByIdOrNull(parentId) }
 
         val caption = appModuleConfigs[action.module]?.captions?.let { captions ->
             getLocalizedMessage(captions, userConfig.lang)
@@ -66,7 +67,8 @@ class ChartSensorService(
 
         var charts: List<ChartData> = emptyList()
 
-        chartActionRequest.action.id?.let { sensorId ->
+        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
+        chartActionRequest.action.parentId?.let { sensorId ->
             sensorRepository.findByIdOrNull(sensorId)?.let { sensorEntity ->
                 val begTimeCheck = sensorEntity.endTime?.let { sensorEndTime ->
                     begTime < sensorEndTime

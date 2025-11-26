@@ -64,8 +64,9 @@ abstract class AbstractSchemeIndicatorStateService(
             return AppResponse(ResponseCode.LOGON_NEED)
         }
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        val objectEntity = action.id?.let { id ->
-            objectRepository.findByIdOrNull(id) ?: return AppResponse(ResponseCode.LOGON_NEED)
+        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
+        val objectEntity = action.parentId?.let { parentId ->
+            objectRepository.findByIdOrNull(parentId) ?: return AppResponse(ResponseCode.LOGON_NEED)
         } ?: return AppResponse(ResponseCode.LOGON_NEED)
 
         val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
@@ -119,7 +120,9 @@ abstract class AbstractSchemeIndicatorStateService(
                     responseCode = ResponseCode.OK,
                     elements = getElements(
                         userConfig = userConfig,
-                        sensorId = schemeActionRequest.action.id!!,
+                        //!!! добавить соответствующий parentModule (могут быть разные!)
+                        // parentModule = ???
+                        sensorId = schemeActionRequest.action.parentId!!,
                         scale = max(SCHEME_WIDTH * GRID_STEP / viewWidth, SCHEME_HEIGHT * GRID_STEP / viewHeight),
                     ),
                 )

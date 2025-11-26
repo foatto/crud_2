@@ -477,8 +477,8 @@ class CompositeControl(
                     contentPadding = PaddingValues(start = getMenuPadding(level), end = 16.dp),
                     onClick = {
                         compositeBlocksReload(
-                            id = item.itemId,
                             parentModule = item.itemModule,
+                            parentId = item.itemId,
                         )
                     },
                 )
@@ -527,8 +527,8 @@ class CompositeControl(
                     contentPadding = PaddingValues(start = getMenuPadding(level), end = 16.dp),
                     onClick = {
                         compositeBlocksReload(
-                            id = item.itemId,
                             parentModule = item.itemModule,
+                            parentId = item.itemId,
                         )
                     },
                 )
@@ -597,8 +597,8 @@ class CompositeControl(
         if (compositeResponse.items == null) {
             GlobalScope.launch {
                 compositeBlocksReload(
-                    id = compositeResponse.action.id,
                     parentModule = compositeResponse.action.parentModule,
+                    parentId = compositeResponse.action.parentId,
                 )
             }
         }
@@ -611,10 +611,10 @@ class CompositeControl(
         compositeResponse.items?.let { items ->
             val findText = findTextFieldValueState.text
             listItems = items.filter { item ->
-                item.text.contains(findText) ||
+                item.text.contains(other = findText, ignoreCase = true) ||
                         item.subListDatas?.let { subListDatas ->
                             subListDatas.any { subItem ->
-                                subItem.text.contains(findText)
+                                subItem.text.contains(other = findText, ignoreCase = true)
                             }
                         } ?: false
             }.map { item ->
@@ -634,16 +634,16 @@ class CompositeControl(
     )
 
     private fun compositeBlocksReload(
-        id: Int?,
         parentModule: String?,
+        parentId: Int?,
     ) {
         root.setWait(true)
         invokeRequest(
             CompositeActionRequest(
                 action = compositeResponse.action.copy(
                     type = ActionType.GET_ELEMENTS,
-                    id = id,
                     parentModule = parentModule,
+                    parentId = parentId,
                 ),
                 viewSize = canvasWidth / root.scaleKoef to canvasHeight / root.scaleKoef,
             )

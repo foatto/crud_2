@@ -86,7 +86,7 @@ abstract class AbstractDashboardService(
         val moduleConfig = appModuleConfigs[actionModule] ?: return getErrorCompositeActionResponse()
         val (objectEntity, deviceEntity) = when (action.parentModule) {
             AppModuleMMS.OBJECT -> {
-                val oe = action.id?.let { objectId ->
+                val oe = action.parentId?.let { objectId ->
                     objectRepository.findByIdOrNull(objectId)
                 } ?: return getErrorCompositeActionResponse()
 
@@ -94,7 +94,7 @@ abstract class AbstractDashboardService(
             }
 
             AppModuleMMS.DEVICE -> {
-                val de = action.id?.let { deviceId ->
+                val de = action.parentId?.let { deviceId ->
                     deviceRepository.findByIdOrNull(deviceId)
                 } ?: return getErrorCompositeActionResponse()
 
@@ -106,7 +106,7 @@ abstract class AbstractDashboardService(
             else -> return getErrorCompositeActionResponse()
         }
 
-        val layoutSaveKey = action.parentModule + action.id
+        val layoutSaveKey = action.parentModule + action.parentId
         val compositeLayoutDatas = userConfig.userProperties[layoutSaveKey]?.let { propertyValue ->
             try {
                 Json.decodeFromString<Map<Int, CompositeLayoutData>>(propertyValue)
@@ -198,8 +198,8 @@ abstract class AbstractDashboardService(
 
     private fun getCompositeResponseAction(action: AppAction): AppAction = if (withObjectList()) {
         action.copy(
-            id = null,
             parentModule = null,
+            parentId = null,
         )
     } else {
         action.copy(

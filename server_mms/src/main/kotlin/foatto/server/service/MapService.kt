@@ -170,8 +170,9 @@ class MapService(
             return AppResponse(ResponseCode.LOGON_NEED)
         }
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        val objectEntity = action.id?.let { id ->
-            objectRepository.findByIdOrNull(id) ?: return AppResponse(ResponseCode.LOGON_NEED)
+        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
+        val objectEntity = action.parentId?.let { parentId ->
+            objectRepository.findByIdOrNull(parentId) ?: return AppResponse(ResponseCode.LOGON_NEED)
         } ?: return AppResponse(ResponseCode.LOGON_NEED)
 
         val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
@@ -249,8 +250,9 @@ class MapService(
 
         val (begTime, endTime) = getBegEndTime(appAction)
 
-        appAction.id?.let { id ->
-            objectRepository.findByIdOrNull(id)?.let { objectEntity ->
+        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
+        appAction.parentId?.let { parentId ->
+            objectRepository.findByIdOrNull(parentId)?.let { objectEntity ->
                 sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
                     SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
@@ -304,8 +306,9 @@ class MapService(
         val drawColors = mutableListOf<Int>()
         val fillColors = mutableListOf<Int>()
 
-        appAction.id?.let { id ->
-            objectRepository.findByIdOrNull(id)?.let { objectEntity ->
+        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
+        appAction.parentId?.let { parentId ->
+            objectRepository.findByIdOrNull(parentId)?.let { objectEntity ->
                 sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
                     SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
@@ -333,7 +336,7 @@ class MapService(
         }
 
         val elements = mutableListOf(
-            XyElement(TYPE_OBJECT_TRACE, -getRandomInt(), appAction.id ?: 0).apply {
+            XyElement(TYPE_OBJECT_TRACE, -getRandomInt(), appAction.parentId ?: 0).apply {
                 isReadOnly = true
                 alPoint = points
                 fillColor = null

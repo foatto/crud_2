@@ -416,7 +416,8 @@ class SensorService(
                     action = AppAction(
                         type = ActionType.MODULE_CHART,
                         module = AppModuleMMS.CHART_SENSOR,
-                        id = sensorEntity.id,
+                        parentModule = action.module,
+                        parentId = sensorEntity.id,
                         timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
                         //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
                     ),

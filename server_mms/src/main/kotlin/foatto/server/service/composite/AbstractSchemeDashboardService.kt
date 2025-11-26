@@ -68,7 +68,8 @@ abstract class AbstractSchemeDashboardService(
             DashboardSensorTypeEnum.COUNTER -> AppModuleMMS.SCHEME_COUNTER_INDICATOR_STATE
             DashboardSensorTypeEnum.WORK -> AppModuleMMS.SCHEME_WORK_INDICATOR_STATE
         },
-        id = sensorEntity.id,
+        parentModule = AppModuleMMS.SENSOR,
+        parentId = sensorEntity.id,
     )
 
     override fun getSchemeResponse(sensorType: DashboardSensorTypeEnum, sensorEntity: SensorEntity): SchemeResponse? = SchemeResponse(

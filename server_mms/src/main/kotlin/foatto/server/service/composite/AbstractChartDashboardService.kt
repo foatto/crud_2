@@ -53,7 +53,8 @@ abstract class AbstractChartDashboardService(
 //            DashboardSensorTypeEnum.WORK -> AppModuleMMS.SCHEME_WORK_INDICATOR_STATE
             else -> AppModuleMMS.CHART_SENSOR
         },
-        id = sensorEntity.id,
+        parentModule = AppModuleMMS.SENSOR,
+        parentId = sensorEntity.id,
         timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
     )
 

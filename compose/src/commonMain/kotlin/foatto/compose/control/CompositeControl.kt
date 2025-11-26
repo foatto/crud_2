@@ -574,7 +574,7 @@ class CompositeControl(
         ) {
             KamelImage(
                 modifier = Modifier.size(styleToolbarIconSize.dp),
-                resource = asyncPainterResource(data = getFullUrl(iconName)),
+                resource = { asyncPainterResource(data = getFullUrl(iconName)) },
                 contentDescription = iconName,
             )
         }

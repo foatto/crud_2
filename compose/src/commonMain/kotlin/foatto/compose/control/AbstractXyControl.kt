@@ -122,7 +122,7 @@ abstract class AbstractXyControl(
                                     x = with(density) { element.x.toDp() },
                                     y = with(density) { element.y.toDp() },
                                 ),
-                            resource = asyncPainterResource(data = element.url),
+                            resource = { asyncPainterResource(data = element.url) },
                             contentDescription = null,
                         )
 //                                    onMouseEnter { syntheticMouseEvent ->
@@ -354,7 +354,7 @@ abstract class AbstractXyControl(
                                     x = with(density) { element.x.toDp() },
                                     y = with(density) { element.y.toDp() },
                                 ),
-                            resource = asyncPainterResource(data = element.url),
+                            resource = { asyncPainterResource(data = element.url) },
                             contentDescription = null,
                         )
 //                                    onMouseEnter { syntheticMouseEvent ->

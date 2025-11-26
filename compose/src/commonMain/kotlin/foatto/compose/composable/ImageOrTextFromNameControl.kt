@@ -30,7 +30,7 @@ internal fun ImageOrTextFromNameControl(
             imageButton {
                 KamelImage(
                     modifier = Modifier.size(iconSize.dp),
-                    resource = asyncPainterResource(data = getFullUrl(url)),
+                    resource = { asyncPainterResource(data = getFullUrl(url)) },
                     contentDescription = name,
                 )
             }
@@ -39,7 +39,7 @@ internal fun ImageOrTextFromNameControl(
                 imageButton {
                     KamelImage(
                         modifier = Modifier.size(iconSize.dp),
-                        resource = asyncPainterResource(data = getFullUrl(name)),
+                        resource = { asyncPainterResource(data = getFullUrl(name)) },
                         contentDescription = name,
                     )
                 }

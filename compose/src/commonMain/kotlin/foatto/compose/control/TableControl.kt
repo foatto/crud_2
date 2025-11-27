@@ -5,10 +5,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.draggable2D
+import androidx.compose.foundation.gestures.rememberDraggable2DState
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -347,22 +346,6 @@ class TableControl(
                             }
                             .verticalScroll(state = verticalScrollState)
                             .horizontalScroll(state = horizontalScrollState)
-                            .draggable(
-                                orientation = Orientation.Horizontal,
-                                state = rememberDraggableState { delta ->
-                                    coroutineScope.launch {
-                                        horizontalScrollState.scrollBy(-delta)
-                                    }
-                                },
-                            )
-                            .draggable(
-                                orientation = Orientation.Vertical,
-                                state = rememberDraggableState { delta ->
-                                    coroutineScope.launch {
-                                        verticalScrollState.scrollBy(-delta)
-                                    }
-                                },
-                            )
                     ) {
                         alGridRows.forEachIndexed { index, gridRow ->
                             Row(
@@ -394,6 +377,14 @@ class TableControl(
                                                         gridData.backColor
                                                     }
                                                 } ?: colorMainBack0
+                                            )
+                                            .draggable2D(
+                                                state = rememberDraggable2DState { delta ->
+                                                    coroutineScope.launch {
+                                                        horizontalScrollState.scrollBy(-delta.x)
+                                                        verticalScrollState.scrollBy(-delta.y)
+                                                    }
+                                                },
                                             )
                                             //--- Непрямой метод поймать правую кнопку мыши. Ждём, когда завезут официальную реакцию на правую мышь.
                                             .pointerInput(Unit) {

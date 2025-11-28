@@ -117,6 +117,17 @@ class GalileoHandler : MMSNioHandler() {
     private val tmESDReverseCameraFlow = sortedMapOf<Int, Double>()
     private val tmESDReverseCameraTemperature = sortedMapOf<Int, Double>()
 
+    //--- датчики ПМП-201/218
+    private val tmPMPLevel = sortedMapOf<Int, Double>()         // уровень [м]
+    private val tmPMPTemperature = sortedMapOf<Int, Double>()   // температура
+    private val tmPMPVolume = sortedMapOf<Int, Double>()        // (накопленный) объём [куб.м]
+    private val tmPMPMass = sortedMapOf<Int, Double>()          // (накопленная) масса [тонна]
+    private val tmPMPDensity = sortedMapOf<Int, Double>()       // плотность [г/куб.см == тонна/куб.м]
+
+    //--- плата контроля параметров ДВС (датчики, которые ещё не были описаны)
+    private val tmPressure = sortedMapOf<Int, Double>()         // давление [кг/см2]
+    private val tmTurn = sortedMapOf<Int, Double>()             // обороты [об/мин]
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     override fun init(aDataServer: CoreNioServer, aSelectionKey: SelectionKey) {
@@ -434,7 +445,7 @@ class GalileoHandler : MMSNioHandler() {
                                             (b4.toInt() and 0xFF)
 
                                     val floatBitsValue = (b1.toInt() and 0xFF shl 24) or (b2.toInt() and 0xFF shl 16) or (b3.toInt() and 0xFF shl 8) or (b4.toInt() and 0xFF)
-                                    val doubleFromBits = Float.fromBits(floatBitsValue).toDouble()
+                                    val doubleFromFloatBits = Float.fromBits(floatBitsValue).toDouble()
 //AdvancedLogger.debug("----------------")
 //AdvancedLogger.debug("id = ${id.toString(16)}")
 //AdvancedLogger.debug("b1 = ${(b1.toInt() and 0xFF).toString(16)}")
@@ -482,19 +493,29 @@ class GalileoHandler : MMSNioHandler() {
                                         in 0x052C..0x052F -> tmEnergoPowerFullB[id - 0x052C] = doubleFromInt
                                         in 0x0530..0x0533 -> tmEnergoPowerFullC[id - 0x0530] = doubleFromInt
 
-                                        in 0x0550..0x0553 -> tmEnergoTransformKoefCurrent[id - 0x0550] = doubleFromBits
-                                        in 0x0560..0x0563 -> tmEnergoTransformKoefVoltage[id - 0x0560] = doubleFromBits
+                                        in 0x0541..0x0544 -> tmEmisMassFlow[id - 0x0541] = doubleFromFloatBits
 
-                                        in 0x0541..0x0544 -> tmEmisMassFlow[id - 0x0541] = doubleFromBits
-                                        in 0x0581..0x0584 -> tmEmisDensity[id - 0x0581] = doubleFromBits
-                                        in 0x05C1..0x05C4 -> tmEmisTemperature[id - 0x05C1] = doubleFromBits
-                                        in 0x0601..0x0604 -> tmEmisVolumeFlow[id - 0x0601] = doubleFromBits
-                                        in 0x0641..0x0644 -> tmEmisAccumulatedMass[id - 0x0641] = doubleFromBits
-                                        in 0x0681..0x0684 -> tmEmisAccumulatedVolume[id - 0x0681] = doubleFromBits
+                                        in 0x0550..0x0553 -> tmEnergoTransformKoefCurrent[id - 0x0550] = doubleFromFloatBits
+                                        in 0x0560..0x0563 -> tmEnergoTransformKoefVoltage[id - 0x0560] = doubleFromFloatBits
+
+                                        in 0x0581..0x0584 -> tmEmisDensity[id - 0x0581] = doubleFromFloatBits
+                                        in 0x05C1..0x05C4 -> tmEmisTemperature[id - 0x05C1] = doubleFromFloatBits
+                                        in 0x0601..0x0604 -> tmEmisVolumeFlow[id - 0x0601] = doubleFromFloatBits
+                                        in 0x0641..0x0644 -> tmEmisAccumulatedMass[id - 0x0641] = doubleFromFloatBits
+                                        in 0x0681..0x0684 -> tmEmisAccumulatedVolume[id - 0x0681] = doubleFromFloatBits
 
                                         in 0x0700..0x0703 -> tmEnergoPowerActiveABC[id - 0x0700] = doubleFromInt
                                         in 0x0710..0x0713 -> tmEnergoPowerReactiveABC[id - 0x0710] = doubleFromInt
                                         in 0x0720..0x0723 -> tmEnergoPowerFullABC[id - 0x0720] = doubleFromInt
+
+                                        in 0x0800..0x080F -> tmPMPLevel[id - 0x0800] = doubleFromFloatBits
+                                        in 0x0810..0x081F -> tmPMPTemperature[id - 0x0810] = doubleFromFloatBits
+                                        in 0x0820..0x082F -> tmPMPVolume[id - 0x0820] = doubleFromFloatBits
+                                        in 0x0830..0x083F -> tmPMPMass[id - 0x0830] = doubleFromFloatBits
+                                        in 0x0840..0x084F -> tmPMPDensity[id - 0x0840] = doubleFromFloatBits
+
+                                        in 0x0850..0x085F -> tmPressure[id - 0x0850] = doubleFromFloatBits
+                                        in 0x0860..0x086F -> tmTurn[id - 0x0860] = doubleFromFloatBits
 
                                         else -> AdvancedLogger.error("serialNo = $serialNo\n модуль сбора данных: неизвестный id = ${id.toString(16)}.")
                                     }
@@ -506,7 +527,7 @@ class GalileoHandler : MMSNioHandler() {
                                 return false
                             }
                         }
-                    } else if (userDataType == 0x07) {
+                    } else if (userDataType == 0x07) {  //--- есть подозрение, что эти данные приходят/эмулируются как Emis
                         //--- Eurosens Delta
                         for (groupIndex in 0..3) {
                             val esdStatus = bbIn.getByte().toInt() and 0xFF
@@ -918,6 +939,15 @@ class GalileoHandler : MMSNioHandler() {
                 MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmESDReverseCameraFlow, PortNumbers.ESD_REVERSE_CAMERA_FLOW_528, bbData)
                 MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmESDReverseCameraTemperature, PortNumbers.ESD_REVERSE_CAMERA_TEMPERATURE_532, bbData)
 
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPLevel, PortNumbers.PMP_LEVEL_540, bbData)
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPTemperature, PortNumbers.PMP_TEMPERATURE_560, bbData)
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPVolume, PortNumbers.PMP_VOLUME_580, bbData)
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPMass, PortNumbers.PMP_MASS_600, bbData)
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPDensity, PortNumbers.PMP_DENSITY_620, bbData)
+
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPressure, PortNumbers.PRESSURE_640, bbData)
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmTurn, PortNumbers.TURN_660, bbData)
+
                 MMSTelematicFunction.addPoint(conn, dc, pointTime, bbData)
 
                 dataCount++
@@ -1016,6 +1046,15 @@ class GalileoHandler : MMSNioHandler() {
         tmESDReverseCameraVolume.clear()
         tmESDReverseCameraFlow.clear()
         tmESDReverseCameraTemperature.clear()
+
+        tmPMPLevel.clear()
+        tmPMPTemperature.clear()
+        tmPMPVolume.clear()
+        tmPMPMass.clear()
+        tmPMPDensity.clear()
+
+        tmPressure.clear()
+        tmTurn.clear()
     }
 
 }

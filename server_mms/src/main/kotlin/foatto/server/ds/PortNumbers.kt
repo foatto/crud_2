@@ -42,7 +42,7 @@ object PortNumbers {
     const val MERCURY_TRANSFORM_KOEF_CURRENT_360: Int = 360
     const val MERCURY_TRANSFORM_KOEF_VOLTAGE_370: Int = 370
 
-    //--- нет в MMSPulsarDataController
+    //--- в MMSPulsarDataController приходят как EMIS_xxx
 //    const val ESD_STATUS_500: Int = 500 - не используется
     const val ESD_VOLUME_504: Int = 504
     const val ESD_FLOW_508: Int = 508
@@ -53,10 +53,12 @@ object PortNumbers {
     const val ESD_REVERSE_CAMERA_FLOW_528: Int = 528
     const val ESD_REVERSE_CAMERA_TEMPERATURE_532: Int = 532
 
-    //--- нет в GalileoHandler
     const val PMP_LEVEL_540: Int = 540
     const val PMP_TEMPERATURE_560: Int = 560
     const val PMP_VOLUME_580: Int = 580
     const val PMP_MASS_600: Int = 600
     const val PMP_DENSITY_620: Int = 620
+
+    const val PRESSURE_640: Int = 640
+    const val TURN_660: Int = 660
 }

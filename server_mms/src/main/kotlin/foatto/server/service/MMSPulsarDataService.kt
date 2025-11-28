@@ -109,6 +109,10 @@ class MMSPulsarDataService(
         val tmPMPMass = sortedMapOf<Int, Double>()          // (накопленная) масса [тонна]
         val tmPMPDensity = sortedMapOf<Int, Double>()       // плотность [г/куб.см == тонна/куб.м]
 
+        //--- плата контроля параметров ДВС (датчики, которые ещё не были описаны)
+        val tmPressure = sortedMapOf<Int, Double>()         // давление [кг/см2]
+        val tmTurn = sortedMapOf<Int, Double>()             // обороты [об/мин]
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         //--- количество считанных и записанных блоков данных (например, точек)
@@ -253,6 +257,9 @@ class MMSPulsarDataService(
                                         in 0x0830..0x083F -> tmPMPMass[id - 0x0830] = value
                                         in 0x0840..0x084F -> tmPMPDensity[id - 0x0840] = value
 
+                                        in 0x0850..0x085F -> tmPressure[id - 0x0850] = value
+                                        in 0x0860..0x086F -> tmTurn[id - 0x0860] = value
+
                                         else -> outDataParseError(serialNo, "Unknown ID value == '$sId'")
                                     }
                                 } ?: run {
@@ -333,6 +340,9 @@ class MMSPulsarDataService(
                         MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPMass, PortNumbers.PMP_MASS_600, bbData)
                         MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPMPDensity, PortNumbers.PMP_DENSITY_620, bbData)
 
+                        MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPressure, PortNumbers.PRESSURE_640, bbData)
+                        MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmTurn, PortNumbers.TURN_660, bbData)
+
                         MMSTelematicFunction.addPoint(conn, deviceConfig, pointTime, bbData)
 
                         dataCount++
@@ -392,6 +402,9 @@ class MMSPulsarDataService(
                         tmPMPVolume.clear()
                         tmPMPMass.clear()
                         tmPMPDensity.clear()
+
+                        tmPressure.clear()
+                        tmTurn.clear()
                     }
                 } else {
                     outDataParseError(serialNo, "DateTime is very old or in future")

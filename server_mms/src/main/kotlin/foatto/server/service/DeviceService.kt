@@ -706,13 +706,13 @@ class DeviceService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_INDEX to "Индекс должен быть в диапазоне от 0 до ${MAX_DEVICE_COUNT_PER_OBJECT - 1}"))
         }
 
-        val serialNo = formActionData[FIELD_SERIAL_NO]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Не введён серийный номер"))
-        if (serialNo.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Не введён серийный номер"))
-        }
-        if (deviceRepository.findBySerialNo(serialNo).any { se -> se.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Такой серийный номер уже существует"))
-        }
+//        val serialNo = formActionData[FIELD_SERIAL_NO]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Не введён серийный номер"))
+//        if (serialNo.isEmpty()) {
+//            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Не введён серийный номер"))
+//        }
+//        if (deviceRepository.findBySerialNo(serialNo).any { se -> se.id != id }) {
+//            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Такой серийный номер уже существует"))
+//        }
 
         val objectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: 0
         val objectEntity = objectRepository.findByIdOrNull(objectId)
@@ -730,7 +730,7 @@ class DeviceService(
             userId = recordUserId,
             index = index,
             type = formActionData[FIELD_TYPE]?.stringValue?.toIntOrNull() ?: MMSTelematicFunction.DEVICE_TYPE_PULSAR_DATA,
-            serialNo = serialNo,
+            serialNo = formActionData[FIELD_SERIAL_NO]?.stringValue ?: "",
             name = formActionData[FIELD_NAME]?.stringValue?.trim(),
             obj = objectEntity,
             cellImei = formActionData[FIELD_CELL_IMEI]?.stringValue,
@@ -895,7 +895,7 @@ class DeviceService(
             sensorType = sensorType,
             begTime = getCurrentTimeInt(),
             endTime = null,
-            serialNo = null,
+            serialNo = "",
 
             minMovingTime = 1,
             minParkingTime = 300,

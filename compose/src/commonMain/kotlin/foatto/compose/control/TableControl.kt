@@ -61,6 +61,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import foatto.compose.AppControl
 import foatto.compose.Root
@@ -386,12 +387,16 @@ class TableControl(
                                                     }
                                                 },
                                             )
-                                            //--- Непрямой метод поймать правую кнопку мыши. Ждём, когда завезут официальную реакцию на правую мышь.
                                             .pointerInput(Unit) {
                                                 awaitEachGesture {
                                                     val event = awaitPointerEvent()
                                                     if (event.buttons.isSecondaryPressed) {
-                                                        showPopupMenu(gridData)
+                                                        val offset = event.changes.first().position
+                                                        val dpOffset = DpOffset(
+                                                            with(density) { offset.x.toDp() },
+                                                            with(density) { offset.y.toDp() - (gridData?.componentHeight ?: 0.dp) },
+                                                        )
+                                                        showPopupMenu(gridData, dpOffset)
                                                     }
                                                 }
                                             }
@@ -411,7 +416,11 @@ class TableControl(
                                                     setCurrentRow(gridData?.dataRow)
                                                 },
                                                 onLongClick = {
-                                                    showPopupMenu(gridData)
+                                                    val dpOffset = DpOffset(
+                                                        with(density) { 0.toDp() },
+                                                        with(density) { 0.toDp() },
+                                                    )
+                                                    showPopupMenu(gridData, dpOffset)
                                                 },
                                             )
                                             .onSizeChanged { size ->
@@ -420,6 +429,7 @@ class TableControl(
                                                         maxDp(size.width.toDp(), gridData.minWidth.dp)
                                                     }
                                                     gridData.componentWidth = maxDp(gridData.componentWidth, componentWidth)
+                                                    gridData.componentHeight = with(density) { size.height.toDp() }
 
                                                     hmColumnMaxWidth[col] = maxDp(
                                                         hmColumnMaxWidth[col] ?: 0.dp,
@@ -559,6 +569,7 @@ class TableControl(
                                                     onDismissRequest = {
                                                         gridData.isShowPopupMenu = false
                                                     },
+                                                    offset = gridData.offset,
                                                 ) {
                                                     GenerateMenuBody(
                                                         alMenuDataClient = gridData.alCurrentPopupData!!,
@@ -1065,13 +1076,14 @@ class TableControl(
         root.selectorControl = null
     }
 
-    private fun showPopupMenu(gridData: TableBaseCellClient?) {
+    private fun showPopupMenu(gridData: TableBaseCellClient?, offset: DpOffset) {
         gridData?.let {
             //--- чтобы строчка выделялась и по правой кнопке мыши тоже
             setCurrentRow(gridData.dataRow)
             gridData.dataRow?.let { dataRow ->
                 if (alRowData[dataRow].tablePopups.isNotEmpty()) {
                     convertPopupMenuDataClient(gridData, alRowData[dataRow].tablePopups)
+                    gridData.offset = offset
                     gridData.isShowPopupMenu = true
                 } else {
                     gridData.isShowPopupMenu = false

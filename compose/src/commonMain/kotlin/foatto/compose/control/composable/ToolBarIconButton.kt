@@ -6,6 +6,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import foatto.compose.colorIconButton
 import foatto.compose.colorTextButton
 import foatto.compose.composable.ImageOrTextFromNameControl
@@ -14,6 +15,7 @@ import foatto.compose.styleToolbarIconSize
 
 @Composable
 fun ToolBarIconButton(
+    modifier: Modifier = Modifier,
     isVisible: Boolean = true,
     isEnabled: Boolean = true,
     name: String,
@@ -25,6 +27,7 @@ fun ToolBarIconButton(
             iconSize = styleToolbarIconSize,
             imageButton = { func ->
                 FilledIconButton(
+                    modifier = modifier,
                     shape = singleButtonShape,
                     colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
                     enabled = isEnabled,
@@ -37,6 +40,7 @@ fun ToolBarIconButton(
             },
             textButton = { text ->
                 TextButton(
+                    modifier = modifier,
                     shape = singleButtonShape,
                     colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                     enabled = isEnabled,

@@ -328,6 +328,7 @@ fun TableToolBar(
     ) {
         ToolBarBlock {
             ToolBarIconButton(
+                modifier = Modifier.padding(start = 12.dp, end = 16.dp),
                 isVisible = selectorCancelAction != null,
                 name = "/images/ic_reply_all_${getStyleToolbarIconNameSuffix()}.png",
             ) {

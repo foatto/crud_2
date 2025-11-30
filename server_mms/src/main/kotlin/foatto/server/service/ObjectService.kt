@@ -334,7 +334,7 @@ class ObjectService(
             name = FIELD_DEPARTMENT_NAME,
             caption = "Подразделение",
             isEditable = false,
-            value = if (departmentId == null || departmentId == 0) {
+            value = if (departmentId == 0) {
                 "-"
             } else {
                 objectEntity?.department?.name ?: "(неизвестно)"
@@ -367,7 +367,7 @@ class ObjectService(
             name = FIELD_GROUP_NAME,
             caption = "Группа",
             isEditable = false,
-            value = if (groupId == null || groupId == 0) {
+            value = if (groupId == 0) {
                 "-"
             } else {
                 objectEntity?.group?.name ?: "(неизвестно)"

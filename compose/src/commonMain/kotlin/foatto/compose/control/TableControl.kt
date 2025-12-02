@@ -38,6 +38,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -145,6 +146,7 @@ class TableControl(
     companion object {
         private val SCROLL_BAR_TICKNESS = 16.dp
 
+        private val TABLE_ROW_BOTTOM_PADDING = 2.dp
         private val TABLE_CELL_PADDING = 16.dp
     }
 
@@ -187,6 +189,7 @@ class TableControl(
 
     @Composable
     override fun Body() {
+        val density = LocalDensity.current
         val coroutineScope = rememberCoroutineScope()
 
         Column(
@@ -315,10 +318,21 @@ class TableControl(
                 }
             }
         }
-//!!!
-        //coroutineScope.launch {
-        //    gridState.scrollToItem(...)
-        //}
+
+        LaunchedEffect(currentRowNo) {
+            currentRowNo?.let { curRowNo ->
+                val padding = with(density) { TABLE_ROW_BOTTOM_PADDING.toPx() }
+                val rowHeightSum = rowHeights.filter { (index, _) ->
+                    index <= curRowNo
+                }.values.map { value ->
+                    value + padding
+                }.sum()
+                val autoScroll = rowHeightSum - tableBodyHeight
+                if (autoScroll > 0) {
+                    verticalScrollState.scrollBy(autoScroll)
+                }
+            }
+        }
     }
 
     @Composable
@@ -356,7 +370,7 @@ class TableControl(
                                     //--- чтобы ячейки занимали всю отведённую им (общую) высоту (работает только совместно с .fillMaxHeight())
                                     .height(intrinsicSize = IntrinsicSize.Max)
                                     .background(color = colorTableCellBorder)
-                                    .padding(bottom = 2.dp)
+                                    .padding(bottom = TABLE_ROW_BOTTOM_PADDING)
                                     .onSizeChanged { size ->
                                         rowHeights[index] = size.height.toFloat()
                                     }

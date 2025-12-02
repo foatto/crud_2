@@ -61,4 +61,5 @@ object PortNumbers {
 
     const val PRESSURE_640: Int = 640
     const val TURN_660: Int = 660
+    const val CONSTANT_VOLTAGE_680: Int = 680
 }

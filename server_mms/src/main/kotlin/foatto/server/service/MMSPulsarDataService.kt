@@ -112,6 +112,7 @@ class MMSPulsarDataService(
         //--- плата контроля параметров ДВС (датчики, которые ещё не были описаны)
         val tmPressure = sortedMapOf<Int, Double>()         // давление [кг/см2]
         val tmTurn = sortedMapOf<Int, Double>()             // обороты [об/мин]
+        val tmConstantVoltage = sortedMapOf<Int, Double>()  // напряжение постоянное [В]
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -259,6 +260,7 @@ class MMSPulsarDataService(
 
                                         in 0x0850..0x085F -> tmPressure[id - 0x0850] = value
                                         in 0x0860..0x086F -> tmTurn[id - 0x0860] = value
+                                        in 0x0870..0x087F -> tmConstantVoltage[id - 0x0870] = value
 
                                         else -> outDataParseError(serialNo, "Unknown ID value == '$sId'")
                                     }
@@ -342,6 +344,7 @@ class MMSPulsarDataService(
 
                         MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPressure, PortNumbers.PRESSURE_640, bbData)
                         MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmTurn, PortNumbers.TURN_660, bbData)
+                        MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmConstantVoltage, PortNumbers.CONSTANT_VOLTAGE_680, bbData)
 
                         MMSTelematicFunction.addPoint(conn, deviceConfig, pointTime, bbData)
 
@@ -405,6 +408,7 @@ class MMSPulsarDataService(
 
                         tmPressure.clear()
                         tmTurn.clear()
+                        tmConstantVoltage.clear()
                     }
                 } else {
                     outDataParseError(serialNo, "DateTime is very old or in future")

@@ -127,6 +127,7 @@ class GalileoHandler : MMSNioHandler() {
     //--- плата контроля параметров ДВС (датчики, которые ещё не были описаны)
     private val tmPressure = sortedMapOf<Int, Double>()         // давление [кг/см2]
     private val tmTurn = sortedMapOf<Int, Double>()             // обороты [об/мин]
+    private val tmConstantVoltage = sortedMapOf<Int, Double>()  // напряжение постоянное [В]
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -516,6 +517,7 @@ class GalileoHandler : MMSNioHandler() {
 
                                         in 0x0850..0x085F -> tmPressure[id - 0x0850] = doubleFromFloatBits
                                         in 0x0860..0x086F -> tmTurn[id - 0x0860] = doubleFromFloatBits
+                                        in 0x0870..0x087F -> tmConstantVoltage[id - 0x0870] = doubleFromFloatBits
 
                                         else -> AdvancedLogger.error("serialNo = $serialNo\n модуль сбора данных: неизвестный id = ${id.toString(16)}.")
                                     }
@@ -947,6 +949,7 @@ class GalileoHandler : MMSNioHandler() {
 
                 MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmPressure, PortNumbers.PRESSURE_640, bbData)
                 MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmTurn, PortNumbers.TURN_660, bbData)
+                MMSTelematicFunction.saveSensorData(conn, dc.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmConstantVoltage, PortNumbers.CONSTANT_VOLTAGE_680, bbData)
 
                 MMSTelematicFunction.addPoint(conn, dc, pointTime, bbData)
 
@@ -1055,6 +1058,7 @@ class GalileoHandler : MMSNioHandler() {
 
         tmPressure.clear()
         tmTurn.clear()
+        tmConstantVoltage.clear()
     }
 
 }

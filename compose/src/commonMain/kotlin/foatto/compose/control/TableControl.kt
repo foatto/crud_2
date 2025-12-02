@@ -742,9 +742,6 @@ class TableControl(
         //--- установка текущей строки
         setCurrentRow(tableResponse.selectedRowNo)
 
-        //--- запоминаем текущий appParam для возможной установки в виде стартовой
-        root.curAction = tableAction
-
 //        //--- две попытки установить фокус, с минимальными задержками
 //        window.setTimeout({
 //            if (!focusToCursorField(tabId)) {

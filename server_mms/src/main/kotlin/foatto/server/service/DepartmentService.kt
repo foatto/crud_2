@@ -120,12 +120,9 @@ class DepartmentService(
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = departmentEntity.name ?: "-")
 
-            val formAction = AppAction(
+            val formAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = departmentEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = mutableListOf<TablePopup>()
@@ -232,14 +229,18 @@ class DepartmentService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
         }
 
+        val recordId = id ?: getNextId { nextId -> departmentRepository.existsById(nextId) }
         val departmentEntity = DepartmentEntity(
-            id = id ?: getNextId { nextId -> departmentRepository.existsById(nextId) },
+            id = recordId,
             userId = recordUserId,
             name = name,
         )
         departmentRepository.saveAndFlush(departmentEntity)
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {

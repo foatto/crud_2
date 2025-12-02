@@ -353,12 +353,9 @@ class DeviceService(
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionError ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = getDateEntityDMYString(deviceEntity.usingStartDate))
 
-            val formOpenAction = AppAction(
+            val formOpenAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = deviceEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = mutableListOf<TablePopup>()
@@ -725,8 +722,9 @@ class DeviceService(
             deviceRepository.findByIdOrNull(id)
         }
 
+        val recordId = id ?: getNextId { nextId -> deviceRepository.existsById(nextId) }
         val deviceEntity = DeviceEntity(
-            id = id ?: getNextId { nextId -> deviceRepository.existsById(nextId) },
+            id = recordId,
             userId = recordUserId,
             index = index,
             type = formActionData[FIELD_TYPE]?.stringValue?.toIntOrNull() ?: MMSTelematicFunction.DEVICE_TYPE_PULSAR_DATA,
@@ -805,7 +803,10 @@ class DeviceService(
             sensorRepository.flush()
         }
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun getFormActionPermissions(

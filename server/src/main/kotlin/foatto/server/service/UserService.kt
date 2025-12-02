@@ -304,12 +304,9 @@ class UserService(
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.lastIP?.removePrefix("/") ?: "-")
             }
 
-            val formAction = AppAction(
+            val formAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = userEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = mutableListOf<TablePopup>()
@@ -646,8 +643,9 @@ class UserService(
         val lastLoginDateTime = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_LAST_LOGIN]?.dateTimeValue ?: 0)
         val passwordLastChangeDate = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_PASSWORD_LAST_CHANGE]?.dateTimeValue ?: 0)
 
+        val recordId = id ?: getNextId { nextId -> userRepository.existsById(nextId) }
         val userEntity = UserEntity(
-            id = id ?: getNextId { nextId -> userRepository.existsById(nextId) },
+            id = recordId,
             parentId = formActionData[FIELD_PARENT_ID]?.stringValue?.toIntOrNull() ?: 0,
             userId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull() ?: 0,
             orgType = formActionData[FIELD_ORG_TYPE]?.stringValue?.toIntOrNull() ?: OrgType.ORG_TYPE_DIVISION,
@@ -684,7 +682,10 @@ class UserService(
         )
         userRepository.saveAndFlush(userEntity)
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {

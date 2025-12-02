@@ -350,13 +350,10 @@ abstract class ApplicationService(
         }
     } ?: emptyList()
 
-    protected open fun getTableAddAction(action: AppAction): AppAction =
-        AppAction(
-            type = ActionType.MODULE_FORM,
-            module = action.module,
-            parentModule = action.parentModule,
-            parentId = action.parentId,
-        )
+    protected fun getTableAddAction(action: AppAction): AppAction = action.copy(
+        type = ActionType.MODULE_FORM,
+        id = null,  // явное указание на _добавление_ записи
+    )
 
     protected fun fillTablePageButtons(
         action: AppAction,
@@ -593,7 +590,7 @@ abstract class ApplicationService(
         moduleConfig: AppModuleConfig,
     ): Triple<Boolean, Boolean, Boolean>
 
-    open fun formAction(
+    fun formAction(
         sessionId: Long,
         action: AppAction,
         formActionData: Map<String, FormActionData>,
@@ -660,7 +657,10 @@ abstract class ApplicationService(
 
     protected abstract fun formActionDelete(userId: Int, id: Int): FormActionResponse
 
-    protected open fun formActionExit(action: AppAction): FormActionResponse = FormActionResponse(ResponseCode.OK)
+    protected fun formActionExit(action: AppAction): FormActionResponse = FormActionResponse(
+        responseCode = ResponseCode.OK,
+        nextAction = action.prevAction?.copy(id = action.id),
+    )
 
     protected fun isAdminOnly(userConfig: ServerUserConfig): Boolean = userConfig.roles.size == 1 && userConfig.roles.contains(AppRole.ADMIN)
 

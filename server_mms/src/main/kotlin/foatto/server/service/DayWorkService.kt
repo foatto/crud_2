@@ -340,12 +340,9 @@ class DayWorkService(
                 align = TableCellAlign.LEFT,
             )
 
-            val formOpenAction = AppAction(
+            val formOpenAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = dayWorkEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = getTablePopupDatas(

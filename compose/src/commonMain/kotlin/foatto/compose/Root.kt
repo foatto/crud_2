@@ -101,8 +101,6 @@ open class Root {
 
     private var waitCount by mutableIntStateOf(0)
 
-    lateinit var curAction: AppAction
-
     private var lastTabId: Int = 0
 
     var dialogActionFun: suspend () -> Unit = {}

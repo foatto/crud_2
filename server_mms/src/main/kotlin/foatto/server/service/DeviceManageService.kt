@@ -188,12 +188,9 @@ class DeviceManageService(
                 minWidth = 200,
             )
 
-            val formOpenAction = AppAction(
+            val formOpenAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = deviceManageEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = mutableListOf<TablePopup>()
@@ -360,8 +357,9 @@ class DeviceManageService(
             deviceManageRepository.findByIdOrNull(id)
         }
 
+        val recordId = id ?: getNextId { nextId -> deviceManageRepository.existsById(nextId) }
         val deviceManageEntity = DeviceManageEntity(
-            id = id ?: getNextId { nextId -> deviceManageRepository.existsById(nextId) },
+            id = recordId,
             userId = recordUserId,
             device = getParentDeviceEntity(action),
             descr = formActionData[FIELD_DESCR]?.stringValue?.trim(),
@@ -375,7 +373,10 @@ class DeviceManageService(
         )
         deviceManageRepository.saveAndFlush(deviceManageEntity)
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {

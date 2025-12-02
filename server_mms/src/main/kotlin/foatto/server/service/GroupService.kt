@@ -120,12 +120,9 @@ class GroupService(
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = groupEntity.name ?: "-")
 
-            val formAction = AppAction(
+            val formAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = groupEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = mutableListOf<TablePopup>()
@@ -238,14 +235,18 @@ class GroupService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
         }
 
+        val recordId = id ?: getNextId { nextId -> groupRepository.existsById(nextId) }
         val groupEntity = GroupEntity(
-            id = id ?: getNextId { nextId -> groupRepository.existsById(nextId) },
+            id = recordId,
             userId = recordUserId,
             name = name,
         )
         groupRepository.saveAndFlush(groupEntity)
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {

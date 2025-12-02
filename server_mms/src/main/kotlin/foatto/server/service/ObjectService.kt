@@ -166,12 +166,9 @@ class ObjectService(
                 )
             }
 
-            val formOpenAction = AppAction(
+            val formOpenAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = objectEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = getTablePopupDatas(
@@ -482,7 +479,10 @@ class ObjectService(
             )
         }
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {

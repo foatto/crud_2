@@ -359,12 +359,9 @@ class SensorService(
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.serialNo ?: "-")
 
-            val formOpenAction = AppAction(
+            val formOpenAction = action.copy(
                 type = ActionType.MODULE_FORM,
-                module = action.module,
                 id = sensorEntity.id,
-                parentModule = action.parentModule,
-                parentId = action.parentId
             )
 
             val popupDatas = mutableListOf<TablePopup>()
@@ -1134,7 +1131,10 @@ class SensorService(
 
         checkAndCreateSensorTables(entityManager, recordId)
 
-        return FormActionResponse(responseCode = ResponseCode.OK)
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     private fun getNextSensorCalibrationId(): Int {

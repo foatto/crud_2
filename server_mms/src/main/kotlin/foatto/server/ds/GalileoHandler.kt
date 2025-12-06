@@ -406,6 +406,9 @@ class GalileoHandler : MMSNioHandler() {
                     //AdvancedLogger.debug( "deviceID = " + deviceID + "\n user data time = " + StringFunction.DateTime_YMDHMS( timeZone, pointTime ) );
 
                     val userDataSize = bbIn.getByte().toInt() and 0xFF // размер данных
+//AdvancedLogger.debug("----------------")
+//AdvancedLogger.debug("userDataSize = $userDataSize")
+//AdvancedLogger.debug("----------------")
 //                    AdvancedLogger.debug("serialNo = $serialNo\n userDataSize = $userDataSize")
 
                     //                StringBuilder sbHex = new StringBuilder( " 0xEA =" );
@@ -449,17 +452,18 @@ class GalileoHandler : MMSNioHandler() {
                                     val doubleFromFloatBits = Float.fromBits(floatBitsValue).toDouble()
 //AdvancedLogger.debug("----------------")
 //AdvancedLogger.debug("id = ${id.toString(16)}")
-//AdvancedLogger.debug("b1 = ${(b1.toInt() and 0xFF).toString(16)}")
-//AdvancedLogger.debug("b2 = ${(b2.toInt() and 0xFF).toString(16)}")
-//AdvancedLogger.debug("b3 = ${(b3.toInt() and 0xFF).toString(16)}")
-//AdvancedLogger.debug("b3 = ${(b3.toInt() and 0xFF).toString(16)}")
+//AdvancedLogger.debug("b1 = ${(b1.toInt() and 0xFF).toString(16).uppercase()}")
+//AdvancedLogger.debug("b2 = ${(b2.toInt() and 0xFF).toString(16).uppercase()}")
+//AdvancedLogger.debug("b3 = ${(b3.toInt() and 0xFF).toString(16).uppercase()}")
+//AdvancedLogger.debug("b3 = ${(b3.toInt() and 0xFF).toString(16).uppercase()}")
 //val intValue = (b1.toInt() and 0xFF shl 24) or (b2.toInt() and 0xFF shl 16) or (b3.toInt() and 0xFF shl 8) or (b4.toInt() and 0xFF)
 //AdvancedLogger.debug("intValue = $intValue")
-//AdvancedLogger.debug("doubleFromBits = $doubleFromBits")
+//AdvancedLogger.debug("doubleFromFloatBits = $doubleFromFloatBits")
 //AdvancedLogger.debug("doubleFromInt = $doubleFromInt")
                                     when (id) {
                                         0 -> {
-                                        } // молча пропускаем пустой 0-й id
+                                            //--- согласно протокола молча пропускаем пустой 0-й id
+                                        }
 
                                         in 0x0100..0x010F -> tmLLSLevel[id - 0x0100] = doubleFromInt
                                         in 0x0140..0x014F -> tmGalileoVoltage[id - 0x0140] = doubleFromInt
@@ -519,7 +523,7 @@ class GalileoHandler : MMSNioHandler() {
                                         in 0x0860..0x086F -> tmTurn[id - 0x0860] = doubleFromFloatBits
                                         in 0x0870..0x087F -> tmConstantVoltage[id - 0x0870] = doubleFromFloatBits
 
-                                        else -> AdvancedLogger.error("serialNo = $serialNo\n модуль сбора данных: неизвестный id = ${id.toString(16)}.")
+                                        else -> AdvancedLogger.error("serialNo = $serialNo\n модуль сбора данных: неизвестный id = '${id.toString(16).uppercase()}'")
                                     }
                                 }
                             }

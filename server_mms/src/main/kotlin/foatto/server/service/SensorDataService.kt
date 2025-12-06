@@ -28,7 +28,7 @@ class SensorDataService(
     private val sensorRepository: SensorRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
+) : MMSService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
@@ -36,6 +36,8 @@ class SensorDataService(
     companion object {
         private const val PAGE_SIZE_IN_SEC = 3600  // 10_800 // 21_600 // 43_200 // 86_400
     }
+
+    override fun isDateTimeIntervalPanelVisible(): Boolean = true
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
@@ -76,7 +78,31 @@ class SensorDataService(
         SensorService.checkAndCreateSensorTables(entityManager, parentSensorEntity.id)
 
         val zoneUTC = getTimeZone(0)
-        val zoneLocal = getTimeZone(userConfig.timeOffset)
+        val zoneUser = getTimeZone(userConfig.timeOffset)
+
+        val filterBegDateTime = action.begDateTimeValue
+        val filterEndDateTime = action.endDateTimeValue
+
+        val whereClause = filterBegDateTime?.let {
+            filterEndDateTime?.let {
+                """
+                    WHERE ontime_0 >= $filterBegDateTime
+                      AND ontime_0 <= $filterEndDateTime 
+                """
+            } ?: run {
+                """
+                    WHERE ontime_0 >= $filterBegDateTime 
+                """
+            }
+        } ?: run {
+            filterEndDateTime?.let {
+                """
+                    WHERE ontime_0 <= $filterEndDateTime 
+                """
+            } ?: run {
+                ""
+            }
+        }
 
         var firstTimeUTC = 0
         var lastTimeUTC = 0
@@ -85,6 +111,7 @@ class SensorDataService(
             """
                 SELECT MIN(ontime_0), MAX(ontime_0)
                 FROM MMS_agg_$parentSensorId
+                $whereClause
             """
         ) { rs ->
             if (rs.next()) {
@@ -93,8 +120,8 @@ class SensorDataService(
             }
         }
 
-        val currentPageNo = lastTimeUTC / PAGE_SIZE_IN_SEC - action.pageNo
-        val begPageTime = currentPageNo * PAGE_SIZE_IN_SEC
+        val currentTimedPageNo = lastTimeUTC / PAGE_SIZE_IN_SEC - action.pageNo
+        val begPageTime = currentTimedPageNo * PAGE_SIZE_IN_SEC
         val endPageTime = begPageTime + PAGE_SIZE_IN_SEC
 
         queryNativeSql(
@@ -128,7 +155,7 @@ class SensorDataService(
                     row = row,
                     col = col++,
                     dataRow = row,
-                    name = getDateTimeDMYHMSString(zoneLocal, ontime0)
+                    name = getDateTimeDMYHMSString(zoneUser, ontime0)
                 )
                 tableCells += TableSimpleCell(
                     row = row,
@@ -140,7 +167,7 @@ class SensorDataService(
                     row = row,
                     col = col++,
                     dataRow = row,
-                    name = getDateTimeDMYHMSString(zoneLocal, ontime1)
+                    name = getDateTimeDMYHMSString(zoneUser, ontime1)
                 )
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = type0.toString())
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value0.toString())
@@ -157,42 +184,17 @@ class SensorDataService(
             }
         }
 
-        val pageCount = lastTimeUTC / PAGE_SIZE_IN_SEC - firstTimeUTC / PAGE_SIZE_IN_SEC + 1
-
-        //--- first page
-        if (action.pageNo > 0) {
-            pageButtons += TablePageButton(action.copy(pageNo = 0), getPageCaption(zoneUTC, lastTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC))
-        }
-        //--- empty
-        if (action.pageNo > 2) {
-            pageButtons += TablePageButton(null, "...")
-        }
-        //--- prev page
-        if (action.pageNo > 1) {
-            pageButtons += TablePageButton(action.copy(pageNo = action.pageNo - 1), getPageCaption(zoneUTC, (currentPageNo + 1) * PAGE_SIZE_IN_SEC))
-        }
-        //--- current page
-        pageButtons += TablePageButton(null, getPageCaption(zoneUTC, currentPageNo * PAGE_SIZE_IN_SEC))
-        //--- next page
-        if (action.pageNo < pageCount - 2) {
-            pageButtons += TablePageButton(action.copy(pageNo = action.pageNo + 1), getPageCaption(zoneUTC, (currentPageNo - 1) * PAGE_SIZE_IN_SEC))
-        }
-        //--- empty
-        if (action.pageNo < pageCount - 3) {
-            pageButtons += TablePageButton(null, "...")
-        }
-        //--- last page
-        if (action.pageNo < pageCount - 1) {
-            pageButtons += TablePageButton(action.copy(pageNo = pageCount - 1), getPageCaption(zoneUTC, firstTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC))
-        }
+        getTableTimedPageButtons(
+            pageSizeInSec = PAGE_SIZE_IN_SEC,
+            action = action,
+            zoneUser = zoneUser,
+            firstTimeUTC = firstTimeUTC,
+            lastTimeUTC = lastTimeUTC,
+            currentTimedPageNo = currentTimedPageNo,
+            pageButtons = pageButtons,
+        )
 
         return null
-    }
-
-    private fun getPageCaption(timeZone: TimeZone, time: Int): String {
-        val caption = getDateTimeDMYHMSString(timeZone, time)
-        //--- remove last seconds digits
-        return caption.substring(0, caption.length - 3)
     }
 
     override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> = emptyList()

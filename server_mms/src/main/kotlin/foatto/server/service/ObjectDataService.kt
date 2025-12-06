@@ -17,15 +17,14 @@ import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
 import foatto.server.entity.ObjectEntity
 import foatto.server.model.AppModuleConfig
-import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.util.AdvancedByteBuffer
 import foatto.server.util.byteToHex
 import jakarta.persistence.EntityManager
-import kotlinx.datetime.TimeZone
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.TreeMap
@@ -37,14 +36,16 @@ class ObjectDataService(
     private val sensorRepository: SensorRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
+) : MMSService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
 
     companion object {
-        private const val PAGE_SIZE_IN_SEC = 1800    // 3600  // 10_800 // 21_600 // 43_200 // 86_400
+        private const val PAGE_SIZE_IN_SEC = 3600    // 10_800 // 21_600 // 43_200 // 86_400
     }
+
+    override fun isDateTimeIntervalPanelVisible(): Boolean = true
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
@@ -93,7 +94,31 @@ class ObjectDataService(
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
         val zoneUTC = getTimeZone(0)
-        val zoneLocal = getTimeZone(userConfig.timeOffset)
+        val zoneUser = getTimeZone(userConfig.timeOffset)
+
+        val filterBegDateTime = action.begDateTimeValue
+        val filterEndDateTime = action.endDateTimeValue
+
+        val whereClause = filterBegDateTime?.let {
+            filterEndDateTime?.let {
+                """
+                    WHERE ontime >= $filterBegDateTime
+                      AND ontime <= $filterEndDateTime 
+                """
+            } ?: run {
+                """
+                    WHERE ontime >= $filterBegDateTime 
+                """
+            }
+        } ?: run {
+            filterEndDateTime?.let {
+                """
+                    WHERE ontime <= $filterEndDateTime 
+                """
+            } ?: run {
+                ""
+            }
+        }
 
         var firstTimeUTC = 0
         var lastTimeUTC = 0
@@ -102,6 +127,7 @@ class ObjectDataService(
             """
                 SELECT MIN(ontime), MAX(ontime)
                 FROM MMS_data_$parentObjectId
+                $whereClause
             """
         ) { rs ->
             if (rs.next()) {
@@ -110,8 +136,8 @@ class ObjectDataService(
             }
         }
 
-        val currentPageNo = lastTimeUTC / PAGE_SIZE_IN_SEC - action.pageNo
-        val begPageTime = currentPageNo * PAGE_SIZE_IN_SEC
+        val currentTimedPageNo = lastTimeUTC / PAGE_SIZE_IN_SEC - action.pageNo
+        val begPageTime = currentTimedPageNo * PAGE_SIZE_IN_SEC
         val endPageTime = begPageTime + PAGE_SIZE_IN_SEC
 
         val sensorConfigs = getSensorConfigs(parentObjectEntity, begPageTime, endPageTime)
@@ -141,7 +167,7 @@ class ObjectDataService(
                     row = row,
                     col = col++,
                     dataRow = row,
-                    name = getDateTimeDMYHMSString(zoneLocal, ontime)
+                    name = getDateTimeDMYHMSString(zoneUser, ontime)
                 )
 
                 val valuesByPortNum = mutableMapOf<Int, String>()
@@ -178,34 +204,15 @@ class ObjectDataService(
             }
         }
 
-        val pageCount = lastTimeUTC / PAGE_SIZE_IN_SEC - firstTimeUTC / PAGE_SIZE_IN_SEC + 1
-
-        //--- first page
-        if (action.pageNo > 0) {
-            pageButtons += TablePageButton(action.copy(pageNo = 0), getPageCaption(zoneUTC, lastTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC))
-        }
-        //--- empty
-        if (action.pageNo > 2) {
-            pageButtons += TablePageButton(null, "...")
-        }
-        //--- prev page
-        if (action.pageNo > 1) {
-            pageButtons += TablePageButton(action.copy(pageNo = action.pageNo - 1), getPageCaption(zoneUTC, (currentPageNo + 1) * PAGE_SIZE_IN_SEC))
-        }
-        //--- current page
-        pageButtons += TablePageButton(null, getPageCaption(zoneUTC, currentPageNo * PAGE_SIZE_IN_SEC))
-        //--- next page
-        if (action.pageNo < pageCount - 2) {
-            pageButtons += TablePageButton(action.copy(pageNo = action.pageNo + 1), getPageCaption(zoneUTC, (currentPageNo - 1) * PAGE_SIZE_IN_SEC))
-        }
-        //--- empty
-        if (action.pageNo < pageCount - 3) {
-            pageButtons += TablePageButton(null, "...")
-        }
-        //--- last page
-        if (action.pageNo < pageCount - 1) {
-            pageButtons += TablePageButton(action.copy(pageNo = pageCount - 1), getPageCaption(zoneUTC, firstTimeUTC / PAGE_SIZE_IN_SEC * PAGE_SIZE_IN_SEC))
-        }
+        getTableTimedPageButtons(
+            pageSizeInSec = PAGE_SIZE_IN_SEC,
+            action = action,
+            zoneUser = zoneUser,
+            firstTimeUTC = firstTimeUTC,
+            lastTimeUTC = lastTimeUTC,
+            currentTimedPageNo = currentTimedPageNo,
+            pageButtons = pageButtons,
+        )
 
         return null
     }
@@ -220,12 +227,6 @@ class ObjectDataService(
             }
         }
         return sensorConfigs
-    }
-
-    private fun getPageCaption(timeZone: TimeZone, time: Int): String {
-        val caption = getDateTimeDMYHMSString(timeZone, time)
-        //--- remove last seconds digits
-        return caption.substring(0, caption.length - 3)
     }
 
     override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> = emptyList()

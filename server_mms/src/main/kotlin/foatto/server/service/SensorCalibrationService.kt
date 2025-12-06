@@ -24,10 +24,12 @@ import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.util.getNextId
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.io.File
 
 @Service
 class SensorCalibrationService(
@@ -46,6 +48,9 @@ class SensorCalibrationService(
         private const val FIELD_SENSOR_VALUE = "sensorValue"
         private const val FIELD_SENSOR_DATA = "sensorData"
     }
+
+    @Value("\${data_server_ini_file}")
+    val dataServerIniFileName: String = ""
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
@@ -202,6 +207,9 @@ class SensorCalibrationService(
             dataValue = dataValue,
         )
         sensorCalibrationRepository.saveAndFlush(sensorCalibrationEntity)
+
+        //--- (re)create DataServer restart flag file
+        File(dataServerIniFileName).copyTo(File(dataServerIniFileName + "_"), true)
 
         return FormActionResponse(
             responseCode = ResponseCode.OK,

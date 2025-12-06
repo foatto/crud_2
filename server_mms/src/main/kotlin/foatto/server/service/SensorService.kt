@@ -46,10 +46,12 @@ import foatto.server.repository.SensorRepository
 import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.io.File
 import java.sql.ResultSet
 
 @Service
@@ -251,8 +253,8 @@ class SensorService(
         }
     }
 
-    //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
-    //override fun isDateTimeIntervalPanelVisible(): Boolean = true
+    @Value("\${data_server_ini_file}")
+    val dataServerIniFileName: String = ""
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
@@ -1133,6 +1135,9 @@ class SensorService(
         sensorCalibrationRepository.flush()
 
         checkAndCreateSensorTables(entityManager, recordId)
+
+        //--- (re)create DataServer restart flag file
+        File(dataServerIniFileName).copyTo(File(dataServerIniFileName + "_"), true)
 
         return FormActionResponse(
             responseCode = ResponseCode.OK,

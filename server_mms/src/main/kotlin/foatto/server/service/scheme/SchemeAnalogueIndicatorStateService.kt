@@ -18,6 +18,8 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 @Service
@@ -146,9 +148,10 @@ class SchemeAnalogueIndicatorStateService(
                     sensorEntity.minLimit?.let { minLimit ->
                         sensorEntity.maxLimit?.let { maxLimit ->
                             if (maxLimit - minLimit > 0) {
-                                limitArcs += Triple(minView, minLimit, DataValueStateEnum.CRITICAL)
-                                limitArcs += Triple(minLimit, maxLimit, DataValueStateEnum.NORMAL)
-                                limitArcs += Triple(maxLimit, maxView, DataValueStateEnum.CRITICAL)
+                                //--- workaroung for minLimit < minView and/or maxLimit > maxView
+                                limitArcs += Triple(minView, max(minLimit, minView), DataValueStateEnum.CRITICAL)
+                                limitArcs += Triple(max(minLimit, minView), min(maxLimit, maxView), DataValueStateEnum.NORMAL)
+                                limitArcs += Triple(min(maxLimit, maxView), maxView, DataValueStateEnum.CRITICAL)
                             }
                         } ?: run {
                             limitArcs += Triple(minView, minLimit, DataValueStateEnum.CRITICAL)

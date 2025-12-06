@@ -1,5 +1,6 @@
 package foatto.server
 
+//--- Don't change or lowercase role values!!! Theis writted in SYSTEM_user.role field
 object AppRoleMMS {
     //--- additional (to ADMIN) disabling role for support/managers
     const val SUPPORT: String = "SUPPORT"

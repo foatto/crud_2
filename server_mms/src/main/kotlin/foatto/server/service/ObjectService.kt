@@ -27,6 +27,7 @@ import foatto.server.entity.ObjectEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DepartmentRepository
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.GroupRepository
@@ -50,8 +51,10 @@ class ObjectService(
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val deviceRepository: DeviceRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : MMSService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {
@@ -85,8 +88,8 @@ class ObjectService(
         alColumnInfo += FIELD_IS_DISABLED to "Заблокирован"
         alColumnInfo += FIELD_NAME to "Наименование"
         alColumnInfo += FIELD_MODEL to "Модель"
-        alColumnInfo += null to "Подразделение"     //!!! сортировка как в gnssapp (и проверить поиск!)
-        alColumnInfo += null to "Группа"            //!!! сортировка как в gnssapp (и проверить поиск!)
+        alColumnInfo += null to "Подразделение"
+        alColumnInfo += null to "Группа"
 
         if (isAdminOnly(userConfig)) {
             alColumnInfo += null to "Файл схемы объекта"

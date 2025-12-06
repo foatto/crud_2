@@ -19,6 +19,7 @@ import foatto.server.entity.ObjectEntity
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.util.AdvancedByteBuffer
@@ -35,13 +36,14 @@ class ObjectDataService(
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {
-        //!!! попробовать увеличить в compose 1.8.x
-        private const val PAGE_SIZE_IN_SEC = 900    // 3600  // 10_800 // 21_600 // 43_200 // 86_400
+        private const val PAGE_SIZE_IN_SEC = 1800    // 3600  // 10_800 // 21_600 // 43_200 // 86_400
     }
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {

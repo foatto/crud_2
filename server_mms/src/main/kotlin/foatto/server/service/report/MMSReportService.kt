@@ -2,6 +2,7 @@ package foatto.server.service.report
 
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.service.FileStoreService
 import foatto.server.service.ReportService
 import jxl.write.Label
@@ -9,8 +10,10 @@ import jxl.write.WritableSheet
 
 abstract class MMSReportService(
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ReportService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     //--- стандартные ширины столбцов

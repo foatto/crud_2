@@ -15,6 +15,7 @@ import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
 import kotlinx.datetime.TimeZone
@@ -26,12 +27,13 @@ class SensorDataService(
     private val entityManager: EntityManager,
     private val sensorRepository: SensorRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {
-        //!!! попробовать размеры побольше
         private const val PAGE_SIZE_IN_SEC = 3600  // 10_800 // 21_600 // 43_200 // 86_400
     }
 

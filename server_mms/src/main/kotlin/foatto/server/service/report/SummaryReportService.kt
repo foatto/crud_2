@@ -13,6 +13,7 @@ import foatto.server.entity.ObjectEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.service.CalcService
 import foatto.server.service.FileStoreService
@@ -29,8 +30,10 @@ class SummaryReportService(
     private val objectRepository: ObjectRepository,
     private val calcService: CalcService,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : AbstractPeriodSummaryService(
-    fileStoreService,
+    fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

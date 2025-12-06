@@ -8,6 +8,7 @@ import foatto.server.entity.SensorEntity
 import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfigCounter
 import foatto.server.model.sensor.SensorConfigLiquidLevel
+import foatto.server.repository.ActionLogRepository
 import foatto.server.service.FileStoreService
 import jxl.CellView
 import jxl.format.PageOrientation
@@ -17,8 +18,10 @@ import jxl.write.WritableSheet
 
 abstract class AbstractPeriodSummaryService(
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : MMSReportService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     override fun setPrintOptions() {

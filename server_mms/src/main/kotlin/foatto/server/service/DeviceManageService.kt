@@ -31,6 +31,7 @@ import foatto.server.entity.DeviceEntity
 import foatto.server.entity.DeviceManageEntity
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DeviceManageRepository
 import foatto.server.repository.DeviceRepository
 import foatto.server.util.getNextId
@@ -46,8 +47,10 @@ class DeviceManageService(
     private val deviceManageRepository: DeviceManageRepository,
     private val deviceRepository: DeviceRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
     companion object {
         private const val FIELD_USER_ID = "userId"

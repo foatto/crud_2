@@ -7,11 +7,14 @@ import foatto.core.model.response.table.TablePopup
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 
 abstract class MMSService(
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     protected fun getTableTablePopupData(

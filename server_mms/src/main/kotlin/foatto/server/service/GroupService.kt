@@ -20,6 +20,7 @@ import foatto.server.entity.GroupEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.util.getNextId
@@ -33,8 +34,10 @@ class GroupService(
     private val groupRepository: GroupRepository,
     private val objectRepository: ObjectRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

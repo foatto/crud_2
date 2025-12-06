@@ -39,6 +39,7 @@ import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.sensor.SensorConfigCounter
 import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.model.sensor.SensorConfigLiquidLevel
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
@@ -58,8 +59,10 @@ class SensorService(
     private val objectRepository: ObjectRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

@@ -25,6 +25,7 @@ import foatto.server.entity.DayWorkEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.ObjectRepository
 import kotlinx.datetime.LocalDateTime
@@ -42,8 +43,10 @@ class DayWorkService(
     private val objectRepository: ObjectRepository,
     private val calcService: CalcService,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : MMSService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

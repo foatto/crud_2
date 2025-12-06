@@ -20,6 +20,7 @@ import foatto.server.entity.DepartmentEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DepartmentRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.util.getNextId
@@ -33,8 +34,10 @@ class DepartmentService(
     private val departmentRepository: DepartmentRepository,
     private val objectRepository: ObjectRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

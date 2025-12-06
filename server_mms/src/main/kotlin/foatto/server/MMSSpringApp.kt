@@ -66,7 +66,8 @@ class MMSSpringApp : SpringApp() {
     }
 
     private fun initAppModuleConfigs() {
-        //--- add disabled permissions for SUPPORT role to USER module
+        //--- add disabled permissions for SUPPORT role to some system modules
+        appModuleConfigs[AppModule.ACTION_LOG]?.disabledAccessRoles?.add(AppRoleMMS.SUPPORT)
         appModuleConfigs[AppModule.USER]?.disabledFormAddRoles?.add(AppRoleMMS.SUPPORT)
         addDisabledRoles(AppModule.USER, ActionType.FORM_EDIT, AppRoleMMS.SUPPORT)
         addDisabledRoles(AppModule.USER, ActionType.FORM_DELETE, AppRoleMMS.SUPPORT)
@@ -495,6 +496,7 @@ class MMSSpringApp : SpringApp() {
 
                 addMenuItem(AppModule.USER_PROPERTY_EDIT, ActionType.MODULE_FORM, serverUserConfig.id, serverUserConfig, this)
                 addMenuItem(AppModule.USER, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(AppModule.ACTION_LOG, ActionType.MODULE_TABLE, null, serverUserConfig, this)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMessage(LocalizedMessages.SYSTEM, serverUserConfig.lang), null, this)

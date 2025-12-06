@@ -20,6 +20,7 @@ import foatto.server.checkRowPermission
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.util.getNextId
@@ -33,8 +34,10 @@ class SensorCalibrationService(
     private val sensorRepository: SensorRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

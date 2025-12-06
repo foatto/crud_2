@@ -3,8 +3,16 @@ package foatto.server.entity
 import foatto.core.i18n.LanguageEnum
 import foatto.server.entity.converter.BooleanToIntConverter
 import foatto.server.entity.converter.SetToStringConverter
-import jakarta.persistence.*
-import kotlin.hashCode
+import jakarta.persistence.AttributeOverride
+import jakarta.persistence.AttributeOverrides
+import jakarta.persistence.Column
+import jakarta.persistence.Convert
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 
 @Entity
 @Table(name = "SYSTEM_users")

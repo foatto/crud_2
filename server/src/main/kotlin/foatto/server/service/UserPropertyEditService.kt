@@ -17,6 +17,7 @@ import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.server.checkRowPermission
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.UserRepository
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
@@ -29,8 +30,10 @@ import kotlin.time.ExperimentalTime
 class UserPropertyEditService(
     private val userRepository: UserRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

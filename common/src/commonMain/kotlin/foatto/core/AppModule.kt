@@ -1,6 +1,7 @@
 package foatto.core
 
 object AppModule {
-    const val USER = "USER"
-    const val USER_PROPERTY_EDIT = "USER_PROPERTY_EDIT"
+    const val ACTION_LOG = "action_log"
+    const val USER = "user"
+    const val USER_PROPERTY_EDIT = "user_property_edit"
 }

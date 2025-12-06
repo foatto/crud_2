@@ -22,6 +22,7 @@ import foatto.server.checkFormAddPermission
 import foatto.server.checkReportUnlockPermission
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.util.getFreeFile
 import jxl.Workbook
 import jxl.format.Alignment
@@ -44,8 +45,10 @@ import java.io.File
 
 abstract class ReportService(
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {

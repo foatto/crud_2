@@ -16,9 +16,13 @@ object ApiUrl {
 
     const val SAVE_USER_PROPERTY: String = "$URL_BASE/save_user_property/$CURRENT_VERSION"
 
+    const val ACTION_LOG: String = "$URL_BASE/action_log/$CURRENT_VERSION"
+    const val ACTION_LOG_FORM_ACTION: String = "$URL_BASE/action_log_form_action/$CURRENT_VERSION"
+
     const val USER: String = "$URL_BASE/user/$CURRENT_VERSION"
     const val USER_FORM_ACTION: String = "$URL_BASE/user_form_action/$CURRENT_VERSION"
 
     const val USER_PROPERTY_EDIT: String = "$URL_BASE/user_property_edit/$CURRENT_VERSION"
     const val USER_PROPERTY_EDIT_FORM_ACTION: String = "$URL_BASE/user_property_edit_form_action/$CURRENT_VERSION"
+
 }

@@ -33,7 +33,9 @@ import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getTimeZone
 import foatto.server.OrgType
 import foatto.server.SpringApp
+import foatto.server.appModuleConfigs
 import foatto.server.appRoleConfigs
+import foatto.server.checkAccessPermission
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.DateEntity
@@ -42,6 +44,7 @@ import foatto.server.entity.UserEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.UserRepository
 import foatto.server.util.encodePassword
 import foatto.server.util.getNextId
@@ -60,8 +63,10 @@ import kotlin.time.ExperimentalTime
 class UserService(
     private val userRepository: UserRepository,
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
+    actionLogRepository = actionLogRepository,
 ) {
 
     companion object {
@@ -316,6 +321,20 @@ class UserService(
                     action = formAction,
                     text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
+                )
+            }
+            if (checkAccessPermission(AppModule.ACTION_LOG, userConfig.roles)) {
+                popupDatas += TablePopup(
+                    action = AppAction(
+                        type = ActionType.MODULE_TABLE,
+                        module = AppModule.ACTION_LOG,
+                        parentModule = AppModule.USER,
+                        parentId = userEntity.id,
+                    ),
+                    text = appModuleConfigs[AppModule.ACTION_LOG]?.captions?.let { captions ->
+                        getLocalizedMessage(captions, userConfig.lang)
+                    } ?: "(неизвестный тип модуля: '${AppModule.ACTION_LOG}')",
+                    inNewTab = true,
                 )
             }
 

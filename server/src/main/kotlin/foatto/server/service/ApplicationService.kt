@@ -28,6 +28,7 @@ import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableButtonCell
 import foatto.core.model.response.table.cell.TableButtonCellData
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateDMYString
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.server.AppRole
@@ -35,13 +36,18 @@ import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.checkFormAddPermission
+import foatto.server.entity.ActionLogEntity
 import foatto.server.entity.DateEntity
 import foatto.server.entity.DateTimeEntity
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.repository.ActionLogRepository
 import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.sql.SpringConnection
+import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.hibernate.Session
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -51,6 +57,7 @@ import java.sql.Statement
 
 abstract class ApplicationService(
     private val fileStoreService: FileStoreService,
+    private val actionLogRepository: ActionLogRepository,
 ) {
 
     @Value("\${root_dir}")
@@ -61,6 +68,8 @@ abstract class ApplicationService(
 
     @Value("\${file_access_period}")
     private val fileAccessPeriod: String = "24"  // 24 hour file accessibility by default
+
+    private val json = Json { prettyPrint = true }
 
     companion object {
 
@@ -130,6 +139,20 @@ abstract class ApplicationService(
         }
 
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
+
+        actionLogRepository.saveAndFlush(
+            ActionLogEntity(
+                id = getNextId { nextId -> actionLogRepository.existsById(nextId) },
+                userId = userConfig.id,
+                onTime = getCurrentTimeInt(),
+                type = action.type,
+                module = action.module,
+                recordId = action.id,
+                parentModule = action.parentModule,
+                parentId = action.parentId,
+                action = json.encodeToString(action),
+            )
+        )
 
         return when (action.type) {
             ActionType.MODULE_TABLE -> {
@@ -603,6 +626,20 @@ abstract class ApplicationService(
             action = action,
             userConfig = userConfig,
             moduleConfig = moduleConfig,
+        )
+
+        actionLogRepository.saveAndFlush(
+            ActionLogEntity(
+                id = getNextId { nextId -> actionLogRepository.existsById(nextId) },
+                userId = userConfig.id,
+                onTime = getCurrentTimeInt(),
+                type = action.type,
+                module = action.module,
+                recordId = action.id,
+                parentModule = action.parentModule,
+                parentId = action.parentId,
+                action = json.encodeToString(action),
+            )
         )
 
         return when (action.type) {

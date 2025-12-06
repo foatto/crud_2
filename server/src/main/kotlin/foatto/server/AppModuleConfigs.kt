@@ -8,6 +8,31 @@ import foatto.server.model.Permission
 
 val appModuleConfigs: MutableMap<String, AppModuleConfig> = mutableMapOf(
 
+    AppModule.ACTION_LOG to AppModuleConfig(
+        captions = mapOf(LanguageEnum.EN to "Action Log", LanguageEnum.RU to "Журнал активности"),
+        pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+        enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
+        disabledAccessRoles = mutableSetOf(AppRole.USER),
+        enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+        disabledFormAddRoles = mutableSetOf(AppRole.USER),
+        rowPermissions = mutableMapOf(
+            ActionType.MODULE_TABLE to Permission(
+                enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                disabledRoles = getRoleAllPermissions(AppRole.USER),
+            ),
+            ActionType.MODULE_FORM to Permission(
+                enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                disabledRoles = getRoleAllPermissions(AppRole.USER),
+            ),
+            ActionType.FORM_EDIT to Permission(
+                disabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
+            ),
+            ActionType.FORM_DELETE to Permission(
+                disabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
+            ),
+        )
+    ),
+
     AppModule.USER to AppModuleConfig(
         captions = mapOf(LanguageEnum.EN to "Users", LanguageEnum.RU to "Пользователи"),
         enabledAccessRoles = mutableSetOf(AppRole.ADMIN),

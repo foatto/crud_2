@@ -905,11 +905,6 @@ class DeviceService(
             minParkingTime = 300,
             minOverSpeedTime = 60,
             isAbsoluteRun = true,
-            speedRoundRule = SensorConfigGeo.SPEED_ROUND_RULE_STANDART,
-            runKoef = 1.0,
-            isUsePos = true,
-            isUseSpeed = true,
-            isUseRun = true,
 
             minIgnore = 0.0,
             maxIgnore = 1_000_000_000.0,

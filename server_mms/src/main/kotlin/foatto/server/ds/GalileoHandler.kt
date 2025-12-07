@@ -11,6 +11,7 @@ import java.net.InetSocketAddress
 import java.nio.ByteOrder
 import java.nio.channels.SelectionKey
 import java.nio.channels.SocketChannel
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 class GalileoHandler : MMSNioHandler() {
@@ -239,7 +240,7 @@ class GalileoHandler : MMSNioHandler() {
 
                 //--- speed & angle
                 0x33 -> {
-                    speed = roundSpeed((bbIn.getShort().toInt() and 0xFFFF) / 10.0)
+                    speed = round((bbIn.getShort().toInt() and 0xFFFF) / 10.0).toInt()
                     bbIn.getShort()    // SKIP angle
                 }
 
@@ -444,9 +445,9 @@ class GalileoHandler : MMSNioHandler() {
                                     //--- борьба с переполнением Int и выходом его в отрицательную зону
                                     val doubleFromInt =
                                         (b1.toInt() and 0xFF) * 256.0 * 256.0 * 256.0 +
-                                            (b2.toInt() and 0xFF) * 256.0 * 256.0 +
-                                            (b3.toInt() and 0xFF) * 256.0 +
-                                            (b4.toInt() and 0xFF)
+                                                (b2.toInt() and 0xFF) * 256.0 * 256.0 +
+                                                (b3.toInt() and 0xFF) * 256.0 +
+                                                (b4.toInt() and 0xFF)
 
                                     val floatBitsValue = (b1.toInt() and 0xFF shl 24) or (b2.toInt() and 0xFF shl 16) or (b3.toInt() and 0xFF shl 8) or (b4.toInt() and 0xFF)
                                     val doubleFromFloatBits = Float.fromBits(floatBitsValue).toDouble()

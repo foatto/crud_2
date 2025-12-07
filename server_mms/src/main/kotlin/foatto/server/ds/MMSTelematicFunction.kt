@@ -411,8 +411,6 @@ object MMSTelematicFunction {
         }
         rs.close()
 
-        relativeRun *= sensorEntity.runKoef ?: 1.0
-
         conn.executeUpdate(
             """
                 INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 

@@ -97,9 +97,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
         var rs = conn.executeQuery(
             """
                 SELECT port_num , id , sensor_type , beg_time , end_time ,  
-                    min_moving_time , min_parking_time , min_over_speed_time , 
-                        is_absolute_run , speed_round_rule , run_koef ,
-                        is_use_pos , is_use_speed , is_use_run ,
+                    min_moving_time , min_parking_time , min_over_speed_time , is_absolute_run , 
                     ignore_min_sensor , ignore_max_sensor , dim ,
                     active_value , bound_value , idle_border , limit_border , min_off_time , min_on_time , min_idle_time , min_over_time ,  
                     analog_min_view , analog_max_view , analog_min_limit , analog_max_limit , smooth_time ,   
@@ -133,11 +131,6 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 minParkingTime = rs.getInt(pos++),
                 minOverSpeedTime = rs.getInt(pos++),
                 isAbsoluteRun = rs.getInt(pos++) != 0,
-                speedRoundRule = rs.getInt(pos++),
-                runKoef = rs.getDouble(pos++),
-                isUsePos = rs.getInt(pos++) != 0,
-                isUseSpeed = rs.getInt(pos++) != 0,
-                isUseRun = rs.getInt(pos++) != 0,
 
                 minIgnore = rs.getDouble(pos++),
                 maxIgnore = rs.getDouble(pos++),
@@ -195,15 +188,4 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
             }
         }
     }
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    protected fun roundSpeed(speed: Double): Int =
-        when (deviceConfig!!.speedRoundRule) {
-            SensorConfigGeo.SPEED_ROUND_RULE_LESS -> floor(speed).toInt()
-            SensorConfigGeo.SPEED_ROUND_RULE_GREATER -> ceil(speed).toInt()
-            SensorConfigGeo.SPEED_ROUND_RULE_STANDART -> round(speed).toInt()
-            else -> round(speed).toInt()
-        }
-
 }

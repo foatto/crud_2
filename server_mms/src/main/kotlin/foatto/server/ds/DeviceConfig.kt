@@ -13,8 +13,6 @@ class DeviceConfig(
     var isAutoWorkShift: Boolean,
     val deviceIndex: Int,
 ) {
-    var speedRoundRule: Int = SensorConfigGeo.SPEED_ROUND_RULE_STANDART
-
     lateinit var timeZone: TimeZone
 
     companion object {
@@ -43,21 +41,6 @@ class DeviceConfig(
             rs.close()
 
             deviceConfig?.let { dc ->
-                rs = conn.executeQuery(
-                    """
-                        SELECT speed_round_rule 
-                        FROM MMS_sensor 
-                        WHERE object_id = ${dc.objectId} 
-                        AND sensor_type = ${SensorConfig.SENSOR_GEO}
-                    """.trimIndent()
-                )
-                dc.speedRoundRule = if (rs.next()) {
-                    rs.getInt(1)
-                } else {
-                    SensorConfigGeo.SPEED_ROUND_RULE_STANDART
-                }
-                rs.close()
-
                 rs = conn.executeQuery(
                     """
                         SELECT time_offset 

@@ -37,7 +37,6 @@ import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.sensor.SensorConfigCounter
-import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.model.sensor.SensorConfigLiquidLevel
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
@@ -83,11 +82,6 @@ class SensorService(
         private const val FIELD_MIN_PARKING_TIME = "minParkingTime"
         private const val FIELD_MIN_OVER_SPEED_TIME = "minOverSpeedTime"
         private const val FIELD_IS_ABSOLUTE_RUN = "isAbsoluteRun"
-        private const val FIELD_SPEED_ROUND_RULE = "speedRoundRule"
-        private const val FIELD_RUN_KOEF = "runKoef"
-        private const val FIELD_IS_USE_POS = "isUsePos"
-        private const val FIELD_IS_USE_SPEED = "isUseSpeed"
-        private const val FIELD_IS_USE_RUN = "isUseRun"
 
         private const val FIELD_MIN_IGNORE = "minIgnore"
         private const val FIELD_MAX_IGNORE = "maxIgnore"
@@ -658,67 +652,6 @@ class SensorService(
                 values = geoSensorType,
             ),
         )
-        formCells += FormComboCell(
-            name = FIELD_SPEED_ROUND_RULE,
-            caption = "Правило округления скорости",
-            isEditable = changeEnabled,
-            value = sensorEntity?.speedRoundRule?.toString() ?: SensorConfigGeo.SPEED_ROUND_RULE_STANDART.toString(),
-            values = listOf(
-                SensorConfigGeo.SPEED_ROUND_RULE_LESS.toString() to "В меньшую сторону",
-                SensorConfigGeo.SPEED_ROUND_RULE_STANDART.toString() to "Стандартно",
-                SensorConfigGeo.SPEED_ROUND_RULE_GREATER.toString() to "В большую сторону",
-            ),
-            asRadioButtons = true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType,
-            ),
-        )
-        formCells += FormSimpleCell(
-            name = FIELD_RUN_KOEF,
-            caption = "Коэффициент учёта погрешности",
-            isEditable = changeEnabled,
-            value = sensorEntity?.runKoef?.toString() ?: "1.0",
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType,
-            ),
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_IS_USE_POS,
-            caption = "Использовать местоположение",
-            isEditable = changeEnabled,
-            value = sensorEntity?.isUsePos ?: true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType,
-            ),
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_IS_USE_SPEED,
-            caption = "Использовать скорость",
-            isEditable = changeEnabled,
-            value = sensorEntity?.isUseSpeed ?: true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType,
-            ),
-        )
-        formCells += FormBooleanCell(
-            name = FIELD_IS_USE_RUN,
-            caption = "Использовать пробег",
-            isEditable = changeEnabled,
-            value = sensorEntity?.isUseRun ?: true,
-            visibility = FormCellVisibility(
-                name = FIELD_SENSOR_TYPE,
-                state = true,
-                values = geoSensorType,
-            ),
-        )
 
         //--- all sensors (exclude geo-sensor) --------------------------------------------------------------
 
@@ -1081,11 +1014,6 @@ class SensorService(
             minParkingTime = formActionData[FIELD_MIN_PARKING_TIME]?.stringValue?.toIntOrNull() ?: 300,
             minOverSpeedTime = formActionData[FIELD_MIN_OVER_SPEED_TIME]?.stringValue?.toIntOrNull() ?: 60,
             isAbsoluteRun = formActionData[FIELD_IS_ABSOLUTE_RUN]?.booleanValue ?: true,
-            speedRoundRule = formActionData[FIELD_SPEED_ROUND_RULE]?.stringValue?.toIntOrNull() ?: SensorConfigGeo.SPEED_ROUND_RULE_STANDART,
-            runKoef = formActionData[FIELD_RUN_KOEF]?.stringValue?.toDoubleOrNull() ?: 1.0,
-            isUsePos = formActionData[FIELD_IS_USE_POS]?.booleanValue ?: true,
-            isUseSpeed = formActionData[FIELD_IS_USE_SPEED]?.booleanValue ?: true,
-            isUseRun = formActionData[FIELD_IS_USE_RUN]?.booleanValue ?: true,
             minIgnore = formActionData[FIELD_MIN_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxIgnore = formActionData[FIELD_MAX_IGNORE]?.stringValue?.toDoubleOrNull() ?: 0.0,
             dim = formActionData[FIELD_DIM]?.stringValue,

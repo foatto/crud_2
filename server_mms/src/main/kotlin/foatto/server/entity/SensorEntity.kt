@@ -50,24 +50,6 @@ class SensorEntity(
     @Column(name = "is_absolute_run")
     val isAbsoluteRun: Boolean?,
 
-    @Column(name = "speed_round_rule")
-    val speedRoundRule: Int?,
-
-    @Column(name = "run_koef")
-    val runKoef: Double?,
-
-    @Convert(converter = BooleanToIntConverter::class)
-    @Column(name = "is_use_pos")
-    val isUsePos: Boolean?,
-
-    @Convert(converter = BooleanToIntConverter::class)
-    @Column(name = "is_use_speed")
-    val isUseSpeed: Boolean?,
-
-    @Convert(converter = BooleanToIntConverter::class)
-    @Column(name = "is_use_run")
-    val isUseRun: Boolean?,
-
     //--- for all sensor tpes (exclude geo-sensor)
 
     @Column(name = "ignore_min_sensor")
@@ -167,11 +149,6 @@ class SensorEntity(
         if (minParkingTime != other.minParkingTime) return false
         if (minOverSpeedTime != other.minOverSpeedTime) return false
         if (isAbsoluteRun != other.isAbsoluteRun) return false
-        if (speedRoundRule != other.speedRoundRule) return false
-        if (runKoef != other.runKoef) return false
-        if (isUsePos != other.isUsePos) return false
-        if (isUseSpeed != other.isUseSpeed) return false
-        if (isUseRun != other.isUseRun) return false
         if (minIgnore != other.minIgnore) return false
         if (maxIgnore != other.maxIgnore) return false
         if (isWorkAboveBorder != other.isWorkAboveBorder) return false
@@ -214,11 +191,6 @@ class SensorEntity(
         result = 31 * result + (minParkingTime ?: 0)
         result = 31 * result + (minOverSpeedTime ?: 0)
         result = 31 * result + (isAbsoluteRun?.hashCode() ?: 0)
-        result = 31 * result + (speedRoundRule ?: 0)
-        result = 31 * result + (runKoef?.hashCode() ?: 0)
-        result = 31 * result + (isUsePos?.hashCode() ?: 0)
-        result = 31 * result + (isUseSpeed?.hashCode() ?: 0)
-        result = 31 * result + (isUseRun?.hashCode() ?: 0)
         result = 31 * result + (minIgnore?.hashCode() ?: 0)
         result = 31 * result + (maxIgnore?.hashCode() ?: 0)
         result = 31 * result + (isWorkAboveBorder?.hashCode() ?: 0)

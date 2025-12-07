@@ -1,8 +1,6 @@
 package foatto.server.ds
 
 import foatto.core.util.getTimeZone
-import foatto.server.model.sensor.SensorConfig
-import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.sql.CoreAdvancedConnection
 import kotlinx.datetime.TimeZone
 

@@ -1,5 +1,6 @@
 package foatto.server.entity
 
+import foatto.server.ObjectType
 import foatto.server.entity.converter.BooleanToIntConverter
 import jakarta.persistence.*
 
@@ -12,6 +13,9 @@ class ObjectEntity(
 
     @Column(name = "user_id")
     val userId: Int?,
+
+    @Enumerated(EnumType.STRING)
+    var type: ObjectType?,
 
     @Convert(converter = BooleanToIntConverter::class)
     @Column(name = "is_disabled")
@@ -44,7 +48,6 @@ class ObjectEntity(
     @Convert(converter = BooleanToIntConverter::class)
     @Column(name = "is_auto_work_shift")
     val isAutoWorkShiftEnabled: Boolean?,
-
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -52,6 +55,9 @@ class ObjectEntity(
 
         if (userId != other.userId) return false
         if (isDisabled != other.isDisabled) return false
+        if (fileId != other.fileId) return false
+        if (isAutoWorkShiftEnabled != other.isAutoWorkShiftEnabled) return false
+        if (type != other.type) return false
         if (disableReason != other.disableReason) return false
         if (name != other.name) return false
         if (model != other.model) return false
@@ -59,9 +65,6 @@ class ObjectEntity(
         if (group != other.group) return false
         if (info != other.info) return false
         if (eMail != other.eMail) return false
-        if (fileId != other.fileId) return false
-//        if (lastAlertTime != other.lastAlertTime) return false
-        if (isAutoWorkShiftEnabled != other.isAutoWorkShiftEnabled) return false
 
         return true
     }
@@ -69,6 +72,9 @@ class ObjectEntity(
     override fun hashCode(): Int {
         var result = userId ?: 0
         result = 31 * result + (isDisabled?.hashCode() ?: 0)
+        result = 31 * result + (fileId ?: 0)
+        result = 31 * result + (isAutoWorkShiftEnabled?.hashCode() ?: 0)
+        result = 31 * result + (type?.hashCode() ?: 0)
         result = 31 * result + (disableReason?.hashCode() ?: 0)
         result = 31 * result + (name?.hashCode() ?: 0)
         result = 31 * result + (model?.hashCode() ?: 0)
@@ -76,9 +82,6 @@ class ObjectEntity(
         result = 31 * result + (group?.hashCode() ?: 0)
         result = 31 * result + (info?.hashCode() ?: 0)
         result = 31 * result + (eMail?.hashCode() ?: 0)
-        result = 31 * result + (fileId ?: 0)
-//        result = 31 * result + (lastAlertTime ?: 0)
-        result = 31 * result + (isAutoWorkShiftEnabled?.hashCode() ?: 0)
         return result
     }
 }

@@ -13,6 +13,7 @@ import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.AppRoleConfig
 import foatto.server.model.Permission
+import foatto.server.service.ObjectService
 import foatto.server.util.AdvancedLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -445,8 +446,8 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
-                addMenuItem(AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE, null, serverUserConfig, this)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.CONTROL, serverUserConfig.lang), null, this)
@@ -454,10 +455,26 @@ class MMSSpringApp : SpringApp() {
             }
 
             mutableListOf<MenuData>().apply {
-
-                addMenuItem(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-                addMenuItem(AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-                addMenuItem(AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM, null, serverUserConfig, this)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.OBJECT,
+                    actionType = ActionType.MODULE_TABLE,
+                    id = null,
+                    alterCaption = "Мобильные объекты",
+                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.MOBILE.name)
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.OBJECT,
+                    actionType = ActionType.MODULE_TABLE,
+                    id = null,
+                    alterCaption = "Стационарные объекты",
+                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.STATIONARY.name)
+                )
+                addMenuItem(this, serverUserConfig, AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.ACCOUNTING, serverUserConfig.lang), null, this)
@@ -466,7 +483,7 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM, null, serverUserConfig, this)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.REPORTS, serverUserConfig.lang), null, this)
@@ -475,8 +492,8 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.DEPARTMENT, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-                addMenuItem(AppModuleMMS.GROUP, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.DEPARTMENT, ActionType.MODULE_TABLE)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.GROUP, ActionType.MODULE_TABLE)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.REFERENCES, serverUserConfig.lang), null, this)
@@ -485,7 +502,7 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModuleMMS.DEVICE, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(this, serverUserConfig, AppModuleMMS.DEVICE, ActionType.MODULE_TABLE)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.DEVICES, serverUserConfig.lang), null, this)
@@ -494,9 +511,9 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(AppModule.USER_PROPERTY_EDIT, ActionType.MODULE_FORM, serverUserConfig.id, serverUserConfig, this)
-                addMenuItem(AppModule.USER, ActionType.MODULE_TABLE, null, serverUserConfig, this)
-                addMenuItem(AppModule.ACTION_LOG, ActionType.MODULE_TABLE, null, serverUserConfig, this)
+                addMenuItem(this, serverUserConfig, AppModule.USER_PROPERTY_EDIT, ActionType.MODULE_FORM, serverUserConfig.id)
+                addMenuItem(this, serverUserConfig, AppModule.USER, ActionType.MODULE_TABLE)
+                addMenuItem(this, serverUserConfig, AppModule.ACTION_LOG, ActionType.MODULE_TABLE)
 
                 if (size > 0) {
                     alMenu += MenuData(getLocalizedMessage(LocalizedMessages.SYSTEM, serverUserConfig.lang), null, this)

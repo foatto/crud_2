@@ -1,5 +1,6 @@
 package foatto.server.repository
 
+import foatto.server.ObjectType
 import foatto.server.entity.ObjectEntity
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -49,16 +50,20 @@ interface ObjectRepository : JpaRepository<ObjectEntity, Int> {
             LEFT JOIN oe.department de
             LEFT JOIN oe.group ge
             WHERE oe.id <> 0
-                AND oe.userId IN ?1
                 AND (
-                        ?2 = ''
-                     OR LOWER(oe.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
+                       ?1 IS NULL
+                    OR oe.type = ?1
+                )
+                AND oe.userId IN ?2
+                AND (
+                        ?3 = ''
+                     OR LOWER(oe.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                 )
         """
     )
-    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, pageRequest: Pageable): Page<ObjectEntity>
+    fun findByTypeAndUserIdInAndFilter(type: ObjectType?, userIds: List<Int>, findText: String, pageRequest: Pageable): Page<ObjectEntity>
 
 }

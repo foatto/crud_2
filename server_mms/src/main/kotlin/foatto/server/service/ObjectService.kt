@@ -9,6 +9,7 @@ import foatto.core.model.response.form.FormButton
 import foatto.core.model.response.form.FormCellVisibility
 import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormBooleanCell
+import foatto.core.model.response.form.cells.FormComboCell
 import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.model.response.table.TableCaption
@@ -21,12 +22,18 @@ import foatto.core.model.response.table.cell.TableButtonCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
+import foatto.server.ObjectType
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.ObjectEntity
+import foatto.server.entity.SensorEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.model.sensor.SensorConfig
+import foatto.server.model.sensor.SensorConfigCounter
+import foatto.server.model.sensor.SensorConfigGeo
+import foatto.server.model.sensor.SensorConfigLiquidLevel
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DepartmentRepository
 import foatto.server.repository.DeviceRepository
@@ -34,12 +41,15 @@ import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.service.SensorService.Companion.checkAndCreateSensorTables
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.io.File
 
 @Service
 class ObjectService(
@@ -60,6 +70,7 @@ class ObjectService(
     companion object {
         const val FIELD_ID: String = "id"
         private const val FIELD_USER_ID = "userId"
+        const val FIELD_TYPE: String = "type"
         private const val FIELD_IS_DISABLED = "isDisabled"
         private const val FIELD_DISABLE_REASON = "disableReason"
         const val FIELD_NAME: String = "name"
@@ -78,6 +89,9 @@ class ObjectService(
         private const val FIELD_GROUP_NAME = "_groupName"             // псевдополе для селектора
     }
 
+    @Value("\${data_server_ini_file}")
+    val dataServerIniFileName: String = ""
+
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
@@ -85,6 +99,9 @@ class ObjectService(
             alColumnInfo += null to "" // selector button
         }
         alColumnInfo += null to "" // userId
+        if (getObjectType(action) == null) {
+            alColumnInfo += FIELD_TYPE to "Тип"
+        }
         alColumnInfo += FIELD_IS_DISABLED to "Заблокирован"
         alColumnInfo += FIELD_NAME to "Наименование"
         alColumnInfo += FIELD_MODEL to "Модель"
@@ -116,9 +133,16 @@ class ObjectService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
 
+        val objectType = getObjectType(action)
+
         val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
 
-        val page: Page<ObjectEntity> = objectRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
+        val page: Page<ObjectEntity> = objectRepository.findByTypeAndUserIdInAndFilter(
+            type = objectType,
+            userIds = enabledUserIds,
+            findText = findText,
+            pageRequest = pageRequest,
+        )
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val objectEntities = page.content
 
@@ -154,6 +178,9 @@ class ObjectService(
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
+            if (objectType == null) {
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.type?.getDescr(userConfig.lang) ?: "-")
+            }
             tableCells += TableBooleanCell(row = row, col = col++, dataRow = row, minWidth = 100, value = objectEntity.isDisabled ?: false)
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.name ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.model ?: "-")
@@ -287,6 +314,14 @@ class ObjectService(
 
         val changeEnabled = action.id?.let { editEnabled } ?: addEnabled
 
+        formCells += FormComboCell(
+            name = FIELD_TYPE,
+            caption = "Тип объекта",
+            isEditable = changeEnabled,
+            value = (objectEntity?.type ?: getObjectType(action) ?: ObjectType.STATIONARY).name,
+            values = ObjectType.entries.map { v -> v.name to v.getDescr(userConfig.lang) },
+            asRadioButtons = true,
+        )
         fillFormUserCells(
             fieldUserId = FIELD_USER_ID,
             fieldOwnerFullName = FIELD_OWNER_FULL_NAME,
@@ -452,11 +487,14 @@ class ObjectService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
         }
 
+        val objectType = formActionData[FIELD_TYPE]?.stringValue?.let { s -> ObjectType.valueOf(s) } ?: ObjectType.STATIONARY
+
         // !!! getNextIntId(arrayOf("MMS_object", "MMS_zone"), arrayOf("id", "id"))
         val recordId = id ?: getNextId { nextId -> objectRepository.existsById(nextId) }
         val objectEntity = ObjectEntity(
             id = recordId,
             userId = recordUserId,
+            type = objectType,
             isDisabled = formActionData[FIELD_IS_DISABLED]?.booleanValue == true,
             disableReason = formActionData[FIELD_DISABLE_REASON]?.stringValue,
             name = formActionData[FIELD_NAME]?.stringValue,
@@ -480,6 +518,68 @@ class ObjectService(
                 " CREATE TABLE MMS_data_$recordId ( ontime INT NOT NULL, sensor_data BYTEA ) ",
                 " CREATE INDEX MMS_data_${recordId}_ontime ON MMS_data_$recordId ( ontime ) ",
             )
+        }
+
+        val geoSensors = sensorRepository.findByObjAndPortNumAndSensorType(objectEntity, SensorConfigGeo.PORT_NUM, SensorConfig.SENSOR_GEO)
+        when (objectType) {
+            ObjectType.MOBILE -> {
+                if (geoSensors.isEmpty()) {
+                    val recordId = id ?: getNextId { nextId -> sensorRepository.existsById(nextId) }
+                    val sensorEntity = SensorEntity(
+                        id = recordId,
+                        obj = objectEntity,
+                        name = "",
+                        group = "",
+                        descr = SensorConfig.hmSensorDescr[SensorConfig.SENSOR_GEO],
+                        portNum = SensorConfigGeo.PORT_NUM,
+                        sensorType = SensorConfig.SENSOR_GEO,
+                        begTime = getCurrentTimeInt(),
+                        endTime = null,
+                        serialNo = "",
+                        minMovingTime = 1,
+                        minParkingTime = 300,
+                        minOverSpeedTime = 60,
+                        isAbsoluteRun = true,
+                        minIgnore = 0.0,
+                        maxIgnore = 0.0,
+                        dim = null,
+                        isWorkAboveBorder = true,
+                        workOnBorder = null,
+                        workIdleBorder = null,
+                        workOverBorder = null,
+                        workMinOffTime = 1,
+                        workMinOnTime = 1,
+                        workMinIdleTime = 1,
+                        workMinOverTime = 1,
+                        minView = 0.0,
+                        maxView = 100.0,
+                        minLimit = 0.0,
+                        maxLimit = 100.0,
+                        smoothTime = 0,
+                        indicatorDelimiterCount = 4,
+                        indicatorMultiplicator = 1.0,
+                        isAbsoluteCount = true,
+                        inOutType = SensorConfigCounter.CALC_TYPE_OUT,
+                        containerType = SensorConfigLiquidLevel.CONTAINER_TYPE_WORK,
+                        phase = 0,
+                        schemeX = null,
+                        schemeY = null,
+                    )
+                    sensorRepository.saveAndFlush(sensorEntity)
+                    checkAndCreateSensorTables(entityManager, recordId)
+
+                    //--- (re)create DataServer restart flag file
+                    File(dataServerIniFileName).copyTo(File(dataServerIniFileName + "_"), true)
+                }
+            }
+
+            ObjectType.STATIONARY -> {
+                if (geoSensors.isNotEmpty()) {
+                    geoSensors.forEach { sensorEntity ->
+                        SensorService.deleteSensor(entityManager, sensorRepository, sensorCalibrationRepository, sensorEntity.id)
+                    }
+                }
+            }
         }
 
         return FormActionResponse(
@@ -534,6 +634,14 @@ class ObjectService(
         return Triple(addEnabled, editEnabled, deleteEnabled)
     }
 
+    private fun getObjectType(action: AppAction): ObjectType? =
+        action.params[FIELD_TYPE]?.let { objectTypeStr ->
+            try {
+                ObjectType.valueOf(objectTypeStr)
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+        }
 }
 /*
     companion object {

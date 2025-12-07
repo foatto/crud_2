@@ -298,6 +298,7 @@ class UserService(
                 )
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.timeOffset?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.lang?.descr ?: "-")
             if (isAdminOnly(userConfig)) {
                 tableCells += TableSimpleCell(
                     row = row,

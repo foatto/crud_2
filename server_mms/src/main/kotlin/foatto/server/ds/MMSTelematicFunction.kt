@@ -17,22 +17,21 @@ import java.io.File
 import java.util.SortedMap
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
-import kotlin.math.roundToLong
 
 object MMSTelematicFunction {
 
     const val DEVICE_TYPE_GALILEO: Int = 1
     const val DEVICE_TYPE_PULSAR_DATA: Int = 3
 
-    private const val ERROR_CODE_NO_DATA: Long = -1_000_000_000_000L
-    private const val ERROR_CODE_MEASURE_ERROR: Long = -2_000_000_000_000L
+    private const val ERROR_CODE_NO_DATA: Double = -1.0E-12
+    private const val ERROR_CODE_MEASURE_ERROR: Double = -2.0E-12
 
     private const val TEXT_TYPE_ERROR: Int = 1
 
     private const val TEXT_CODE_NO_DATA: Int = 1
     private const val TEXT_CODE_MEASURE_ERROR: Int = 2
 
-    private val errorCodes: Map<Long, Int> = mapOf(
+    private val errorCodes: Map<Double, Int> = mapOf(
         ERROR_CODE_NO_DATA to TEXT_CODE_NO_DATA,
         ERROR_CODE_MEASURE_ERROR to TEXT_CODE_MEASURE_ERROR,
     )
@@ -682,8 +681,7 @@ object MMSTelematicFunction {
         sensorTime: Int,
         sensorValue: Double,
     ): Boolean {
-        val errorValue = sensorValue.roundToLong()
-        return errorCodes[errorValue]?.let { errorCode ->
+        return errorCodes[sensorValue]?.let { errorCode ->
             var rs = conn.executeQuery(" SELECT MAX(ontime_1) FROM MMS_agg_$sensorId ")
             val lastAggTime = if (rs.next()) {
                 rs.getInt(1)

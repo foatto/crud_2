@@ -14,12 +14,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import foatto.compose.colorMainBack0
-import foatto.compose.colorMainText
+import foatto.compose.colorMainMenuText
+import foatto.compose.colorPopupMenuText
 import foatto.compose.model.MenuDataClient
+import foatto.compose.textSizeMainMenuFolder
+import foatto.compose.textSizeMainMenuItem
+import foatto.compose.textSizePopupMenuFolder
+import foatto.compose.textSizePopupMenuItem
+import foatto.compose.textWeightMainMenuFolder
+import foatto.compose.textWeightPopupMenuFolder
 import foatto.core.ActionType
 import foatto.core.model.AppAction
 import foatto.core.model.AppUserConfig
@@ -27,7 +31,7 @@ import foatto.core.model.AppUserConfig
 
 @Composable
 internal fun MainMenu(
-    isStaticMainMenu: Boolean,
+    isMainMenu: Boolean,
     isShowMainMenu: Boolean,
     alMenuDataClient: SnapshotStateList<MenuDataClient>,
     closeMenu: () -> Unit,
@@ -38,7 +42,7 @@ internal fun MainMenu(
         onDismissRequest = closeMenu,
     ) {
         GenerateMenuBody(
-            isStaticMainMenu = isStaticMainMenu,
+            isMainMenu = isMainMenu,
             alMenuDataClient = alMenuDataClient,
             level = 0,
             closeMenu = closeMenu,
@@ -49,7 +53,7 @@ internal fun MainMenu(
 
 @Composable
 internal fun GenerateMenuBody(
-    isStaticMainMenu: Boolean,
+    isMainMenu: Boolean,
     alMenuDataClient: List<MenuDataClient>,
     level: Int,
     closeMenu: () -> Unit,
@@ -70,10 +74,10 @@ internal fun GenerateMenuBody(
                         } else {
                             Icons.Default.KeyboardArrowDown
                         },
-                        tint = if (isStaticMainMenu) {
-                            colorMainBack0
+                        tint = if (isMainMenu) {
+                            colorMainMenuText
                         } else {
-                            colorMainText
+                            colorPopupMenuText
                         },
                         contentDescription = null,
                     )
@@ -81,20 +85,20 @@ internal fun GenerateMenuBody(
                 text = {
                     Text(
                         text = menuDataClient.caption,
-                        fontSize = if (isStaticMainMenu) {
-                            16.sp
+                        fontSize = if (isMainMenu) {
+                            textSizeMainMenuFolder
                         } else {
-                            13.sp
+                            textSizePopupMenuFolder
                         },
-                        fontWeight = if (isStaticMainMenu) {
-                            FontWeight.Normal   // белый жирный шрифт на темном фоне выглядит рыхлым :(
+                        fontWeight = if (isMainMenu) {
+                            textWeightMainMenuFolder
                         } else {
-                            FontWeight.Bold
+                            textWeightPopupMenuFolder
                         },
-                        color = if (isStaticMainMenu) {
-                            colorMainBack0
+                        color = if (isMainMenu) {
+                            colorMainMenuText
                         } else {
-                            colorMainText
+                            colorPopupMenuText
                         },
                     )
                 },
@@ -105,7 +109,7 @@ internal fun GenerateMenuBody(
             )
             if (menuDataClient.isExpanded.value) {
                 GenerateMenuBody(
-                    isStaticMainMenu = isStaticMainMenu,
+                    isMainMenu = isMainMenu,
                     alMenuDataClient = alSubMenu,
                     level = level + 1,
                     menuClick = menuClick,
@@ -118,11 +122,15 @@ internal fun GenerateMenuBody(
                     text = {
                         Text(
                             text = menuDataClient.caption,
-                            fontSize = 13.sp,
-                            color = if (isStaticMainMenu) {
-                                colorMainBack0
+                            fontSize = if (isMainMenu) {
+                                textSizeMainMenuItem
                             } else {
-                                colorMainText
+                                textSizePopupMenuItem
+                            },
+                            color = if (isMainMenu) {
+                                colorMainMenuText
+                            } else {
+                                colorPopupMenuText
                             },
                         )
                     },

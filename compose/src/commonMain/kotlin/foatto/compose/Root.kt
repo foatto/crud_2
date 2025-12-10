@@ -1,6 +1,5 @@
 package foatto.compose
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
@@ -148,7 +145,18 @@ open class Root {
 
         MaterialTheme {
             //--- define the all urgent size modifiers explicitly
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+                    .paint(
+                        painter = asyncPainterResource(getFullUrl("/images/index_2.png")).getOrElse(
+                            onLoading = { ColorPainter(colorIndexBackgroundDefault) },
+                            onFailure = { ColorPainter(colorIndexBackgroundDefault) },
+                        ),
+                        contentScale = ContentScale.FillBounds,
+                    )
+            ) {
                 if (isWideScreen) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         //AnimatedVisibility(visible = isShowMainMenu) { - притормаживает со сложной графикой (с дашбоардами, например)
@@ -156,39 +164,32 @@ open class Root {
                             Column(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .width(300.dp)
-                                    .background(Color.Transparent)
-                                    .paint(
-                                        painter = asyncPainterResource(getFullUrl("/images/main_menu.png")).getOrElse(
-                                            onLoading = { ColorPainter(colorTableCaptionBar) },
-                                            onFailure = { ColorPainter(colorTableCaptionBar) },
-                                        ),
-                                        contentScale = ContentScale.FillBounds,
-                                    )
+                                    .width(widthMainMenu)
+                                    .background(colorMainMenuDefault)
                             ) {
                                 Row(
-                                    modifier = Modifier
-                                        //.background(colorTableCaptionBar)
-                                        .padding(top = 12.dp, bottom = 12.dp),  // соотносится с отступами заголовков таблиц/форм основной части
+                                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
                                     horizontalArrangement = Arrangement.Start,
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     KamelImage(
                                         modifier = Modifier.padding(horizontal = 16.dp).size(18.dp),
                                         resource = { asyncPainterResource(data = getFullUrl("/images/ic_account_circle_black_18dp.png")) },
-                                        colorFilter = ColorFilter.tint(colorMainBack0),
+                                        colorFilter = ColorFilter.tint(colorUserName),
                                         contentDescription = "",
                                     )
                                     Text(
                                         modifier = Modifier.weight(1.0f),
-                                        color = colorMainBack0,
+                                        color = colorUserName,
                                         text = appUserConfig.currentUserName,
                                         softWrap = false,
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                 }
                                 KamelImage(
-                                    modifier = Modifier.size(300.dp, (134 * 300 / 260).dp), // increase proportionally
+                                    modifier = Modifier
+                                        .width(widthLogo)
+                                        .height(heightLogo),
                                     resource = { asyncPainterResource(data = getFullUrl("/images/logo_2.png")) },
                                     contentDescription = null,
                                 )
@@ -199,7 +200,7 @@ open class Root {
                                         .verticalScroll(state = mainMenuVerticalScrollState)
                                 ) {
                                     GenerateMenuBody(
-                                        isStaticMainMenu = true,
+                                        isMainMenu = true,
                                         alMenuDataClient = alMenuDataClient,
                                         level = 0,
                                         closeMenu = {},
@@ -295,7 +296,7 @@ open class Root {
                     }
                     if (!isWideScreen) {
                         MainMenu(
-                            isStaticMainMenu = false,
+                            isMainMenu = false,
                             isShowMainMenu = isShowMainMenu,
                             alMenuDataClient = alMenuDataClient,
                             closeMenu = {
@@ -359,6 +360,7 @@ open class Root {
 
                 invokeRequest(LogoffRequest()) { logoffResponse: LogoffResponse ->
                     isShowMainMenuButton = false
+                    isShowMainMenu = false
 
                     alMenuDataClient.clear()
 
@@ -366,6 +368,14 @@ open class Root {
                     selectedTabIndex = 0
                     tabInfos.clear()
                     controls.clear()
+
+                    appUserConfig = AppUserConfig(
+                        currentUserName = "",
+                        isAdmin = false,
+                        timeOffset = 0,
+                        lang = defaultLang,
+                        userProperties = mutableMapOf(),
+                    )
 
                     start()
                 }

@@ -4,6 +4,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 
 //--- по умолчанию - тёмные иконки на светлом фоне кнопок,
@@ -26,10 +29,12 @@ private const val MAIN_BACK_LIGHTNESS_2 = 0.88f
 private const val MAIN_BACK_LIGHTNESS_3 = 0.82f
 
 val colorMainBack0: Color = Color.hsl(0.0f, 0.0f, 1.0f)                             // input field, etc.
-private val colorMainBack1: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_0)    // form panel
+val colorMainBack1: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_0)    // form panel
 val colorMainBack2: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_1)    // active tab + header + toolbar
 private val colorMainBack3: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_2)    // non-active tab
 val colorMainBack4: Color = Color.hsl(0.0f, 0.0f, MAIN_BACK_LIGHTNESS_3)    // ?
+
+var colorIndexBackgroundDefault: Color = colorMainBack0
 
 var colorWait: Color? = null
 var colorWaitTrack: Color? = null
@@ -43,6 +48,15 @@ var colorIconButton: IconButtonColors? = null
 var colorOutlinedTextInput: TextFieldColors? = null
 var colorCheckBox: CheckboxColors? = null
 var colorRadioButton: RadioButtonColors? = null
+
+var colorLogonBack: Color = colorMainBack0
+var colorLogonLogoBack: Color = colorMainBack0
+
+var colorMainMenuDefault: Color = colorMainBack1
+var colorUserName: Color = colorMainText
+
+var colorMainMenuText: Color = colorMainText
+var colorPopupMenuText: Color = colorMainText
 
 val colorTabActive: Color = colorMainBack2
 val colorTabInactive: Color = colorMainBack3
@@ -72,6 +86,18 @@ var colorTablePageButton: ButtonColors? = null
 var colorDatePicker: DatePickerColors? = null
 @OptIn(ExperimentalMaterial3Api::class)
 var colorTimePicker: TimePickerColors? = null
+
+var widthLogo: Dp = 0.dp
+var heightLogo: Dp = 0.dp
+var widthMainMenu: Dp = 300.dp
+
+var textSizeMainMenuFolder: TextUnit = TextUnit.Unspecified
+var textSizeMainMenuItem: TextUnit = TextUnit.Unspecified
+var textSizePopupMenuFolder: TextUnit = TextUnit.Unspecified
+var textSizePopupMenuItem: TextUnit = TextUnit.Unspecified
+
+var textWeightMainMenuFolder: FontWeight = FontWeight.Bold
+var textWeightPopupMenuFolder: FontWeight = FontWeight.Bold
 
 val alertDialogShape: Shape = RoundedCornerShape(8.dp)
 val singleButtonShape: Shape = RoundedCornerShape(4.dp)

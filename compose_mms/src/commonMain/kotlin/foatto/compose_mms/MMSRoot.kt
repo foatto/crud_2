@@ -10,43 +10,64 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import foatto.compose.Root
 import foatto.compose.colorBottomBar
-import foatto.compose.colorTableCaptionBar
 import foatto.compose.colorCheckBox
 import foatto.compose.colorCompositeMovedBlockBack
 import foatto.compose.colorDatePicker
 import foatto.compose.colorIconButton
+import foatto.compose.colorIndexBackgroundDefault
+import foatto.compose.colorLogonBack
+import foatto.compose.colorLogonLogoBack
 import foatto.compose.colorMainBack0
+import foatto.compose.colorMainBack1
+import foatto.compose.colorMainBack2
+import foatto.compose.colorMainMenuDefault
+import foatto.compose.colorMainMenuText
 import foatto.compose.colorMainText
 import foatto.compose.colorOutlinedTextInput
+import foatto.compose.colorPopupMenuText
 import foatto.compose.colorRadioButton
 import foatto.compose.colorTabSelected
 import foatto.compose.colorTabUnselected
+import foatto.compose.colorTableCaptionBar
 import foatto.compose.colorTableCaptionSortCurrent
 import foatto.compose.colorTableCurrentRow
 import foatto.compose.colorTablePageButton
 import foatto.compose.colorTextButton
 import foatto.compose.colorTextButtonDefault
 import foatto.compose.colorTimePicker
+import foatto.compose.colorUserName
 import foatto.compose.colorWait
 import foatto.compose.colorWaitTrack
 import foatto.compose.defaultStartModule
+import foatto.compose.heightLogo
+import foatto.compose.textSizeMainMenuFolder
+import foatto.compose.textSizeMainMenuItem
+import foatto.compose.textSizePopupMenuFolder
+import foatto.compose.textSizePopupMenuItem
+import foatto.compose.textWeightMainMenuFolder
+import foatto.compose.textWeightPopupMenuFolder
 import foatto.compose.utils.SETTINGS_SERVER_ADDRESS
 import foatto.compose.utils.SETTINGS_SERVER_PORT
 import foatto.compose.utils.SETTINGS_SERVER_PROTOCOL
 import foatto.compose.utils.settings
+import foatto.compose.widthLogo
+import foatto.compose.widthMainMenu
 import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.addAppModuleUrls
 
 //--- фирменный тёмно-синий         #0C386D = hsl(213,80%,24%) и градиент до #209dcb = hsl(196,73%,46%)
-//private const val MMS_FIRM_COLOR_1_H = 213f
-//private const val MMS_FIRM_COLOR_1_S = 0.80f
-//private const val MMS_FIRM_COLOR_1_L = 0.40f    //0.24f <- слишком тяжёлый/сочный/тёмный цвет - 0.60f
+private const val MMS_FIRM_COLOR_1_H = 213f
+private const val MMS_FIRM_COLOR_1_S = 0.80f
+private const val MMS_FIRM_COLOR_1_L = 0.40f    //0.24f <- слишком тяжёлый/сочный/тёмный цвет - 0.60f
 //--- фирменный тёмно-синий         #0D54A2 = hsl(211,85%,34%) - с сайта - получается светлее и не очень контрастным с рыжим
-private const val MMS_FIRM_COLOR_1_H = 211f
-private const val MMS_FIRM_COLOR_1_S = 0.85f
-private const val MMS_FIRM_COLOR_1_L = 0.34f
+//private const val MMS_FIRM_COLOR_1_H = 211f
+//private const val MMS_FIRM_COLOR_1_S = 0.85f
+//private const val MMS_FIRM_COLOR_1_L = 0.34f
 
 //--- фирменный терракотовый        #F7AA47 = hsl(34,92%,62%)
 private const val MMS_FIRM_COLOR_2_H = 34f
@@ -78,8 +99,31 @@ class MMSRoot : Root() {
         val darkBlueColor = Color.hsl(MMS_FIRM_COLOR_1_H, MMS_FIRM_COLOR_1_S, MMS_FIRM_COLOR_1_L)
         val orangeColor = Color.hsl(MMS_FIRM_COLOR_2_H, MMS_FIRM_COLOR_2_S, MMS_FIRM_COLOR_2_L)
 
+        colorIndexBackgroundDefault = darkBlueColor
+
         colorWait = darkBlueColor
         colorWaitTrack = orangeColor
+
+        colorLogonBack = colorMainBack0
+        colorLogonLogoBack = darkBlueColor
+
+        widthLogo = 256.dp
+        heightLogo = 84.dp
+
+        widthMainMenu = 300.dp
+        colorMainMenuDefault = Color.Transparent
+        colorUserName = colorMainBack0
+
+        colorMainMenuText = colorMainBack0
+        colorPopupMenuText = colorMainText
+
+        textSizeMainMenuFolder = 17.sp  // белый жирный шрифт на темном фоне выглядит рыхлым, поэтому делаем шрифт крупнее
+        textSizeMainMenuItem = 14.sp
+        textSizePopupMenuFolder = 14.sp
+        textSizePopupMenuItem = 14.sp
+
+        textWeightMainMenuFolder = FontWeight.Normal   // белый жирный шрифт на темном фоне выглядит рыхлым
+        textWeightPopupMenuFolder = FontWeight.Bold
 
         colorTabSelected = darkBlueColor
         colorTabUnselected = Color.hsl(0.0f, 0.0f, 0.5f)

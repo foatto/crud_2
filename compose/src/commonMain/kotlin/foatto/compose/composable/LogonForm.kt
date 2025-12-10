@@ -1,9 +1,13 @@
 package foatto.compose.composable
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -27,10 +31,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import foatto.compose.colorCheckBox
+import foatto.compose.colorLogonBack
+import foatto.compose.colorLogonLogoBack
 import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorTextButton
+import foatto.compose.heightLogo
 import foatto.compose.singleButtonShape
 import foatto.compose.utils.getFullUrl
+import foatto.compose.widthLogo
 import foatto.core.i18n.LanguageEnum
 import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
@@ -56,108 +64,117 @@ fun LogonForm(
     var isFocusRequesterDefined = false
     val focusManager = LocalFocusManager.current
 
-    Column(
-        modifier = modifier
-    ) {
-        KamelImage(
-            modifier = Modifier.size(260.dp).align(Alignment.CenterHorizontally),
-            resource = { asyncPainterResource(data = getFullUrl("/images/logo_2.png")) },
-            contentDescription = null,
-        )
-        errorText?.let {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = errorText,
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        OutlinedTextField(
+    Box(modifier = modifier) {
+        Column(
             modifier = Modifier
-                .onKeyEvent { keyEvent ->
-                    if (keyEvent.key == Key.Enter) {
-                        focusManager.moveFocus(FocusDirection.Next)
-                        true
-                    } else {
-                        false
-                    }
-                }
-                .then(
-                    run {
-                        isFocusRequesterDefined = true
-                        Modifier.focusRequester(focusRequester)
-                    }
-                ),
-            colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
-            value = login,
-            onValueChange = { newText ->
-                onLoginInput(newText)
-            },
-            label = { Text(getLocalizedMessage(LocalizedMessages.LOGIN, lang)) },
-            isError = loginError != null,
-            supportingText = loginError?.let {
-                {
-                    Text(
-                        text = loginError,
-                        color = Color.Red,
-                    )
-                }
-            },
-            singleLine = true,
-        )
-        OutlinedTextField(
-            modifier = Modifier
-                .onKeyEvent { keyEvent ->
-                    if (keyEvent.key == Key.Enter) {
-                        logon()
-                        true
-                    } else {
-                        false
-                    }
-                },
-            colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
-            value = password,
-            onValueChange = { newText ->
-                onPasswordInput(newText)
-            },
-            label = { Text(getLocalizedMessage(LocalizedMessages.PASSWORD, lang)) },
-            isError = passwordError != null,
-            supportingText = passwordError?.let {
-                {
-                    Text(
-                        text = passwordError,
-                        color = Color.Red,
-                    )
-                }
-            },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-        )
-        Row {
-            Checkbox(
-                modifier = Modifier
-                    .background(Color.Transparent)
-                    .align(Alignment.CenterVertically),
-                colors = colorCheckBox ?: CheckboxDefaults.colors(),
-                checked = isRememberMe,
-                onCheckedChange = { newState ->
-                    onIsRememberMeChange(newState)
-                },
-            )
-            Text(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                text = getLocalizedMessage(LocalizedMessages.REMEMBER_ME, lang),
-            )
-        }
-        TextButton(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            shape = singleButtonShape,
-            colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
-            onClick = logon,
+                .background(colorLogonBack)
+                .padding(32.dp)
         ) {
-            Text(
-                text = getLocalizedMessage(LocalizedMessages.LOGON, lang),
+            KamelImage(
+                modifier = Modifier
+                    .width(widthLogo)
+                    .height(heightLogo)
+                    .align(Alignment.CenterHorizontally)
+                    .background(colorLogonLogoBack),
+                resource = { asyncPainterResource(data = getFullUrl("/images/logo_2.png")) },
+                contentDescription = null,
             )
+            Spacer(modifier = Modifier.height(32.dp))
+            errorText?.let {
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = errorText,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            OutlinedTextField(
+                modifier = Modifier
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.key == Key.Enter) {
+                            focusManager.moveFocus(FocusDirection.Next)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    .then(
+                        run {
+                            isFocusRequesterDefined = true
+                            Modifier.focusRequester(focusRequester)
+                        }
+                    ),
+                colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
+                value = login,
+                onValueChange = { newText ->
+                    onLoginInput(newText)
+                },
+                label = { Text(getLocalizedMessage(LocalizedMessages.LOGIN, lang)) },
+                isError = loginError != null,
+                supportingText = loginError?.let {
+                    {
+                        Text(
+                            text = loginError,
+                            color = Color.Red,
+                        )
+                    }
+                },
+                singleLine = true,
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.key == Key.Enter) {
+                            logon()
+                            true
+                        } else {
+                            false
+                        }
+                    },
+                colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
+                value = password,
+                onValueChange = { newText ->
+                    onPasswordInput(newText)
+                },
+                label = { Text(getLocalizedMessage(LocalizedMessages.PASSWORD, lang)) },
+                isError = passwordError != null,
+                supportingText = passwordError?.let {
+                    {
+                        Text(
+                            text = passwordError,
+                            color = Color.Red,
+                        )
+                    }
+                },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+            )
+            Row {
+                Checkbox(
+                    modifier = Modifier
+                        .background(Color.Transparent)
+                        .align(Alignment.CenterVertically),
+                    colors = colorCheckBox ?: CheckboxDefaults.colors(),
+                    checked = isRememberMe,
+                    onCheckedChange = { newState ->
+                        onIsRememberMeChange(newState)
+                    },
+                )
+                Text(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    text = getLocalizedMessage(LocalizedMessages.REMEMBER_ME, lang),
+                )
+            }
+            TextButton(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                shape = singleButtonShape,
+                colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
+                onClick = logon,
+            ) {
+                Text(
+                    text = getLocalizedMessage(LocalizedMessages.LOGON, lang),
+                )
+            }
         }
     }
 

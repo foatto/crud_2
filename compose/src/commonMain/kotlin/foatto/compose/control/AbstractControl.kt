@@ -66,7 +66,7 @@ abstract class AbstractControl(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(colorHeader)
-                    .padding(top = 10.dp, bottom = 10.dp),
+                    .padding(top = 10.dp, bottom = 10.dp),  // соотносится с отступами имени пользователя в главном меню
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

@@ -169,7 +169,7 @@ open class Root {
                                 Row(
                                     modifier = Modifier
                                         //.background(colorTableCaptionBar)
-                                        .padding(top = 12.dp, bottom = 12.dp),
+                                        .padding(top = 12.dp, bottom = 12.dp),  // соотносится с отступами заголовков таблиц/форм основной части
                                     horizontalArrangement = Arrangement.Start,
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {

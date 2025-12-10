@@ -18,7 +18,6 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
-import kotlinx.datetime.TimeZone
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
@@ -54,7 +53,7 @@ class SensorDataService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

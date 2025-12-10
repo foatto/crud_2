@@ -180,7 +180,7 @@ abstract class ReportService(
         val isReportUnlock = checkReportUnlockPermission(action.module, userConfig.roles)
 
         if (!isReportUnlock) {
-            val printKeyImage = File("$rootDirName/logo.png")
+            val printKeyImage = File("$rootDirName/logo_2.png")
             if (printKeyW > 0 && printKeyH > 0 && printKeyImage.exists()) {
                 ss.password = getRandomInt().toString()
                 ss.isProtected = true

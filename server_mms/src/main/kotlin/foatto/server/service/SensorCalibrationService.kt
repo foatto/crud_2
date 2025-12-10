@@ -60,7 +60,7 @@ class SensorCalibrationService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

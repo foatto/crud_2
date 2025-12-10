@@ -1,16 +1,26 @@
 package foatto.compose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
@@ -28,9 +38,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import foatto.compose.composable.GenerateMenuBody
 import foatto.compose.composable.MainMenu
 import foatto.compose.composable.PasswordChangeDialog
 import foatto.compose.composable.StardartDialog
@@ -43,6 +59,7 @@ import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
 import foatto.compose.utils.SETTINGS_PASSWORD
 import foatto.compose.utils.encodePassword
+import foatto.compose.utils.getFullUrl
 import foatto.compose.utils.getScaledWindowWidth
 import foatto.compose.utils.openFileByUrl
 import foatto.compose.utils.settings
@@ -58,6 +75,9 @@ import foatto.core.model.request.LogoffRequest
 import foatto.core.model.response.ChangeLanguageResponse
 import foatto.core.model.response.ChangePasswordResponse
 import foatto.core.model.response.LogoffResponse
+import io.kamel.core.getOrElse
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 
 var defaultStartModule: String? = null
@@ -112,6 +132,8 @@ open class Root {
 
     private var showPasswordChangeDialog by mutableStateOf(false)
 
+    private val mainMenuVerticalScrollState = ScrollState(0)
+
     @Composable
     fun Content() {
         setCustomColors()
@@ -125,63 +147,76 @@ open class Root {
         scaleKoef = density.density
 
         MaterialTheme {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                ) {
-                    Row {
-                        Column {
-                            if (isShowMainMenuButton) {
-                                FilledIconButton(
-                                    modifier = Modifier.size(48.dp),
-                                    shape = RoundedCornerShape(0.dp),   // чтобы кнопка заполнила всё пространство
-                                    colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
-                                    onClick = {
-                                        isShowMainMenu = !isShowMainMenu
-                                    }
+            //--- define the all urgent size modifiers explicitly
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isWideScreen) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        //AnimatedVisibility(visible = isShowMainMenu) { - притормаживает со сложной графикой (с дашбоардами, например)
+                        if (isShowMainMenu) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(300.dp)
+                                    .background(Color.Transparent)
+                                    .paint(
+                                        painter = asyncPainterResource(getFullUrl("/images/main_menu.png")).getOrElse(
+                                            onLoading = { ColorPainter(colorTableCaptionBar) },
+                                            onFailure = { ColorPainter(colorTableCaptionBar) },
+                                        ),
+                                        contentScale = ContentScale.FillBounds,
+                                    )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        //.background(colorTableCaptionBar)
+                                        .padding(top = 12.dp, bottom = 12.dp),
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    Icon(
-                                        imageVector = if (isShowMainMenu) {
-                                            Icons.Default.Close
-                                        } else {
-                                            Icons.Default.Menu
+                                    KamelImage(
+                                        modifier = Modifier.padding(horizontal = 16.dp).size(18.dp),
+                                        resource = { asyncPainterResource(data = getFullUrl("/images/ic_account_circle_black_18dp.png")) },
+                                        colorFilter = ColorFilter.tint(colorMainBack0),
+                                        contentDescription = "",
+                                    )
+                                    Text(
+                                        modifier = Modifier.weight(1.0f),
+                                        color = colorMainBack0,
+                                        text = appUserConfig.currentUserName,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                KamelImage(
+                                    modifier = Modifier.size(300.dp, (134 * 300 / 260).dp), // increase proportionally
+                                    resource = { asyncPainterResource(data = getFullUrl("/images/logo_2.png")) },
+                                    contentDescription = null,
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1.0f)
+                                        .verticalScroll(state = mainMenuVerticalScrollState)
+                                ) {
+                                    GenerateMenuBody(
+                                        isStaticMainMenu = true,
+                                        alMenuDataClient = alMenuDataClient,
+                                        level = 0,
+                                        closeMenu = {},
+                                        menuClick = { action: AppAction, inNewTab: Boolean ->
+                                            coroutineScope.launch {
+                                                openTab(action)
+                                            }
                                         },
-                                        contentDescription = null,
                                     )
                                 }
                             }
-                            MainMenu(
-                                isShowMainMenu = isShowMainMenu,
-                                alMenuDataClient = alMenuDataClient,
-                                closeMenu = {
-                                    isShowMainMenu = false
-                                },
-                                menuClick = { action: AppAction, inNewTab: Boolean ->
-                                    coroutineScope.launch {
-                                        openTab(action)
-                                    }
-                                }
-                            )
                         }
-                        TabPanel(
-                            isTabPanelVisible = isTabPanelVisible,
-                            selectedTabIndex = selectedTabIndex,
-                            tabInfos = tabInfos,
-                            onTabClick = { index ->
-                                selectedTabIndex = index
-                            },
-                            onTabCloseClick = { index ->
-                                closeTabByIndex(index)
-                            },
-                        )
+                        RootBody()
                     }
-                    controls.getOrNull(selectedTabIndex)?.Body()
+                } else {
+                    RootBody()
                 }
-
                 selectorControl?.Body()
 
                 if (showPasswordChangeDialog) {
@@ -230,6 +265,63 @@ open class Root {
                     )
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun RootBody() {
+        val coroutineScope = rememberCoroutineScope()
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column {
+                    if (isShowMainMenuButton) {
+                        FilledIconButton(
+                            modifier = Modifier.size(48.dp),
+                            shape = RoundedCornerShape(0.dp),   // чтобы кнопка заполнила всё пространство
+                            colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
+                            onClick = {
+                                isShowMainMenu = !isShowMainMenu
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (isShowMainMenu) {
+                                    Icons.AutoMirrored.Default.KeyboardArrowLeft
+                                } else {
+                                    Icons.Default.Menu
+                                },
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                    if (!isWideScreen) {
+                        MainMenu(
+                            isStaticMainMenu = false,
+                            isShowMainMenu = isShowMainMenu,
+                            alMenuDataClient = alMenuDataClient,
+                            closeMenu = {
+                                isShowMainMenu = false
+                            },
+                            menuClick = { action: AppAction, inNewTab: Boolean ->
+                                coroutineScope.launch {
+                                    openTab(action)
+                                }
+                            }
+                        )
+                    }
+                }
+                TabPanel(
+                    isTabPanelVisible = isTabPanelVisible,
+                    selectedTabIndex = selectedTabIndex,
+                    tabInfos = tabInfos,
+                    onTabClick = { index ->
+                        selectedTabIndex = index
+                    },
+                    onTabCloseClick = { index ->
+                        closeTabByIndex(index)
+                    },
+                )
+            }
+            controls.getOrNull(selectedTabIndex)?.Body()
         }
     }
 

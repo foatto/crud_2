@@ -1,7 +1,6 @@
 package foatto.server.service
 
 import foatto.core.ActionType
-import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -14,12 +13,9 @@ import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableCellAlign
 import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
-import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getSplittedDouble
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
-import foatto.server.appModuleConfigs
-import foatto.server.checkAccessPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.DayWorkEntity
 import foatto.server.getEnabledUserIds
@@ -88,7 +84,7 @@ class DayWorkService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

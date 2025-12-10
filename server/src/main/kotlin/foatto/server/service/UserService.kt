@@ -188,7 +188,7 @@ class UserService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = columnInfos,
+            columnInfos = columnInfos,
         )
     }
 

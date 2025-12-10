@@ -72,7 +72,7 @@ class ObjectDataService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

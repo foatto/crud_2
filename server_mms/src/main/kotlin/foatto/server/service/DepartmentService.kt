@@ -59,7 +59,7 @@ class DepartmentService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

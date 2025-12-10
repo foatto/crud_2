@@ -39,7 +39,6 @@ import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.sensor.SensorConfigCounter
-import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.model.sensor.SensorConfigLiquidLevel
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
@@ -231,7 +230,7 @@ class DeviceService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

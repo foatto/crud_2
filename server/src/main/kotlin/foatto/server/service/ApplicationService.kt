@@ -276,8 +276,8 @@ abstract class ApplicationService(
 
     protected abstract fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption>
 
-    protected fun getTableColumnCaptionActions(action: AppAction, alColumnInfo: List<Pair<String?, String>>): List<TableCaption> =
-        alColumnInfo.map { (fieldName, fieldCaption) ->
+    protected fun getTableColumnCaptionActions(action: AppAction, columnInfos: List<Pair<String?, String>>): List<TableCaption> =
+        columnInfos.map { (fieldName, fieldCaption) ->
             TableCaption(
                 name = fieldCaption,
                 action = fieldName?.let {
@@ -383,7 +383,7 @@ abstract class ApplicationService(
         pageCount: Int,
         pageButtons: MutableList<TablePageButton>,
     ) {
-        val NEAR_PAGE_BUTTON_COUNT = 11
+        val NEAR_PAGE_BUTTON_COUNT = 9
         val pageNo = action.pageNo
 
         //--- current page

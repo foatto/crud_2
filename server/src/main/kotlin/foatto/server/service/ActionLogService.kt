@@ -6,12 +6,9 @@ import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.ResponseCode
-import foatto.core.model.response.form.FormCellVisibility
 import foatto.core.model.response.form.FormDateTimeCellMode
 import foatto.core.model.response.form.cells.FormBaseCell
-import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
-import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.model.response.table.TableCaption
 import foatto.core.model.response.table.TablePageButton
@@ -68,7 +65,7 @@ class ActionLogService(
 
         return getTableColumnCaptionActions(
             action = action,
-            alColumnInfo = alColumnInfo,
+            columnInfos = alColumnInfo,
         )
     }
 

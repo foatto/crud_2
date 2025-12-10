@@ -94,8 +94,7 @@ class UserEntity(
     )
     @Embedded
     val passwordLastChangeDate: DateEntity,
-
-    ) {
+) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

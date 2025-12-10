@@ -586,6 +586,7 @@ class TableControl(
                                                     offset = gridData.offset,
                                                 ) {
                                                     GenerateMenuBody(
+                                                        isStaticMainMenu = false,
                                                         alMenuDataClient = gridData.alCurrentPopupData!!,
                                                         level = 0,
                                                         closeMenu = {

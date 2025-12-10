@@ -66,7 +66,7 @@ abstract class AbstractControl(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(colorHeader)
-                    .padding(top = 16.dp, bottom = 16.dp),
+                    .padding(top = 10.dp, bottom = 10.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

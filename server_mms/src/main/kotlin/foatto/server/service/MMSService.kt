@@ -161,7 +161,8 @@ abstract class MMSService(
         currentTimedPageNo: Int,
         pageButtons: MutableList<TablePageButton>,
     ) {
-        val NEAR_PAGE_BUTTON_COUNT = 4
+        //--- из-за возможного статического меню слева пришлось уменьшить с 4 до 3
+        val NEAR_PAGE_BUTTON_COUNT = 3
         val pageNo = action.pageNo
         val pageCount = lastTimeUTC / pageSizeInSec - firstTimeUTC / pageSizeInSec + 1
 

@@ -3,7 +3,6 @@ package foatto.compose.composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -61,8 +60,8 @@ fun LogonForm(
         modifier = modifier
     ) {
         KamelImage(
-            modifier = Modifier.size(128.dp).align(Alignment.CenterHorizontally).padding(bottom = 16.dp),
-            resource = { asyncPainterResource(data = getFullUrl("/images/logo.png")) },
+            modifier = Modifier.size(260.dp).align(Alignment.CenterHorizontally),
+            resource = { asyncPainterResource(data = getFullUrl("/images/logo_2.png")) },
             contentDescription = null,
         )
         errorText?.let {

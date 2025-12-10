@@ -14,7 +14,7 @@ fun main() = application {
     val root = MMSRoot()
     Window(
         onCloseRequest = ::exitApplication,
-        title = "Система контроля технологического оборудования и транспорта \"Пульсар\"",
+        title = "Система контроля технологического оборудования и транспорта",
     ) {
         filePickerDialogSettings = FileKitDialogSettings(this.window)
         root.Content()

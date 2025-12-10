@@ -64,20 +64,21 @@ kotlin {
             api(compose.material3)
             api(compose.components.resources)
             api(compose.components.uiToolingPreview)
-            api("org.jetbrains.compose.material:material-icons-core:${materialIconsCoreVersion}")
+            api("org.jetbrains.compose.material:material-icons-core:$materialIconsCoreVersion")
 
             api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
 
-            api("io.ktor:ktor-client-cio:${ktorVersion}")
-            api("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
-            api("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+            api("io.ktor:ktor-client-cio:$ktorVersion")
+            api("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+            api("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
             api("com.russhwolf:multiplatform-settings:$multiplatformSettingsVersion")
             api("com.russhwolf:multiplatform-settings-no-arg:$multiplatformSettingsVersion")
+
             api("media.kamel:kamel-image-default:$kamelImageVersion")
 
-            api("io.github.vinceglb:filekit-core:${fileKitVersion}")
-            api("io.github.vinceglb:filekit-dialogs-compose:${fileKitVersion}")
+            api("io.github.vinceglb:filekit-core:$fileKitVersion")
+            api("io.github.vinceglb:filekit-dialogs-compose:$fileKitVersion")
             //api("io.github.vinceglb:filekit-coil:$fileKitVersion") - пока не нужно
 
             api(project(":common"))

@@ -272,7 +272,11 @@ open class Root {
     @Composable
     private fun RootBody() {
         val coroutineScope = rememberCoroutineScope()
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorMainBack0)
+        ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column {
                     if (isShowMainMenuButton) {

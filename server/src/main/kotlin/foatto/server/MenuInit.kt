@@ -14,11 +14,15 @@ fun addMenuItem(
     actionType: String,
     id: Int? = null,
     alterCaption: String? = null,
+    iconUrl: String? = null,
+    iconSize: Int = 16,
     params: MutableMap<String, String> = mutableMapOf(),
 ) {
     appModuleConfigs[module]?.let { moduleConfig ->
         if (checkAccessPermission(module, serverUserConfig.roles)) {
             alMenu += MenuData(
+                iconUrl = iconUrl,
+                iconSize = iconSize,
                 caption = alterCaption ?: getLocalizedMessage(moduleConfig.captions, serverUserConfig.lang),
                 action = AppAction(
                     type = actionType,
@@ -32,5 +36,5 @@ fun addMenuItem(
 }
 
 fun addSeparator(alMenu: MutableList<MenuData>) {
-    alMenu += MenuData("", null)
+    alMenu += MenuData(caption = "", action = null)
 }

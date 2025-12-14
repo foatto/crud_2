@@ -446,11 +446,29 @@ class MMSSpringApp : SpringApp() {
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(this, serverUserConfig, AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE)
-                addMenuItem(this, serverUserConfig, AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD, ActionType.MODULE_COMPOSITE)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD,
+                    actionType = ActionType.MODULE_COMPOSITE,
+                    iconUrl = "/images/icons8-dashboard-gauge-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD,
+                    actionType = ActionType.MODULE_COMPOSITE,
+                    iconUrl = "/images/icons8-combo-chart-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
-                    alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.CONTROL, serverUserConfig.lang), null, this)
+                    alMenu += MenuData(
+                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.CONTROL, serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this
+                    )
                 }
             }
 
@@ -462,7 +480,9 @@ class MMSSpringApp : SpringApp() {
                     actionType = ActionType.MODULE_TABLE,
                     id = null,
                     alterCaption = "Мобильные объекты",
-                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.MOBILE.name)
+                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.MOBILE.name),
+                    iconUrl = "/images/icons8-truck-24.png",
+                    iconSize = 24,
                 )
                 addMenuItem(
                     alMenu = this,
@@ -471,52 +491,130 @@ class MMSSpringApp : SpringApp() {
                     actionType = ActionType.MODULE_TABLE,
                     id = null,
                     alterCaption = "Стационарные объекты",
-                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.STATIONARY.name)
+                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.STATIONARY.name),
+                    iconUrl = "/images/icons8-oil-pump-24.png",
+                    iconSize = 24,
                 )
-                addMenuItem(this, serverUserConfig, AppModuleMMS.DAY_WORK, ActionType.MODULE_TABLE)
-                addMenuItem(this, serverUserConfig, AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.DAY_WORK,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-logbook-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
-                    alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.ACCOUNTING, serverUserConfig.lang), null, this)
+                    alMenu += MenuData(
+                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.ACCOUNTING, serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this
+                    )
                 }
             }
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(this, serverUserConfig, AppModuleMMS.REPORT_SUMMARY, ActionType.MODULE_FORM)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.REPORT_SUMMARY,
+                    actionType = ActionType.MODULE_FORM,
+                    iconUrl = "/images/icons8-statistics-report-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
-                    alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.REPORTS, serverUserConfig.lang), null, this)
+                    alMenu += MenuData(
+                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.REPORTS, serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this
+                    )
                 }
             }
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(this, serverUserConfig, AppModuleMMS.DEPARTMENT, ActionType.MODULE_TABLE)
-                addMenuItem(this, serverUserConfig, AppModuleMMS.GROUP, ActionType.MODULE_TABLE)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.DEPARTMENT,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-organization-chart-people-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.GROUP,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-organization-chart-people-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
-                    alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.REFERENCES, serverUserConfig.lang), null, this)
+                    alMenu += MenuData(
+                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.REFERENCES, serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this
+                    )
                 }
             }
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(this, serverUserConfig, AppModuleMMS.DEVICE, ActionType.MODULE_TABLE)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.DEVICE,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-network-gateway-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
-                    alMenu += MenuData(getLocalizedMMSMessage(LocalizedMMSMessages.DEVICES, serverUserConfig.lang), null, this)
+                    alMenu += MenuData(
+                        caption = getLocalizedMMSMessage(message = LocalizedMMSMessages.DEVICES, lang = serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this,
+                    )
                 }
             }
 
             mutableListOf<MenuData>().apply {
 
-                addMenuItem(this, serverUserConfig, AppModule.USER_PROPERTY_EDIT, ActionType.MODULE_FORM, serverUserConfig.id)
-                addMenuItem(this, serverUserConfig, AppModule.USER, ActionType.MODULE_TABLE)
-                addMenuItem(this, serverUserConfig, AppModule.ACTION_LOG, ActionType.MODULE_TABLE)
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModule.USER_PROPERTY_EDIT,
+                    actionType = ActionType.MODULE_FORM,
+                    id = serverUserConfig.id,
+                    iconUrl = "/images/icons8-users-settings-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModule.USER,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-users-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModule.ACTION_LOG,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-log-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
-                    alMenu += MenuData(getLocalizedMessage(LocalizedMessages.SYSTEM, serverUserConfig.lang), null, this)
+                    alMenu += MenuData(
+                        caption = getLocalizedMessage(LocalizedMessages.SYSTEM, serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this
+                    )
                 }
             }
 

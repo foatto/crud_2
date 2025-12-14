@@ -172,12 +172,15 @@ open class Root {
                                     horizontalArrangement = Arrangement.Start,
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
+                                    //--- Spacer better, than padding modifier at KamelImage icon
+                                    Spacer(modifier = Modifier.width(16.dp))
                                     KamelImage(
-                                        modifier = Modifier.padding(horizontal = 16.dp).size(18.dp),
+                                        modifier = Modifier.size(18.dp),
                                         resource = { asyncPainterResource(data = getFullUrl("/images/ic_account_circle_black_18dp.png")) },
-                                        colorFilter = ColorFilter.tint(colorUserName),
-                                        contentDescription = "",
+                                        colorFilter = ColorFilter.tint(colorMainMenuIcon),
+                                        contentDescription = null,
                                     )
+                                    Spacer(modifier = Modifier.width(16.dp))
                                     Text(
                                         modifier = Modifier.weight(1.0f),
                                         color = colorUserName,

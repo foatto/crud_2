@@ -56,7 +56,9 @@ var colorMainMenuDefault: Color = colorMainBack1
 var colorUserName: Color = colorMainText
 
 var colorMainMenuText: Color = colorMainText
+var colorMainMenuIcon: Color = colorMainText
 var colorPopupMenuText: Color = colorMainText
+var colorPopupMenuIcon: Color = colorMainText
 
 val colorTabActive: Color = colorMainBack2
 val colorTabInactive: Color = colorMainBack3

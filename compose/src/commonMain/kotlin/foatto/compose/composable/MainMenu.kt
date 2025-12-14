@@ -3,6 +3,7 @@ package foatto.compose.composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -14,8 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
+import foatto.compose.colorMainMenuIcon
 import foatto.compose.colorMainMenuText
+import foatto.compose.colorPopupMenuIcon
 import foatto.compose.colorPopupMenuText
 import foatto.compose.model.MenuDataClient
 import foatto.compose.textSizeMainMenuFolder
@@ -24,9 +28,12 @@ import foatto.compose.textSizePopupMenuFolder
 import foatto.compose.textSizePopupMenuItem
 import foatto.compose.textWeightMainMenuFolder
 import foatto.compose.textWeightPopupMenuFolder
+import foatto.compose.utils.getFullUrl
 import foatto.core.ActionType
 import foatto.core.model.AppAction
 import foatto.core.model.AppUserConfig
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
 
 
 @Composable
@@ -62,25 +69,21 @@ internal fun GenerateMenuBody(
     for (menuDataClient in alMenuDataClient) {
         menuDataClient.alSubMenu?.let { alSubMenu ->
             DropdownMenuItem(
-                trailingIcon = {
-                    Icon(
-                        modifier = Modifier.clickable(
-                            onClick = {
-                                menuDataClient.isExpanded.value = !menuDataClient.isExpanded.value
-                            }
-                        ),
-                        imageVector = if (menuDataClient.isExpanded.value) {
-                            Icons.Default.KeyboardArrowUp
-                        } else {
-                            Icons.Default.KeyboardArrowDown
-                        },
-                        tint = if (isMainMenu) {
-                            colorMainMenuText
-                        } else {
-                            colorPopupMenuText
-                        },
-                        contentDescription = null,
-                    )
+                leadingIcon = menuDataClient.iconUrl?.let { iconUrl ->
+                    {
+                        KamelImage(
+                            modifier = Modifier.size(menuDataClient.iconSize.dp),
+                            resource = { asyncPainterResource(data = getFullUrl(iconUrl)) },
+                            colorFilter = ColorFilter.tint(
+                                if (isMainMenu) {
+                                    colorMainMenuIcon
+                                } else {
+                                    colorPopupMenuIcon
+                                }
+                            ),
+                            contentDescription = null,
+                        )
+                    }
                 },
                 text = {
                     Text(
@@ -102,6 +105,26 @@ internal fun GenerateMenuBody(
                         },
                     )
                 },
+                trailingIcon = {
+                    Icon(
+                        modifier = Modifier.clickable(
+                            onClick = {
+                                menuDataClient.isExpanded.value = !menuDataClient.isExpanded.value
+                            }
+                        ),
+                        imageVector = if (menuDataClient.isExpanded.value) {
+                            Icons.Default.KeyboardArrowUp
+                        } else {
+                            Icons.Default.KeyboardArrowDown
+                        },
+                        tint = if (isMainMenu) {
+                            colorMainMenuText
+                        } else {
+                            colorPopupMenuText
+                        },
+                        contentDescription = null,
+                    )
+                },
                 contentPadding = PaddingValues(start = getMenuPadding(level), end = 16.dp),
                 onClick = {
                     menuDataClient.isExpanded.value = !menuDataClient.isExpanded.value
@@ -119,6 +142,22 @@ internal fun GenerateMenuBody(
         } ?: run {
             if (menuDataClient.action != null || menuDataClient.caption.isNotEmpty()) {
                 DropdownMenuItem(
+                    leadingIcon = menuDataClient.iconUrl?.let { iconUrl ->
+                        {
+                            KamelImage(
+                                modifier = Modifier.size(menuDataClient.iconSize.dp),
+                                resource = { asyncPainterResource(data = getFullUrl(iconUrl)) },
+                                colorFilter = ColorFilter.tint(
+                                    if (isMainMenu) {
+                                        colorMainMenuIcon
+                                    } else {
+                                        colorPopupMenuIcon
+                                    }
+                                ),
+                                contentDescription = null,
+                            )
+                        }
+                    },
                     text = {
                         Text(
                             text = menuDataClient.caption,
@@ -160,8 +199,18 @@ internal fun getClientSubMenus(
 ): List<MenuDataClient> {
     val alClientSubMenu = mutableListOf<MenuDataClient>()
 
-    alClientSubMenu += MenuDataClient(caption = "Сменить пароль", action = AppAction(ActionType.CHANGE_PASSWORD))
-    alClientSubMenu += MenuDataClient(caption = "Выход из системы", action = AppAction(ActionType.LOGOFF))
+    alClientSubMenu += MenuDataClient(
+        caption = "Сменить пароль",
+        action = AppAction(ActionType.CHANGE_PASSWORD),
+        iconUrl = "/images/icons8-password-24.png",
+        iconSize = 24,
+    )
+    alClientSubMenu += MenuDataClient(
+        caption = "Выход из системы",
+        action = AppAction(ActionType.LOGOFF),
+        iconUrl = "/images/icons8-logout-24.png",
+        iconSize = 24,
+    )
 
     if (appUserConfig.isAdmin) {
         alClientSubMenu += MenuDataClient(caption = "")

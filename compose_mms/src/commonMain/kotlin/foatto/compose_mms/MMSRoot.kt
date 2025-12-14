@@ -23,12 +23,12 @@ import foatto.compose.colorIndexBackgroundDefault
 import foatto.compose.colorLogonBack
 import foatto.compose.colorLogonLogoBack
 import foatto.compose.colorMainBack0
-import foatto.compose.colorMainBack1
-import foatto.compose.colorMainBack2
 import foatto.compose.colorMainMenuDefault
+import foatto.compose.colorMainMenuIcon
 import foatto.compose.colorMainMenuText
 import foatto.compose.colorMainText
 import foatto.compose.colorOutlinedTextInput
+import foatto.compose.colorPopupMenuIcon
 import foatto.compose.colorPopupMenuText
 import foatto.compose.colorRadioButton
 import foatto.compose.colorTabSelected
@@ -115,7 +115,9 @@ class MMSRoot : Root() {
         colorUserName = colorMainBack0
 
         colorMainMenuText = colorMainBack0
+        colorMainMenuIcon = orangeColor
         colorPopupMenuText = colorMainText
+        colorPopupMenuIcon = colorMainText
 
         textSizeMainMenuFolder = 17.sp  // белый жирный шрифт на темном фоне выглядит рыхлым, поэтому делаем шрифт крупнее
         textSizeMainMenuItem = 14.sp

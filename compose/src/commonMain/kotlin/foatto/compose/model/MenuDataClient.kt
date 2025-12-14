@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import foatto.core.model.AppAction
 
 class MenuDataClient(
+    val iconUrl: String? = null,
+    val iconSize: Int = 16,
     val caption: String,
     val action: AppAction? = null,
     val alSubMenu: List<MenuDataClient>? = null,

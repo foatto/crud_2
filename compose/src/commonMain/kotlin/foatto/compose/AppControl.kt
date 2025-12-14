@@ -316,6 +316,8 @@ class AppControl(
     }
 
     private fun mapMenuData(menuDataServer: MenuData): MenuDataClient = MenuDataClient(
+        iconUrl = menuDataServer.iconUrl,
+        iconSize = menuDataServer.iconSize,
         caption = menuDataServer.caption,
         action = menuDataServer.action,
         alSubMenu = menuDataServer.subMenuDatas?.map { subMenuDataServer ->

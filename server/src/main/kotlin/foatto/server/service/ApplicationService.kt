@@ -699,8 +699,6 @@ abstract class ApplicationService(
         nextAction = action.prevAction?.copy(id = action.id),
     )
 
-    protected fun isAdminOnly(userConfig: ServerUserConfig): Boolean = userConfig.roles.size == 1 && userConfig.roles.contains(AppRole.ADMIN)
-
     protected fun formActionSaveFiles(formActionData: FormActionData): Int {
         val fileId = formActionData.fileId ?: fileStoreService.getNextFileId()
 

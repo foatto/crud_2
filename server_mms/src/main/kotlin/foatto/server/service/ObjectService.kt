@@ -108,7 +108,7 @@ class ObjectService(
         alColumnInfo += null to "Подразделение"
         alColumnInfo += null to "Группа"
 
-        if (isAdminOnly(userConfig)) {
+        if (userConfig.isAdminOnly()) {
             alColumnInfo += null to "Файл схемы объекта"
         }
 
@@ -186,7 +186,7 @@ class ObjectService(
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.model ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.department?.name ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.group?.name ?: "-")
-            if (isAdminOnly(userConfig)) {
+            if (userConfig.isAdminOnly()) {
                 tableCells += TableButtonCell(
                     row = row,
                     col = col++,

@@ -16,6 +16,8 @@ class ServerUserConfig(
     val relatedUserIds: Map<Int, UserRelationEnum>,
     val userProperties: MutableMap<String, String>
 ) {
+    fun isAdminOnly(): Boolean = roles.size == 1 && roles.contains(AppRole.ADMIN)
+
     fun toAppUserConfig(): AppUserConfig = AppUserConfig(
         currentUserName = currentUserName,
         isAdmin = roles.contains(AppRole.ADMIN),

@@ -473,28 +473,54 @@ class MMSSpringApp : SpringApp() {
             }
 
             mutableListOf<MenuData>().apply {
-                addMenuItem(
-                    alMenu = this,
-                    serverUserConfig = serverUserConfig,
-                    module = AppModuleMMS.OBJECT,
-                    actionType = ActionType.MODULE_TABLE,
-                    id = null,
-                    alterCaption = "Мобильные объекты",
-                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.MOBILE.name),
-                    iconUrl = "/images/icons8-truck-24.png",
-                    iconSize = 24,
-                )
-                addMenuItem(
-                    alMenu = this,
-                    serverUserConfig = serverUserConfig,
-                    module = AppModuleMMS.OBJECT,
-                    actionType = ActionType.MODULE_TABLE,
-                    id = null,
-                    alterCaption = "Стационарные объекты",
-                    params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.STATIONARY.name),
-                    iconUrl = "/images/icons8-oil-pump-24.png",
-                    iconSize = 24,
-                )
+                if (
+                    !serverUserConfig.roles.contains(AppRoleMMS.USER_MOBILE_OBJECTS) &&
+                    !serverUserConfig.roles.contains(AppRoleMMS.USER_FIXED_OBJECTS)
+                ) {
+                    addMenuItem(
+                        alMenu = this,
+                        serverUserConfig = serverUserConfig,
+                        module = AppModuleMMS.OBJECT,
+                        actionType = ActionType.MODULE_TABLE,
+                        iconUrl = "/images/icons8-compressor-24.png",
+                        iconSize = 24,
+                    )
+                }
+                if (serverUserConfig.roles.contains(AppRole.ADMIN) || serverUserConfig.roles.contains(AppRoleMMS.USER_MOBILE_OBJECTS)) {
+                    addMenuItem(
+                        alMenu = this,
+                        serverUserConfig = serverUserConfig,
+                        module = AppModuleMMS.OBJECT,
+                        actionType = ActionType.MODULE_TABLE,
+                        alterCaption = "Мобильные объекты",
+                        params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.MOBILE.name),
+                        iconUrl = "/images/icons8-truck-24.png",
+                        iconSize = 24,
+                    )
+                }
+                if (serverUserConfig.roles.contains(AppRole.ADMIN) || serverUserConfig.roles.contains(AppRoleMMS.USER_FIXED_OBJECTS)) {
+                    addMenuItem(
+                        alMenu = this,
+                        serverUserConfig = serverUserConfig,
+                        module = AppModuleMMS.OBJECT,
+                        actionType = ActionType.MODULE_TABLE,
+                        alterCaption = "Стационарные объекты",
+                        params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.STATIONARY.name),
+                        iconUrl = "/images/icons8-oil-pump-24.png",
+                        iconSize = 24,
+                    )
+                }
+
+                if (size > 0) {
+                    alMenu += MenuData(
+                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.OBJECTS, serverUserConfig.lang),
+                        action = null,
+                        subMenuDatas = this
+                    )
+                }
+            }
+
+            mutableListOf<MenuData>().apply {
                 addMenuItem(
                     alMenu = this,
                     serverUserConfig = serverUserConfig,
@@ -506,7 +532,7 @@ class MMSSpringApp : SpringApp() {
 
                 if (size > 0) {
                     alMenu += MenuData(
-                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.ACCOUNTING, serverUserConfig.lang),
+                        caption = getLocalizedMMSMessage(LocalizedMMSMessages.WORK_LOGS, serverUserConfig.lang),
                         action = null,
                         subMenuDatas = this
                     )

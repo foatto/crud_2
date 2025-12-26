@@ -171,17 +171,17 @@ class UserService(
         columnInfos += FIELD_SHORT_NAME to "Краткое имя"
         columnInfos += FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.FULL_NAME, userConfig.lang)
 
-        if (isAdminOnly(userConfig)) {
+        if (userConfig.isAdminOnly()) {
             columnInfos += FIELD_ROLES to "Роли"
         }
         columnInfos += FIELD_EMAIL to "E-mail"
         columnInfos += FIELD_CONTACT_INFO to getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang)
-        if (isAdminOnly(userConfig)) {
+        if (userConfig.isAdminOnly()) {
             columnInfos += null to "Файлы"
         }
         columnInfos += FIELD_TIME_OFFSET to getLocalizedMessage(LocalizedMessages.TIME_OFFSET, userConfig.lang)
         columnInfos += FIELD_LANG to getLocalizedMessage(LocalizedMessages.LANG, userConfig.lang)
-        if (isAdminOnly(userConfig)) {
+        if (userConfig.isAdminOnly()) {
             columnInfos += FIELD_LAST_LOGIN to "Last Login Time (UTC)"
             columnInfos += FIELD_LAST_IP to "Last IP"
         }
@@ -283,12 +283,12 @@ class UserService(
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.login ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.shortName ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.fullName ?: "-")
-            if (isAdminOnly(userConfig)) {
+            if (userConfig.isAdminOnly()) {
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.roles.joinToString())
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.eMail ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.contactInfo ?: "-")
-            if (isAdminOnly(userConfig)) {
+            if (userConfig.isAdminOnly()) {
                 tableCells += TableButtonCell(
                     row = row,
                     col = col++,
@@ -299,7 +299,7 @@ class UserService(
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.timeOffset?.toString() ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.lang?.descr ?: "-")
-            if (isAdminOnly(userConfig)) {
+            if (userConfig.isAdminOnly()) {
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col++,

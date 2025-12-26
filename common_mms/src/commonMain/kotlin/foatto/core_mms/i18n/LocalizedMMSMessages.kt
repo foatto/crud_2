@@ -12,10 +12,11 @@ enum class LocalizedMMSMessages(
     OBJECT_TYPE_STATIONARY(mapOf(LanguageEnum.EN to "Stationary", LanguageEnum.RU to "Стационарный")),
 
     CONTROL(mapOf(LanguageEnum.EN to "Control", LanguageEnum.RU to "Контроль")),
-    ACCOUNTING(mapOf(LanguageEnum.EN to "Accounting", LanguageEnum.RU to "Учёт")),
-    REPORTS(mapOf(LanguageEnum.EN to "Reports", LanguageEnum.RU to "Отчёты")),
-    REFERENCES(mapOf(LanguageEnum.EN to "Reference books", LanguageEnum.RU to "Справочники")),
     DEVICES(mapOf(LanguageEnum.EN to "Devices", LanguageEnum.RU to "Контроллеры")),
+    OBJECTS(mapOf(LanguageEnum.EN to "Objects", LanguageEnum.RU to "Объекты")),
+    REFERENCES(mapOf(LanguageEnum.EN to "Reference books", LanguageEnum.RU to "Справочники")),
+    REPORTS(mapOf(LanguageEnum.EN to "Reports", LanguageEnum.RU to "Отчёты")),
+    WORK_LOGS(mapOf(LanguageEnum.EN to "Work logs", LanguageEnum.RU to "Рабочие журналы")),
 
     ____(mapOf(LanguageEnum.EN to "____", LanguageEnum.RU to "____")),
 }

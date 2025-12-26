@@ -21,7 +21,6 @@ import foatto.compose.colorDatePicker
 import foatto.compose.colorIconButton
 import foatto.compose.colorIndexBackgroundDefault
 import foatto.compose.colorLogonBack
-import foatto.compose.colorLogonLogoBack
 import foatto.compose.colorMainBack0
 import foatto.compose.colorMainMenuDefault
 import foatto.compose.colorMainMenuIcon
@@ -45,6 +44,7 @@ import foatto.compose.colorWait
 import foatto.compose.colorWaitTrack
 import foatto.compose.defaultStartModule
 import foatto.compose.heightLogo
+import foatto.compose.logonFormTitle
 import foatto.compose.textSizeMainMenuFolder
 import foatto.compose.textSizeMainMenuItem
 import foatto.compose.textSizePopupMenuFolder
@@ -105,7 +105,8 @@ class MMSRoot : Root() {
         colorWaitTrack = orangeColor
 
         colorLogonBack = colorMainBack0
-        colorLogonLogoBack = darkBlueColor
+
+        logonFormTitle = "СИСТЕМА КОНТРОЛЯ\n\nТЕХНОЛОГИЧЕСКОГО ОБОРУДОВАНИЯ И ТРАНСПОРТА"
 
         widthLogo = 256.dp
         heightLogo = 84.dp

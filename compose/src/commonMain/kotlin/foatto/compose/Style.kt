@@ -50,7 +50,6 @@ var colorCheckBox: CheckboxColors? = null
 var colorRadioButton: RadioButtonColors? = null
 
 var colorLogonBack: Color = colorMainBack0
-var colorLogonLogoBack: Color = colorMainBack0
 
 var colorMainMenuDefault: Color = colorMainBack1
 var colorUserName: Color = colorMainText
@@ -105,3 +104,5 @@ val alertDialogShape: Shape = RoundedCornerShape(8.dp)
 val singleButtonShape: Shape = RoundedCornerShape(4.dp)
 
 var colorCompositeMovedBlockBack: Color = Color.White
+
+var logonFormTitle: String = ""

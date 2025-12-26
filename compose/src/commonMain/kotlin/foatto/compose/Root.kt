@@ -86,14 +86,14 @@ open class Root {
         private const val WIDE_SCREEN_WIDTH = 600
     }
 
-    var defaultLang: LanguageEnum = LanguageEnum.RU
-
     var scaledWindowWidth: Int = 0
         private set
     var isWideScreen: Boolean by mutableStateOf(false)
         private set
     var scaleKoef: Float = 1.0f
         private set
+
+    var defaultLang: LanguageEnum = LanguageEnum.RU
 
     var appUserConfig: AppUserConfig by mutableStateOf(
         AppUserConfig(

@@ -69,8 +69,8 @@ class AppControl(
             when (responseCode) {
                 ResponseCode.LOGON_NEED, ResponseCode.LOGON_FAILED -> {
                     LogonForm(
+                        isWideScreen = root.isWideScreen,
                         lang = root.defaultLang,
-                        modifier = Modifier.align(Alignment.Center),
                         errorText = if (responseCode == ResponseCode.LOGON_FAILED) {
                             getLocalizedMessage(LocalizedMessages.INCORRECT_LOGIN_OR_PASSWORD, root.appUserConfig.lang)
                         } else {

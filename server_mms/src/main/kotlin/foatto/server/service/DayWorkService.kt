@@ -4,7 +4,11 @@ import foatto.core.ActionType
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
+import foatto.core.model.response.ResponseCode
+import foatto.core.model.response.form.FormDateTimeCellMode
 import foatto.core.model.response.form.cells.FormBaseCell
+import foatto.core.model.response.form.cells.FormDateTimeCell
+import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.model.response.table.TableCaption
 import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TablePopup
@@ -13,10 +17,14 @@ import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableCellAlign
 import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core.util.getCurrentTimeInt
+import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getSplittedDouble
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
+import foatto.server.entity.DateEntity
 import foatto.server.entity.DayWorkEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
@@ -24,6 +32,7 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.util.getNextId
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import org.springframework.data.domain.Page
@@ -46,15 +55,18 @@ class DayWorkService(
 ) {
 
     companion object {
-        //        private const val FIELD_USER_ID = "userId"
-//        private const val FIELD_OBJECT = "obj"
+        private const val FIELD_USER_ID = "userId"
+        private const val FIELD_OWNER_FULL_NAME = "_ownerFullName"   // псевдополе для селектора
+
+        private const val FIELD_OBJECT_ID = "obj.id"
+        private const val FIELD_OBJECT_NAME = "obj.name"
+        private const val FIELD_OBJECT_MODEL = "obj.model"
+
         private const val FIELD_DAY = "day"
 
-        //        private const val FIELD_OBJECT_ID = "obj.id"
         private const val FIELD_DAY_YE = "day.ye"
         private const val FIELD_DAY_MO = "day.mo"
         private const val FIELD_DAY_DA = "day.da"
-        private const val FIELD_OBJECT_NAME = "obj.name"    // отдельное определение для сортировки в Hibernate
     }
 
     //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
@@ -284,14 +296,14 @@ class DayWorkService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = liquidLevels.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(acd.begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                name = liquidLevels.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = liquidLevels.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(acd.endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                name = liquidLevels.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
 
@@ -306,14 +318,14 @@ class DayWorkService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = temperatures.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(acd.begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                name = temperatures.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = temperatures.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(acd.endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                name = temperatures.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
 
@@ -328,14 +340,14 @@ class DayWorkService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = densities.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(acd.begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                name = densities.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = densities.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(acd.endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
+                name = densities.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
 
@@ -375,14 +387,14 @@ class DayWorkService(
 //println("liquidLevels = $liquidLevelsTime")
 //println("temperatures = $temperaturesTime")
 //println("densities = $densitiesTime")
-/*
-works = 12 / 4 = 3
-usings = 8 / 4 = 2
-energos = 2 / 0 = ?
-liquidLevels = 16 / 6 = 2.7
-temperatures = 6 / 2 = 3
-densities = 5 / 2 = 2.5
-*/
+        /*
+        works = 12 / 4 = 3
+        usings = 8 / 4 = 2
+        energos = 2 / 0 = ?
+        liquidLevels = 16 / 6 = 2.7
+        temperatures = 6 / 2 = 3
+        densities = 5 / 2 = 2.5
+        */
         return currentRowNo
     }
 
@@ -421,19 +433,134 @@ densities = 5 / 2 = 2.5
     }
 
     override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> {
-        TODO("Not yet implemented")
+        val formCells = mutableListOf<FormBaseCell>()
+
+        val id = action.id
+
+        val changeEnabled = id?.let { editEnabled } ?: addEnabled
+
+        val dayWorkEntity = id?.let {
+            dayWorkRepository.findByIdOrNull(id) ?: return emptyList()
+        }
+
+        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
+            action.parentId
+        } else {
+            dayWorkEntity?.obj?.id
+        }
+        val parentObjectEntity = parentObjectId?.let {
+            objectRepository.findByIdOrNull(parentObjectId)
+        }
+
+        //--- логика именно такая - если есть объект - берём его userId, даже если он null
+        val userId = dayWorkEntity?.let {
+            dayWorkEntity.userId
+        } ?: parentObjectEntity?.let {
+            parentObjectEntity.userId
+        } ?: userConfig.id
+
+        fillFormUserCells(
+            fieldUserId = FIELD_USER_ID,
+            fieldOwnerFullName = FIELD_OWNER_FULL_NAME,
+            userId = userId,
+            userConfig = userConfig,
+            changeEnabled = changeEnabled,
+            formCells = formCells,
+        )
+
+        formCells += FormSimpleCell(
+            name = FIELD_OBJECT_ID,
+            caption = "",
+            isEditable = false,
+            value = parentObjectEntity?.id?.toString() ?: "",
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_OBJECT_NAME,
+            caption = "Наименование",
+            isEditable = false,
+            value = parentObjectEntity?.name ?: "",
+            selectorAction = AppAction(
+                type = ActionType.MODULE_TABLE,
+                module = AppModuleMMS.OBJECT,
+                isSelectorMode = true,
+                selectorPath = mapOf(
+                    ObjectService.FIELD_ID to FIELD_OBJECT_ID,
+                    ObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
+                    ObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
+                ),
+                selectorClear = mapOf(
+                    FIELD_OBJECT_ID to "",
+                    FIELD_OBJECT_NAME to "",
+                    FIELD_OBJECT_MODEL to "",
+                ),
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_OBJECT_MODEL,
+            caption = "Модель",
+            isEditable = changeEnabled,
+            value = parentObjectEntity?.model ?: "",
+        )
+
+        formCells += FormDateTimeCell(
+            name = FIELD_DAY,
+            caption = "Дата",
+            isEditable = changeEnabled,
+            mode = FormDateTimeCellMode.DMY,
+            value = dayWorkEntity?.day?.let { dt ->
+                LocalDateTime(dt.ye ?: 2000, dt.mo ?: 1, dt.da ?: 1, 0, 0, 0).toInstant(getTimeZone(userConfig.timeOffset)).epochSeconds.toInt()
+            } ?: getCurrentTimeInt(),
+        )
+
+        return formCells
     }
 
     override fun getFormActionPermissions(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig): Triple<Boolean, Boolean, Boolean> {
-        TODO("Not yet implemented")
+        val id = action.id
+
+        val addEnabled = checkFormAddPermission(moduleConfig, userConfig.roles)
+
+        val dayWorkEntity = id?.let {
+            dayWorkRepository.findByIdOrNull(id) ?: return Triple(addEnabled, false, false)
+        }
+
+        val editEnabled = checkRowPermission(action.module, ActionType.FORM_EDIT, userConfig.relatedUserIds[dayWorkEntity?.userId], userConfig.roles)
+        val deleteEnabled = checkRowPermission(action.module, ActionType.FORM_DELETE, userConfig.relatedUserIds[dayWorkEntity?.userId], userConfig.roles)
+
+        return Triple(addEnabled, editEnabled, deleteEnabled)
     }
 
     override fun formActionSave(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, formActionData: Map<String, FormActionData>): FormActionResponse {
-        TODO("Not yet implemented")
+        val id = action.id
+
+        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_OBJECT_NAME to "Не выбран объект"))
+        val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId)
+
+        val day = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_DAY]?.dateTimeValue ?: getCurrentTimeInt())
+
+        val recordId = id ?: getNextId { nextId -> dayWorkRepository.existsById(nextId) }
+        val dayWorkEntity = DayWorkEntity(
+            id = recordId,
+            userId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull(),
+            obj = parentObjectEntity,
+            day = DateEntity(
+                ye = day[0],
+                mo = day[1],
+                da = day[2],
+            ),
+        )
+        dayWorkRepository.saveAndFlush(dayWorkEntity)
+
+        return FormActionResponse(
+            responseCode = ResponseCode.OK,
+            nextAction = action.prevAction?.copy(id = recordId),
+        )
     }
 
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {
-        TODO("Not yet implemented")
+        dayWorkRepository.deleteById(id)
+
+        return FormActionResponse(responseCode = ResponseCode.OK)
     }
 
 }

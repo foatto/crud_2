@@ -29,6 +29,7 @@ class SensorEntity(
 
     @Column(name = "beg_time")
     var begTime: Int?,
+
     @Column(name = "end_time")
     var endTime: Int?,
 

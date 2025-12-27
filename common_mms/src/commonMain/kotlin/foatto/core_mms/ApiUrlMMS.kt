@@ -33,6 +33,9 @@ object ApiUrlMMS {
     const val DAY_WORK: String = "${ApiUrl.URL_BASE}/day_work/${ApiUrl.CURRENT_VERSION}"
     const val DAY_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_work_form_action/${ApiUrl.CURRENT_VERSION}"
 
+    const val WORK_SHIFT: String = "${ApiUrl.URL_BASE}/work_shift/${ApiUrl.CURRENT_VERSION}"
+    const val WORK_SHIFT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/work_shift_form_action/${ApiUrl.CURRENT_VERSION}"
+
     const val CHART_SENSOR: String = "${ApiUrl.URL_BASE}/chart_sensor/${ApiUrl.CURRENT_VERSION}"
     const val CHART_SENSOR_ACTION: String = "${ApiUrl.URL_BASE}/chart_sensor_action/${ApiUrl.CURRENT_VERSION}"
 

@@ -49,6 +49,10 @@ fun addAppModuleUrls() {
         appUrl = ApiUrlMMS.DAY_WORK,
         formActionUrl = ApiUrlMMS.DAY_WORK_FORM_ACTION,
     )
+    appModuleUrls[AppModuleMMS.WORK_SHIFT] = AppModuleUrl(
+        appUrl = ApiUrlMMS.WORK_SHIFT,
+        formActionUrl = ApiUrlMMS.WORK_SHIFT_FORM_ACTION,
+    )
 
     appModuleUrls[AppModuleMMS.CHART_SENSOR] = AppModuleUrl(
         appUrl = ApiUrlMMS.CHART_SENSOR,

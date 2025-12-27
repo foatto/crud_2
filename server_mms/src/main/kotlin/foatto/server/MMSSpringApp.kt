@@ -330,10 +330,8 @@ class MMSSpringApp : SpringApp() {
         appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "Daily work log", LanguageEnum.RU to "Журнал суточных работ"),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
-//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
-//            disabledAccessRoles = mutableSetOf(),
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
-            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT, AppRole.USER),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
             disabledFormAddRoles = mutableSetOf(AppRole.USER),
             rowPermissions = mutableMapOf(
@@ -354,6 +352,38 @@ class MMSSpringApp : SpringApp() {
                 ActionType.FORM_DELETE to Permission(
                     enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
                     disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
+        appModuleConfigs[AppModuleMMS.WORK_SHIFT] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Shift work log", LanguageEnum.RU to "Журнал посменных работ"),
+            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledFormAddRoles = mutableSetOf(),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                    },
                 ),
             ),
         )
@@ -525,6 +555,14 @@ class MMSSpringApp : SpringApp() {
                     alMenu = this,
                     serverUserConfig = serverUserConfig,
                     module = AppModuleMMS.DAY_WORK,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-logbook-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.WORK_SHIFT,
                     actionType = ActionType.MODULE_TABLE,
                     iconUrl = "/images/icons8-logbook-24.png",
                     iconSize = 24,

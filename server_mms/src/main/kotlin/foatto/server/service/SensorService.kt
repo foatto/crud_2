@@ -460,7 +460,6 @@ class SensorService(
 //        val isEquip = aliasConfig.name == "mms_equip"
 
         val sensorEntity = id?.let {
-            //--- TODO: ошибка об отсутствии такой записи
             sensorRepository.findByIdOrNull(id) ?: return emptyList()
         }
 

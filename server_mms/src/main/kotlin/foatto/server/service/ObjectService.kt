@@ -255,6 +255,7 @@ class ObjectService(
         val endTime = begTime + 86_400
 
         getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.WORK_SHIFT, AppModuleMMS.OBJECT, objectId, alPopupData)
 
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
 

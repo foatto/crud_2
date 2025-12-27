@@ -62,7 +62,7 @@ class SummaryReportService(
 
         val formCells = mutableListOf<FormBaseCell>()
 
-        val parentObjectId = if (action.parentModule in setOf(AppModuleMMS.OBJECT, AppModuleMMS.DAY_WORK)) {
+        val parentObjectId = if (action.parentModule in setOf(AppModuleMMS.OBJECT, AppModuleMMS.DAY_WORK, AppModuleMMS.WORK_SHIFT)) {
             action.parentId
         } else {
             null

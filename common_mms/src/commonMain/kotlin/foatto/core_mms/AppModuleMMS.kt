@@ -16,6 +16,7 @@ object AppModuleMMS {
     const val DEVICE_MANAGE: String = "device_manage"
 
     const val DAY_WORK: String = "day_work"
+    const val WORK_SHIFT: String = "work_shift"
 
     const val CHART_SENSOR: String = "chart_sensor"
 //    const val CHART_LIQUID_LEVEL: String = "CHART_LIQUID_LEVEL"

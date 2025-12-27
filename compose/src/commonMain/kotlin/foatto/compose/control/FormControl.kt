@@ -162,6 +162,7 @@ import kotlin.time.ExperimentalTime
 
 var filePickerDialogSettings: FileKitDialogSettings = FileKitDialogSettings.createDefault()
 var formComboCellPreSetFun: ((lang: LanguageEnum, formCell: FormComboCell) -> Unit)? = null
+
 /*
         formComboCellPreSetFun = { formCell: FormComboCell ->
             if (formCell.name == EquipActionParameters.FIELD_PORT_SELECT) {
@@ -177,6 +178,7 @@ var formComboCellPreSetFun: ((lang: LanguageEnum, formCell: FormComboCell) -> Un
         }
  */
 var formSelectorPreCall: ((selectorAction: AppAction, alGridRows: SnapshotStateList<MutableList<FormBaseCellClient?>>) -> Boolean)? = null
+
 /*
         formSelectorPreCall = { selectorAction, alGridRows ->
             if (selectorAction.type == ActionTypeLicense.PIN_CODE_GENERATE) {
@@ -518,11 +520,6 @@ class FormControl(
                                             when (gridData) {
                                                 is FormLabelCellClient -> {
                                                     Text(text = gridData.current.value)
-//                                            if (gridData.text.value == BR) {
-//                                                Br()
-//                                            } else {
-//                                                Text(gridData.text.value)
-//                                            }
                                                 }
 
                                                 is FormSimpleCellClient -> {
@@ -579,29 +576,31 @@ class FormControl(
 
                                                 is FormBooleanCellClient -> {
                                                     if (gridData.data.alSwitchText.isEmpty()) {
-                                                        Checkbox(
-                                                            modifier = Modifier
-                                                                .then(
+                                                        Column {
+                                                            Checkbox(
+                                                                modifier = Modifier
+                                                                    .then(
+                                                                        if (gridData.data.isEditable) {
+                                                                            Modifier.background(Color.Transparent)
+                                                                        } else {
+                                                                            Modifier
+                                                                        }
+                                                                    ),
+                                                                colors = colorCheckBox ?: CheckboxDefaults.colors(),
+                                                                checked = gridData.current,
+                                                                onCheckedChange = { newState ->
                                                                     if (gridData.data.isEditable) {
-                                                                        Modifier.background(Color.Transparent)
-                                                                    } else {
-                                                                        Modifier
+                                                                        gridData.current = newState
+                                                                        doVisibleAndCaptionAndComboChange(gridData)
                                                                     }
-                                                                ),
-                                                            colors = colorCheckBox ?: CheckboxDefaults.colors(),
-                                                            checked = gridData.current,
-                                                            onCheckedChange = { newState ->
-                                                                if (gridData.data.isEditable) {
-                                                                    gridData.current = newState
-                                                                    doVisibleAndCaptionAndComboChange(gridData)
-                                                                }
-                                                            },
-                                                        )
-                                                        gridData.error?.let { error ->
-                                                            Text(
-                                                                text = error,
-                                                                color = Color.Red,
+                                                                },
                                                             )
+                                                            gridData.error?.let { error ->
+                                                                Text(
+                                                                    text = error,
+                                                                    color = Color.Red,
+                                                                )
+                                                            }
                                                         }
                                                         //                                            id(getFocusId(gridData.id))
                                                         //onInput { syntheticInputEvent -> - тоже можно
@@ -665,53 +664,66 @@ class FormControl(
                                                         }
                                                     }
 
-                                                    Text(text = dateString)
-                                                    if (gridData.data.isEditable) {
-                                                        FilledIconButton(
-                                                            shape = singleButtonShape,
-                                                            colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
-                                                            onClick = {
-                                                                val curDateTime = gridData.current.value?.let { seconds ->
-                                                                    seconds * 1000L
-                                                                } ?: Clock.System.now().toEpochMilliseconds()
-
-                                                                datePickerState.displayedMonthMillis = curDateTime
-                                                                datePickerState.selectedDateMillis = curDateTime
-
-                                                                datePickerData = gridData
-                                                            }
+                                                    Column {
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
                                                         ) {
-                                                            Icon(
-                                                                imageVector = Icons.Default.Edit,
-                                                                contentDescription = null,
-                                                            )
-                                                        }
-                                                    }
-                                                    //--- time fields on new line on narrow screens
+                                                            Text(text = dateString)
+                                                            if (gridData.data.isEditable) {
+                                                                FilledIconButton(
+                                                                    shape = singleButtonShape,
+                                                                    colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
+                                                                    onClick = {
+                                                                        val curDateTime = gridData.current.value?.let { seconds ->
+                                                                            seconds * 1000L
+                                                                        } ?: Clock.System.now().toEpochMilliseconds()
+
+                                                                        datePickerState.displayedMonthMillis = curDateTime
+                                                                        datePickerState.selectedDateMillis = curDateTime
+
+                                                                        datePickerData = gridData
+                                                                    }
+                                                                ) {
+                                                                    Icon(
+                                                                        imageVector = Icons.Default.Edit,
+                                                                        contentDescription = null,
+                                                                    )
+                                                                }
+                                                            }
+                                                            //--- time fields on new line on narrow screens
 //                                            if (styleIsNarrowScreen && index == 3) {
 //                                                Br()
 //                                            }
-                                                    if (!gridData.data.isEditable) {
-                                                        Text(modifier = Modifier.padding(8.dp), text = "")
-                                                    }
+                                                            if (!gridData.data.isEditable) {
+                                                                Text(modifier = Modifier.padding(8.dp), text = "")
+                                                            }
 
-                                                    timeString?.let {
-                                                        Text(text = timeString)
-                                                        if (gridData.data.isEditable) {
-                                                            FilledIconButton(
-                                                                shape = singleButtonShape,
-                                                                colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
-                                                                onClick = {
-                                                                    timePickerData = gridData
+                                                            timeString?.let {
+                                                                Text(text = timeString)
+                                                                if (gridData.data.isEditable) {
+                                                                    FilledIconButton(
+                                                                        shape = singleButtonShape,
+                                                                        colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
+                                                                        onClick = {
+                                                                            timePickerData = gridData
+                                                                        }
+                                                                    ) {
+                                                                        Icon(
+                                                                            imageVector = Icons.Default.Edit,
+                                                                            contentDescription = null,
+                                                                        )
+                                                                    }
                                                                 }
-                                                            ) {
-                                                                Icon(
-                                                                    imageVector = Icons.Default.Edit,
-                                                                    contentDescription = null,
-                                                                )
                                                             }
                                                         }
+                                                        gridData.error?.let { error ->
+                                                            Text(
+                                                                text = error,
+                                                                color = Color.Red,
+                                                            )
+                                                        }
                                                     }
+
 //                                                id(getFocusId(gridData.id, gridData.alSubId?.get(index)))
 //                                                onFocusIn { syntheticFocusEvent ->
 //                                                    selectAllText(syntheticFocusEvent)
@@ -1207,7 +1219,7 @@ class FormControl(
             )
         }
     }
-    
+
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     override suspend fun start() {

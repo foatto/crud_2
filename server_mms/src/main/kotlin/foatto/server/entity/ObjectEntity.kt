@@ -47,7 +47,7 @@ class ObjectEntity(
 
     @Convert(converter = BooleanToIntConverter::class)
     @Column(name = "is_auto_work_shift")
-    val isAutoWorkShiftEnabled: Boolean?,
+    var isAutoWorkShiftEnabled: Boolean?,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

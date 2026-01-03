@@ -51,7 +51,7 @@ class APIService(
         }
 
         val enabledUserIds = getEnabledUserIds(
-            module = AppModuleMMS.OBJECT,
+            module = AppModuleMMS.ANY_OBJECT,
             actionType = ActionType.MODULE_TABLE,
             relatedUserIds = logonService.loadRelatedUserIds(
                 userId = userEntity.id,

@@ -1,7 +1,9 @@
 package foatto.core_mms
 
 object AppModuleMMS {
-    const val OBJECT: String = "object"
+    const val ANY_OBJECT: String = "any_object"
+    const val MOBILE_OBJECT: String = "mobile_object"
+    const val STATIONARY_OBJECT: String = "stationary_object"
 
     const val DEPARTMENT: String = "department"
     const val GROUP: String = "group"

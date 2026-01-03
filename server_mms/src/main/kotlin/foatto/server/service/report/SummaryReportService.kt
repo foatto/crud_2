@@ -15,9 +15,9 @@ import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.service.AbstractObjectService
 import foatto.server.service.CalcService
 import foatto.server.service.FileStoreService
-import foatto.server.service.ObjectService
 import jxl.write.Label
 import jxl.write.WritableSheet
 import org.springframework.data.repository.findByIdOrNull
@@ -62,11 +62,7 @@ class SummaryReportService(
 
         val formCells = mutableListOf<FormBaseCell>()
 
-        val parentObjectId = if (action.parentModule in setOf(AppModuleMMS.OBJECT, AppModuleMMS.DAY_WORK, AppModuleMMS.WORK_SHIFT)) {
-            action.parentId
-        } else {
-            null
-        }
+        val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
@@ -84,12 +80,12 @@ class SummaryReportService(
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
                 type = ActionType.MODULE_TABLE,
-                module = AppModuleMMS.OBJECT,
+                module = AppModuleMMS.ANY_OBJECT,
                 isSelectorMode = true,
                 selectorPath = mapOf(
-                    ObjectService.FIELD_ID to FIELD_OBJECT_ID,
-                    ObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
-                    ObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
+                    AbstractObjectService.FIELD_ID to FIELD_OBJECT_ID,
+                    AbstractObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
+                    AbstractObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
                 ),
                 selectorClear = mapOf(
                     FIELD_OBJECT_ID to "",
@@ -194,7 +190,7 @@ class SummaryReportService(
                 objectEntities += parentObjectEntity
             }
         } ?: run {
-            val enabledUserIds = getEnabledUserIds(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
+            val enabledUserIds = getEnabledUserIds(AppModuleMMS.ANY_OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
             objectEntities += objectRepository.findByUserIdIn(enabledUserIds)
         }
 

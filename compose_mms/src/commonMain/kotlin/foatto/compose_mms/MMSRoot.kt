@@ -86,7 +86,7 @@ class MMSRoot : Root() {
         settings.putInt(SETTINGS_SERVER_PORT, 19998)
 
 //        defaultStartModule = AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD
-        defaultStartModule = AppModuleMMS.OBJECT
+        defaultStartModule = AppModuleMMS.ANY_OBJECT
 
         addAppModuleUrls()
     }

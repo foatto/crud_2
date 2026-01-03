@@ -124,11 +124,7 @@ class DayWorkService(
 
         val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId
-        } else {
-            null
-        }
+        val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
@@ -416,18 +412,18 @@ class DayWorkService(
             )
         }
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.ANY_OBJECT, objectId, begTime, endTime, alPopupData)
 
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
 
 //        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
 
-        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.ANY_OBJECT, objectId, begTime, endTime, alPopupData)
 
-        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
 
         return alPopupData
     }
@@ -443,11 +439,7 @@ class DayWorkService(
             dayWorkRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId
-        } else {
-            dayWorkEntity?.obj?.id
-        }
+        val parentObjectId = getParentObjectId(action) ?: dayWorkEntity?.obj?.id
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
@@ -481,12 +473,12 @@ class DayWorkService(
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
                 type = ActionType.MODULE_TABLE,
-                module = AppModuleMMS.OBJECT,
+                module = AppModuleMMS.ANY_OBJECT,
                 isSelectorMode = true,
                 selectorPath = mapOf(
-                    ObjectService.FIELD_ID to FIELD_OBJECT_ID,
-                    ObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
-                    ObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
+                    AbstractObjectService.FIELD_ID to FIELD_OBJECT_ID,
+                    AbstractObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
+                    AbstractObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
                 ),
                 selectorClear = mapOf(
                     FIELD_OBJECT_ID to "",

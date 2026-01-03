@@ -6,6 +6,7 @@ import foatto.core.model.AppAction
 import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TablePopup
 import foatto.core.util.getDateTimeDMYHMSString
+import foatto.core_mms.AppModuleMMS
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.model.ServerUserConfig
@@ -20,6 +21,13 @@ abstract class MMSService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
+
+    protected fun getParentObjectId(action: AppAction) =
+        if (action.parentModule in setOf(AppModuleMMS.ANY_OBJECT, AppModuleMMS.MOBILE_OBJECT, AppModuleMMS.STATIONARY_OBJECT)) {
+            action.parentId
+        } else {
+            null
+        }
 
     protected fun getTableTablePopupData(
         userConfig: ServerUserConfig,
@@ -220,11 +228,11 @@ abstract class MMSService(
             val nextPageNo = pageNo + i
             if (nextPageNo <= pageCount - 1) {
                 pageButtons += getTableTimedPageButton(
-                        action = action,
-                        timeZone = zoneUser,
-                        pageNo = nextPageNo,
-                        time = (currentTimedPageNo - i) * pageSizeInSec,
-                    )
+                    action = action,
+                    timeZone = zoneUser,
+                    pageNo = nextPageNo,
+                    time = (currentTimedPageNo - i) * pageSizeInSec,
+                )
             } else {
                 break
             }

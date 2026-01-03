@@ -4,9 +4,17 @@ import foatto.core.appModuleUrls
 import foatto.core.model.AppModuleUrl
 
 fun addAppModuleUrls() {
-    appModuleUrls[AppModuleMMS.OBJECT] = AppModuleUrl(
-        appUrl = ApiUrlMMS.OBJECT,
-        formActionUrl = ApiUrlMMS.OBJECT_FORM_ACTION,
+    appModuleUrls[AppModuleMMS.ANY_OBJECT] = AppModuleUrl(
+        appUrl = ApiUrlMMS.ANY_OBJECT,
+        formActionUrl = ApiUrlMMS.ANY_OBJECT_FORM_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.MOBILE_OBJECT] = AppModuleUrl(
+        appUrl = ApiUrlMMS.MOBILE_OBJECT,
+        formActionUrl = ApiUrlMMS.MOBILE_OBJECT_FORM_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.STATIONARY_OBJECT] = AppModuleUrl(
+        appUrl = ApiUrlMMS.STATIONARY_OBJECT,
+        formActionUrl = ApiUrlMMS.STATIONARY_OBJECT_FORM_ACTION,
     )
 
     appModuleUrls[AppModuleMMS.DEPARTMENT] = AppModuleUrl(

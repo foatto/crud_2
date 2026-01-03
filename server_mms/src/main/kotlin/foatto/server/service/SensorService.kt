@@ -61,7 +61,7 @@ class SensorService(
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
+) : MMSService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
@@ -287,11 +287,7 @@ class SensorService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_GROUP), Sort.Order(Sort.Direction.ASC, FIELD_PORT_NUM))
         val findText = action.findText?.trim() ?: ""
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId ?: return null
-        } else {
-            return null
-        }
+        val parentObjectId = getParentObjectId(action) ?: return null
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
         val page: Page<SensorEntity> = sensorRepository.findByObjAndFilter(
@@ -463,11 +459,7 @@ class SensorService(
             sensorRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId ?: 0
-        } else {
-            0
-        }
+        val parentObjectId = getParentObjectId(action) ?: 0
 
         val sensorCalibrationInfo = id?.let {
             sensorCalibrationRepository.findBySensorIdOrderBySensorValue(id).joinToString("\n") { sensorCalibrationEntity ->

@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.AppModule
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -48,11 +49,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.stereotype.Service
 import java.io.File
+import kotlin.collections.get
 
-@Service
-class ObjectService(
+abstract class AbstractObjectService(
     private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
     private val departmentRepository: DepartmentRepository,
@@ -62,15 +62,15 @@ class ObjectService(
     private val deviceRepository: DeviceRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
+    private val objectType: ObjectType?,
 ) : MMSService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
-
     companion object {
         const val FIELD_ID: String = "id"
         private const val FIELD_USER_ID = "userId"
-        const val FIELD_TYPE: String = "type"
+        private const val FIELD_TYPE: String = "type"
         private const val FIELD_IS_DISABLED = "isDisabled"
         private const val FIELD_DISABLE_REASON = "disableReason"
         const val FIELD_NAME: String = "name"
@@ -82,7 +82,6 @@ class ObjectService(
         private const val FIELD_FILE = "fileId"
 
         //        private const val FIELD_LAST_ALERT_TIME = "lastAlertTime"
-        private const val FIELD_IS_AUTO_WORK_SHIFT_ENABLED = "isAutoWorkShiftEnabled"
 
         private const val FIELD_OWNER_FULL_NAME = "_ownerFullName"   // псевдополе для селектора
         private const val FIELD_DEPARTMENT_NAME = "_departmentName"   // псевдополе для селектора
@@ -99,7 +98,7 @@ class ObjectService(
             alColumnInfo += null to "" // selector button
         }
         alColumnInfo += null to "" // userId
-        if (getObjectType(action) == null) {
+        if (objectType == null) {
             alColumnInfo += FIELD_TYPE to "Тип"
         }
         alColumnInfo += FIELD_IS_DISABLED to "Заблокирован"
@@ -132,8 +131,6 @@ class ObjectService(
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
-
-        val objectType = getObjectType(action)
 
         val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
 
@@ -254,21 +251,21 @@ class ObjectService(
         val begTime = getCurrentTimeInt() / 86_400 * 86_400 - userConfig.timeOffset
         val endTime = begTime + 86_400
 
-        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.WORK_SHIFT, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, getObjectAppModule(), objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.WORK_SHIFT, getObjectAppModule(), objectId, alPopupData)
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, getObjectAppModule(), objectId, begTime, endTime, alPopupData)
 
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, getObjectAppModule(), objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, getObjectAppModule(), objectId, alPopupData)
 
 //        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
 
-        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, getObjectAppModule(), objectId, begTime, endTime, alPopupData)
 
-        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, getObjectAppModule(), objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, getObjectAppModule(), objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, getObjectAppModule(), objectId, alPopupData)
 
         return alPopupData
     }
@@ -319,7 +316,7 @@ class ObjectService(
             name = FIELD_TYPE,
             caption = "Тип объекта",
             isEditable = changeEnabled,
-            value = (objectEntity?.type ?: getObjectType(action) ?: ObjectType.STATIONARY).name,
+            value = (objectEntity?.type ?: objectType ?: ObjectType.STATIONARY).name,
             values = ObjectType.entries.map { v -> v.name to v.getDescr(userConfig.lang) },
             asRadioButtons = true,
         )
@@ -446,15 +443,13 @@ class ObjectService(
             fileId = objectEntity?.fileId,
             files = getFormFileCellData(objectEntity?.fileId)
         )
-        formCells += FormBooleanCell(
-            name = FIELD_IS_AUTO_WORK_SHIFT_ENABLED,
-            caption = "Автосоздание рабочих смен",
-            isEditable = changeEnabled,
-            value = objectEntity?.isAutoWorkShiftEnabled ?: false,
-        )
+
+        addFormCells(changeEnabled, objectEntity, formCells)
 
         return formCells
     }
+
+    open fun addFormCells(changeEnabled: Boolean, objectEntity: ObjectEntity?, formCells: MutableList<FormBaseCell>) {}
 
     override fun getFormButtons(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean, deleteEnabled: Boolean): List<FormButton> {
         val id = action.id
@@ -474,7 +469,7 @@ class ObjectService(
         action: AppAction,
         userConfig: ServerUserConfig,
         moduleConfig: AppModuleConfig,
-        formActionData: Map<String, FormActionData>
+        formActionData: Map<String, FormActionData>,
     ): FormActionResponse {
         val id = action.id
 
@@ -488,14 +483,14 @@ class ObjectService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
         }
 
-        val objectType = formActionData[FIELD_TYPE]?.stringValue?.let { s -> ObjectType.valueOf(s) } ?: ObjectType.STATIONARY
+        val newObjectType = formActionData[FIELD_TYPE]?.stringValue?.let { s -> ObjectType.valueOf(s) } ?: ObjectType.STATIONARY
 
         // !!! getNextIntId(arrayOf("MMS_object", "MMS_zone"), arrayOf("id", "id"))
         val recordId = id ?: getNextId { nextId -> objectRepository.existsById(nextId) }
         val objectEntity = ObjectEntity(
             id = recordId,
             userId = recordUserId,
-            type = objectType,
+            type = newObjectType,
             isDisabled = formActionData[FIELD_IS_DISABLED]?.booleanValue == true,
             disableReason = formActionData[FIELD_DISABLE_REASON]?.stringValue,
             name = formActionData[FIELD_NAME]?.stringValue,
@@ -507,7 +502,7 @@ class ObjectService(
             fileId = formActionData[FIELD_FILE]?.let { fad ->
                 formActionSaveFiles(fad)
             },
-            isAutoWorkShiftEnabled = formActionData[FIELD_IS_AUTO_WORK_SHIFT_ENABLED]?.booleanValue == true,
+            isAutoWorkShiftEnabled = getAutoWorkShiftEnabledData(formActionData),
         )
         objectRepository.saveAndFlush(objectEntity)
 
@@ -522,7 +517,7 @@ class ObjectService(
         }
 
         val geoSensors = sensorRepository.findByObjAndPortNumAndSensorType(objectEntity, SensorConfigGeo.PORT_NUM, SensorConfig.SENSOR_GEO)
-        when (objectType) {
+        when (newObjectType) {
             ObjectType.MOBILE -> {
                 if (geoSensors.isEmpty()) {
                     val recordId = id ?: getNextId { nextId -> sensorRepository.existsById(nextId) }
@@ -589,6 +584,8 @@ class ObjectService(
         )
     }
 
+    open fun getAutoWorkShiftEnabledData(formActionData: Map<String, FormActionData>): Boolean = false
+
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {
         //--- remove all depended sensors & datas
         objectRepository.findByIdOrNull(id)?.let { objectEntity ->
@@ -635,14 +632,11 @@ class ObjectService(
         return Triple(addEnabled, editEnabled, deleteEnabled)
     }
 
-    private fun getObjectType(action: AppAction): ObjectType? =
-        action.params[FIELD_TYPE]?.let { objectTypeStr ->
-            try {
-                ObjectType.valueOf(objectTypeStr)
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-        }
+    private fun getObjectAppModule(): String = when(objectType) {
+        ObjectType.MOBILE -> AppModuleMMS.MOBILE_OBJECT
+        ObjectType.STATIONARY -> AppModuleMMS.STATIONARY_OBJECT
+        else -> AppModuleMMS.ANY_OBJECT
+    }
 }
 /*
     companion object {

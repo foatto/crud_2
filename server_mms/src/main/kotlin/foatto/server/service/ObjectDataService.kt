@@ -14,7 +14,6 @@ import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getTimeZone
-import foatto.core_mms.AppModuleMMS
 import foatto.server.entity.ObjectEntity
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
@@ -52,11 +51,7 @@ class ObjectDataService(
 
         val emptyResult = getTableColumnCaptionActions(action, alColumnInfo)
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId ?: return emptyResult
-        } else {
-            return emptyResult
-        }
+        val parentObjectId = getParentObjectId(action) ?: return emptyResult
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return emptyResult
 
         //--- Передавать два getCurrentTimeInt() неправильно, но определить показываемый период сейчас невозможно.
@@ -86,11 +81,7 @@ class ObjectDataService(
     ): Int? {
         var row = 0
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId ?: return null
-        } else {
-            return null
-        }
+        val parentObjectId = getParentObjectId(action) ?: return null
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId) ?: return null
 
         val zoneUTC = getTimeZone(0)

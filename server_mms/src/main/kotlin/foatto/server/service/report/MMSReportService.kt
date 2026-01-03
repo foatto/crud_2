@@ -1,12 +1,15 @@
 package foatto.server.service.report
 
+import foatto.core.model.AppAction
 import foatto.core.util.getDateTimeDMYHMSString
+import foatto.core_mms.AppModuleMMS
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.service.FileStoreService
 import foatto.server.service.ReportService
 import jxl.write.Label
 import jxl.write.WritableSheet
+import kotlin.collections.contains
 
 abstract class MMSReportService(
     private val fileStoreService: FileStoreService,
@@ -53,4 +56,11 @@ abstract class MMSReportService(
 
         return offsY
     }
+
+    protected fun getParentObjectId(action: AppAction) =
+        if (action.parentModule in setOf(AppModuleMMS.ANY_OBJECT, AppModuleMMS.MOBILE_OBJECT, AppModuleMMS.STATIONARY_OBJECT)) {
+            action.parentId
+        } else {
+            null
+        }
 }

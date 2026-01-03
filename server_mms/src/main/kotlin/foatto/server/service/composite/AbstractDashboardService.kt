@@ -85,7 +85,7 @@ abstract class AbstractDashboardService(
 
         val moduleConfig = appModuleConfigs[actionModule] ?: return getErrorCompositeActionResponse()
         val (objectEntity, deviceEntity) = when (action.parentModule) {
-            AppModuleMMS.OBJECT -> {
+            AppModuleMMS.ANY_OBJECT, AppModuleMMS.MOBILE_OBJECT, AppModuleMMS.STATIONARY_OBJECT  -> {
                 val oe = action.parentId?.let { objectId ->
                     objectRepository.findByIdOrNull(objectId)
                 } ?: return getErrorCompositeActionResponse()
@@ -203,7 +203,7 @@ abstract class AbstractDashboardService(
         )
     } else {
         action.copy(
-            parentModule = AppModuleMMS.OBJECT,
+            parentModule = AppModuleMMS.ANY_OBJECT,
         )
     }
 
@@ -215,7 +215,7 @@ abstract class AbstractDashboardService(
         val sessionData = SpringApp.getSessionData(sessionId) ?: return emptyList()
         val userConfig = sessionData.serverUserConfig ?: return emptyList()
 
-        val enabledUserIds = getEnabledUserIds(AppModuleMMS.OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
+        val enabledUserIds = getEnabledUserIds(AppModuleMMS.ANY_OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
 
         val objectEntities = objectRepository.findByUserIdIn(enabledUserIds)
         val deviceEntities = deviceRepository.findAll()
@@ -242,7 +242,7 @@ abstract class AbstractDashboardService(
             result += CompositeListItemData(
                 text = objectEntity.name ?: "(без наименования)",
                 itemId = objectEntity.id,
-                itemModule = AppModuleMMS.OBJECT,
+                itemModule = AppModuleMMS.ANY_OBJECT,
                 itemStatus = true,
                 subListDatas = if (deviceList.isEmpty()) {
                     null

@@ -117,11 +117,7 @@ class WorkShiftService(
 
         val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId
-        } else {
-            null
-        }
+        val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
@@ -413,19 +409,19 @@ class WorkShiftService(
             )
         }
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.ANY_OBJECT, objectId, begTime, endTime, alPopupData)
 
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
 
 //        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
 
         //--- maps for shift works for static objects is not exists
         //getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)
 
-        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.ANY_OBJECT, objectId, alPopupData)
 
         return alPopupData
     }
@@ -441,11 +437,7 @@ class WorkShiftService(
             workShiftRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId
-        } else {
-            workShiftEntity?.obj?.id
-        }
+        val parentObjectId = getParentObjectId(action) ?: workShiftEntity?.obj?.id
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
@@ -479,12 +471,12 @@ class WorkShiftService(
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
                 type = ActionType.MODULE_TABLE,
-                module = AppModuleMMS.OBJECT,
+                module = AppModuleMMS.ANY_OBJECT,
                 isSelectorMode = true,
                 selectorPath = mapOf(
-                    ObjectService.FIELD_ID to FIELD_OBJECT_ID,
-                    ObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
-                    ObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
+                    AbstractObjectService.FIELD_ID to FIELD_OBJECT_ID,
+                    AbstractObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
+                    AbstractObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
                 ),
                 selectorClear = mapOf(
                     FIELD_OBJECT_ID to "",
@@ -556,8 +548,7 @@ class WorkShiftService(
 
         if (endTime == begTime) {
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_END_TIME to "Время окончания смены совпадает с временем начала смены"))
-        }
-        else if (endTime < begTime) {
+        } else if (endTime < begTime) {
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_END_TIME to "Время окончания смены раньше, чем время начала смены"))
         }
 

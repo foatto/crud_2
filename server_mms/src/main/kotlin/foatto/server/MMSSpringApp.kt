@@ -13,7 +13,6 @@ import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.AppRoleConfig
 import foatto.server.model.Permission
-import foatto.server.service.ObjectService
 import foatto.server.util.AdvancedLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -73,10 +72,72 @@ class MMSSpringApp : SpringApp() {
         addDisabledRoles(AppModule.USER, ActionType.FORM_EDIT, AppRoleMMS.SUPPORT)
         addDisabledRoles(AppModule.USER, ActionType.FORM_DELETE, AppRoleMMS.SUPPORT)
 
-        appModuleConfigs[AppModuleMMS.OBJECT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Objects", LanguageEnum.RU to "Объекты"),
+        appModuleConfigs[AppModuleMMS.ANY_OBJECT] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "All objects", LanguageEnum.RU to "Все объекты"),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
+
+        appModuleConfigs[AppModuleMMS.MOBILE_OBJECT] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Mobile objects", LanguageEnum.RU to "Мобильные объекты"),
+            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_MOBILE_OBJECTS),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
+
+        appModuleConfigs[AppModuleMMS.STATIONARY_OBJECT] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Stationary objects", LanguageEnum.RU to "Стационарные объекты"),
+            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
             disabledFormAddRoles = mutableSetOf(AppRole.USER),
@@ -358,7 +419,7 @@ class MMSSpringApp : SpringApp() {
         appModuleConfigs[AppModuleMMS.WORK_SHIFT] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "Shift work log", LanguageEnum.RU to "Журнал посменных работ"),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledFormAddRoles = mutableSetOf(),
@@ -510,36 +571,28 @@ class MMSSpringApp : SpringApp() {
                     addMenuItem(
                         alMenu = this,
                         serverUserConfig = serverUserConfig,
-                        module = AppModuleMMS.OBJECT,
+                        module = AppModuleMMS.ANY_OBJECT,
                         actionType = ActionType.MODULE_TABLE,
                         iconUrl = "/images/icons8-compressor-24.png",
                         iconSize = 24,
                     )
                 }
-                if (serverUserConfig.roles.contains(AppRole.ADMIN) || serverUserConfig.roles.contains(AppRoleMMS.USER_MOBILE_OBJECTS)) {
                     addMenuItem(
                         alMenu = this,
                         serverUserConfig = serverUserConfig,
-                        module = AppModuleMMS.OBJECT,
+                        module = AppModuleMMS.MOBILE_OBJECT,
                         actionType = ActionType.MODULE_TABLE,
-                        alterCaption = "Мобильные объекты",
-                        params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.MOBILE.name),
                         iconUrl = "/images/icons8-truck-24.png",
                         iconSize = 24,
                     )
-                }
-                if (serverUserConfig.roles.contains(AppRole.ADMIN) || serverUserConfig.roles.contains(AppRoleMMS.USER_FIXED_OBJECTS)) {
                     addMenuItem(
                         alMenu = this,
                         serverUserConfig = serverUserConfig,
-                        module = AppModuleMMS.OBJECT,
+                        module = AppModuleMMS.STATIONARY_OBJECT,
                         actionType = ActionType.MODULE_TABLE,
-                        alterCaption = "Стационарные объекты",
-                        params = mutableMapOf(ObjectService.FIELD_TYPE to ObjectType.STATIONARY.name),
                         iconUrl = "/images/icons8-oil-pump-24.png",
                         iconSize = 24,
                     )
-                }
 
                 if (size > 0) {
                     alMenu += MenuData(

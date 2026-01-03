@@ -3,8 +3,14 @@ package foatto.core_mms
 import foatto.core.ApiUrl
 
 object ApiUrlMMS {
-    const val OBJECT: String = "${ApiUrl.URL_BASE}/object/${ApiUrl.CURRENT_VERSION}"
-    const val OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/object_form_action/${ApiUrl.CURRENT_VERSION}"
+    const val ANY_OBJECT: String = "${ApiUrl.URL_BASE}/any_object/${ApiUrl.CURRENT_VERSION}"
+    const val ANY_OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/any_object_form_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val MOBILE_OBJECT: String = "${ApiUrl.URL_BASE}/mobile_object/${ApiUrl.CURRENT_VERSION}"
+    const val MOBILE_OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/mobile_object_form_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val STATIONARY_OBJECT: String = "${ApiUrl.URL_BASE}/stationary_object/${ApiUrl.CURRENT_VERSION}"
+    const val STATIONARY_OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/stationary_object_form_action/${ApiUrl.CURRENT_VERSION}"
 
     const val DEPARTMENT: String = "${ApiUrl.URL_BASE}/department/${ApiUrl.CURRENT_VERSION}"
     const val DEPARTMENT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/department_form_action/${ApiUrl.CURRENT_VERSION}"

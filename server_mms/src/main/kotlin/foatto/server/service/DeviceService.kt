@@ -37,10 +37,10 @@ import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.AppModuleConfig
+import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.sensor.SensorConfigCounter
 import foatto.server.model.sensor.SensorConfigLiquidLevel
-import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DeviceManageRepository
 import foatto.server.repository.DeviceRepository
@@ -69,7 +69,7 @@ class DeviceService(
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
+) : MMSService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
@@ -251,11 +251,7 @@ class DeviceService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_SERIAL_NO))
         val findText = action.findText?.trim() ?: ""
 
-        val parentObjectId = if (action.parentModule == AppModuleMMS.OBJECT) {
-            action.parentId
-        } else {
-            null
-        }
+        val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
@@ -428,11 +424,7 @@ class DeviceService(
         val parentObjectId = deviceEntity?.let {
             deviceEntity.obj?.id
         } ?: run {
-            if (action.parentModule == AppModuleMMS.OBJECT) {
-                action.parentId ?: 0
-            } else {
-                0
-            }
+            getParentObjectId(action) ?: 0
         }
 
         fillFormUserCells(
@@ -488,12 +480,12 @@ class DeviceService(
             selectorAction = if (changeEnabled) {
                 AppAction(
                     type = ActionType.MODULE_TABLE,
-                    module = AppModuleMMS.OBJECT,
+                    module = AppModuleMMS.ANY_OBJECT,
                     isSelectorMode = true,
                     selectorPath = mapOf(
-                        ObjectService.FIELD_ID to FIELD_OBJECT_ID,
-                        ObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
-                        ObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
+                        AbstractObjectService.FIELD_ID to FIELD_OBJECT_ID,
+                        AbstractObjectService.FIELD_NAME to FIELD_OBJECT_NAME,
+                        AbstractObjectService.FIELD_MODEL to FIELD_OBJECT_MODEL,
                     ),
                     selectorClear = mapOf(
                         FIELD_OBJECT_ID to "0",

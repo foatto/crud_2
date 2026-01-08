@@ -491,10 +491,19 @@ class TableControl(
                                                 TableImageOrTextCell(
                                                     baseCellData = gridData,
                                                     cellData = gridData.data,
-                                                    modifier = Modifier.padding(TABLE_CELL_PADDING),
+                                                    //--- less width for empty "group" cell
+                                                    modifier = Modifier.padding(
+                                                        start = TABLE_CELL_PADDING,
+                                                        end = if (gridData.backColor in setOf(colorTableGroupBack0, colorTableGroupBack1)) {
+                                                            0.dp
+                                                        } else {
+                                                            TABLE_CELL_PADDING
+                                                        },
+                                                        top = TABLE_CELL_PADDING,
+                                                        bottom = TABLE_CELL_PADDING
+                                                    ),
                                                 )
                                             }
-
                                             is TableButtonCellClient -> {
                                                 Column(
                                                     modifier = Modifier.padding(TABLE_CELL_PADDING),
@@ -804,8 +813,8 @@ class TableControl(
             val (isStaticBackColor, backColor) = tc.backColor?.let { bc ->
                 true to Color(bc)
             } ?: when (tc.backColorType) {
-                TableCellBackColorType.GROUP_0 -> false to colorTableGroupBack0
-                TableCellBackColorType.GROUP_1 -> false to colorTableGroupBack1
+                TableCellBackColorType.GROUP_0 -> true to colorTableGroupBack0
+                TableCellBackColorType.GROUP_1 -> true to colorTableGroupBack1
                 else -> if (tc.dataRow % 2 == 0) {
                     false to colorTableRowBack0
                 } else {

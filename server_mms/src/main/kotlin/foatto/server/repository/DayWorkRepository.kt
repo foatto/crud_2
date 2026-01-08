@@ -1,5 +1,6 @@
 package foatto.server.repository
 
+import foatto.server.ObjectType
 import foatto.server.entity.DayWorkEntity
 import foatto.server.entity.ObjectEntity
 import org.springframework.data.domain.Page
@@ -17,28 +18,23 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
             LEFT JOIN oe.group ge
             LEFT JOIN oe.department de
             WHERE dwe.id <> 0
-                AND dwe.userId IN ?1
                 AND (
-                        ?2 = ''
-                     OR LOWER(oe.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
-                     OR (
-                            dwe.day.ye IS NOT NULL
-                        AND dwe.day.mo IS NOT NULL
-                        AND dwe.day.da IS NOT NULL
-                        AND TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?2, '%' )
-                    )
+                       ?1 IS NULL
+                    OR oe.type = ?1
                 )
+                AND dwe.userId IN ?2
                 AND (
-                        ?3 = -1
+                        ?3 = ''
+                     OR LOWER(oe.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR (
                             dwe.day.ye IS NOT NULL
                         AND dwe.day.mo IS NOT NULL
                         AND dwe.day.da IS NOT NULL
-                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?3 second )
-                     )
+                        AND TO_CHAR(MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0), 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?3, '%' )
+                    )
                 )
                 AND (
                         ?4 = -1
@@ -46,12 +42,22 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                             dwe.day.ye IS NOT NULL
                         AND dwe.day.mo IS NOT NULL
                         AND dwe.day.da IS NOT NULL
-                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                     )
+                )
+                AND (
+                        ?5 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?5 second )
                      )
                 )
         """
     )
     fun findByUserIdInAndFilter(
+        objectType: ObjectType?,
         userIds: List<Int>,
         findText: String,
         begDateTime: Int,

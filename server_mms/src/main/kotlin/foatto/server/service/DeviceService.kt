@@ -480,7 +480,7 @@ class DeviceService(
             selectorAction = if (changeEnabled) {
                 AppAction(
                     type = ActionType.MODULE_TABLE,
-                    module = AppModuleMMS.ANY_OBJECT,
+                    module = AppModuleMMS.ALL_OBJECT,
                     isSelectorMode = true,
                     selectorPath = mapOf(
                         AbstractObjectService.FIELD_ID to FIELD_OBJECT_ID,

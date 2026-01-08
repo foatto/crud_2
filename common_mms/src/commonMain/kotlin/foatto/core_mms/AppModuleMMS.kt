@@ -1,7 +1,7 @@
 package foatto.core_mms
 
 object AppModuleMMS {
-    const val ANY_OBJECT: String = "any_object"
+    const val ALL_OBJECT: String = "all_object"
     const val MOBILE_OBJECT: String = "mobile_object"
     const val STATIONARY_OBJECT: String = "stationary_object"
 
@@ -17,7 +17,9 @@ object AppModuleMMS {
     const val DEVICE: String = "device"
     const val DEVICE_MANAGE: String = "device_manage"
 
-    const val DAY_WORK: String = "day_work"
+    const val DAY_ALL_WORK: String = "day_all_work"
+    const val DAY_MOBILE_WORK: String = "day_mobile_work"
+    const val DAY_STATIONARY_WORK: String = "day_stationary_work"
     const val WORK_SHIFT: String = "work_shift"
 
     const val CHART_SENSOR: String = "chart_sensor"

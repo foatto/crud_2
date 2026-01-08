@@ -4,9 +4,9 @@ import foatto.core.appModuleUrls
 import foatto.core.model.AppModuleUrl
 
 fun addAppModuleUrls() {
-    appModuleUrls[AppModuleMMS.ANY_OBJECT] = AppModuleUrl(
-        appUrl = ApiUrlMMS.ANY_OBJECT,
-        formActionUrl = ApiUrlMMS.ANY_OBJECT_FORM_ACTION,
+    appModuleUrls[AppModuleMMS.ALL_OBJECT] = AppModuleUrl(
+        appUrl = ApiUrlMMS.ALL_OBJECT,
+        formActionUrl = ApiUrlMMS.ALL_OBJECT_FORM_ACTION,
     )
     appModuleUrls[AppModuleMMS.MOBILE_OBJECT] = AppModuleUrl(
         appUrl = ApiUrlMMS.MOBILE_OBJECT,
@@ -53,9 +53,17 @@ fun addAppModuleUrls() {
         formActionUrl = ApiUrlMMS.DEVICE_MANAGE_FORM_ACTION,
     )
 
-    appModuleUrls[AppModuleMMS.DAY_WORK] = AppModuleUrl(
-        appUrl = ApiUrlMMS.DAY_WORK,
-        formActionUrl = ApiUrlMMS.DAY_WORK_FORM_ACTION,
+    appModuleUrls[AppModuleMMS.DAY_ALL_WORK] = AppModuleUrl(
+        appUrl = ApiUrlMMS.DAY_ALL_WORK,
+        formActionUrl = ApiUrlMMS.DAY_ALL_WORK_FORM_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.DAY_MOBILE_WORK] = AppModuleUrl(
+        appUrl = ApiUrlMMS.DAY_MOBILE_WORK,
+        formActionUrl = ApiUrlMMS.DAY_MOBILE_WORK_FORM_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.DAY_STATIONARY_WORK] = AppModuleUrl(
+        appUrl = ApiUrlMMS.DAY_STATIONARY_WORK,
+        formActionUrl = ApiUrlMMS.DAY_STATIONARY_WORK_FORM_ACTION,
     )
     appModuleUrls[AppModuleMMS.WORK_SHIFT] = AppModuleUrl(
         appUrl = ApiUrlMMS.WORK_SHIFT,

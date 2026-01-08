@@ -17,6 +17,7 @@ interface WorkShiftRepository : JpaRepository<WorkShiftEntity, Int> {
             LEFT JOIN oe.group ge
             LEFT JOIN oe.department de
             WHERE wse.id <> 0
+                AND oe.type = 'STATIONARY'
                 AND wse.userId IN ?1
                 AND (
                         ?2 = ''

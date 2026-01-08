@@ -23,7 +23,7 @@ abstract class MMSService(
 ) {
 
     protected fun getParentObjectId(action: AppAction) =
-        if (action.parentModule in setOf(AppModuleMMS.ANY_OBJECT, AppModuleMMS.MOBILE_OBJECT, AppModuleMMS.STATIONARY_OBJECT)) {
+        if (action.parentModule in setOf(AppModuleMMS.ALL_OBJECT, AppModuleMMS.MOBILE_OBJECT, AppModuleMMS.STATIONARY_OBJECT)) {
             action.parentId
         } else {
             null

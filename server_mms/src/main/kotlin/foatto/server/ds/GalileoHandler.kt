@@ -232,7 +232,7 @@ class GalileoHandler : MMSNioHandler() {
                 //--- coords
                 0x30 -> {
                     isCoordOk = bbIn.getByte().toInt() and 0xF0 == 0
-                    //--- галиеевские int-координаты с точностью 6 цифр после запятой переводим
+                    //--- галилеевские int-координаты с точностью 6 цифр после запятой переводим
                     //--- в наши int-координаты с точностью 7 цифр после запятой
                     wgsY = bbIn.getInt() * 10
                     wgsX = bbIn.getInt() * 10

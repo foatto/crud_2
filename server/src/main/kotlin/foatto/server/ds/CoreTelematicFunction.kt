@@ -119,26 +119,26 @@ object CoreTelematicFunction {
         bbData.putDouble(dataValue)
     }
 
-    fun putStringSensorData(
-        deviceIndex: Int,
-        portNum: Int,
-        stringValue: String,
-        bbData: AdvancedByteBuffer,
-    ) {
-        //--- чтобы не путать короткие строки с 1-2-3-4-8-байтовыми числами,
-        //--- запишем длину строки в виде отрицательного числа (т.е. как флаг строковых данных)
-        val len = min(stringValue.length, 32_000)   // dataSize as Short
-        val dataSize = 2 + len * 2
-
-        putSensorPortNumAndDataSize(
-            deviceIndex = deviceIndex,
-            portNum = portNum,
-            dataSize = -dataSize,
-            bbData = bbData,
-        )
-
-        bbData.putShortString(stringValue.subSequence(0, len))
-    }
+//    fun putStringSensorData(
+//        deviceIndex: Int,
+//        portNum: Int,
+//        stringValue: String,
+//        bbData: AdvancedByteBuffer,
+//    ) {
+//        //--- чтобы не путать короткие строки с 1-2-3-4-8-байтовыми числами,
+//        //--- запишем длину строки в виде отрицательного числа (т.е. как флаг строковых данных)
+//        val len = min(stringValue.length, 32_000)   // dataSize as Short
+//        val dataSize = 2 + len * 2
+//
+//        putSensorPortNumAndDataSize(
+//            deviceIndex = deviceIndex,
+//            portNum = portNum,
+//            dataSize = -dataSize,
+//            bbData = bbData,
+//        )
+//
+//        bbData.putShortString(stringValue.subSequence(0, len))
+//    }
 
     fun putSensorPortNumAndDataSize(
         deviceIndex: Int,

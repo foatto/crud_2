@@ -3,8 +3,8 @@ package foatto.core_mms
 import foatto.core.ApiUrl
 
 object ApiUrlMMS {
-    const val ANY_OBJECT: String = "${ApiUrl.URL_BASE}/any_object/${ApiUrl.CURRENT_VERSION}"
-    const val ANY_OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/any_object_form_action/${ApiUrl.CURRENT_VERSION}"
+    const val ALL_OBJECT: String = "${ApiUrl.URL_BASE}/all_object/${ApiUrl.CURRENT_VERSION}"
+    const val ALL_OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/all_object_form_action/${ApiUrl.CURRENT_VERSION}"
 
     const val MOBILE_OBJECT: String = "${ApiUrl.URL_BASE}/mobile_object/${ApiUrl.CURRENT_VERSION}"
     const val MOBILE_OBJECT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/mobile_object_form_action/${ApiUrl.CURRENT_VERSION}"
@@ -36,8 +36,14 @@ object ApiUrlMMS {
     const val DEVICE_MANAGE: String = "${ApiUrl.URL_BASE}/device_manage/${ApiUrl.CURRENT_VERSION}"
     const val DEVICE_MANAGE_FORM_ACTION: String = "${ApiUrl.URL_BASE}/device_manage_form_action/${ApiUrl.CURRENT_VERSION}"
 
-    const val DAY_WORK: String = "${ApiUrl.URL_BASE}/day_work/${ApiUrl.CURRENT_VERSION}"
-    const val DAY_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_work_form_action/${ApiUrl.CURRENT_VERSION}"
+    const val DAY_ALL_WORK: String = "${ApiUrl.URL_BASE}/day_all_work/${ApiUrl.CURRENT_VERSION}"
+    const val DAY_ALL_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_all_work_form_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val DAY_MOBILE_WORK: String = "${ApiUrl.URL_BASE}/day_mobile_work/${ApiUrl.CURRENT_VERSION}"
+    const val DAY_MOBILE_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_mobile_work_form_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val DAY_STATIONARY_WORK: String = "${ApiUrl.URL_BASE}/day_stationary_work/${ApiUrl.CURRENT_VERSION}"
+    const val DAY_STATIONARY_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/day_stationary_work_form_action/${ApiUrl.CURRENT_VERSION}"
 
     const val WORK_SHIFT: String = "${ApiUrl.URL_BASE}/work_shift/${ApiUrl.CURRENT_VERSION}"
     const val WORK_SHIFT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/work_shift_form_action/${ApiUrl.CURRENT_VERSION}"

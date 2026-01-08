@@ -72,7 +72,7 @@ class MMSSpringApp : SpringApp() {
         addDisabledRoles(AppModule.USER, ActionType.FORM_EDIT, AppRoleMMS.SUPPORT)
         addDisabledRoles(AppModule.USER, ActionType.FORM_DELETE, AppRoleMMS.SUPPORT)
 
-        appModuleConfigs[AppModuleMMS.ANY_OBJECT] = AppModuleConfig(
+        appModuleConfigs[AppModuleMMS.ALL_OBJECT] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "All objects", LanguageEnum.RU to "Все объекты"),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
@@ -388,8 +388,64 @@ class MMSSpringApp : SpringApp() {
             ),
         )
 
-        appModuleConfigs[AppModuleMMS.DAY_WORK] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Daily work log", LanguageEnum.RU to "Журнал суточных работ"),
+        appModuleConfigs[AppModuleMMS.DAY_ALL_WORK] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Daily all works log", LanguageEnum.RU to "Журнал всех суточных работ"),
+            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
+        appModuleConfigs[AppModuleMMS.DAY_MOBILE_WORK] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Daily mobile works log", LanguageEnum.RU to "Журнал мобильных суточных работ"),
+            pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
+            disabledFormAddRoles = mutableSetOf(AppRole.USER),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_TABLE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN).apply {
+                        getOrPut(UserRelationEnum.SELF) { mutableSetOf() } += AppRole.USER
+                        getOrPut(UserRelationEnum.WORKER) { mutableSetOf() } += AppRole.USER
+                    },
+                ),
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_EDIT to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+                ActionType.FORM_DELETE to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
+                    disabledRoles = getRoleAllPermissions(AppRole.USER),
+                ),
+            ),
+        )
+        appModuleConfigs[AppModuleMMS.DAY_STATIONARY_WORK] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Daily stationary works log", LanguageEnum.RU to "Журнал стационарных суточных работ"),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -571,7 +627,7 @@ class MMSSpringApp : SpringApp() {
                     addMenuItem(
                         alMenu = this,
                         serverUserConfig = serverUserConfig,
-                        module = AppModuleMMS.ANY_OBJECT,
+                        module = AppModuleMMS.ALL_OBJECT,
                         actionType = ActionType.MODULE_TABLE,
                         iconUrl = "/images/icons8-compressor-24.png",
                         iconSize = 24,
@@ -607,7 +663,23 @@ class MMSSpringApp : SpringApp() {
                 addMenuItem(
                     alMenu = this,
                     serverUserConfig = serverUserConfig,
-                    module = AppModuleMMS.DAY_WORK,
+                    module = AppModuleMMS.DAY_ALL_WORK,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-logbook-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.DAY_MOBILE_WORK,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-logbook-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.DAY_STATIONARY_WORK,
                     actionType = ActionType.MODULE_TABLE,
                     iconUrl = "/images/icons8-logbook-24.png",
                     iconSize = 24,

@@ -80,7 +80,7 @@ class SummaryReportService(
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
                 type = ActionType.MODULE_TABLE,
-                module = AppModuleMMS.ANY_OBJECT,
+                module = AppModuleMMS.ALL_OBJECT,
                 isSelectorMode = true,
                 selectorPath = mapOf(
                     AbstractObjectService.FIELD_ID to FIELD_OBJECT_ID,
@@ -190,7 +190,7 @@ class SummaryReportService(
                 objectEntities += parentObjectEntity
             }
         } ?: run {
-            val enabledUserIds = getEnabledUserIds(AppModuleMMS.ANY_OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
+            val enabledUserIds = getEnabledUserIds(AppModuleMMS.ALL_OBJECT, ActionType.MODULE_TABLE, userConfig.relatedUserIds, userConfig.roles)
             objectEntities += objectRepository.findByUserIdIn(enabledUserIds)
         }
 

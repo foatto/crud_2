@@ -1,7 +1,6 @@
 package foatto.server.service
 
 import foatto.core.ActionType
-import foatto.core.AppModule
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -50,7 +49,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import java.io.File
-import kotlin.collections.get
 
 abstract class AbstractObjectService(
     private val entityManager: EntityManager,
@@ -200,7 +198,7 @@ abstract class AbstractObjectService(
 
             val popupDatas = getTablePopupDatas(
                 userConfig = userConfig,
-                objectId = objectEntity.id,
+                objectEntity = objectEntity,
                 isFormEnabled = isFormEnabled,
                 formOpenAction = formOpenAction,
             )
@@ -234,7 +232,7 @@ abstract class AbstractObjectService(
 
     private fun getTablePopupDatas(
         userConfig: ServerUserConfig,
-        objectId: Int,
+        objectEntity: ObjectEntity,
         isFormEnabled: Boolean,
         formOpenAction: AppAction,
     ): List<TablePopup> {
@@ -251,21 +249,30 @@ abstract class AbstractObjectService(
         val begTime = getCurrentTimeInt() / 86_400 * 86_400 - userConfig.timeOffset
         val endTime = begTime + 86_400
 
-        getTableTablePopupData(userConfig, AppModuleMMS.DAY_WORK, getObjectAppModule(), objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.WORK_SHIFT, getObjectAppModule(), objectId, alPopupData)
+        val childDayWorkModule = when (objectEntity.type) {
+            ObjectType.MOBILE -> AppModuleMMS.DAY_MOBILE_WORK
+            ObjectType.STATIONARY -> AppModuleMMS.DAY_STATIONARY_WORK
+            else -> AppModuleMMS.DAY_ALL_WORK
+        }
+        getTableTablePopupData(userConfig, childDayWorkModule, getObjectAppModule(), objectEntity.id, alPopupData)
+        if (objectEntity.type == ObjectType.STATIONARY) {
+            getTableTablePopupData(userConfig, AppModuleMMS.WORK_SHIFT, getObjectAppModule(), objectEntity.id, alPopupData)
+        }
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, getObjectAppModule(), objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
 
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, getObjectAppModule(), objectId, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, getObjectAppModule(), objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)
 
 //        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
 
-        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, getObjectAppModule(), objectId, begTime, endTime, alPopupData)
+        if (objectEntity.type == ObjectType.MOBILE) {
+            getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
+        }
 
-        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, getObjectAppModule(), objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, getObjectAppModule(), objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, getObjectAppModule(), objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, getObjectAppModule(), objectEntity.id, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, getObjectAppModule(), objectEntity.id, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, getObjectAppModule(), objectEntity.id, alPopupData)
 
         return alPopupData
     }
@@ -632,10 +639,10 @@ abstract class AbstractObjectService(
         return Triple(addEnabled, editEnabled, deleteEnabled)
     }
 
-    private fun getObjectAppModule(): String = when(objectType) {
+    private fun getObjectAppModule(): String = when (objectType) {
         ObjectType.MOBILE -> AppModuleMMS.MOBILE_OBJECT
         ObjectType.STATIONARY -> AppModuleMMS.STATIONARY_OBJECT
-        else -> AppModuleMMS.ANY_OBJECT
+        else -> AppModuleMMS.ALL_OBJECT
     }
 }
 /*

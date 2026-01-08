@@ -24,6 +24,36 @@ class CalcService(
 
 //---------------------------------------------------------------------------------------------------------------------
 
+    fun calcRun(
+        objectEntity: ObjectEntity,
+        begTime: Int,
+        endTime: Int,
+    ): Double {
+        var run = 0.0
+
+        sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).forEach { sensorEntity ->
+            ApplicationService.withConnection(entityManager) { conn ->
+                SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
+
+                val rs = conn.executeQuery(
+                    """
+                        SELECT SUM( value_3 ) 
+                        FROM MMS_agg_${sensorEntity.id}
+                        WHERE ontime_0 BETWEEN $begTime AND $endTime
+                    """
+                )
+                if (rs.next()) {
+                    run += rs.getDouble(1)
+                }
+                rs.close()
+            }
+        }
+
+        return run
+    }
+
+//---------------------------------------------------------------------------------------------------------------------
+
     fun calcWorks(
         objectEntity: ObjectEntity,
         begTime: Int,

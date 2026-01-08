@@ -5,18 +5,18 @@ import foatto.core.model.request.FormActionRequest
 import foatto.core.model.response.AppResponse
 import foatto.core.model.response.FormActionResponse
 import foatto.core_mms.ApiUrlMMS
-import foatto.server.service.DayWorkService
+import foatto.server.service.DayStationaryWorkService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class DayWorkController(
-    private val dayWorkService: DayWorkService,
+class DayStationaryWorkController(
+    private val dayWorkService: DayStationaryWorkService,
 ) {
 
-    @PostMapping(ApiUrlMMS.DAY_WORK)
+    @PostMapping(ApiUrlMMS.DAY_STATIONARY_WORK)
     @Transactional
     fun app(
         @RequestBody
@@ -28,7 +28,7 @@ class DayWorkController(
         )
     }
 
-    @PostMapping(ApiUrlMMS.DAY_WORK_FORM_ACTION)
+    @PostMapping(ApiUrlMMS.DAY_STATIONARY_WORK_FORM_ACTION)
     @Transactional
     fun formAction(
         @RequestBody

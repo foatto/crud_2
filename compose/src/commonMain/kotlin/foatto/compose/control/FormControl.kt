@@ -314,7 +314,7 @@ class FormControl(
                         colors = colorTextButtonDefault ?: ButtonDefaults.textButtonColors(),
                         onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                dateTimeData.current.value = (millis / 1000).toInt()
+                                dateTimeData.current.value = (millis / 1000).toInt() - root.appUserConfig.timeOffset
                             }
                             datePickerData = null
                         }
@@ -674,9 +674,11 @@ class FormControl(
                                                                     shape = singleButtonShape,
                                                                     colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
                                                                     onClick = {
-                                                                        val curDateTime = gridData.current.value?.let { seconds ->
-                                                                            seconds * 1000L
-                                                                        } ?: Clock.System.now().toEpochMilliseconds()
+                                                                        val curDateTime = (
+                                                                                gridData.current.value?.let { seconds ->
+                                                                                    seconds * 1000L
+                                                                                } ?: Clock.System.now().toEpochMilliseconds()
+                                                                                ) + (root.appUserConfig.timeOffset * 1000L)
 
                                                                         datePickerState.displayedMonthMillis = curDateTime
                                                                         datePickerState.selectedDateMillis = curDateTime

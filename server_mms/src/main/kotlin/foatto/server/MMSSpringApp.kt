@@ -561,27 +561,38 @@ class MMSSpringApp : SpringApp() {
 
         appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "Summary report", LanguageEnum.RU to "Суммарный отчёт"),
-            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),   //, AppRole.USER),
-            disabledAccessRoles = mutableSetOf(AppRoleMMS.SUPPORT),
-            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),  //, AppRole.USER),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledFormAddRoles = mutableSetOf(),
             rowPermissions = mutableMapOf(
-//                ActionType.MODULE_TABLE to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//                ),
                 ActionType.MODULE_FORM to Permission(
                     enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
-//                    disabledRoles = getRoleAllPermissions(),
                 ),
-//                ActionType.FORM_EDIT to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//                ),
-//                ActionType.FORM_DELETE to Permission(
-//                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN),
-//                    disabledRoles = getRoleAllPermissions(AppRole.USER),
-//                ),
+            ),
+        )
+        appModuleConfigs[AppModuleMMS.REPORT_DAY_WORK] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Day work report", LanguageEnum.RU to "Отчёт по суточным работам"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledFormAddRoles = mutableSetOf(),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRole.USER),
+                ),
+            ),
+        )
+        appModuleConfigs[AppModuleMMS.REPORT_WORK_SHIFT] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Work shift report", LanguageEnum.RU to "Отчёт по рабочим сменам"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
+            disabledAccessRoles = mutableSetOf(),
+            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
+            disabledFormAddRoles = mutableSetOf(),
+            rowPermissions = mutableMapOf(
+                ActionType.MODULE_FORM to Permission(
+                    enabledRoles = getRoleAllPermissions(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
+                ),
             ),
         )
 
@@ -708,6 +719,22 @@ class MMSSpringApp : SpringApp() {
                     alMenu = this,
                     serverUserConfig = serverUserConfig,
                     module = AppModuleMMS.REPORT_SUMMARY,
+                    actionType = ActionType.MODULE_FORM,
+                    iconUrl = "/images/icons8-statistics-report-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.REPORT_DAY_WORK,
+                    actionType = ActionType.MODULE_FORM,
+                    iconUrl = "/images/icons8-statistics-report-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.REPORT_WORK_SHIFT,
                     actionType = ActionType.MODULE_FORM,
                     iconUrl = "/images/icons8-statistics-report-24.png",
                     iconSize = 24,

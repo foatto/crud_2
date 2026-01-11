@@ -35,8 +35,8 @@ abstract class MMSReportService(
     protected fun fillReportTitle(
         userConfig: ServerUserConfig,
         title: String,
-        begDateTime: Int,
-        endDateTime: Int,
+        begTime: Int,
+        endTime: Int,
         sheet: WritableSheet,
         offsX: Int,
     ): Int {
@@ -47,8 +47,8 @@ abstract class MMSReportService(
             Label(
                 offsX,
                 offsY++,
-                "за период с ${getDateTimeDMYHMSString(userConfig.timeOffset, begDateTime)}" +
-                        " по ${getDateTimeDMYHMSString(userConfig.timeOffset, endDateTime)}",
+                "за период с ${getDateTimeDMYHMSString(userConfig.timeOffset, begTime)}" +
+                        " по ${getDateTimeDMYHMSString(userConfig.timeOffset, endTime)}",
                 wcfTitleL,
             )
         )

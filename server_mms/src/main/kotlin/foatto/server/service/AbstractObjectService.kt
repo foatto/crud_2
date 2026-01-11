@@ -260,6 +260,10 @@ abstract class AbstractObjectService(
         }
 
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_DAY_WORK, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
+        if (objectEntity.type == ObjectType.STATIONARY) {
+            getTableReportPopupData(userConfig, AppModuleMMS.REPORT_WORK_SHIFT, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
+        }
 
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)

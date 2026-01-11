@@ -14,6 +14,49 @@ interface WorkShiftRepository : JpaRepository<WorkShiftEntity, Int> {
             SELECT wse
             FROM WorkShiftEntity wse
             LEFT JOIN wse.obj oe
+            WHERE wse.id <> 0
+                AND (
+                       ?1 IS NULL
+                    OR oe = ?1
+                )
+                AND wse.userId IN ?2
+                AND (
+                        ?3 = -1
+                     OR (
+                            wse.begTime IS NOT NULL
+                        AND wse.begTime >= ?3
+                     )
+                     OR (
+                            wse.endTime IS NOT NULL
+                        AND wse.endTime >= ?3
+                     )
+                )
+                AND (
+                        ?4 = -1
+                     OR (
+                            wse.begTime IS NOT NULL
+                        AND wse.begTime <= ?4
+                     )
+                     OR (
+                            wse.endTime IS NOT NULL
+                        AND wse.endTime <= ?4
+                     )
+                )
+            ORDER BY wse.begTime, wse.endTime
+        """
+    )
+    fun findByObjAndUserIdIn(
+        obj: ObjectEntity?,
+        userIds: List<Int>,
+        begDateTime: Int,
+        endDateTime: Int,
+    ): List<WorkShiftEntity>
+
+    @Query(
+        """
+            SELECT wse
+            FROM WorkShiftEntity wse
+            LEFT JOIN wse.obj oe
             LEFT JOIN oe.group ge
             LEFT JOIN oe.department de
             WHERE wse.id <> 0

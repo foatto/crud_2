@@ -15,6 +15,45 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
             SELECT dwe
             FROM DayWorkEntity dwe
             LEFT JOIN dwe.obj oe
+            WHERE dwe.id <> 0
+                AND (
+                       ?1 IS NULL 
+                    OR oe = ?1
+                )
+                AND dwe.userId IN ?2
+                AND (
+                        ?3 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) >= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?3 second )
+                     )
+                )
+                AND (
+                        ?4 = -1
+                     OR (
+                            dwe.day.ye IS NOT NULL
+                        AND dwe.day.mo IS NOT NULL
+                        AND dwe.day.da IS NOT NULL
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                     )
+                )
+            ORDER BY dwe.day.ye , dwe.day.mo , dwe.day.da  
+        """
+    )
+    fun findByObjAndUserIdIn(
+        obj: ObjectEntity?,
+        userIds: List<Int>,
+        begDateTime: Int,
+        endDateTime: Int,
+    ): List<DayWorkEntity>
+
+    @Query(
+        """
+            SELECT dwe
+            FROM DayWorkEntity dwe
+            LEFT JOIN dwe.obj oe
             LEFT JOIN oe.group ge
             LEFT JOIN oe.department de
             WHERE dwe.id <> 0

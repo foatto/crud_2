@@ -80,4 +80,10 @@ object ApiUrlMMS {
 
     const val REPORT_SUMMARY: String = "${ApiUrl.URL_BASE}/report_summary/${ApiUrl.CURRENT_VERSION}"
     const val REPORT_SUMMARY_FORM_ACTION: String = "${ApiUrl.URL_BASE}/report_summary_form_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val REPORT_DAY_WORK: String = "${ApiUrl.URL_BASE}/report_day_work/${ApiUrl.CURRENT_VERSION}"
+    const val REPORT_DAY_WORK_FORM_ACTION: String = "${ApiUrl.URL_BASE}/report_day_work_form_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val REPORT_WORK_SHIFT: String = "${ApiUrl.URL_BASE}/report_work_shift/${ApiUrl.CURRENT_VERSION}"
+    const val REPORT_WORK_SHIFT_FORM_ACTION: String = "${ApiUrl.URL_BASE}/report_work_shift_form_action/${ApiUrl.CURRENT_VERSION}"
 }

@@ -410,6 +410,7 @@ class WorkShiftService(
         }
 
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_WORK_SHIFT, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
 
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)

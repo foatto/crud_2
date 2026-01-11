@@ -119,4 +119,12 @@ fun addAppModuleUrls() {
         appUrl = ApiUrlMMS.REPORT_SUMMARY,
         formActionUrl = ApiUrlMMS.REPORT_SUMMARY_FORM_ACTION,
     )
+    appModuleUrls[AppModuleMMS.REPORT_DAY_WORK] = AppModuleUrl(
+        appUrl = ApiUrlMMS.REPORT_DAY_WORK,
+        formActionUrl = ApiUrlMMS.REPORT_DAY_WORK_FORM_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.REPORT_WORK_SHIFT] = AppModuleUrl(
+        appUrl = ApiUrlMMS.REPORT_WORK_SHIFT,
+        formActionUrl = ApiUrlMMS.REPORT_WORK_SHIFT_FORM_ACTION,
+    )
 }

@@ -19,6 +19,7 @@ import foatto.compose.colorCheckBox
 import foatto.compose.colorCompositeMovedBlockBack
 import foatto.compose.colorDatePicker
 import foatto.compose.colorIconButton
+import foatto.compose.colorIconTint
 import foatto.compose.colorIndexBackgroundDefault
 import foatto.compose.colorLogonBack
 import foatto.compose.colorMainBack0
@@ -115,6 +116,8 @@ class MMSRoot : Root() {
         widthMainMenu = 300.dp
         colorMainMenuDefault = Color.Transparent
         colorUserName = colorMainBack0
+
+        colorIconTint = darkBlueColor
 
         colorMainMenuText = colorMainBack0
         colorMainMenuIcon = orangeColor

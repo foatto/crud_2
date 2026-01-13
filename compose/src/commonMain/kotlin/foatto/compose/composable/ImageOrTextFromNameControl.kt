@@ -5,6 +5,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import foatto.compose.colorIconTint
 import foatto.compose.utils.getFullUrl
 import foatto.compose.utils.hmNameToImageVector
 import foatto.compose.utils.hmNameToUrl
@@ -22,6 +23,7 @@ internal fun ImageOrTextFromNameControl(
         imageButton {
             Icon(
                 imageVector = imageVector,
+                tint = colorIconTint,
                 contentDescription = null,
             )
         }

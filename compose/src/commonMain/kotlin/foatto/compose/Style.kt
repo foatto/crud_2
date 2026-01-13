@@ -1,7 +1,14 @@
 package foatto.compose
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.DatePickerColors
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.RadioButtonColors
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TimePickerColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
@@ -12,14 +19,17 @@ import androidx.compose.ui.unit.dp
 //--- по умолчанию - тёмные иконки на светлом фоне кнопок,
 //--- но в material 3 design (да и в прочих дизайнах) - контраст к основному фону - светлые иконки/текст на тёмном фоне иконок
 var styleToolbarDarkIcon: Boolean = true
+var styleTableRowDarkIcon: Boolean = true
 var styleOtherDarkIcon: Boolean = true
 
 //--- по умолчанию - иконки размером 36dp (пока только на toolbar'ах, в остальных местах 48)
-const val styleToolbarIconSize: Int = 36
-const val styleOtherIconSize: Int = 48
+var styleToolbarIconSize: Int = 36
+var styleTableRowIconSize: Int = 36 //!!! хорошо бы попробовать 24, но надо загрузить все 24-размерные варианты иконок
+var styleOtherIconSize: Int = 48
 
 //--- суффикс наименовани типовой иконки material design
 fun getStyleToolbarIconNameSuffix(): String = (if (styleToolbarDarkIcon) "black" else "white") + "_" + styleToolbarIconSize + "dp"
+fun getStyleTableRowIconNameSuffix(): String = (if (styleTableRowDarkIcon) "black" else "white") + "_" + styleTableRowIconSize + "dp"
 fun getStyleOtherIconNameSuffix(): String = (if (styleOtherDarkIcon) "black" else "white") + "_" + styleOtherIconSize + "dp"
 
 //--- different gray tones by default
@@ -41,6 +51,7 @@ var colorWaitTrack: Color? = null
 
 val colorMainText: Color = Color.Black
 val colorControlBack: Color = colorMainBack0
+var colorIconTint: Color = colorMainText
 
 var colorTextButton: ButtonColors? = null
 var colorTextButtonDefault: ButtonColors? = null
@@ -74,6 +85,7 @@ val colorScrollBarFore: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_
 var colorTableCaptionBar: Color = colorHeader
 var colorTableCaptionSortCurrent: Color = colorMainText
 var colorTableCellBorder: Color = colorMainBack3
+
 //--- table-group-back цвета не должны совпадать с основными фоновыми цветами - поэтому располагаем их между ними посередине
 var colorTableGroupBack0: Color = Color.hsl(0f, 0f, (MAIN_BACK_LIGHTNESS_2 + MAIN_BACK_LIGHTNESS_3) / 2)
 var colorTableGroupBack1: Color = Color.hsl(0f, 0f, MAIN_BACK_LIGHTNESS_3 - (MAIN_BACK_LIGHTNESS_2 - MAIN_BACK_LIGHTNESS_3) / 2)
@@ -85,6 +97,7 @@ var colorTablePageButton: ButtonColors? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 var colorDatePicker: DatePickerColors? = null
+
 @OptIn(ExperimentalMaterial3Api::class)
 var colorTimePicker: TimePickerColors? = null
 

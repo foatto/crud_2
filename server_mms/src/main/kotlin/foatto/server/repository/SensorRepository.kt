@@ -150,6 +150,7 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                 AND oe = ?1
                 AND (
                         ?2 = ''
+                     OR LOWER(se.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(se.group) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(se.descr) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
                      OR LOWER(se.serialNo) LIKE LOWER( CONCAT( '%', ?2, '%' ) )

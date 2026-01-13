@@ -69,7 +69,7 @@ class SensorService(
     companion object {
         private const val FIELD_OBJECT_ID = "obj_id"
 
-        // private const val FIELD_NAME = "name"
+        private const val FIELD_NAME = "name"
         private const val FIELD_GROUP = "group"
         private const val FIELD_DESCR = "descr"
         private const val FIELD_PORT_NUM = "portNum"
@@ -255,6 +255,7 @@ class SensorService(
 
         alColumnInfo += null to "" // sensorGroup
 
+        alColumnInfo += FIELD_NAME to "Интеграционный идентификатор"
         alColumnInfo += FIELD_DESCR to "Описание"
         alColumnInfo += FIELD_PORT_NUM to "Номер входа"
         alColumnInfo += FIELD_SENSOR_TYPE to "Тип датчика"
@@ -330,6 +331,7 @@ class SensorService(
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
 
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.name ?: "")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.descr ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = sensorEntity.portNum?.toString() ?: "-")
             tableCells += TableSimpleCell(
@@ -523,6 +525,13 @@ class SensorService(
             caption = "Группа",
             isEditable = changeEnabled,
             value = sensorEntity?.group ?: "",
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_NAME,
+            caption = "Интеграционный идентификатор",
+            isEditable = changeEnabled,
+//            isEditable = !isEquip
+            value = sensorEntity?.name ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_DESCR,
@@ -985,7 +994,7 @@ class SensorService(
         //}
 
         val portNum = formActionData[FIELD_PORT_NUM]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to "Не введён номер входа"))
-        if (portNum < 0 || portNum > 65535) {
+        if (portNum !in 0..65535) {
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to "Номер входа должен быть в диапазоне от 0 до 65535"))
         }
 
@@ -993,7 +1002,7 @@ class SensorService(
         val sensorEntity = SensorEntity(
             id = recordId,
             obj = parentObjectEntity,
-            name = "",
+            name = formActionData[FIELD_NAME]?.stringValue ?: "",
             group = formActionData[FIELD_GROUP]?.stringValue ?: "",
             descr = descr,
             portNum = portNum,

@@ -159,6 +159,7 @@ class APIService(
                 }
             }
             sensors += ObjectDataResponseSensorInfo(
+                id = sensorEntity.name,
                 name = sensorEntity.descr,
                 type = sensorEntity.sensorType,
                 data = data,

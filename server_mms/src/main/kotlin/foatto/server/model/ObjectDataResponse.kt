@@ -10,6 +10,7 @@ class ObjectDataResponse(
 
 @Serializable
 class ObjectDataResponseSensorInfo(
+    val id: String?,
     val name: String?,
     val type: Int?,
     val data: List<Map<String, String>>,

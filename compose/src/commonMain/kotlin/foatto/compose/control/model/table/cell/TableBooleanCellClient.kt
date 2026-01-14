@@ -8,8 +8,7 @@ class TableBooleanCellClient(
     dataRow: Int?,
     minWidth: Int,
     align: Alignment,
-    isStaticBackColor: Boolean,
-    backColor: Color,
+    backColor: Color?,
     textColor: Color,
     isBoldText: Boolean,
 
@@ -19,7 +18,6 @@ class TableBooleanCellClient(
     dataRow = dataRow,
     minWidth = minWidth,
     align = align,
-    isStaticBackColor = isStaticBackColor,
     backColor = backColor,
     textColor = textColor,
     isBoldText = isBoldText,

@@ -38,7 +38,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
@@ -163,9 +162,10 @@ class TableControl(
 
     private var captions = mutableStateListOf<TableCaption>()
 
-    private val alGridRows = mutableStateListOf<MutableList<TableBaseCellClient?>>()
+    private val gridRows = mutableStateListOf<MutableList<TableBaseCellClient?>>()
 
-    private val alRowData = mutableStateListOf<TableRow>()
+    private val rowDatas = mutableStateListOf<TableRow>()
+    private val rowBackColors = mutableMapOf<Int, Color>()
 
     private val hmColumnMaxWidth = mutableStateMapOf<Int, Dp>()
 
@@ -319,20 +319,20 @@ class TableControl(
             }
         }
 
-        LaunchedEffect(currentRowNo) {
-            currentRowNo?.let { curRowNo ->
-                val padding = with(density) { TABLE_ROW_BOTTOM_PADDING.toPx() }
-                val rowHeightSum = rowHeights.filter { (index, _) ->
-                    index <= curRowNo
-                }.values.map { value ->
-                    value + padding
-                }.sum()
-                val autoScroll = rowHeightSum - tableBodyHeight
-                if (autoScroll > 0) {
-                    verticalScrollState.scrollBy(autoScroll)
-                }
-            }
-        }
+//        LaunchedEffect(currentRowNo) {
+//            currentRowNo?.let { curRowNo ->
+//                val padding = with(density) { TABLE_ROW_BOTTOM_PADDING.toPx() }
+//                val rowHeightSum = rowHeights.filter { (index, _) ->
+//                    index <= curRowNo
+//                }.values.map { value ->
+//                    value + padding
+//                }.sum()
+//                val autoScroll = rowHeightSum - tableBodyHeight
+//                if (autoScroll > 0) {
+//                    verticalScrollState.scrollBy(autoScroll)
+//                }
+//            }
+//        }
     }
 
     @Composable
@@ -362,7 +362,7 @@ class TableControl(
                             .verticalScroll(state = verticalScrollState)
                             .horizontalScroll(state = horizontalScrollState)
                     ) {
-                        alGridRows.forEachIndexed { index, gridRow ->
+                        gridRows.forEachIndexed { index, gridRow ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -383,15 +383,11 @@ class TableControl(
                                             .background(
                                                 gridData?.let {
                                                     if (gridData.dataRow == currentRowNo) {
-                                                        if (gridData.isStaticBackColor) {
-                                                            gridData.backColor
-                                                        } else {
-                                                            colorTableCurrentRow
-                                                        }
+                                                        gridData.backColor ?: colorTableCurrentRow
                                                     } else {
-                                                        gridData.backColor
+                                                        gridData.backColor ?: rowBackColors[gridData.dataRow] ?: Color.Magenta // максимально заметная сигнализация о баге отображения
                                                     }
-                                                } ?: colorMainBack0
+                                                } ?: Color.Magenta // максимально заметная сигнализация о баге отображения
                                             )
                                             .draggable2D(
                                                 state = rememberDraggable2DState { delta ->
@@ -417,7 +413,7 @@ class TableControl(
                                             .combinedClickable(
                                                 onDoubleClick = {
                                                     gridData?.dataRow?.let { dataRow ->
-                                                        val rowData = alRowData[dataRow]
+                                                        val rowData = rowDatas[dataRow]
                                                         rowData.rowAction?.let { rowAction ->
                                                             coroutineScope.launch {
                                                                 call(rowAction, rowData.isRowUrlInNewTab)
@@ -803,22 +799,27 @@ class TableControl(
         captions.clear()
         captions.addAll(tableResponse.columnCaptions)
 
-        alGridRows.clear()
+        rowBackColors.clear()
+        gridRows.clear()
 
         var maxColCount = tableResponse.columnCaptions.size
 
         for (tc in tableResponse.tableCells) {
             maxColCount = max(maxColCount, tc.col + tc.colSpan)
 
-            val (isStaticBackColor, backColor) = tc.backColor?.let { bc ->
-                true to Color(bc)
+            rowBackColors[tc.dataRow] = if (tc.dataRow % 2 == 0) {
+                colorTableRowBack0
+            } else {
+                colorTableRowBack1
+            }
+
+            val backColor = tc.backColor?.let { bc ->
+                Color(bc)
             } ?: when (tc.backColorType) {
-                TableCellBackColorType.GROUP_0 -> true to colorTableGroupBack0
-                TableCellBackColorType.GROUP_1 -> true to colorTableGroupBack1
-                else -> if (tc.dataRow % 2 == 0) {
-                    false to colorTableRowBack0
-                } else {
-                    false to colorTableRowBack1
+                TableCellBackColorType.GROUP_0 -> colorTableGroupBack0
+                TableCellBackColorType.GROUP_1 -> colorTableGroupBack1
+                else -> {
+                    null
                 }
             }
             val textColor = tc.foreColor?.let { fc ->
@@ -838,7 +839,6 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
-                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -852,7 +852,6 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
-                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -869,7 +868,6 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
-                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -889,7 +887,6 @@ class TableControl(
                         dataRow = tc.dataRow,
                         minWidth = tc.minWidth,
                         align = align,
-                        isStaticBackColor = isStaticBackColor,
                         backColor = backColor,
                         textColor = textColor,
                         isBoldText = tc.isBoldText,
@@ -906,7 +903,7 @@ class TableControl(
             }
 
             addCellToGrid(
-                alGridRows = alGridRows,
+                alGridRows = gridRows,
                 maxColCount = maxColCount,
                 row = tc.row,
                 col = tc.col,
@@ -914,8 +911,8 @@ class TableControl(
             )
         }
 
-        alRowData.clear()
-        alRowData.addAll(tableResponse.tableRows)
+        rowDatas.clear()
+        rowDatas.addAll(tableResponse.tableRows)
     }
 
 //    private fun closeTabById() {
@@ -937,12 +934,12 @@ class TableControl(
     private fun setCurrentRow(rowNo: Int?) {
         rowServerButtons.clear()
         rowNo?.let {
-            rowServerButtons.addAll(alRowData[rowNo].serverActionButtons)
+            rowServerButtons.addAll(rowDatas[rowNo].serverActionButtons)
         }
 
         rowClientButtons.clear()
         rowNo?.let {
-            rowClientButtons.addAll(alRowData[rowNo].clientActionButtons)
+            rowClientButtons.addAll(rowDatas[rowNo].clientActionButtons)
         }
 
         currentRowNo = rowNo
@@ -956,8 +953,8 @@ class TableControl(
 
     private suspend fun doKeyEnter() {
         currentRowNo?.let { curRow ->
-            if (curRow >= 0 && curRow < alRowData.size) {
-                val curRowData = alRowData[curRow]
+            if (curRow >= 0 && curRow < rowDatas.size) {
+                val curRowData = rowDatas[curRow]
                 curRowData.rowAction?.let { rowAction ->
                     call(rowAction, curRowData.isRowUrlInNewTab)
                 }
@@ -981,21 +978,21 @@ class TableControl(
 
     private fun doKeyDown() {
         currentRowNo?.let { curRow ->
-            if (curRow < alRowData.lastIndex) {
+            if (curRow < rowDatas.lastIndex) {
                 setCurrentRow(curRow + 1)
             }
         }
     }
 
     private fun doKeyHome() {
-        if (alRowData.isNotEmpty()) {
+        if (rowDatas.isNotEmpty()) {
             setCurrentRow(0)
         }
     }
 
     private fun doKeyEnd() {
-        if (alRowData.isNotEmpty()) {
-            setCurrentRow(alRowData.lastIndex)
+        if (rowDatas.isNotEmpty()) {
+            setCurrentRow(rowDatas.lastIndex)
         }
     }
 
@@ -1102,8 +1099,8 @@ class TableControl(
             //--- чтобы строчка выделялась и по правой кнопке мыши тоже
             setCurrentRow(gridData.dataRow)
             gridData.dataRow?.let { dataRow ->
-                if (alRowData[dataRow].tablePopups.isNotEmpty()) {
-                    convertPopupMenuDataClient(gridData, alRowData[dataRow].tablePopups)
+                if (rowDatas[dataRow].tablePopups.isNotEmpty()) {
+                    convertPopupMenuDataClient(gridData, rowDatas[dataRow].tablePopups)
                     gridData.offset = offset
                     gridData.isShowPopupMenu = true
                 } else {

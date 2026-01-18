@@ -5,12 +5,14 @@ import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormBooleanCell
 import foatto.server.entity.ObjectEntity
 import foatto.server.repository.ActionLogRepository
+import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.DepartmentRepository
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.WorkShiftRepository
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 
@@ -23,6 +25,8 @@ class AnyObjectService(
     private val sensorRepository: SensorRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val deviceRepository: DeviceRepository,
+    private val dayWorkRepository: DayWorkRepository,
+    private val workShiftRepository: WorkShiftRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
 ) : AbstractObjectService(
@@ -33,6 +37,8 @@ class AnyObjectService(
     sensorRepository = sensorRepository,
     sensorCalibrationRepository = sensorCalibrationRepository,
     deviceRepository = deviceRepository,
+    dayWorkRepository = dayWorkRepository,
+    workShiftRepository = workShiftRepository,
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
     objectType = null,

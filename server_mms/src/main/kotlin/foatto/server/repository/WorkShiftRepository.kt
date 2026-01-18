@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query
 
 interface WorkShiftRepository : JpaRepository<WorkShiftEntity, Int> {
 
+    fun deleteByObj(obj: ObjectEntity)
+
     @Query(
         """
             SELECT wse

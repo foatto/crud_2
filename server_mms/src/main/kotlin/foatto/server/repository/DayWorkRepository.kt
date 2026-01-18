@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query
 
 interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
 
+    fun deleteByObj(obj: ObjectEntity)
+
     @Query(
         """
             SELECT dwe

@@ -35,12 +35,14 @@ import foatto.server.model.sensor.SensorConfigCounter
 import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.model.sensor.SensorConfigLiquidLevel
 import foatto.server.repository.ActionLogRepository
+import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.DepartmentRepository
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.WorkShiftRepository
 import foatto.server.service.SensorService.Companion.checkAndCreateSensorTables
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
@@ -58,6 +60,8 @@ abstract class AbstractObjectService(
     private val sensorRepository: SensorRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
     private val deviceRepository: DeviceRepository,
+    private val dayWorkRepository: DayWorkRepository,
+    private val workShiftRepository: WorkShiftRepository,
     private val fileStoreService: FileStoreService,
     private val actionLogRepository: ActionLogRepository,
     private val objectType: ObjectType?,
@@ -600,6 +604,15 @@ abstract class AbstractObjectService(
     override fun formActionDelete(userId: Int, id: Int): FormActionResponse {
         //--- remove all depended sensors & datas
         objectRepository.findByIdOrNull(id)?.let { objectEntity ->
+            deviceRepository.findByObject(objectEntity).forEach { deviceEntity ->
+                deviceEntity.obj = null
+                deviceRepository.save(deviceEntity)
+            }
+            deviceRepository.flush()
+
+            dayWorkRepository.deleteByObj(objectEntity)
+            workShiftRepository.deleteByObj(objectEntity)
+
             fileStoreService.deleteFile(objectEntity.fileId, null)
             sensorRepository.findByObj(objectEntity).forEach { sensorEntity ->
                 SensorService.deleteSensor(
@@ -609,9 +622,9 @@ abstract class AbstractObjectService(
                     sensorId = sensorEntity.id,
                 )
             }
+            objectRepository.delete(objectEntity)
         }
 
-        objectRepository.deleteById(id)
         executeNativeSql(entityManager, " DROP TABLE MMS_data_$id ")
 
         /*

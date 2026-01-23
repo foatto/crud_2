@@ -498,11 +498,12 @@ class UserService(
                 visibility = nonVisibleForDivision,
             )
         }
-        formCells += FormSimpleCell(
+        formCells += FormDateTimeCell(
             name = FIELD_TIME_OFFSET,
             caption = getLocalizedMessage(LocalizedMessages.TIME_OFFSET, userConfig.lang),
             isEditable = changeEnabled,
-            value = (userEntity?.timeOffset ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds).toString(),
+            mode = FormDateTimeCellMode.HM,
+            value = userEntity?.timeOffset ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
             visibility = nonVisibleForDivision,
         )
         formCells += FormComboCell(
@@ -675,7 +676,7 @@ class UserService(
             login = login,
             password = encodedPassword,
             roles = roles,
-            timeOffset = formActionData[FIELD_TIME_OFFSET]?.stringValue?.toIntOrNull() ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
+            timeOffset = formActionData[FIELD_TIME_OFFSET]?.dateTimeValue ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
             lang = formActionData[FIELD_LANG]?.stringValue?.let { s -> LanguageEnum.valueOf(s) } ?: SpringApp.defaultLang,
             eMail = formActionData[FIELD_EMAIL]?.stringValue,
             contactInfo = formActionData[FIELD_CONTACT_INFO]?.stringValue,

@@ -29,7 +29,6 @@ import foatto.compose.textSizePopupMenuItem
 import foatto.compose.textWeightMainMenuFolder
 import foatto.compose.textWeightPopupMenuFolder
 import foatto.compose.utils.getFullUrl
-import foatto.core.ActionType
 import foatto.core.model.AppAction
 import foatto.core.model.AppUserConfig
 import io.kamel.image.KamelImage
@@ -199,19 +198,6 @@ internal fun getClientSubMenus(
 ): List<MenuDataClient> {
     val alClientSubMenu = mutableListOf<MenuDataClient>()
 
-    alClientSubMenu += MenuDataClient(
-        caption = "Сменить пароль",
-        action = AppAction(ActionType.CHANGE_PASSWORD),
-        iconUrl = "/images/icons8-password-24.png",
-        iconSize = 24,
-    )
-    alClientSubMenu += MenuDataClient(
-        caption = "Выход из системы",
-        action = AppAction(ActionType.LOGOFF),
-        iconUrl = "/images/icons8-logout-24.png",
-        iconSize = 24,
-    )
-
     if (appUserConfig.isAdmin) {
         alClientSubMenu += MenuDataClient(caption = "")
 
@@ -220,10 +206,12 @@ internal fun getClientSubMenus(
 //    alClientSubMenu.add(MenuDataClient(url = "", text = "touch screen = ${getStyleIsTouchScreen()}"))
     }
 
-//    alClientSubMenu += MenuDataClient(caption = "")
-//    LanguageEnum.entries.forEach { lang ->
-//        alClientSubMenu += MenuDataClient(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
-//    }
+//--- пока не актуально
+//                val langSubMenus = mutableListOf<MenuData>()
+//                LanguageEnum.entries.forEach { lang ->
+//                    langSubMenus += MenuData(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
+//                }
+//                add(MenuData(caption = LanguageEnum.entries.joinToString(" / "), alSubMenu = langSubMenus))
 
     return alClientSubMenu
 }

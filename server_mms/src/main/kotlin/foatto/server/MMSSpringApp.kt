@@ -5,6 +5,7 @@ import foatto.core.AppModule
 import foatto.core.i18n.LanguageEnum
 import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
+import foatto.core.model.AppAction
 import foatto.core.model.response.MenuData
 import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.addAppModuleUrls
@@ -644,22 +645,22 @@ class MMSSpringApp : SpringApp() {
                         iconSize = 24,
                     )
                 }
-                    addMenuItem(
-                        alMenu = this,
-                        serverUserConfig = serverUserConfig,
-                        module = AppModuleMMS.MOBILE_OBJECT,
-                        actionType = ActionType.MODULE_TABLE,
-                        iconUrl = "/images/icons8-truck-24.png",
-                        iconSize = 24,
-                    )
-                    addMenuItem(
-                        alMenu = this,
-                        serverUserConfig = serverUserConfig,
-                        module = AppModuleMMS.STATIONARY_OBJECT,
-                        actionType = ActionType.MODULE_TABLE,
-                        iconUrl = "/images/icons8-oil-pump-24.png",
-                        iconSize = 24,
-                    )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.MOBILE_OBJECT,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-truck-24.png",
+                    iconSize = 24,
+                )
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModuleMMS.STATIONARY_OBJECT,
+                    actionType = ActionType.MODULE_TABLE,
+                    iconUrl = "/images/icons8-oil-pump-24.png",
+                    iconSize = 24,
+                )
 
                 if (size > 0) {
                     alMenu += MenuData(
@@ -802,15 +803,6 @@ class MMSSpringApp : SpringApp() {
                 addMenuItem(
                     alMenu = this,
                     serverUserConfig = serverUserConfig,
-                    module = AppModule.USER_PROPERTY_EDIT,
-                    actionType = ActionType.MODULE_FORM,
-                    id = serverUserConfig.id,
-                    iconUrl = "/images/icons8-users-settings-24.png",
-                    iconSize = 24,
-                )
-                addMenuItem(
-                    alMenu = this,
-                    serverUserConfig = serverUserConfig,
                     module = AppModule.USER,
                     actionType = ActionType.MODULE_TABLE,
                     iconUrl = "/images/icons8-users-24.png",
@@ -829,6 +821,48 @@ class MMSSpringApp : SpringApp() {
                     alMenu += MenuData(
                         caption = getLocalizedMessage(LocalizedMessages.SYSTEM, serverUserConfig.lang),
                         action = null,
+                        subMenuDatas = this
+                    )
+                }
+            }
+
+            mutableListOf<MenuData>().apply {
+//--- пока не актуально
+//                val langSubMenus = mutableListOf<MenuData>()
+//                LanguageEnum.entries.forEach { lang ->
+//                    langSubMenus += MenuData(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
+//                }
+//                add(MenuData(caption = LanguageEnum.entries.joinToString(" / "), alSubMenu = langSubMenus))
+
+                addMenuItem(
+                    alMenu = this,
+                    serverUserConfig = serverUserConfig,
+                    module = AppModule.USER_PROPERTY_EDIT,
+                    actionType = ActionType.MODULE_FORM,
+                    id = serverUserConfig.id,
+                    iconUrl = "/images/icons8-users-settings-24.png",
+                    iconSize = 24,
+                )
+                add(
+                    MenuData(
+                        caption = getLocalizedMessage(LocalizedMessages.CHANGE_PASSWORD, serverUserConfig.lang),
+                        action = AppAction(ActionType.CHANGE_PASSWORD),
+                        iconUrl = "/images/icons8-password-24.png",
+                        iconSize = 24,
+                    )
+                )
+                add(
+                    MenuData(
+                        caption = getLocalizedMessage(LocalizedMessages.LOGOUT, serverUserConfig.lang),
+                        action = AppAction(ActionType.LOGOFF),
+                        iconUrl = "/images/icons8-logout-24.png",
+                        iconSize = 24,
+                    )
+                )
+
+                if (size > 0) {
+                    alMenu += MenuData(
+                        caption = getLocalizedMessage(LocalizedMessages.ADDITIONAL, serverUserConfig.lang),
                         subMenuDatas = this
                     )
                 }

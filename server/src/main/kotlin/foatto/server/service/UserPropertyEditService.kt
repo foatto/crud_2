@@ -1,13 +1,17 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.form.FormButton
+import foatto.core.model.response.form.FormDateTimeCellMode
 import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormBooleanCell
+import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.model.response.table.TableCaption
@@ -61,11 +65,12 @@ class UserPropertyEditService(
 
         val changeEnabled = action.id?.let { editEnabled } ?: addEnabled
 
-        formCells += FormSimpleCell(
+        formCells += FormDateTimeCell(
             name = FIELD_TIME_OFFSET,
-            caption = "Сдвиг часового пояса [сек]",
+            caption = getLocalizedMessage(LocalizedMessages.TIME_OFFSET, userConfig.lang),
             isEditable = changeEnabled,
-            value = (userEntity?.timeOffset ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds).toString(),
+            mode = FormDateTimeCellMode.HM,
+            value = userEntity?.timeOffset ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
         )
         formCells += FormSimpleCell(
             name = FIELD_EMAIL,
@@ -121,7 +126,7 @@ class UserPropertyEditService(
         val userEntity = userRepository.findByIdOrNull(id) ?: return FormActionResponse(responseCode = ResponseCode.ERROR)
 
         userEntity.apply {
-            timeOffset = formActionData[FIELD_TIME_OFFSET]?.stringValue?.toIntOrNull() ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds
+            timeOffset = formActionData[FIELD_TIME_OFFSET]?.dateTimeValue ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds
             eMail = formActionData[FIELD_EMAIL]?.stringValue
             contactInfo = formActionData[FIELD_CONTACT_INFO]?.stringValue
             useThousandsDivider = formActionData[FIELD_USE_THOUSANDS_DIVIDER]?.booleanValue ?: true

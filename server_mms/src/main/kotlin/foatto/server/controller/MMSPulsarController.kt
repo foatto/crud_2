@@ -28,8 +28,7 @@ class MMSPulsarController(
     @PostMapping(value = ["/data/pulsar/{fileName}"])
     @Transactional
     fun storePulsarData(
-        @PathVariable("fileName")
-        fileName: String,
+        @PathVariable fileName: String,
         @RequestBody
         arrData: Array<PulsarData>,
         request: HttpServletRequest,

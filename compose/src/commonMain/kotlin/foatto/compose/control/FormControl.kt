@@ -338,7 +338,12 @@ class FormControl(
 
         timePickerData?.let { dateTimeData ->
             val localDateTime = getLocalDateTime(
-                timeOffset = root.appUserConfig.timeOffset,
+                timeOffset = when (dateTimeData.data.mode) {
+                    FormDateTimeCellMode.DMY -> root.appUserConfig.timeOffset
+                    FormDateTimeCellMode.DMYHMS -> root.appUserConfig.timeOffset
+                    FormDateTimeCellMode.HM -> 0
+                    FormDateTimeCellMode.HMS -> 0
+                },
                 seconds = dateTimeData.current.value ?: Clock.System.now().epochSeconds.toInt()
             )
 
@@ -370,7 +375,16 @@ class FormControl(
                                 hour = timePickerState.hour,
                                 minute = timePickerState.minute,
                                 second = 0
-                            ).toInstant(getTimeZone(root.appUserConfig.timeOffset)).epochSeconds.toInt()
+                            ).toInstant(
+                                getTimeZone(
+                                    when (dateTimeData.data.mode) {
+                                        FormDateTimeCellMode.DMY -> root.appUserConfig.timeOffset
+                                        FormDateTimeCellMode.DMYHMS -> root.appUserConfig.timeOffset
+                                        FormDateTimeCellMode.HM -> 0
+                                        FormDateTimeCellMode.HMS -> 0
+                                    }
+                                )
+                            ).epochSeconds.toInt()
                             timePickerData = null
                         }
                     ) {
@@ -637,12 +651,19 @@ class FormControl(
                                                 is FormDateTimeCellClient -> {
                                                     val (dateString, timeString) = gridData.current.value?.let { curDateTimeValue ->
                                                         val dateTimeString = getDateTimeDMYHMSString(
-                                                            root.appUserConfig.timeOffset,
-                                                            curDateTimeValue,
+                                                            timeOffset = when (gridData.data.mode) {
+                                                                FormDateTimeCellMode.DMY -> root.appUserConfig.timeOffset
+                                                                FormDateTimeCellMode.DMYHMS -> root.appUserConfig.timeOffset
+                                                                FormDateTimeCellMode.HM -> 0
+                                                                FormDateTimeCellMode.HMS -> 0
+                                                            },
+                                                            seconds = curDateTimeValue,
                                                         )
                                                         when (gridData.data.mode) {
                                                             FormDateTimeCellMode.DMY -> dateTimeString.substring(0, 10) to null
                                                             FormDateTimeCellMode.DMYHMS -> dateTimeString.substring(0, 10) to dateTimeString.substring(11)
+                                                            FormDateTimeCellMode.HM -> null to dateTimeString.substring(11, 16)
+                                                            FormDateTimeCellMode.HMS -> null to dateTimeString.substring(11)
                                                         }
                                                     } ?: run {
                                                         when (gridData.data.mode) {
@@ -661,6 +682,22 @@ class FormControl(
                                                                     "" to ""
                                                                 }
                                                             }
+
+                                                            FormDateTimeCellMode.HM -> {
+                                                                if (gridData.data.isEditable) {
+                                                                    null to "-"
+                                                                } else {
+                                                                    null to ""
+                                                                }
+                                                            }
+
+                                                            FormDateTimeCellMode.HMS -> {
+                                                                if (gridData.data.isEditable) {
+                                                                    null to "-"
+                                                                } else {
+                                                                    null to ""
+                                                                }
+                                                            }
                                                         }
                                                     }
 
@@ -668,36 +705,38 @@ class FormControl(
                                                         Row(
                                                             verticalAlignment = Alignment.CenterVertically,
                                                         ) {
-                                                            Text(text = dateString)
-                                                            if (gridData.data.isEditable) {
-                                                                FilledIconButton(
-                                                                    shape = singleButtonShape,
-                                                                    colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
-                                                                    onClick = {
-                                                                        val curDateTime = (
-                                                                                gridData.current.value?.let { seconds ->
-                                                                                    seconds * 1000L
-                                                                                } ?: Clock.System.now().toEpochMilliseconds()
-                                                                                ) + (root.appUserConfig.timeOffset * 1000L)
+                                                            dateString?.let {
+                                                                Text(text = dateString)
+                                                                if (gridData.data.isEditable) {
+                                                                    FilledIconButton(
+                                                                        shape = singleButtonShape,
+                                                                        colors = colorIconButton ?: IconButtonDefaults.iconButtonColors(),
+                                                                        onClick = {
+                                                                            val curDateTime = (
+                                                                                    gridData.current.value?.let { seconds ->
+                                                                                        seconds * 1000L
+                                                                                    } ?: Clock.System.now().toEpochMilliseconds()
+                                                                                    ) + (root.appUserConfig.timeOffset * 1000L)
 
-                                                                        datePickerState.displayedMonthMillis = curDateTime
-                                                                        datePickerState.selectedDateMillis = curDateTime
+                                                                            datePickerState.displayedMonthMillis = curDateTime
+                                                                            datePickerState.selectedDateMillis = curDateTime
 
-                                                                        datePickerData = gridData
+                                                                            datePickerData = gridData
+                                                                        }
+                                                                    ) {
+                                                                        Icon(
+                                                                            imageVector = Icons.Default.Edit,
+                                                                            contentDescription = null,
+                                                                        )
                                                                     }
-                                                                ) {
-                                                                    Icon(
-                                                                        imageVector = Icons.Default.Edit,
-                                                                        contentDescription = null,
-                                                                    )
                                                                 }
-                                                            }
-                                                            //--- time fields on new line on narrow screens
-//                                            if (styleIsNarrowScreen && index == 3) {
-//                                                Br()
-//                                            }
-                                                            if (!gridData.data.isEditable) {
-                                                                Text(modifier = Modifier.padding(8.dp), text = "")
+                                                                //--- time fields on new line on narrow screens
+                                                                //                                            if (styleIsNarrowScreen && index == 3) {
+                                                                //                                                Br()
+                                                                //                                            }
+                                                                if (!gridData.data.isEditable) {
+                                                                    Text(modifier = Modifier.padding(8.dp), text = "")
+                                                                }
                                                             }
 
                                                             timeString?.let {

@@ -10,6 +10,7 @@ interface UserRepository : JpaRepository<UserEntity, Int> {
     fun findByLogin(login: String): List<UserEntity>
     fun findByLoginAndPassword(login: String, password: String): List<UserEntity>
     fun findByFullName(fullName: String): List<UserEntity>
+    fun findByTelegram(telegram: String): List<UserEntity>
     fun findByParentId(parentId: Int): List<UserEntity>
     fun findByParentIdAndOrgType(parentId: Int, orgType: Int): List<UserEntity>
 
@@ -27,6 +28,7 @@ interface UserRepository : JpaRepository<UserEntity, Int> {
                      OR LOWER(ue.fullName) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.eMail) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.contactInfo) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                     OR LOWER(ue.telegram) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR LOWER(ue.lastIP) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                      OR CAST(ue.timeOffset AS String) LIKE CONCAT( '%', ?3, '%' )
                      OR ( 

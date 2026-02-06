@@ -58,6 +58,9 @@ class UserEntity(
     @Column(name = "e_mail")
     var eMail: String?,
 
+    @Column(name = "telegram")
+    var telegram: String?,
+
     @Column(name = "contact_info")
     var contactInfo: String?,
 
@@ -95,7 +98,6 @@ class UserEntity(
     @Embedded
     val passwordLastChangeDate: DateEntity,
 ) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is UserEntity) return false
@@ -104,19 +106,20 @@ class UserEntity(
         if (userId != other.userId) return false
         if (orgType != other.orgType) return false
         if (isDisabled != other.isDisabled) return false
+        if (timeOffset != other.timeOffset) return false
+        if (useThousandsDivider != other.useThousandsDivider) return false
+        if (fileId != other.fileId) return false
+        if (atCount != other.atCount) return false
         if (fullName != other.fullName) return false
         if (shortName != other.shortName) return false
         if (login != other.login) return false
         if (password != other.password) return false
         if (roles != other.roles) return false
-        if (timeOffset != other.timeOffset) return false
         if (lang != other.lang) return false
         if (eMail != other.eMail) return false
+        if (telegram != other.telegram) return false
         if (contactInfo != other.contactInfo) return false
-        if (useThousandsDivider != other.useThousandsDivider) return false
         if (decimalSeparator != other.decimalSeparator) return false
-        if (fileId != other.fileId) return false
-        if (atCount != other.atCount) return false
         if (lastLoginDateTime != other.lastLoginDateTime) return false
         if (lastIP != other.lastIP) return false
         if (passwordLastChangeDate != other.passwordLastChangeDate) return false
@@ -129,19 +132,20 @@ class UserEntity(
         result = 31 * result + (userId ?: 0)
         result = 31 * result + (orgType ?: 0)
         result = 31 * result + (isDisabled?.hashCode() ?: 0)
+        result = 31 * result + (timeOffset ?: 0)
+        result = 31 * result + (useThousandsDivider?.hashCode() ?: 0)
+        result = 31 * result + (fileId ?: 0)
+        result = 31 * result + (atCount ?: 0)
         result = 31 * result + (fullName?.hashCode() ?: 0)
         result = 31 * result + (shortName?.hashCode() ?: 0)
         result = 31 * result + (login?.hashCode() ?: 0)
         result = 31 * result + (password?.hashCode() ?: 0)
         result = 31 * result + roles.hashCode()
-        result = 31 * result + (timeOffset ?: 0)
         result = 31 * result + (lang?.hashCode() ?: 0)
         result = 31 * result + (eMail?.hashCode() ?: 0)
+        result = 31 * result + (telegram?.hashCode() ?: 0)
         result = 31 * result + (contactInfo?.hashCode() ?: 0)
-        result = 31 * result + (useThousandsDivider?.hashCode() ?: 0)
         result = 31 * result + (decimalSeparator?.hashCode() ?: 0)
-        result = 31 * result + (fileId ?: 0)
-        result = 31 * result + (atCount ?: 0)
         result = 31 * result + lastLoginDateTime.hashCode()
         result = 31 * result + (lastIP?.hashCode() ?: 0)
         result = 31 * result + passwordLastChangeDate.hashCode()

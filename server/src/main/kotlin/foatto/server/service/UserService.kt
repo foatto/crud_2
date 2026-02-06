@@ -85,6 +85,7 @@ class UserService(
         private const val FIELD_TIME_OFFSET = "timeOffset"
         private const val FIELD_LANG = "lang"
         private const val FIELD_EMAIL = "eMail"
+        private const val FIELD_TELEGRAM = "telegram"
         private const val FIELD_CONTACT_INFO = "contactInfo"
         private const val FIELD_USE_THOUSANDS_DIVIDER = "useThousandsDivider"
         private const val FIELD_DECIMAL_SEPARATOR = "decimalSeparator"
@@ -175,6 +176,7 @@ class UserService(
             columnInfos += FIELD_ROLES to "Роли"
         }
         columnInfos += FIELD_EMAIL to "E-mail"
+        columnInfos += FIELD_TELEGRAM to "Telegram"
         columnInfos += FIELD_CONTACT_INFO to getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang)
         if (userConfig.isAdminOnly()) {
             columnInfos += null to "Файлы"
@@ -287,6 +289,7 @@ class UserService(
                 tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.roles.joinToString())
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.eMail ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.telegram ?: "-")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.contactInfo ?: "-")
             if (userConfig.isAdminOnly()) {
                 tableCells += TableButtonCell(
@@ -521,6 +524,12 @@ class UserService(
             value = userEntity?.eMail ?: "",
         )
         formCells += FormSimpleCell(
+            name = FIELD_TELEGRAM,
+            caption = "Telegram",
+            isEditable = changeEnabled,
+            value = userEntity?.telegram ?: "",
+        )
+        formCells += FormSimpleCell(
             name = FIELD_CONTACT_INFO,
             caption = getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang),
             isEditable = changeEnabled,
@@ -679,6 +688,7 @@ class UserService(
             timeOffset = formActionData[FIELD_TIME_OFFSET]?.dateTimeValue ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
             lang = formActionData[FIELD_LANG]?.stringValue?.let { s -> LanguageEnum.valueOf(s) } ?: SpringApp.defaultLang,
             eMail = formActionData[FIELD_EMAIL]?.stringValue,
+            telegram = formActionData[FIELD_TELEGRAM]?.stringValue,
             contactInfo = formActionData[FIELD_CONTACT_INFO]?.stringValue,
             useThousandsDivider = formActionData[FIELD_USE_THOUSANDS_DIVIDER]?.booleanValue ?: true,
             decimalSeparator = formActionData[FIELD_DECIMAL_SEPARATOR]?.stringValue ?: ".",

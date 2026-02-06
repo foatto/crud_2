@@ -43,6 +43,7 @@ class UserPropertyEditService(
     companion object {
         private const val FIELD_TIME_OFFSET = "timeOffset"
         private const val FIELD_EMAIL = "eMail"
+        private const val FIELD_TELEGRAM = "telegram"
         private const val FIELD_CONTACT_INFO = "contactInfo"
         private const val FIELD_USE_THOUSANDS_DIVIDER = "useThousandsDivider"
         private const val FIELD_DECIMAL_SEPARATOR = "decimalSeparator"
@@ -77,6 +78,12 @@ class UserPropertyEditService(
             caption = "E-mail",
             isEditable = changeEnabled,
             value = userEntity?.eMail ?: "",
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_TELEGRAM,
+            caption = "Telegram",
+            isEditable = changeEnabled,
+            value = userEntity?.telegram ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_CONTACT_INFO,
@@ -128,6 +135,7 @@ class UserPropertyEditService(
         userEntity.apply {
             timeOffset = formActionData[FIELD_TIME_OFFSET]?.dateTimeValue ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds
             eMail = formActionData[FIELD_EMAIL]?.stringValue
+            telegram = formActionData[FIELD_TELEGRAM]?.stringValue
             contactInfo = formActionData[FIELD_CONTACT_INFO]?.stringValue
             useThousandsDivider = formActionData[FIELD_USE_THOUSANDS_DIVIDER]?.booleanValue ?: true
             decimalSeparator = formActionData[FIELD_DECIMAL_SEPARATOR]?.stringValue ?: "."

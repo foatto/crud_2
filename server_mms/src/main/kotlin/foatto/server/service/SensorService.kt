@@ -319,7 +319,7 @@ class SensorService(
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col,
-                    colSpan = 7,
+                    colSpan = 8,
                     dataRow = row,
                     name = groupName,
                     backColorType = TableCellBackColorType.GROUP_0,

@@ -47,7 +47,6 @@ abstract class AbstractSchemeIndicatorStateService(
         const val SCHEME_WIDTH: Int = 12
         const val SCHEME_HEIGHT: Int = 8
 
-
         const val TEXT_COLOR_NORMAL = 0xFF_00_00_00.toInt()
         const val TEXT_COLOR_CRITICAL = 0xFF_FF_00_00.toInt()
     }

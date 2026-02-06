@@ -13,6 +13,7 @@ val jExcelApiVersion: String by project
 val minioVersion: String by project
 val postgresJdbcVersion: String by project
 val springBootVersion: String by project
+val telegramBotsSpringVersion: String by project
 //val zxingVersion: String by project
 
 plugins {
@@ -31,6 +32,9 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     api("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
+
+    api("org.telegram:telegrambots-spring-boot-starter:$telegramBotsSpringVersion")
+    api("org.telegram:telegrambotsextensions:$telegramBotsSpringVersion")
 
 //--- пока не используется
 //    api("com.sun.mail:javax.mail:$javaxMailApiVersion")

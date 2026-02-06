@@ -85,6 +85,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.toSize
 import foatto.compose.AppControl
 import foatto.compose.Root
@@ -147,6 +148,7 @@ import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getLocalDateTime
+import foatto.core.util.getRandomInt
 import foatto.core.util.getRandomLong
 import foatto.core.util.getTimeZone
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
@@ -480,8 +482,7 @@ class FormControl(
                                         verticalScrollState.scrollBy(-delta)
                                     }
                                 },
-                            )
-                            .weight(1.0f),
+                            ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         gridRows.forEachIndexed { index, gridRow ->
@@ -493,7 +494,6 @@ class FormControl(
                                     .onSizeChanged { size ->
                                         rowHeights[index] = size.height.toFloat()
                                     },
-//?                        horizontalArrangement = Arrangement.aligned(Alignment.CenterHorizontally),
                             ) {
                                 gridRow.forEachIndexed { col, gridData ->
                                     //--- специальное хитрое условие: показывать если gridData == null или isVisible == true
@@ -503,9 +503,6 @@ class FormControl(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
                                                 .fillMaxHeight()    // работает только совместно с .height(intrinsicSize = IntrinsicSize.Max)
-                                                //!!! только на время отладки
-                                                //.border(BorderStroke(width = 1.dp, color = Color.LightGray))
-                                                //.wrapContentSize(align = Alignment.Center, unbounded = true)  //- ничем не помогает
                                                 .padding(16.dp)
                                                 .onSizeChanged { size ->
                                                     gridData?.let {
@@ -522,11 +519,7 @@ class FormControl(
                                                 .then(
                                                     gridData?.let {
                                                         hmColumnMaxWidth[col]?.let { maxColWidth ->
-                                                            if (gridData.componentWidth < maxColWidth) {
-                                                                Modifier.width(maxColWidth)
-                                                            } else {
-                                                                Modifier.width(gridData.componentWidth)
-                                                            }
+                                                            Modifier.width(max(maxColWidth, gridData.componentWidth))
                                                         }
                                                     } ?: Modifier
                                                 )
@@ -539,7 +532,8 @@ class FormControl(
                                                 is FormSimpleCellClient -> {
                                                     OutlinedTextField(
                                                         modifier = Modifier
-                                                            .widthIn(max = root.scaledWindowWidth.dp / 2)
+                                                            .fillMaxWidth()
+                                                            .widthIn(max = root.scaledWindowWidth.dp / 3)
                                                             .then(
                                                                 if (gridData.data.isEditable) {
                                                                     Modifier.background(colorControlBack)
@@ -937,6 +931,7 @@ class FormControl(
                                                                 verticalAlignment = Alignment.CenterVertically,
                                                             ) {
                                                                 TextButton(
+                                                                    modifier = Modifier.weight(1.0f),
                                                                     shape = singleButtonShape,
                                                                     colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
                                                                     enabled = fileData.id >= 0,
@@ -1004,7 +999,22 @@ class FormControl(
 //                                            id(getFocusId(gridData.id))
                                                 }
                                             }
-
+                                        }
+                                        Row(
+                                            horizontalArrangement = Arrangement.Start,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .width(
+                                                    //--- чтобы не образовалась пустота между меткой и полями ввода
+                                                    if (gridData is FormLabelCellClient) {
+                                                        0.dp
+                                                    } else {
+                                                        128.dp
+                                                    }
+                                                )
+                                                .fillMaxHeight()
+                                                .padding(horizontal = 0.dp, vertical = 16.dp)
+                                        ) {
                                             if (gridData is FormSimpleCellClient) {
                                                 gridData.data.selectorAction?.let { selectorAction ->
                                                     ImageOrTextFromNameControl(

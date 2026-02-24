@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
@@ -24,6 +26,8 @@ import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.checkFormAddPermission
@@ -124,9 +128,18 @@ class DeviceService(
         )
 
         private val cellOwnerNames = mapOf(
-            CELL_OWNER_UNKNOWN to "(неизвестно)",
-            CELL_OWNER_PLA to "Петролайн",
-            CELL_OWNER_CLIENT to "Клиент",
+            CELL_OWNER_UNKNOWN to mapOf(
+                LanguageEnum.EN to "(unknown)",
+                LanguageEnum.RU to "(неизвестно)",
+            ),
+            CELL_OWNER_PLA to mapOf(
+                LanguageEnum.EN to "Petroline",
+                LanguageEnum.RU to "Петролайн",
+            ),
+            CELL_OWNER_CLIENT to mapOf(
+                LanguageEnum.EN to "Client",
+                LanguageEnum.RU to "Клиент",
+            ),
         )
 
         private const val MAX_PORT_PER_SENSOR = 4
@@ -137,65 +150,440 @@ class DeviceService(
         private const val SENSOR_NAME_MERCURY = "mercury"
 
         private val sensorAutoCreates = mapOf(
-            SENSOR_NAME_EMIS to "ЭМИС",
-            SENSOR_NAME_ESD to "Euro Sens",
-            SENSOR_NAME_PMP to "ПМП",
-            SENSOR_NAME_MERCURY to "Меркурий",
+            SENSOR_NAME_EMIS to mapOf(
+                LanguageEnum.EN to "EMIS",
+                LanguageEnum.RU to "ЭМИС",
+            ),
+            SENSOR_NAME_ESD to mapOf(
+                LanguageEnum.EN to "Euro Sens",
+                LanguageEnum.RU to "Euro Sens",
+            ),
+            SENSOR_NAME_PMP to mapOf(
+                LanguageEnum.EN to "PMP",
+                LanguageEnum.RU to "ПМП",
+            ),
+            SENSOR_NAME_MERCURY to mapOf(
+                LanguageEnum.EN to "Mercury",
+                LanguageEnum.RU to "Меркурий",
+            ),
         )
         private val sensorInfos = mapOf(
             SENSOR_NAME_EMIS to listOf(
-                SensorInfo(sensorType = SensorConfig.SENSOR_MASS_FLOW, portNum = PortNumbers.EMIS_MASS_FLOW_270, descrBody = "Массовый расход"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_DENSITY, portNum = PortNumbers.EMIS_DENSITY_280, descrBody = "Плотность"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_TEMPERATURE, portNum = PortNumbers.EMIS_TEMPERATURE_290, descrBody = "Температура", minView = -100.0, maxView = 100.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_FLOW, portNum = PortNumbers.EMIS_VOLUME_FLOW_300, descrBody = "Объёмный расход"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_MASS_ACCUMULATED, portNum = PortNumbers.EMIS_ACCUMULATED_MASS_310, descrBody = "Накопленная масса"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_ACCUMULATED, portNum = PortNumbers.EMIS_ACCUMULATED_VOLUME_320, descrBody = "Накопленный объём"),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_MASS_FLOW,
+                    portNum = PortNumbers.EMIS_MASS_FLOW_270,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Mass flow rate",
+                        LanguageEnum.RU to "Массовый расход",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_DENSITY,
+                    portNum = PortNumbers.EMIS_DENSITY_280,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Density",
+                        LanguageEnum.RU to "Плотность",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_TEMPERATURE,
+                    portNum = PortNumbers.EMIS_TEMPERATURE_290,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Temperature",
+                        LanguageEnum.RU to "Температура",
+                    ),
+                    minView = -100.0,
+                    maxView = 100.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_VOLUME_FLOW,
+                    portNum = PortNumbers.EMIS_VOLUME_FLOW_300,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Volumetric flow rate",
+                        LanguageEnum.RU to "Объёмный расход",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_MASS_ACCUMULATED,
+                    portNum = PortNumbers.EMIS_ACCUMULATED_MASS_310,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Accumulated mass",
+                        LanguageEnum.RU to "Накопленная масса",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_VOLUME_ACCUMULATED,
+                    portNum = PortNumbers.EMIS_ACCUMULATED_VOLUME_320,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Accumulated volume",
+                        LanguageEnum.RU to "Накопленный объём",
+                    ),
+                ),
             ),
             SENSOR_NAME_ESD to listOf(
-                SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_USING, portNum = PortNumbers.ESD_VOLUME_504, descrBody = "Расходомер"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_FLOW, portNum = PortNumbers.ESD_FLOW_508, descrBody = "Скорость потока"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_USING, portNum = PortNumbers.ESD_CAMERA_VOLUME_512, descrBody = "Расходомер камеры подачи"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_FLOW, portNum = PortNumbers.ESD_CAMERA_FLOW_516, descrBody = "Скорость потока камеры подачи"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_TEMPERATURE, portNum = PortNumbers.ESD_CAMERA_TEMPERATURE_520, descrBody = "Температура камеры подачи", minView = -100.0, maxView = 100.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_USING, portNum = PortNumbers.ESD_REVERSE_CAMERA_VOLUME_524, descrBody = "Расходомер камеры обратки"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_VOLUME_FLOW, portNum = PortNumbers.ESD_REVERSE_CAMERA_FLOW_528, descrBody = "Скорость потока камеры обратки"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_TEMPERATURE, portNum = PortNumbers.ESD_REVERSE_CAMERA_TEMPERATURE_532, descrBody = "Температура камеры обратки", minView = -100.0, maxView = 100.0),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_LIQUID_USING,
+                    portNum = PortNumbers.ESD_VOLUME_504,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Flow meter",
+                        LanguageEnum.RU to "Расходомер",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_VOLUME_FLOW,
+                    portNum = PortNumbers.ESD_FLOW_508,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Flow rate",
+                        LanguageEnum.RU to "Скорость потока",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_LIQUID_USING,
+                    portNum = PortNumbers.ESD_CAMERA_VOLUME_512,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Feed chamber flow meter",
+                        LanguageEnum.RU to "Расходомер камеры подачи",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_VOLUME_FLOW,
+                    portNum = PortNumbers.ESD_CAMERA_FLOW_516,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Feed chamber flow rate",
+                        LanguageEnum.RU to "Скорость потока камеры подачи",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_TEMPERATURE,
+                    portNum = PortNumbers.ESD_CAMERA_TEMPERATURE_520,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Feed chamber temperature",
+                        LanguageEnum.RU to "Температура камеры подачи",
+                    ),
+                    minView = -100.0,
+                    maxView = 100.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_LIQUID_USING,
+                    portNum = PortNumbers.ESD_REVERSE_CAMERA_VOLUME_524,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Return chamber flow meter",
+                        LanguageEnum.RU to "Расходомер камеры обратки",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_VOLUME_FLOW,
+                    portNum = PortNumbers.ESD_REVERSE_CAMERA_FLOW_528,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Return chamber flow rate",
+                        LanguageEnum.RU to "Скорость потока камеры обратки"
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_TEMPERATURE,
+                    portNum = PortNumbers.ESD_REVERSE_CAMERA_TEMPERATURE_532,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Return chamber temperature",
+                        LanguageEnum.RU to "Температура камеры обратки",
+                    ),
+                    minView = -100.0,
+                    maxView = 100.0
+                ),
             ),
             SENSOR_NAME_PMP to listOf(
-                SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_LEVEL, portNum = PortNumbers.PMP_LEVEL_540, descrBody = "Уровень топлива"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_TEMPERATURE, portNum = PortNumbers.PMP_TEMPERATURE_560, descrBody = "Температура", minView = -100.0, maxView = 100.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_LIQUID_LEVEL, portNum = PortNumbers.PMP_VOLUME_580, descrBody = "Объём топлива"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_WEIGHT, portNum = PortNumbers.PMP_MASS_600, descrBody = "Масса топлива"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_DENSITY, portNum = PortNumbers.PMP_DENSITY_620, descrBody = "Плотность"),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_LIQUID_LEVEL,
+                    portNum = PortNumbers.PMP_LEVEL_540,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Fuel level",
+                        LanguageEnum.RU to "Уровень топлива",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_TEMPERATURE,
+                    portNum = PortNumbers.PMP_TEMPERATURE_560,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Temperature",
+                        LanguageEnum.RU to "Температура",
+                    ),
+                    minView = -100.0,
+                    maxView = 100.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_LIQUID_LEVEL,
+                    portNum = PortNumbers.PMP_VOLUME_580,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Fuel volume",
+                        LanguageEnum.RU to "Объём топлива",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_WEIGHT,
+                    portNum = PortNumbers.PMP_MASS_600,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Fuel mass",
+                        LanguageEnum.RU to "Масса топлива",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_DENSITY,
+                    portNum = PortNumbers.PMP_DENSITY_620,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Density",
+                        LanguageEnum.RU to "Плотность",
+                    ),
+                ),
             ),
             SENSOR_NAME_MERCURY to listOf(
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_COUNT_AD, portNum = PortNumbers.MERCURY_COUNT_ACTIVE_DIRECT_160, descrBody = "Электроэнергия активная прямая"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_COUNT_AR, portNum = PortNumbers.MERCURY_COUNT_ACTIVE_REVERSE_164, descrBody = "Электроэнергия активная обратная"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_COUNT_RD, portNum = PortNumbers.MERCURY_COUNT_REACTIVE_DIRECT_168, descrBody = "Электроэнергия реактивная прямая"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_COUNT_RR, portNum = PortNumbers.MERCURY_COUNT_REACTIVE_REVERSE_172, descrBody = "Электроэнергия реактивная обратная"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_VOLTAGE, portNum = PortNumbers.MERCURY_VOLTAGE_A_180, descrBody = "Напряжение по фазе A", phase = 1, minView = 0.0, maxView = 380.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_VOLTAGE, portNum = PortNumbers.MERCURY_VOLTAGE_B_184, descrBody = "Напряжение по фазе B", phase = 2, minView = 0.0, maxView = 380.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_VOLTAGE, portNum = PortNumbers.MERCURY_VOLTAGE_C_188, descrBody = "Напряжение по фазе C", phase = 3, minView = 0.0, maxView = 380.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_CURRENT, portNum = PortNumbers.MERCURY_CURRENT_A_200, descrBody = "Ток по фазе A", phase = 1),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_CURRENT, portNum = PortNumbers.MERCURY_CURRENT_B_204, descrBody = "Ток по фазе B", phase = 2),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_CURRENT, portNum = PortNumbers.MERCURY_CURRENT_C_208, descrBody = "Ток по фазе C", phase = 3),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_KOEF, portNum = PortNumbers.MERCURY_POWER_KOEF_A_220, descrBody = "Коэффициент мощности по фазе A", phase = 1, minView = 0.0, maxView = 1.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_KOEF, portNum = PortNumbers.MERCURY_POWER_KOEF_B_224, descrBody = "Коэффициент мощности по фазе B", phase = 2, minView = 0.0, maxView = 1.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_KOEF, portNum = PortNumbers.MERCURY_POWER_KOEF_C_228, descrBody = "Коэффициент мощности по фазе C", phase = 3, minView = 0.0, maxView = 1.0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE, portNum = PortNumbers.MERCURY_POWER_ACTIVE_A_232, descrBody = "Мощность активная по фазе A", phase = 1),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE, portNum = PortNumbers.MERCURY_POWER_ACTIVE_B_236, descrBody = "Мощность активная по фазе B", phase = 2),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE, portNum = PortNumbers.MERCURY_POWER_ACTIVE_C_240, descrBody = "Мощность активная по фазе C", phase = 3),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE, portNum = PortNumbers.MERCURY_POWER_REACTIVE_A_244, descrBody = "Мощность реактивная по фазе A", phase = 1),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE, portNum = PortNumbers.MERCURY_POWER_REACTIVE_B_248, descrBody = "Мощность реактивная по фазе B", phase = 2),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE, portNum = PortNumbers.MERCURY_POWER_REACTIVE_C_252, descrBody = "Мощность реактивная по фазе C", phase = 3),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL, portNum = PortNumbers.MERCURY_POWER_FULL_A_256, descrBody = "Мощность полная по фазе A", phase = 1),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL, portNum = PortNumbers.MERCURY_POWER_FULL_B_260, descrBody = "Мощность полная по фазе B", phase = 2),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL, portNum = PortNumbers.MERCURY_POWER_FULL_C_264, descrBody = "Мощность полная по фазе C", phase = 3),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE, portNum = PortNumbers.MERCURY_POWER_ACTIVE_ABC_330, descrBody = "Мощность активная по всем фазам", phase = 0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE, portNum = PortNumbers.MERCURY_POWER_REACTIVE_ABC_340, descrBody = "Мощность реактивная по всем фазам", phase = 0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL, portNum = PortNumbers.MERCURY_POWER_FULL_ABC_350, descrBody = "Мощность полная по всем фазам", phase = 0),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT, portNum = PortNumbers.MERCURY_TRANSFORM_KOEF_CURRENT_360, descrBody = "Коэффициент трансформации по току"),
-                SensorInfo(sensorType = SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE, portNum = PortNumbers.MERCURY_TRANSFORM_KOEF_VOLTAGE_370, descrBody = "Коэффициент трансформации по напряжению"),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_COUNT_AD,
+                    portNum = PortNumbers.MERCURY_COUNT_ACTIVE_DIRECT_160,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Direct active electrical energy",
+                        LanguageEnum.RU to "Электроэнергия активная прямая",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_COUNT_AR,
+                    portNum = PortNumbers.MERCURY_COUNT_ACTIVE_REVERSE_164,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Active reverse electrical energy",
+                        LanguageEnum.RU to "Электроэнергия активная обратная",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_COUNT_RD,
+                    portNum = PortNumbers.MERCURY_COUNT_REACTIVE_DIRECT_168,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Direct reactive electrical energy",
+                        LanguageEnum.RU to "Электроэнергия реактивная прямая",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_COUNT_RR,
+                    portNum = PortNumbers.MERCURY_COUNT_REACTIVE_REVERSE_172,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Reactive reverse electrical energy",
+                        LanguageEnum.RU to "Электроэнергия реактивная обратная",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_VOLTAGE,
+                    portNum = PortNumbers.MERCURY_VOLTAGE_A_180,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Voltage in phase A",
+                        LanguageEnum.RU to "Напряжение по фазе A",
+                    ),
+                    phase = 1,
+                    minView = 0.0,
+                    maxView = 380.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_VOLTAGE,
+                    portNum = PortNumbers.MERCURY_VOLTAGE_B_184,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Voltage in phase B",
+                        LanguageEnum.RU to "Напряжение по фазе B",
+                    ),
+                    phase = 2,
+                    minView = 0.0,
+                    maxView = 380.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_VOLTAGE,
+                    portNum = PortNumbers.MERCURY_VOLTAGE_C_188,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Voltage in phase C",
+                        LanguageEnum.RU to "Напряжение по фазе C",
+                    ),
+                    phase = 3,
+                    minView = 0.0,
+                    maxView = 380.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_CURRENT,
+                    portNum = PortNumbers.MERCURY_CURRENT_A_200,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Current in phase A",
+                        LanguageEnum.RU to "Ток по фазе A",
+                    ),
+                    phase = 1
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_CURRENT,
+                    portNum = PortNumbers.MERCURY_CURRENT_B_204,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Current in phase B",
+                        LanguageEnum.RU to "Ток по фазе B",
+                    ),
+                    phase = 2
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_CURRENT,
+                    portNum = PortNumbers.MERCURY_CURRENT_C_208,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Current in phase C",
+                        LanguageEnum.RU to "Ток по фазе C",
+                    ),
+                    phase = 3
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_KOEF,
+                    portNum = PortNumbers.MERCURY_POWER_KOEF_A_220,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Power factor in phase A",
+                        LanguageEnum.RU to "Коэффициент мощности по фазе A",
+                    ),
+                    phase = 1,
+                    minView = 0.0,
+                    maxView = 1.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_KOEF,
+                    portNum = PortNumbers.MERCURY_POWER_KOEF_B_224,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Power factor in phase B",
+                        LanguageEnum.RU to "Коэффициент мощности по фазе B",
+                    ),
+                    phase = 2,
+                    minView = 0.0,
+                    maxView = 1.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_KOEF,
+                    portNum = PortNumbers.MERCURY_POWER_KOEF_C_228,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Power factor in phase C",
+                        LanguageEnum.RU to "Коэффициент мощности по фазе C",
+                    ),
+                    phase = 3,
+                    minView = 0.0,
+                    maxView = 1.0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_ACTIVE_A_232,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Active power in phase A",
+                        LanguageEnum.RU to "Мощность активная по фазе A",
+                    ),
+                    phase = 1
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_ACTIVE_B_236,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Active power in phase B",
+                        LanguageEnum.RU to "Мощность активная по фазе B",
+                    ),
+                    phase = 2
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_ACTIVE_C_240,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Active power in phase C",
+                        LanguageEnum.RU to "Мощность активная по фазе C",
+                    ),
+                    phase = 3
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_REACTIVE_A_244,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Reactive power in phase A",
+                        LanguageEnum.RU to "Мощность реактивная по фазе A",
+                    ),
+                    phase = 1
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_REACTIVE_B_248,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Reactive power in phase B",
+                        LanguageEnum.RU to "Мощность реактивная по фазе B",
+                    ),
+                    phase = 2
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_REACTIVE_C_252,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Reactive power in phase C",
+                        LanguageEnum.RU to "Мощность реактивная по фазе C",
+                    ),
+                    phase = 3
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL,
+                    portNum = PortNumbers.MERCURY_POWER_FULL_A_256,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Full power in phase A",
+                        LanguageEnum.RU to "Мощность полная по фазе A",
+                    ),
+                    phase = 1
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL,
+                    portNum = PortNumbers.MERCURY_POWER_FULL_B_260,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Full power in phase B",
+                        LanguageEnum.RU to "Мощность полная по фазе B",
+                    ),
+                    phase = 2
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL,
+                    portNum = PortNumbers.MERCURY_POWER_FULL_C_264,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Full power in phase C",
+                        LanguageEnum.RU to "Мощность полная по фазе C",
+                    ),
+                    phase = 3
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_ACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_ACTIVE_ABC_330,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Active power in all phases",
+                        LanguageEnum.RU to "Мощность активная по всем фазам",
+                    ),
+                    phase = 0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_REACTIVE,
+                    portNum = PortNumbers.MERCURY_POWER_REACTIVE_ABC_340,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Reactive power in all phases",
+                        LanguageEnum.RU to "Мощность реактивная по всем фазам",
+                    ),
+                    phase = 0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_POWER_FULL,
+                    portNum = PortNumbers.MERCURY_POWER_FULL_ABC_350,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Full power in all phases",
+                        LanguageEnum.RU to "Мощность полная по всем фазам",
+                    ),
+                    phase = 0
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT,
+                    portNum = PortNumbers.MERCURY_TRANSFORM_KOEF_CURRENT_360,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Current transformation ratio",
+                        LanguageEnum.RU to "Коэффициент трансформации по току",
+                    ),
+                ),
+                SensorInfo(
+                    sensorType = SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE,
+                    portNum = PortNumbers.MERCURY_TRANSFORM_KOEF_VOLTAGE_370,
+                    descr = mapOf(
+                        LanguageEnum.EN to "Voltage transformation ratio",
+                        LanguageEnum.RU to "Коэффициент трансформации по напряжению",
+                    ),
+                ),
             ),
         )
     }
@@ -207,26 +595,26 @@ class DeviceService(
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += null to "" // Device.userId
-        alColumnInfo += FIELD_TYPE to "Тип"
-        alColumnInfo += FIELD_INDEX to "Индекс на объекте"
-        alColumnInfo += FIELD_SERIAL_NO to "Серийный номер"
-        alColumnInfo += FIELD_NAME to "Наименование контроллера"
+        alColumnInfo += FIELD_TYPE to getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang)
+        alColumnInfo += FIELD_INDEX to getLocalizedMMSMessage(LocalizedMMSMessages.INDEX_ON_OBJECT, userConfig.lang)
+        alColumnInfo += FIELD_SERIAL_NO to getLocalizedMMSMessage(LocalizedMMSMessages.SERIAL_NUMBER, userConfig.lang)
+        alColumnInfo += FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_NAME, userConfig.lang)
         alColumnInfo += null to "" // Object.userId
-        alColumnInfo += FIELD_OBJECT_NAME to "Наименование объекта"
-        alColumnInfo += FIELD_OBJECT_MODEL to "Модель"
+        alColumnInfo += FIELD_OBJECT_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang)
+        alColumnInfo += FIELD_OBJECT_MODEL to getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang)
 
         //--- две строки в каждой ячейке - по обеим симкам
         alColumnInfo += null to "IMEI"
-        alColumnInfo += null to "Владелец сим-карты"
-        alColumnInfo += null to "Номер телефона"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.SIM_CARD_OWNER, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.PHONE_NUMBER, userConfig.lang)
         alColumnInfo += null to "ICC"
-        alColumnInfo += null to "Мобильный оператор"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.MOBILE_OPERATOR, userConfig.lang)
 
-        alColumnInfo += FIELD_FW_VERSION to "Версия прошивки"
-        alColumnInfo += FIELD_LAST_SESSION_TIME to "Время последней сессии"
-        alColumnInfo += FIELD_LAST_SESSION_STATUS to "Статус последней сессии"
-        alColumnInfo += FIELD_LAST_SESSION_ERROR to "Ошибка последней сессии"
-        alColumnInfo += FIELD_USING_START_DATE to "Дата/время начала эксплуатации"
+        alColumnInfo += FIELD_FW_VERSION to getLocalizedMMSMessage(LocalizedMMSMessages.FIRMWARE_VERSION, userConfig.lang)
+        alColumnInfo += FIELD_LAST_SESSION_TIME to getLocalizedMMSMessage(LocalizedMMSMessages.LAST_SESSION_TIME, userConfig.lang)
+        alColumnInfo += FIELD_LAST_SESSION_STATUS to getLocalizedMMSMessage(LocalizedMMSMessages.LAST_SESSION_STATUS, userConfig.lang)
+        alColumnInfo += FIELD_LAST_SESSION_ERROR to getLocalizedMMSMessage(LocalizedMMSMessages.LAST_SESSION_ERROR, userConfig.lang)
+        alColumnInfo += FIELD_USING_START_DATE to getLocalizedMMSMessage(LocalizedMMSMessages.USING_START, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -302,7 +690,7 @@ class DeviceService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = deviceEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -312,7 +700,7 @@ class DeviceService(
                 col = col++,
                 dataRow = row,
                 name = deviceEntity.type?.let { type ->
-                    deviceTypes[type] ?: "(неизвестный тип датчика)"
+                    deviceTypes[type] ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_SENSOR_TYPE, userConfig.lang)
                 } ?: "-",
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.index?.toString() ?: "-")
@@ -321,7 +709,7 @@ class DeviceService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = deviceEntity.obj?.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -361,7 +749,7 @@ class DeviceService(
             if (isFormEnabled) {
                 popupDatas += TablePopup(
                     action = formOpenAction,
-                    text = "Открыть",
+                    text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
                 )
             }
@@ -375,7 +763,7 @@ class DeviceService(
                     ),
                     text = appModuleConfigs[AppModuleMMS.DEVICE_MANAGE]?.captions?.let { captions ->
                         getLocalizedMessage(captions, userConfig.lang)
-                    } ?: "(неизвестный тип модуля: '${AppModuleMMS.DEVICE_MANAGE}')",
+                    } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE_TYPE, userConfig.lang)}: '${AppModuleMMS.DEVICE_MANAGE}')",
                     inNewTab = true,
                 )
             }
@@ -437,7 +825,7 @@ class DeviceService(
         )
         formCells += FormComboCell(
             name = FIELD_TYPE,
-            caption = "Тип",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang),
             isEditable = changeEnabled,
             value = (deviceEntity?.type ?: MMSTelematicFunction.DEVICE_TYPE_PULSAR_DATA).toString(),
             values = deviceTypes.map { (key, value) -> key.toString() to value },
@@ -445,19 +833,19 @@ class DeviceService(
         )
         formCells += FormSimpleCell(
             name = FIELD_INDEX,
-            caption = "Индекс на объекте",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.INDEX_ON_OBJECT, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceEntity?.index?.toString() ?: "0",
         )
         formCells += FormSimpleCell(
             name = FIELD_SERIAL_NO,
-            caption = "Серийный номер",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SERIAL_NUMBER, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceEntity?.serialNo ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_NAME,
-            caption = "Наименование контроллера",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_NAME, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceEntity?.name ?: "",
         )
@@ -470,12 +858,12 @@ class DeviceService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_NAME,
-            caption = "Наименование объекта",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang),
             isEditable = false,
             value = if (parentObjectId == 0) {
                 "-"
             } else {
-                deviceEntity?.obj?.name ?: "(неизвестно)"
+                deviceEntity?.obj?.name ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)
             },
             selectorAction = if (changeEnabled) {
                 AppAction(
@@ -499,7 +887,7 @@ class DeviceService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_MODEL,
-            caption = "Модель",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang),
             isEditable = false,
             value = deviceEntity?.obj?.model ?: "",
         )
@@ -512,15 +900,15 @@ class DeviceService(
         )
         formCells += FormComboCell(
             name = FIELD_CELL_OWNER,
-            caption = "Владелец сим-карты",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SIM_CARD_OWNER, userConfig.lang),
             isEditable = changeEnabled,
             value = (deviceEntity?.cellOwner ?: CELL_OWNER_UNKNOWN).toString(),
-            values = cellOwnerNames.map { (key, value) -> key.toString() to value },
+            values = cellOwnerNames.map { (key, values) -> key.toString() to (values[userConfig.lang] ?: "-") },
             asRadioButtons = true,
         )
         formCells += FormSimpleCell(
             name = FIELD_CELL_NUMBER,
-            caption = "Номер телефона",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.PHONE_NUMBER, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceEntity?.cellNumber ?: "",
         )
@@ -545,7 +933,7 @@ class DeviceService(
          */
         formCells += FormSimpleCell(
             name = FIELD_CELL_OPERATOR,
-            caption = "Мобильный оператор",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MOBILE_OPERATOR, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceEntity?.cellOperator ?: "",
         )
@@ -558,15 +946,15 @@ class DeviceService(
         )
         formCells += FormComboCell(
             name = FIELD_CELL_OWNER_2,
-            caption = "Владелец сим-карты 2",
+            caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.SIM_CARD_OWNER, userConfig.lang)} 2",
             isEditable = changeEnabled,
             value = (deviceEntity?.cellOwner2 ?: CELL_OWNER_UNKNOWN).toString(),
-            values = cellOwnerNames.map { (key, value) -> key.toString() to value },
+            values = cellOwnerNames.map { (key, values) -> key.toString() to (values[userConfig.lang] ?: "-") },
             asRadioButtons = true,
         )
         formCells += FormSimpleCell(
             name = FIELD_CELL_NUMBER_2,
-            caption = "Номер телефона 2",
+            caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.PHONE_NUMBER, userConfig.lang)} 2",
             isEditable = changeEnabled,
             value = deviceEntity?.cellNumber2 ?: "",
         )
@@ -578,7 +966,7 @@ class DeviceService(
         )
         formCells += FormSimpleCell(
             name = FIELD_CELL_OPERATOR_2,
-            caption = "Мобильный оператор 2",
+            caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.MOBILE_OPERATOR, userConfig.lang)} 2",
             isEditable = changeEnabled,
             value = deviceEntity?.cellOperator2 ?: "",
         )
@@ -586,32 +974,32 @@ class DeviceService(
         //--- только для показа, значения не изменяются, перед сохранением берутся свежие из базы
         formCells += FormSimpleCell(
             name = FIELD_FW_VERSION,
-            caption = "Версия прошивки",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.FIRMWARE_VERSION, userConfig.lang),
             isEditable = false,
             value = deviceEntity?.fwVersion ?: "",
         )
         formCells += FormDateTimeCell(
             name = FIELD_LAST_SESSION_TIME,
-            caption = "Время последней сессии",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.LAST_SESSION_TIME, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMYHMS,
             value = deviceEntity?.lastSessionTime ?: 0,
         )
         formCells += FormSimpleCell(
             name = FIELD_LAST_SESSION_STATUS,
-            caption = "Статус последней сессии",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.LAST_SESSION_STATUS, userConfig.lang),
             isEditable = false,
             value = deviceEntity?.lastSessionStatus ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_LAST_SESSION_ERROR,
-            caption = "Ошибка последней сессии",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.LAST_SESSION_ERROR, userConfig.lang),
             isEditable = false,
             value = deviceEntity?.lastSessionError ?: "",
         )
         formCells += FormDateTimeCell(
             name = FIELD_USING_START_DATE,
-            caption = "Дата начала эксплуатации",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.USING_START, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMY,
             value = deviceEntity?.usingStartDate?.let { dt ->
@@ -621,7 +1009,7 @@ class DeviceService(
 
         formCells += FormBooleanCell(
             name = FIELD_COPY_SENSORS,
-            caption = if (id == null) "" else "Копировать датчики при смене объекта",
+            caption = if (id == null) "" else getLocalizedMMSMessage(LocalizedMMSMessages.COPY_SENSORS, userConfig.lang),
             isEditable = true,
             value = false,
         )
@@ -631,7 +1019,7 @@ class DeviceService(
 
             formCells += FormBooleanCell(
                 name = fieldName,
-                caption = "Автосоздание датчиков $descr",
+                caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.AUTO_CREATE_SENSORS, userConfig.lang)} $descr",
                 isEditable = true,
                 value = false,
 //--- видимость этих полей зависит от FIELD_COPY_SENSORS, но вследствие отсутствия множественности условий visibility
@@ -645,7 +1033,7 @@ class DeviceService(
             (1..MAX_PORT_PER_SENSOR).forEach { si ->
                 formCells += FormSimpleCell(
                     name = name + SENSOR_GROUP_NAME + si,
-                    caption = "Наименование группы датчиков $si",
+                    caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_GROUP_NAME, userConfig.lang)} $si",
                     isEditable = true,
                     value = "",
                     visibility = FormCellVisibility(
@@ -656,7 +1044,7 @@ class DeviceService(
                 )
                 formCells += FormSimpleCell(
                     name = name + SENSOR_DESCR_PREFIX + si,
-                    caption = "Префикс наименования датчика $si",
+                    caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_NAME_PREFIX, userConfig.lang)} $si",
                     isEditable = true,
                     value = "",
                     visibility = FormCellVisibility(
@@ -667,7 +1055,7 @@ class DeviceService(
                 )
                 formCells += FormSimpleCell(
                     name = name + SENSOR_DESCR_POSTFIX + si,
-                    caption = "Постфикс наименования датчика $si",
+                    caption = "${getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_NAME_POSTFIX, userConfig.lang)} $si",
                     isEditable = true,
                     value = "",
                     visibility = FormCellVisibility(
@@ -692,9 +1080,9 @@ class DeviceService(
 
         val recordUserId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull() ?: 0
 
-        val index = formActionData[FIELD_INDEX]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_INDEX to "Не введён индекс"))
-        if (index < 0 || index >= MAX_DEVICE_COUNT_PER_OBJECT) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_INDEX to "Индекс должен быть в диапазоне от 0 до ${MAX_DEVICE_COUNT_PER_OBJECT - 1}"))
+        val index = formActionData[FIELD_INDEX]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_INDEX to getLocalizedMMSMessage(LocalizedMMSMessages.INDEX_NOT_ENTERED, userConfig.lang)))
+        if (index !in 0..<MAX_DEVICE_COUNT_PER_OBJECT) {
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_INDEX to "${getLocalizedMMSMessage(LocalizedMMSMessages.INDEX_MUST_BE_BETWEEN_0_AND, userConfig.lang)} ${MAX_DEVICE_COUNT_PER_OBJECT - 1}"))
         }
 
 //        val serialNo = formActionData[FIELD_SERIAL_NO]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SERIAL_NO to "Не введён серийный номер"))
@@ -779,7 +1167,7 @@ class DeviceService(
                                         descrPostfix = postfix,
                                         sensorType = sensorInfo.sensorType,
                                         portNum = sensorInfo.portNum,
-                                        descrBody = sensorInfo.descrBody,
+                                        descr = sensorInfo.descr[userConfig.lang] ?: "-",
                                         minView = sensorInfo.minView,
                                         maxView = sensorInfo.maxView,
                                         minLimit = sensorInfo.minLimit,
@@ -871,7 +1259,7 @@ class DeviceService(
         descrPostfix: String,
         sensorType: Int,
         portNum: Int,
-        descrBody: String,
+        descr: String,
         minView: Double,
         maxView: Double,
         minLimit: Double = minView,
@@ -885,7 +1273,7 @@ class DeviceService(
             obj = obj,
             name = "",
             group = groupName,
-            descr = "$descrPrefix $descrBody $descrPostfix",
+            descr = "$descrPrefix $descr $descrPostfix",
             portNum = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE + portNum + sensorIndex,
             sensorType = sensorType,
             begTime = getCurrentTimeInt(),
@@ -937,7 +1325,7 @@ class DeviceService(
 private class SensorInfo(
     val sensorType: Int,
     val portNum: Int,
-    val descrBody: String,
+    val descr: Map<LanguageEnum, String>,
     val minView: Double = 0.0,
     val maxView: Double = 1000.0,
     val minLimit: Double = minView,

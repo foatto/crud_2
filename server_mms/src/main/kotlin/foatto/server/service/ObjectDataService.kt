@@ -14,6 +14,8 @@ import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getTimeZone
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.entity.ObjectEntity
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
@@ -58,12 +60,12 @@ class ObjectDataService(
         //--- Рассчитываем на то, что после отключения старой версии Пульсара этот класс/фукционал не понадобится
         val sensorConfigs = getSensorConfigs(parentObjectEntity, getCurrentTimeInt(), getCurrentTimeInt())
 
-        alColumnInfo += null to "Время (UTC)"
-        alColumnInfo += null to "Время (местное)"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TIME_UTC, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TIME_LOCAL, userConfig.lang)
         sensorConfigs.forEach { (portNum, _) ->
             alColumnInfo += null to "$portNum"
         }
-        alColumnInfo += null to "Прочие данные"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OTHER_DATA, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -168,7 +170,7 @@ class ObjectDataService(
 
                     val sensorType = sensorConfigs[portNum]
                     //--- по каждому номеру порта - составляем визуальное представление значения
-                    val sensorValue = getSensorString(sensorConfigs[portNum], dataSize, bb)
+                    val sensorValue = getSensorString(userConfig, sensorConfigs[portNum], dataSize, bb)
 
                     //--- выводим только определённые порты
                     sensorType?.let {
@@ -232,7 +234,12 @@ class ObjectDataService(
     }
 
     //--- defining the string form of sensor data
-    private fun getSensorString(aSensorType: Int?, dataSize: Int, bb: AdvancedByteBuffer): String {
+    private fun getSensorString(
+        userConfig: ServerUserConfig,
+        aSensorType: Int?,
+        dataSize: Int,
+        bb: AdvancedByteBuffer
+    ): String {
         var sensorType = aSensorType
         val sensorValue: CharSequence
 
@@ -243,7 +250,7 @@ class ObjectDataService(
         when (sensorType) {
             SensorConfig.SENSOR_GEO -> {
                 val gd = GeoData(bb.getInt(), bb.getInt(), bb.getShort().toInt(), bb.getInt())
-                sensorValue = "x = ${gd.wgs.x}\ny = ${gd.wgs.y}\nскорость = ${gd.speed}\nпробег = ${gd.distance}"
+                sensorValue = "x = ${gd.wgs.x}\ny = ${gd.wgs.y}\n${getLocalizedMMSMessage(LocalizedMMSMessages.SPEED, userConfig.lang)} = ${gd.speed}\n${getLocalizedMMSMessage(LocalizedMMSMessages.MILEAGE, userConfig.lang)} = ${gd.distance}"
             }
 
             else -> {

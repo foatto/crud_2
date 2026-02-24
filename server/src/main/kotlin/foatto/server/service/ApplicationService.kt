@@ -31,7 +31,6 @@ import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateDMYString
 import foatto.core.util.getDateTimeDMYHMSString
-import foatto.server.AppRole
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
@@ -342,7 +341,7 @@ abstract class ApplicationService(
     protected fun getTableUserNameCell(
         row: Int,
         col: Int,
-        userId: Int,
+        userConfig: ServerUserConfig,
         rowUserId: Int?,
         rowOwnerShortName: String?,
         rowOwnerFullName: String?,
@@ -354,12 +353,12 @@ abstract class ApplicationService(
             "-"
         } else if (rowUserId == 0) {
             "-"
-        } else if (rowUserId == userId) {
+        } else if (rowUserId == userConfig.id) {
             ""
         } else if (!rowOwnerShortName.isNullOrEmpty()) {
             rowOwnerShortName
         } else {
-            rowOwnerFullName ?: "(неизвестно)"
+            rowOwnerFullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)
         }
     )
 
@@ -523,12 +522,12 @@ abstract class ApplicationService(
         )
         formCells += FormSimpleCell(
             name = fieldOwnerFullName,
-            caption = "Владелец",
+            caption = getLocalizedMessage(LocalizedMessages.OWNER, userConfig.lang),
             isEditable = false,
             value = if (userId == null || userId == 0) {
                 "-"
             } else {
-                userConfig.fullNames[userId] ?: "(неизвестно)"
+                userConfig.fullNames[userId] ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)
             },
             selectorAction = if (changeEnabled) {
                 AppAction(

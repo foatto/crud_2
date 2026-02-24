@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
@@ -26,6 +27,8 @@ import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getRandomInt
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.UserRelationEnum
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
@@ -255,13 +258,13 @@ class SensorService(
 
         alColumnInfo += null to "" // sensorGroup
 
-        alColumnInfo += FIELD_NAME to "Интеграционный идентификатор"
-        alColumnInfo += FIELD_DESCR to "Описание"
-        alColumnInfo += FIELD_PORT_NUM to "Номер входа"
-        alColumnInfo += FIELD_SENSOR_TYPE to "Тип датчика"
-        alColumnInfo += FIELD_BEG_TIME to "Дата/время начала эксплуатации"
-        alColumnInfo += FIELD_END_TIME to "Дата/время окончания эксплуатации"
-        alColumnInfo += FIELD_SERIAL_NO to "Серийный номер"
+        alColumnInfo += FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.INTEGRATION_ID, userConfig.lang)
+        alColumnInfo += FIELD_DESCR to getLocalizedMMSMessage(LocalizedMMSMessages.DESCRIPTION, userConfig.lang)
+        alColumnInfo += FIELD_PORT_NUM to getLocalizedMMSMessage(LocalizedMMSMessages.INPUT_NUMBER, userConfig.lang)
+        alColumnInfo += FIELD_SENSOR_TYPE to getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_TYPE, userConfig.lang)
+        alColumnInfo += FIELD_BEG_TIME to getLocalizedMMSMessage(LocalizedMMSMessages.USING_START, userConfig.lang)
+        alColumnInfo += FIELD_END_TIME to getLocalizedMMSMessage(LocalizedMMSMessages.USING_END, userConfig.lang)
+        alColumnInfo += FIELD_SERIAL_NO to getLocalizedMMSMessage(LocalizedMMSMessages.SERIAL_NUMBER, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -339,7 +342,7 @@ class SensorService(
                 col = col++,
                 dataRow = row,
                 name = sensorEntity.sensorType?.let { sensorType ->
-                    SensorConfig.hmSensorDescr[sensorType] ?: "(неизвестный тип датчика)"
+                    SensorConfig.hmSensorDescr[sensorType]?.get(userConfig.lang) ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_SENSOR_TYPE, userConfig.lang)
                 } ?: "-",
             )
             tableCells += TableSimpleCell(
@@ -366,7 +369,7 @@ class SensorService(
             if (isFormEnabled) {
                 popupDatas += TablePopup(
                     action = formOpenAction,
-                    text = "Открыть",
+                    text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
                 )
             }
@@ -387,7 +390,7 @@ class SensorService(
                     ),
                     text = appModuleConfigs[AppModuleMMS.SENSOR_CALIBRATION]?.captions?.let { captions ->
                         getLocalizedMessage(captions, userConfig.lang)
-                    } ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_CALIBRATION})",
+                    } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE_TYPE, userConfig.lang)}: ${AppModuleMMS.SENSOR_CALIBRATION})",
                     inNewTab = true,
                 )
             }
@@ -401,7 +404,7 @@ class SensorService(
                     ),
                     text = appModuleConfigs[AppModuleMMS.SENSOR_DATA]?.captions?.let { captions ->
                         getLocalizedMessage(captions, userConfig.lang)
-                    } ?: "(неизвестный тип модуля: ${AppModuleMMS.SENSOR_DATA})",
+                    } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE_TYPE, userConfig.lang)}: ${AppModuleMMS.SENSOR_DATA})",
                     inNewTab = true,
                 )
             }
@@ -417,7 +420,7 @@ class SensorService(
                     ),
                     text = appModuleConfigs[AppModuleMMS.CHART_SENSOR]?.captions?.let { captions ->
                         getLocalizedMessage(captions, userConfig.lang)
-                    } ?: "(неизвестный тип модуля: '${AppModuleMMS.CHART_SENSOR}')",
+                    } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE_TYPE, userConfig.lang)}: '${AppModuleMMS.CHART_SENSOR}')",
                     inNewTab = true,
                 )
             }
@@ -522,40 +525,42 @@ class SensorService(
 //" SELECT DISTINCT group_name FROM $columnTableName WHERE object_id = $parentObjectId AND group_name IS NOT NULL AND group_name <> '' ORDER BY group_name "
         formCells += FormSimpleCell(
             name = FIELD_GROUP,
-            caption = "Группа",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.GROUP, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.group ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_NAME,
-            caption = "Интеграционный идентификатор",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.INTEGRATION_ID, userConfig.lang),
             isEditable = changeEnabled,
 //            isEditable = !isEquip
             value = sensorEntity?.name ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_DESCR,
-            caption = "Описание",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.DESCRIPTION, userConfig.lang),
             isEditable = changeEnabled,
 //            isEditable = !isEquip
             value = sensorEntity?.descr ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_PORT_NUM,
-            caption = "Номер входа",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.INPUT_NUMBER, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.portNum?.toString() ?: "",
         )
         formCells += FormComboCell(
             name = FIELD_SENSOR_TYPE,
-            caption = "Тип датчика",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_TYPE, userConfig.lang),
             //--- нельзя менять тип уже созданному датчику, т.к. в его таблицу уже записаны данные,
             //--- могущими быть некорректными для нового типа датчика
             isEditable = changeEnabled && id == null,
 //            isEditable = !isEquip
             value = sensorEntity?.sensorType?.toString() ?: "",
             //!!! заполнять с сортировкой по популярности
-            values = SensorConfig.hmSensorDescr.map { (key, value) -> key.toString() to value },
+            values = SensorConfig.hmSensorDescr.map { (key, values) ->
+                key.toString() to (values[userConfig.lang] ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_SENSOR_TYPE, userConfig.lang))
+            },
         )
         /*
                     //--- arrange the types of sensors depending on their "popularity" (ie frequency of use)
@@ -580,7 +585,7 @@ class SensorService(
         */
         formCells += FormDateTimeCell(
             name = FIELD_BEG_TIME,
-            caption = "Дата/время начала эксплуатации",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.USING_START, userConfig.lang),
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
             value = if (id == 0) {
@@ -591,14 +596,14 @@ class SensorService(
         )
         formCells += FormDateTimeCell(
             name = FIELD_END_TIME,
-            caption = "Дата/время окончания эксплуатации",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.USING_END, userConfig.lang),
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
             value = sensorEntity?.endTime,
         )
         formCells += FormSimpleCell(
             name = FIELD_SERIAL_NO,
-            caption = "Серийный номер",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SERIAL_NUMBER, userConfig.lang),
             isEditable = changeEnabled,
 //            formPinMode = FormPinMode.OFF
 //            isEditable = !isEquip
@@ -609,7 +614,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_MIN_MOVING_TIME,
-            caption = "Минимальное время движения [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_DRIVING_TIME, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.minMovingTime?.toString() ?: "1",
             visibility = FormCellVisibility(
@@ -621,7 +626,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_MIN_PARKING_TIME,
-            caption = "Минимальное время стоянки [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_PARKING_TIME, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.minParkingTime?.toString() ?: "300",
             visibility = FormCellVisibility(
@@ -632,7 +637,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MIN_OVER_SPEED_TIME,
-            caption = "Минимальное время превышения скорости [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_SPEEDING_TIME, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.minOverSpeedTime?.toString() ?: "60",
             visibility = FormCellVisibility(
@@ -643,7 +648,7 @@ class SensorService(
         )
         formCells += FormBooleanCell(
             name = FIELD_IS_ABSOLUTE_RUN,
-            caption = "Абсолютный пробег",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.ABSOLUTE_MILEAGE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.isAbsoluteRun ?: true,
             visibility = FormCellVisibility(
@@ -657,7 +662,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_MIN_IGNORE,
-            caption = "Игнорировать показания датчика менее",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.IGNORE_SENSOR_READINGS_LESS_THAN, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.minIgnore?.toString() ?: "0.0",
             visibility = FormCellVisibility(
@@ -668,7 +673,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MAX_IGNORE,
-            caption = "Игнорировать показания датчика более",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.IGNORE_SENSOR_READINGS_GREATER_THAN, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.maxIgnore?.toString() ?: "1000000.0",
             visibility = FormCellVisibility(
@@ -680,7 +685,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_DIM,
-            caption = "Единица измерения",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_OF_MEASUREMENT, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.dim ?: "",
             visibility = FormCellVisibility(
@@ -694,7 +699,7 @@ class SensorService(
 
         formCells += FormBooleanCell(
             name = FIELD_IS_ABOVE_BORDER,
-            caption = "Рабочее состояние выше граничного",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.OPERATING_STATE_ABOVE_LIMIT, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.isWorkAboveBorder ?: true,
             visibility = FormCellVisibility(
@@ -705,7 +710,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_ON_BORDER,
-            caption = "Граница включения",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.ON_LIMIT, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workOnBorder?.toString() ?: "",
             visibility = FormCellVisibility(
@@ -716,7 +721,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_IDLE_BORDER,
-            caption = "Граница холостого хода",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.IDLE_LIMIT, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workIdleBorder?.toString() ?: "",
             visibility = FormCellVisibility(
@@ -727,7 +732,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OVER_BORDER,
-            caption = "Граница перегрузки",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.OVERLOAD_LIMIT, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workOverBorder?.toString() ?: "",
             visibility = FormCellVisibility(
@@ -738,7 +743,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MIN_OFF_TIME,
-            caption = "Минимальное время простоя [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_IDLE_TIME_1, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workMinOffTime?.toString() ?: "1",
             visibility = FormCellVisibility(
@@ -749,7 +754,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MIN_ON_TIME,
-            caption = "Минимальное время работы [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_OPERATING_TIME, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workMinOnTime?.toString() ?: "1",
             visibility = FormCellVisibility(
@@ -760,7 +765,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MIN_IDLE_TIME,
-            caption = "Минимальное время холостого хода [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_IDLE_TIME_2, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workMinIdleTime?.toString() ?: "1",
             visibility = FormCellVisibility(
@@ -771,7 +776,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MIN_OVER_TIME,
-            caption = "Минимальное время перегрузки [сек]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_OVERLOAD_TIME, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workMinOverTime?.toString() ?: "1",
             visibility = FormCellVisibility(
@@ -785,7 +790,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_MIN_VIEW,
-            caption = "Минимальное отображаемое значение",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_DISPLAY_VALUE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.minView?.toString() ?: "0.0",
             visibility = FormCellVisibility(
@@ -796,7 +801,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MAX_VIEW,
-            caption = "Максимальное отображаемое значение",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MAXIMUM_DISPLAY_VALUE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.maxView?.toString() ?: "100.0",
             visibility = FormCellVisibility(
@@ -807,7 +812,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_MIN_LIMIT,
-            caption = "Минимальное рабочее значение",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_OPERATING_VALUE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.minLimit?.toString() ?: "0.0",
             visibility = FormCellVisibility(
@@ -830,15 +835,15 @@ class SensorService(
             captions = FormCellCaption(
                 name = FIELD_SENSOR_TYPE,
                 captions = mapOf(
-                    "Ограничение скорости [км/ч]" to geoSensorType,
-                    "Максимальное рабочее значение" to analogSensorTypes,
+                    getLocalizedMMSMessage(LocalizedMMSMessages.SPEED_LIMIT, userConfig.lang) to geoSensorType,
+                    getLocalizedMMSMessage(LocalizedMMSMessages.MAXIMUM_OPERATING_VALUE, userConfig.lang) to analogSensorTypes,
                 ),
             ),
         )
 
         formCells += FormSimpleCell(
             name = FIELD_SMOOTH_TIME,
-            caption = "Период сглаживания [мин]",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SMOOTHING_PERIOD, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.smoothTime?.toString() ?: "0",
             visibility = FormCellVisibility(
@@ -850,7 +855,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_INDICATOR_DELIMITER_COUNT,
-            caption = "Шкала: количество делений",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SCALE_NUMBER_DIVISIONS, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.indicatorDelimiterCount?.toString() ?: "4",
             visibility = FormCellVisibility(
@@ -861,7 +866,7 @@ class SensorService(
         )
         formCells += FormSimpleCell(
             name = FIELD_INDICATOR_MILTIPLICATOR,
-            caption = "Шкала: множитель",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SCALE_MULTIPLIER, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.indicatorMultiplicator?.toString() ?: "1",
             visibility = FormCellVisibility(
@@ -875,7 +880,7 @@ class SensorService(
 
         formCells += FormBooleanCell(
             name = FIELD_IS_ABSOLUTE_COUNT,
-            caption = "Накопительный счётчик",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.ACCUMULATIVE_METER, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.isAbsoluteCount ?: true,
             visibility = FormCellVisibility(
@@ -887,12 +892,12 @@ class SensorService(
 
         formCells += FormComboCell(
             name = FIELD_IN_OUT_TYPE,
-            caption = "Тип учёта",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.METERING_TYPE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.inOutType?.toString() ?: SensorConfigCounter.CALC_TYPE_OUT.toString(),
             values = listOf(
-                SensorConfigCounter.CALC_TYPE_IN.toString() to "Входящий/заправочный счётчик",
-                SensorConfigCounter.CALC_TYPE_OUT.toString() to "Исходящий/расходный счётчик",
+                SensorConfigCounter.CALC_TYPE_IN.toString() to getLocalizedMMSMessage(LocalizedMMSMessages.INCOMING_FILLING_METER, userConfig.lang),
+                SensorConfigCounter.CALC_TYPE_OUT.toString() to getLocalizedMMSMessage(LocalizedMMSMessages.OUTGOING_FLOW_METER, userConfig.lang),
             ),
             asRadioButtons = true,
             visibility = FormCellVisibility(
@@ -906,12 +911,12 @@ class SensorService(
 
         formCells += FormComboCell(
             name = FIELD_CONTAINER_TYPE,
-            caption = "Тип ёмкости",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.TANK_TYPE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.containerType?.toString() ?: SensorConfigLiquidLevel.CONTAINER_TYPE_WORK.toString(),
             values = listOf(
-                SensorConfigLiquidLevel.CONTAINER_TYPE_MAIN.toString() to "Основная ёмкость",
-                SensorConfigLiquidLevel.CONTAINER_TYPE_WORK.toString() to "Рабочая/расходная ёмкость",
+                SensorConfigLiquidLevel.CONTAINER_TYPE_MAIN.toString() to getLocalizedMMSMessage(LocalizedMMSMessages.MAIN_TANK, userConfig.lang),
+                SensorConfigLiquidLevel.CONTAINER_TYPE_WORK.toString() to getLocalizedMMSMessage(LocalizedMMSMessages.WORKING_FLOW_TANK, userConfig.lang),
             ),
             asRadioButtons = true,
             visibility = FormCellVisibility(
@@ -925,11 +930,11 @@ class SensorService(
 
         formCells += FormComboCell(
             name = FIELD_PHASE,
-            caption = "Фаза",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.PHASE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.phase?.toString() ?: "0",
             values = listOf(
-                0.toString() to "По сумме фаз",
+                0.toString() to getLocalizedMMSMessage(LocalizedMMSMessages.PHASE_SUM, userConfig.lang),
                 1.toString() to "A",
                 2.toString() to "B",
                 3.toString() to "C",
@@ -959,7 +964,7 @@ class SensorService(
 
         formCells += FormSimpleCell(
             name = FIELD_CALIBRATION,
-            caption = "Тарировка датчика",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_CALIBRATION, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorCalibrationInfo,
             rows = 20,
@@ -984,18 +989,18 @@ class SensorService(
         val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: 0
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId)!!
 
-        val descr = formActionData[FIELD_DESCR]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to "Не введёно описание"))
+        val descr = formActionData[FIELD_DESCR]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to getLocalizedMMSMessage(LocalizedMMSMessages.NO_DESCRIPTION_ENTERED, userConfig.lang)))
         if (descr.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to "Не введёно описание"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to getLocalizedMMSMessage(LocalizedMMSMessages.NO_DESCRIPTION_ENTERED, userConfig.lang)))
         }
         //--- могу быть одинаковые описания датчиков из разных периодов
         //if (sensorRepository.findByObjAndDescr(parentObjectEntity, descr).any { oe -> oe.id != id }) {
         //    return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_DESCR to "Такое описание уже существует"))
         //}
 
-        val portNum = formActionData[FIELD_PORT_NUM]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to "Не введён номер входа"))
+        val portNum = formActionData[FIELD_PORT_NUM]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to getLocalizedMMSMessage(LocalizedMMSMessages.NO_ENTRY_NUMBER_ENTERED, userConfig.lang)))
         if (portNum !in 0..65535) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to "Номер входа должен быть в диапазоне от 0 до 65535"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_PORT_NUM to getLocalizedMMSMessage(LocalizedMMSMessages.THE_ENTRY_NUMBER_MUST_BE_BETWEEN_0_AND_65535, userConfig.lang)))
         }
 
         val recordId = id ?: getNextId { nextId -> sensorRepository.existsById(nextId) }

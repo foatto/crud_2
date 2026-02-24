@@ -127,7 +127,7 @@ class UserService(
                         } else {
                             action.copy(parentId = userEntity.id)
                         },
-                        text = userEntity.fullName ?: "(неизвестно)",
+                        text = userEntity.fullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang),
                         isBold = parentId == currentParentId,
                     )
                 )
@@ -168,18 +168,18 @@ class UserService(
         columnInfos += null to "" // userId
         columnInfos += null to "" // orgType
         columnInfos += FIELD_IS_DISABLED to getLocalizedMessage(LocalizedMessages.BLOCKED, userConfig.lang)
-        columnInfos += FIELD_LOGIN to "Логин"
-        columnInfos += FIELD_SHORT_NAME to "Краткое имя"
+        columnInfos += FIELD_LOGIN to getLocalizedMessage(LocalizedMessages.LOGIN, userConfig.lang)
+        columnInfos += FIELD_SHORT_NAME to getLocalizedMessage(LocalizedMessages.SHORT_NAME, userConfig.lang)
         columnInfos += FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.FULL_NAME, userConfig.lang)
 
         if (userConfig.isAdminOnly()) {
-            columnInfos += FIELD_ROLES to "Роли"
+            columnInfos += FIELD_ROLES to getLocalizedMessage(LocalizedMessages.ROLES, userConfig.lang)
         }
         columnInfos += FIELD_EMAIL to "E-mail"
         columnInfos += FIELD_TELEGRAM to "Telegram"
         columnInfos += FIELD_CONTACT_INFO to getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang)
         if (userConfig.isAdminOnly()) {
-            columnInfos += null to "Файлы"
+            columnInfos += null to getLocalizedMessage(LocalizedMessages.FILES, userConfig.lang)
         }
         columnInfos += FIELD_TIME_OFFSET to getLocalizedMessage(LocalizedMessages.TIME_OFFSET, userConfig.lang)
         columnInfos += FIELD_LANG to getLocalizedMessage(LocalizedMessages.LANG, userConfig.lang)
@@ -251,7 +251,7 @@ class UserService(
                 type = ActionType.FORM_SELECTOR,
                 selectorData = mapOf(
                     FIELD_ID to userEntity.id.toString(),
-                    FIELD_FULL_NAME to (userEntity.fullName ?: "(неизвестно)"),
+                    FIELD_FULL_NAME to (userEntity.fullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)),
                 ),
             )
 
@@ -261,7 +261,7 @@ class UserService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = userEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -337,7 +337,7 @@ class UserService(
                     ),
                     text = appModuleConfigs[AppModule.ACTION_LOG]?.captions?.let { captions ->
                         getLocalizedMessage(captions, userConfig.lang)
-                    } ?: "(неизвестный тип модуля: '${AppModule.ACTION_LOG}')",
+                    } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE_TYPE, userConfig.lang)}: '${AppModule.ACTION_LOG}')",
                     inNewTab = true,
                 )
             }
@@ -350,7 +350,7 @@ class UserService(
                         type = ActionType.FORM_SELECTOR,
                         selectorData = mapOf(
                             FIELD_ID to userEntity.id.toString(),
-                            FIELD_FULL_NAME to (userEntity.fullName ?: "(неизвестно)"),
+                            FIELD_FULL_NAME to (userEntity.fullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)),
                         ),
                     )
                 } else if (isFormEnabled) {
@@ -412,12 +412,12 @@ class UserService(
         )
         formCells += FormSimpleCell(
             name = FIELD_PARENT_FULL_NAME,
-            caption = "Верхнее подразделение",
+            caption = getLocalizedMessage(LocalizedMessages.UPPER_DIVISION, userConfig.lang),
             isEditable = false,
             value = if (parentId == null || parentId == 0) {
                 "-"
             } else {
-                userConfig.fullNames[parentId] ?: "(неизвестно)"
+                userConfig.fullNames[parentId] ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)
             },
             selectorAction = if (changeEnabled) {
                 AppAction(
@@ -447,13 +447,13 @@ class UserService(
         )
         formCells += FormComboCell(
             name = FIELD_ORG_TYPE,
-            caption = "Тип",
+            caption = getLocalizedMessage(LocalizedMessages.TYPE, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.orgType?.toString() ?: OrgType.ORG_TYPE_WORKER.toString(),
             values = listOf(
-                OrgType.ORG_TYPE_DIVISION.toString() to "Подразделение",
-                OrgType.ORG_TYPE_BOSS.toString() to "Руководитель",
-                OrgType.ORG_TYPE_WORKER.toString() to "Работник",
+                OrgType.ORG_TYPE_DIVISION.toString() to getLocalizedMessage(LocalizedMessages.DEPARTMENT, userConfig.lang),
+                OrgType.ORG_TYPE_BOSS.toString() to getLocalizedMessage(LocalizedMessages.MANAGER, userConfig.lang),
+                OrgType.ORG_TYPE_WORKER.toString() to getLocalizedMessage(LocalizedMessages.EMPLOYEE, userConfig.lang),
             ),
         )
         formCells += FormBooleanCell(
@@ -471,7 +471,7 @@ class UserService(
         )
         formCells += FormSimpleCell(
             name = FIELD_SHORT_NAME,
-            caption = "Краткое имя",
+            caption = getLocalizedMessage(LocalizedMessages.SHORT_NAME, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.shortName ?: "",
         )
@@ -495,7 +495,7 @@ class UserService(
         }.sorted().forEach { role ->
             formCells += FormBooleanCell(
                 name = FIELD_ROLES + "_" + role,
-                caption = "Роль $role",
+                caption = "${getLocalizedMessage(LocalizedMessages.ROLE, userConfig.lang)} $role",
                 isEditable = changeEnabled,
                 value = userEntity?.roles?.contains(role) ?: false,
                 visibility = nonVisibleForDivision,
@@ -538,34 +538,34 @@ class UserService(
         )
         formCells += FormBooleanCell(
             name = FIELD_USE_THOUSANDS_DIVIDER,
-            caption = "Разделять тысячи пробелами",
+            caption = getLocalizedMessage(LocalizedMessages.SEPARATE_THOUSANDS_WITH_SPACES, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.useThousandsDivider ?: true,
             visibility = nonVisibleForDivision,
         )
         formCells += FormSimpleCell(
             name = FIELD_DECIMAL_SEPARATOR,
-            caption = "Разделить дробной части",
+            caption = getLocalizedMessage(LocalizedMessages.FRACTIONAL_SEPARATOR, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.decimalSeparator ?: ".",
         )
         formCells += FormFileCell(
             name = FIELD_FILE,
-            caption = "Файлы",
+            caption = getLocalizedMessage(LocalizedMessages.FILES, userConfig.lang),
             isEditable = changeEnabled,
             fileId = userEntity?.fileId,
             files = getFormFileCellData(userEntity?.fileId)
         )
         formCells += FormSimpleCell(
             name = FIELD_AT_COUNT,
-            caption = "Кол-во попыток входа",
+            caption = getLocalizedMessage(LocalizedMessages.NUMBER_OF_LOGIN_ATTEMPTS, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.atCount?.toString() ?: "",
             visibility = nonVisibleForDivision,
         )
         formCells += FormDateTimeCell(
             name = FIELD_LAST_LOGIN,
-            caption = "Дата/время последнего входа",
+            caption = getLocalizedMessage(LocalizedMessages.DATE_TIME_OF_LAST_LOGIN, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMYHMS,
             value = userEntity?.lastLoginDateTime?.let { dt ->
@@ -590,7 +590,7 @@ class UserService(
         )
         formCells += FormDateTimeCell(
             name = FIELD_PASSWORD_LAST_CHANGE,
-            caption = "Дата/время последней смены пароля",
+            caption = getLocalizedMessage(LocalizedMessages.DATE_TIME_OF_LAST_PASSWORD_CHANGE, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMY,
             value = userEntity?.passwordLastChangeDate?.let { dt ->
@@ -638,7 +638,7 @@ class UserService(
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.ERROR_FULL_NAME_NOT_ENTERED, userConfig.lang)))
         }
         if (userRepository.findByFullName(fullName).any { ue -> ue.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to "Такое полное имя уже существует"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.THIS_FULL_NAME_ALREADY_EXISTS, userConfig.lang)))
         }
 
         val login = formActionData[FIELD_LOGIN]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to getLocalizedMessage(LocalizedMessages.ERROR_LOGIN_NOT_ENTERED, userConfig.lang)))

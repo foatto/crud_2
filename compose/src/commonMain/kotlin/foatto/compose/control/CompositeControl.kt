@@ -1000,7 +1000,7 @@ class CompositeControl(
                     value = Json.encodeToString(compositeLayoutDatas),
                 )
             ) { _: SaveUserPropertyResponse ->
-                root.showAlert("Ручное расположение блоков сохранено.")
+                root.showAlert(getLocalizedMessage(LocalizedMessages.MANUAL_BLOCK_PLACEMENT_SAVED, root.appUserConfig.lang))
             }
         }
 //            root.appUserConfig.userProperties[propertyName] = propertyValue
@@ -1015,7 +1015,7 @@ class CompositeControl(
                     value = "",
                 )
             ) { _: SaveUserPropertyResponse ->
-                root.showAlert("Ручное расположение блоков очищено.")
+                root.showAlert(getLocalizedMessage(LocalizedMessages.MANUAL_BLOCK_PLACEMENT_CLEARED, root.appUserConfig.lang))
             }
         }
 //            root.appUserConfig.userProperties[propertyName] = propertyValue

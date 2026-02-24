@@ -5,10 +5,13 @@ import foatto.core.model.AppAction
 import foatto.core.model.response.HeaderData
 import foatto.core.model.response.chart.ChartResponse
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.DashboardSensorTypeEnum
 import foatto.server.entity.DeviceEntity
 import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
+import foatto.server.model.ServerUserConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
@@ -58,11 +61,11 @@ abstract class AbstractChartDashboardService(
         timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
     )
 
-    override fun getChartResponse(sensorEntity: SensorEntity): ChartResponse? = ChartResponse(
+    override fun getChartResponse(userConfig: ServerUserConfig, sensorEntity: SensorEntity): ChartResponse? = ChartResponse(
         tabCaption = "",
         headerData = HeaderData(
             titles = emptyList(),
-            rows = listOf("Описание датчика" to (sensorEntity.descr ?: "(датчик без описания)")),
+            rows = listOf(getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_DESCRIPTION, userConfig.lang) to (sensorEntity.descr ?: getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_WITHOUT_DESCRIPTION, userConfig.lang))),
         ),
     )
 }

@@ -84,6 +84,7 @@ class DayWorkReportService(
                     val dayBegTime = LocalDateTime(ye, mo, da, 0, 0).toInstant(timeZone).epochSeconds.toInt()
                     val dayEndTime = dayBegTime + 86_400
                     offsY = outWorkBlock(
+                        userConfig = userConfig,
                         objectEntity = objectEntity,
                         begTime = dayBegTime,
                         endTime = dayEndTime,
@@ -119,6 +120,7 @@ class DayWorkReportService(
                 val dayBegTime = LocalDateTime(ye, mo, da, 0, 0).toInstant(timeZone).epochSeconds.toInt()
                 val dayEndTime = dayBegTime + 86_400
                 offsY = outWorkBlock(
+                    userConfig = userConfig,
                     objectEntity = dayObjectEntity,
                     begTime = dayBegTime,
                     endTime = dayEndTime,

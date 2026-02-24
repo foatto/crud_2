@@ -6,6 +6,8 @@ import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.util.getPrecision
 import foatto.core.util.getRandomInt
 import foatto.core.util.getSplittedDouble
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.calc.DataValueStateEnum
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
@@ -114,7 +116,7 @@ class SchemeAnalogueIndicatorStateService(
             sensorEntity.minLimit?.let { minLimit ->
                 sensorEntity.maxLimit?.let { maxLimit ->
                     if (maxLimit - minLimit > 0) {
-                        if (value < minLimit || value > maxLimit) {
+                        if (value !in minLimit..maxLimit) {
                             DataValueStateEnum.CRITICAL
                         } else {
                             DataValueStateEnum.NORMAL
@@ -402,7 +404,7 @@ class SchemeAnalogueIndicatorStateService(
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.LT
             text = if (isErrorStatus) {
-                errorMessage ?: "(неизвестная ошибка)"
+                errorMessage ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_ERROR, userConfig.lang)
             } else {
                 valueText
             }

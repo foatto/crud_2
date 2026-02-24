@@ -1,7 +1,6 @@
 package foatto.compose.composable
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -47,7 +44,7 @@ import foatto.compose.colorMainMenuText
 import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorTextButton
 import foatto.compose.heightLogo
-import foatto.compose.logonFormTitle
+import foatto.compose.logonFormTitles
 import foatto.compose.singleButtonShape
 import foatto.compose.utils.getFullUrl
 import foatto.compose.widthLogo
@@ -97,7 +94,7 @@ fun LogonForm(
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-                text = logonFormTitle,
+                text = logonFormTitles[lang] ?: logonFormTitles[LanguageEnum.EN] ?: "LOGON",
                 color = colorMainMenuText,
                 fontWeight = FontWeight.Bold,
                 fontSize = if (isWideScreen) {

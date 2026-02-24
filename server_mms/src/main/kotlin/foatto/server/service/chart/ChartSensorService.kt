@@ -1,5 +1,6 @@
 package foatto.server.service.chart
 
+import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.ChartActionRequest
@@ -12,6 +13,8 @@ import foatto.core.model.response.chart.ChartData
 import foatto.core.model.response.chart.ChartElementData
 import foatto.core.model.response.chart.ChartElementLineData
 import foatto.core.model.response.chart.ChartLegendData
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.appModuleConfigs
 import foatto.server.entity.SensorEntity
 import foatto.server.model.ServerUserConfig
@@ -42,11 +45,11 @@ class ChartSensorService(
 
         val caption = appModuleConfigs[action.module]?.captions?.let { captions ->
             getLocalizedMessage(captions, userConfig.lang)
-        } ?: "(неизвестный модуль: ${action.module})"
+        } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE, userConfig.lang)}: ${action.module})"
         val rows = listOf(
-            "Наименование объекта" to (sensorEntity?.obj?.name ?: "-"),
-            "Модель" to (sensorEntity?.obj?.model ?: "-"),
-            "Наименование датчика" to (sensorEntity?.descr ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (sensorEntity?.obj?.name ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang) to (sensorEntity?.obj?.model ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_NAME, userConfig.lang) to (sensorEntity?.descr ?: "-"),
         )
 
         return HeaderData(

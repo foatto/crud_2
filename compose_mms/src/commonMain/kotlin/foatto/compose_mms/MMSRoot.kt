@@ -45,7 +45,7 @@ import foatto.compose.colorWait
 import foatto.compose.colorWaitTrack
 import foatto.compose.defaultStartModule
 import foatto.compose.heightLogo
-import foatto.compose.logonFormTitle
+import foatto.compose.logonFormTitles
 import foatto.compose.textSizeMainMenuFolder
 import foatto.compose.textSizeMainMenuItem
 import foatto.compose.textSizePopupMenuFolder
@@ -58,6 +58,7 @@ import foatto.compose.utils.SETTINGS_SERVER_PROTOCOL
 import foatto.compose.utils.settings
 import foatto.compose.widthLogo
 import foatto.compose.widthMainMenu
+import foatto.core.i18n.LanguageEnum
 import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.addAppModuleUrls
 
@@ -108,7 +109,10 @@ class MMSRoot : Root() {
 
         colorLogonBack = colorMainBack0
 
-        logonFormTitle = "СИСТЕМА КОНТРОЛЯ\n\nТЕХНОЛОГИЧЕСКОГО ОБОРУДОВАНИЯ И ТРАНСПОРТА"
+        logonFormTitles = mapOf(
+            LanguageEnum.EN to "CONTROL SYSTEM\n\nFOR PROCESS EQUIPMENT AND TRANSPORT",
+            LanguageEnum.RU to "СИСТЕМА КОНТРОЛЯ\n\nТЕХНОЛОГИЧЕСКОГО ОБОРУДОВАНИЯ И ТРАНСПОРТА",
+        )
 
         widthLogo = 256.dp
         heightLogo = 84.dp

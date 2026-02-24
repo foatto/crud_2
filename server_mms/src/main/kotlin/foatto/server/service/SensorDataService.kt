@@ -13,6 +13,8 @@ import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
@@ -41,15 +43,15 @@ class SensorDataService(
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
-        alColumnInfo += null to "Время (UTC)"
-        alColumnInfo += null to "Время (местное)"
-        alColumnInfo += null to "Время 2 (UTC)"
-        alColumnInfo += null to "Время 2 (местное)"
-        alColumnInfo += null to "Тип"
-        alColumnInfo += null to "Значение"
-        alColumnInfo += null to "Значение 2"
-        alColumnInfo += null to "Значение 3"
-        alColumnInfo += null to "Значение 4"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TIME_UTC, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TIME_LOCAL, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TIME_2_UTC, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TIME_2_LOCAL, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.VALUE, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.VALUE_2, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.VALUE_3, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.VALUE_4, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,

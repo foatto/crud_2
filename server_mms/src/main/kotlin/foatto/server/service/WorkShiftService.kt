@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -22,6 +24,8 @@ import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMString
 import foatto.core.util.getSplittedDouble
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.WorkShiftEntity
@@ -72,23 +76,23 @@ class WorkShiftService(
 
         alColumnInfo += null to "" // by begTime group
         alColumnInfo += null to "" // userId
-        alColumnInfo += null to "Окончание"
-        alColumnInfo += null to "Объект"
-        alColumnInfo += null to "Оборудование"
-        alColumnInfo += null to "Работа"
-        alColumnInfo += null to "Счётчики топлива"
-        alColumnInfo += null to "Расход топлива"
-        alColumnInfo += null to "Э/счётчики"
-        alColumnInfo += null to "Э/энергия"
-        alColumnInfo += null to "Уровень топлива"
-        alColumnInfo += null to "Начало периода"
-        alColumnInfo += null to "Конец периода"
-        alColumnInfo += null to "Температура"
-        alColumnInfo += null to "Начало периода"
-        alColumnInfo += null to "Конец периода"
-        alColumnInfo += null to "Плотность"
-        alColumnInfo += null to "Начало периода"
-        alColumnInfo += null to "Конец периода"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.THE_END, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.EQUIPMENT, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OPERATION, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.FUEL_METERS, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.FUEL_CONSUMPTION, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.ELECTRICITY_METERS, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.ELECTRICITY, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.FUEL_LEVEL, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.START_OF_PERIOD, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.END_OF_PERIOD, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.TEMPERATURE, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.START_OF_PERIOD, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.END_OF_PERIOD, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.DENSITY, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.START_OF_PERIOD, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.END_OF_PERIOD, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -210,7 +214,7 @@ class WorkShiftService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = workShiftEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -244,7 +248,7 @@ class WorkShiftService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} [час]" },
+                name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} ${getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_HOUR, userConfig.lang)}" },
                 align = TableCellAlign.LEFT,
             )
 
@@ -404,7 +408,7 @@ class WorkShiftService(
         if (isFormEnabled) {
             alPopupData += TablePopup(
                 action = formOpenAction,
-                text = "Открыть",
+                text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                 inNewTab = false,
             )
         }
@@ -467,7 +471,7 @@ class WorkShiftService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_NAME,
-            caption = "Наименование",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang),
             isEditable = false,
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
@@ -488,7 +492,7 @@ class WorkShiftService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_MODEL,
-            caption = "Модель",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang),
             isEditable = changeEnabled,
             value = parentObjectEntity?.model ?: "",
         )
@@ -541,7 +545,7 @@ class WorkShiftService(
     override fun formActionSave(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, formActionData: Map<String, FormActionData>): FormActionResponse {
         val id = action.id
 
-        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_OBJECT_NAME to "Не выбран объект"))
+        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_OBJECT_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NO_OBJECT_SELECTED, userConfig.lang)))
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId)
 
         val begTime = formActionData[FIELD_BEG_TIME]?.dateTimeValue ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_BEG_TIME to "Не задано время начала смены"))

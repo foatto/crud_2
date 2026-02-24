@@ -1,6 +1,8 @@
 package foatto.server.service.report
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.response.form.FormDateTimeCellMode
 import foatto.core.model.response.form.cells.FormBaseCell
@@ -9,6 +11,8 @@ import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.util.getPrecision
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.ObjectType
 import foatto.server.calc.AnalogueCalcData
 import foatto.server.calc.CounterCalcData
@@ -31,8 +35,6 @@ import jxl.format.PaperSize
 import jxl.write.Label
 import jxl.write.WritableSheet
 import org.springframework.data.repository.findByIdOrNull
-import kotlin.collections.get
-import kotlin.collections.plusAssign
 
 abstract class AbstractPeriodSummaryService(
     private val objectRepository: ObjectRepository,
@@ -84,7 +86,7 @@ abstract class AbstractPeriodSummaryService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_NAME,
-            caption = "Наименование",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang),
             isEditable = false,
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
@@ -105,21 +107,21 @@ abstract class AbstractPeriodSummaryService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_MODEL,
-            caption = "Модель",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang),
             isEditable = false,
             value = parentObjectEntity?.model ?: "",
         )
 
         formCells += FormDateTimeCell(
             name = FIELD_BEGIN_DATE_TIME,
-            caption = "Дата/время начала периода",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.START_OF_PERIOD, userConfig.lang),
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
             value = action.begTime,
         )
         formCells += FormDateTimeCell(
             name = FIELD_END_DATE_TIME,
-            caption = "Дата/время окончания периода",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.END_OF_PERIOD, userConfig.lang),
             isEditable = true,
             mode = FormDateTimeCellMode.DMYHMS,
             value = action.endTime,
@@ -128,13 +130,13 @@ abstract class AbstractPeriodSummaryService(
         if (isUseGroupField) {
             formCells += FormComboCell(
                 name = FIELD_GROUP_BY,
-                caption = "Группировка",
+                caption = getLocalizedMMSMessage(LocalizedMMSMessages.GROUPING, userConfig.lang),
                 isEditable = getParentObjectId(action) == null,
                 asRadioButtons = true,
                 value = GROUP_BY_OBJECT,
                 values = listOf(
-                    GROUP_BY_OBJECT to "По объектам",
-                    GROUP_BY_DATE to "По датам",
+                    GROUP_BY_OBJECT to getLocalizedMMSMessage(LocalizedMMSMessages.BY_OBJECTS, userConfig.lang),
+                    GROUP_BY_DATE to getLocalizedMMSMessage(LocalizedMMSMessages.BY_DATES, userConfig.lang),
                 ),
             )
         }
@@ -174,7 +176,7 @@ abstract class AbstractPeriodSummaryService(
         } else if (!rowOwnerShortName.isNullOrEmpty()) {
             rowOwnerShortName
         } else {
-            rowOwnerFullName ?: "(неизвестный пользователь)"
+            rowOwnerFullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN_USER, userConfig.lang)
         }
         var groupTitle = ""
         if (!userName.isNullOrBlank()) {
@@ -250,6 +252,7 @@ abstract class AbstractPeriodSummaryService(
     }
 
     protected fun outWorkBlock(
+        userConfig: ServerUserConfig,
         objectEntity: ObjectEntity,
         begTime: Int,
         endTime: Int,
@@ -269,6 +272,7 @@ abstract class AbstractPeriodSummaryService(
         val densities = calcService.calcDensities(objectEntity, begTime, endTime).sortedBy { acd -> acd.sensorEntity.descr ?: "-" }
 
         return outBlock(
+            userConfig = userConfig,
             sheet = sheet,
             aOffsY = offsY,
             run = run,
@@ -278,11 +282,12 @@ abstract class AbstractPeriodSummaryService(
             liquidLevels = liquidLevels,
             temperatures = temperatures,
             densities = densities,
-    //                troubles = troubles,
+            //                troubles = troubles,
         )
     }
 
     private fun outBlock(
+        userConfig: ServerUserConfig,
         sheet: WritableSheet,
         aOffsY: Int,
         run: Double?,
@@ -335,7 +340,7 @@ abstract class AbstractPeriodSummaryService(
 //                offsY++
 
         run?.let {
-            sheet.addCell(Label(1, offsY, "Пробег [км]", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.MILEAGE_UNITS, userConfig.lang), wcfCaptionHC))
             offsY++
             sheet.addCell(getNumberCell(1, offsY, run / 1000.0, 1, wcfCellC))
             offsY += 2
@@ -343,8 +348,8 @@ abstract class AbstractPeriodSummaryService(
 
         //--- report on sensors of equipment operation
         if (works.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Оборудование", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Время работы [час]", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.EQUIPMENT, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.OPERATING_TIME, userConfig.lang), wcfCaptionHC))
             offsY++
             for (wcd in works) {
                 sheet.addCell(Label(1, offsY, wcd.sensorEntity.descr ?: "-", wcfCellC))
@@ -358,29 +363,29 @@ abstract class AbstractPeriodSummaryService(
             ccd.sensorEntity.inOutType == SensorConfigCounter.CALC_TYPE_IN
         }
         if (inCounters.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Входящие счётчики [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Приход", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.INCOMING_METERS, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.INCOME, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outCounterRows(sheet, offsY, inCounters)
+            offsY = outCounterRows(userConfig, sheet, offsY, inCounters)
             offsY++
         }
         val outCounters = usings.filter { ccd ->
             ccd.sensorEntity.inOutType == SensorConfigCounter.CALC_TYPE_OUT
         }
         if (outCounters.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Исходящие счётчики [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Расход", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.OUTGOING_METERS, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.FLOW, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outCounterRows(sheet, offsY, outCounters)
+            offsY = outCounterRows(userConfig, sheet, offsY, outCounters)
             offsY++
         }
 
         //--- report on energo sensors
         if (energos.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Расход/Генерация", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.NAME_UNITS, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.FLOW_GENERATION, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outCounterRows(sheet, offsY, energos)
+            offsY = outCounterRows(userConfig, sheet, offsY, energos)
             offsY++
         }
 
@@ -388,40 +393,40 @@ abstract class AbstractPeriodSummaryService(
             acd.sensorEntity.containerType == SensorConfigLiquidLevel.CONTAINER_TYPE_MAIN
         }
         if (mainLiquidLevels.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование основной ёмкости [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Уровень начальный", wcfCaptionHC))
-            sheet.addCell(Label(3, offsY, "Уровень конечный", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.NAME_OF_MAIN_TANK, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.INITIAL_LEVEL, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(3, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.FINAL_LEVEL, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outAnalogueRows(sheet, offsY, mainLiquidLevels)
+            offsY = outAnalogueRows(userConfig, sheet, offsY, mainLiquidLevels)
             offsY++
         }
         val workLiquidLevels = liquidLevels.filter { acd ->
             acd.sensorEntity.containerType == SensorConfigLiquidLevel.CONTAINER_TYPE_WORK
         }
         if (workLiquidLevels.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование рабочей/расходной ёмкости [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Уровень начальный", wcfCaptionHC))
-            sheet.addCell(Label(3, offsY, "Уровень конечный", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.NAME_OF_WORKING_FLOW_TANK, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.INITIAL_LEVEL, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(3, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.FINAL_LEVEL, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outAnalogueRows(sheet, offsY, workLiquidLevels)
+            offsY = outAnalogueRows(userConfig, sheet, offsY, workLiquidLevels)
             offsY++
         }
 
         if (temperatures.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Температура начальная", wcfCaptionHC))
-            sheet.addCell(Label(3, offsY, "Температура конечная", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.NAME_UNITS, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.INITIAL_TEMPERATURE, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(3, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.FINAL_TEMPERATURE, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outAnalogueRows(sheet, offsY, temperatures)
+            offsY = outAnalogueRows(userConfig, sheet, offsY, temperatures)
             offsY++
         }
 
         if (densities.isNotEmpty()) {
-            sheet.addCell(Label(1, offsY, "Наименование [ед.изм.]", wcfCaptionHC))
-            sheet.addCell(Label(2, offsY, "Плотность начальная", wcfCaptionHC))
-            sheet.addCell(Label(3, offsY, "Плотность конечная", wcfCaptionHC))
+            sheet.addCell(Label(1, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.NAME_UNITS, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(2, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.INITIAL_DENSITY, userConfig.lang), wcfCaptionHC))
+            sheet.addCell(Label(3, offsY, getLocalizedMMSMessage(LocalizedMMSMessages.FINAL_DENSITY, userConfig.lang), wcfCaptionHC))
             offsY++
-            offsY = outAnalogueRows(sheet, offsY, densities)
+            offsY = outAnalogueRows(userConfig, sheet, offsY, densities)
             offsY++
         }
 
@@ -454,7 +459,12 @@ abstract class AbstractPeriodSummaryService(
         return offsY
     }
 
-    private fun outCounterRows(sheet: WritableSheet, aOffsY: Int, counters: List<CounterCalcData>): Int {
+    private fun outCounterRows(
+        userConfig: ServerUserConfig,
+        sheet: WritableSheet,
+        aOffsY: Int,
+        counters: List<CounterCalcData>
+    ): Int {
         var offsY = aOffsY
         for (ccd in counters) {
             sheet.addCell(Label(1, offsY, getFullSensorDescr(ccd.sensorEntity), wcfCellC))
@@ -464,14 +474,19 @@ abstract class AbstractPeriodSummaryService(
         counters.groupBy { ccd -> ccd.sensorEntity.dim ?: "-" }.forEach { dim, ccds ->
             val sum = ccds.sumOf { ccd -> ccd.value }
 
-            sheet.addCell(Label(1, offsY, "ИТОГО [$dim]", wcfCellRStdYellow))
+            sheet.addCell(Label(1, offsY, "${getLocalizedMMSMessage(LocalizedMMSMessages.TOTAL, userConfig.lang)} [$dim]", wcfCellRStdYellow))
             sheet.addCell(getNumberCell(2, offsY, sum, getPrecision(sum), wcfCellCBStdYellow))
             offsY++
         }
         return offsY
     }
 
-    private fun outAnalogueRows(sheet: WritableSheet, aOffsY: Int, analogues: List<AnalogueCalcData>): Int {
+    private fun outAnalogueRows(
+        userConfig: ServerUserConfig,
+        sheet: WritableSheet,
+        aOffsY: Int,
+        analogues: List<AnalogueCalcData>
+    ): Int {
         var offsY = aOffsY
         for (acd in analogues) {
             sheet.addCell(Label(1, offsY, getFullSensorDescr(acd.sensorEntity), wcfCellC))
@@ -491,7 +506,7 @@ abstract class AbstractPeriodSummaryService(
             val begSum = acds.sumOf { acd -> acd.begValue ?: 0.0 }
             val endSum = acds.sumOf { acd -> acd.endValue ?: 0.0 }
 
-            sheet.addCell(Label(1, offsY, "ИТОГО [$dim]", wcfCellRStdYellow))
+            sheet.addCell(Label(1, offsY, "${getLocalizedMMSMessage(LocalizedMMSMessages.TOTAL, userConfig.lang)} [$dim]", wcfCellRStdYellow))
             sheet.addCell(getNumberCell(2, offsY, begSum, getPrecision(begSum), wcfCellCBStdYellow))
             sheet.addCell(getNumberCell(3, offsY, endSum, getPrecision(endSum), wcfCellCBStdYellow))
             offsY++
@@ -509,32 +524,32 @@ abstract class AbstractPeriodSummaryService(
     }
 
 }
-    /*
-                val troubles = if (reportOutTroubles) {
-                    val (alRawTime, alRawData) = ObjectCalc.loadAllSensorData(conn, objectConfig, begTime, endTime)
-                    val t = ChartElementDTO(ChartElementTypeDTO.TEXT, 0, 0, false)
-                    sdcAbstractAnalog.checkCommonTrouble(alRawTime, alRawData, objectConfig, begTime, endTime, t)
-                    //--- ловим ошибки с датчиков уровня топлива
-                    objectConfig.hmSensorConfig[SensorConfig.SENSOR_LIQUID_LEVEL]?.values?.forEach { sc ->
-                        sdcLiquid.checkLiquidLevelSensorTrouble(
-                            alRawTime = alRawTime,
-                            alRawData = alRawData,
-                            sca = sc as SensorConfigAnalogue,
-                            begTime = begTime,
-                            endTime = endTime,
-                            aText = t,
-                        )
-                    }
-                    t
-                } else {
-                    null
+/*
+            val troubles = if (reportOutTroubles) {
+                val (alRawTime, alRawData) = ObjectCalc.loadAllSensorData(conn, objectConfig, begTime, endTime)
+                val t = ChartElementDTO(ChartElementTypeDTO.TEXT, 0, 0, false)
+                sdcAbstractAnalog.checkCommonTrouble(alRawTime, alRawData, objectConfig, begTime, endTime, t)
+                //--- ловим ошибки с датчиков уровня топлива
+                objectConfig.hmSensorConfig[SensorConfig.SENSOR_LIQUID_LEVEL]?.values?.forEach { sc ->
+                    sdcLiquid.checkLiquidLevelSensorTrouble(
+                        alRawTime = alRawTime,
+                        alRawData = alRawData,
+                        sca = sc as SensorConfigAnalogue,
+                        begTime = begTime,
+                        endTime = endTime,
+                        aText = t,
+                    )
                 }
-
+                t
+            } else {
+                null
             }
 
-            sheet.addCell(Label(0, offsY, "ИТОГО общее", wcfCellCBStdYellow))
-            sheet.mergeCells(0, offsY, getColumnCount(1), offsY + 2)
-            offsY += 4
+        }
 
-            offsY = outSumData(sheet, offsY, allSumCollector.sumUser, true, null)
-     */
+        sheet.addCell(Label(0, offsY, "ИТОГО общее", wcfCellCBStdYellow))
+        sheet.mergeCells(0, offsY, getColumnCount(1), offsY + 2)
+        offsY += 4
+
+        offsY = outSumData(sheet, offsY, allSumCollector.sumUser, true, null)
+ */

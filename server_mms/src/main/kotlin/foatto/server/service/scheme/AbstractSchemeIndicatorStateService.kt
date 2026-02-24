@@ -17,6 +17,8 @@ import foatto.core.model.response.xy.scheme.SchemeResponse
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getRandomInt
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
@@ -70,8 +72,8 @@ abstract class AbstractSchemeIndicatorStateService(
 
         val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
         val rows = listOf(
-            "Наименование объекта" to (objectEntity.name ?: "-"),
-            "Модель" to (objectEntity.model ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (objectEntity.name ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang) to (objectEntity.model ?: "-"),
         )
 
         return AppResponse(

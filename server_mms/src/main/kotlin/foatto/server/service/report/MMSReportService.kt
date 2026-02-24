@@ -3,13 +3,14 @@ package foatto.server.service.report
 import foatto.core.model.AppAction
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.service.FileStoreService
 import foatto.server.service.ReportService
 import jxl.write.Label
 import jxl.write.WritableSheet
-import kotlin.collections.contains
 
 abstract class MMSReportService(
     private val fileStoreService: FileStoreService,
@@ -47,8 +48,8 @@ abstract class MMSReportService(
             Label(
                 offsX,
                 offsY++,
-                "за период с ${getDateTimeDMYHMSString(userConfig.timeOffset, begTime)}" +
-                        " по ${getDateTimeDMYHMSString(userConfig.timeOffset, endTime)}",
+                "${getLocalizedMMSMessage(LocalizedMMSMessages.FOR_THE_PERIOD_FROM, userConfig.lang)} ${getDateTimeDMYHMSString(userConfig.timeOffset, begTime)}" +
+                        " ${getLocalizedMMSMessage(LocalizedMMSMessages.TO, userConfig.lang)} ${getDateTimeDMYHMSString(userConfig.timeOffset, endTime)}",
                 wcfTitleL,
             )
         )

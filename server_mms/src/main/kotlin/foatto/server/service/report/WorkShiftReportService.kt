@@ -78,6 +78,7 @@ class WorkShiftReportService(
                     offsY = addSubGroupTitle(sheet, offsY, getDateTimeDMYHMSString(timeZone, wsBegTime) + " - " + getDateTimeDMYHMSString(timeZone, wsEndTime))
 
                     offsY = outWorkBlock(
+                        userConfig = userConfig,
                         objectEntity = objectEntity,
                         begTime = wsBegTime,
                         endTime = wsEndTime,
@@ -109,6 +110,7 @@ class WorkShiftReportService(
                 offsY = addSubGroupTitle(sheet, offsY, getObjectGroupTitle(userConfig, wsObjectEntity))
 
                 offsY = outWorkBlock(
+                    userConfig = userConfig,
                     objectEntity = wsObjectEntity,
                     begTime = wsBegTime,
                     endTime = wsEndTime,

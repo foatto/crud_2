@@ -11,6 +11,8 @@ import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getSplittedDouble
 import foatto.core.util.getTimeZone
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.ObjectType
 import foatto.server.checkRowPermission
 import foatto.server.entity.DayWorkEntity
@@ -50,12 +52,12 @@ class DayMobileWorkService(
 
         alColumnInfo += null to "" // by date group
         alColumnInfo += null to "" // userId
-        alColumnInfo += null to "Объект"
-        alColumnInfo += null to "Пробег"
-        alColumnInfo += null to "Оборудование"
-        alColumnInfo += null to "Работа"
-        alColumnInfo += null to "Счётчики топлива"
-        alColumnInfo += null to "Расход топлива"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.MILEAGE, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.EQUIPMENT, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OPERATION, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.FUEL_METERS, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.FUEL_CONSUMPTION, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -176,7 +178,7 @@ class DayMobileWorkService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = dayWorkEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -196,7 +198,7 @@ class DayMobileWorkService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = "${getSplittedDouble(run / 1000.0)} [км]",
+                name = "${getSplittedDouble(run / 1000.0)} ${getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_KM, userConfig.lang)}",
                 align = TableCellAlign.LEFT,
             )
 
@@ -211,7 +213,7 @@ class DayMobileWorkService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} [час]" },
+                name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} ${getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_HOUR, userConfig.lang)}" },
                 align = TableCellAlign.LEFT,
             )
 

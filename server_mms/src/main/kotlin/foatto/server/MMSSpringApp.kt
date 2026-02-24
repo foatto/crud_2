@@ -597,6 +597,17 @@ class MMSSpringApp : SpringApp() {
             ),
         )
 
+        //--- упрощённая настройка телеграм-модулей - модифицируем настройки классических модулей
+        appModuleConfigs[AppModuleMMS.T_OBJECT] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Objects", LanguageEnum.RU to "Объекты"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+        )
+        appModuleConfigs[AppModuleMMS.T_DEVICE] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Devices", LanguageEnum.RU to "Приборы"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
+            disabledAccessRoles = mutableSetOf(AppRole.USER),
+        )
     }
 
     private fun initMenuInit() {
@@ -827,12 +838,11 @@ class MMSSpringApp : SpringApp() {
             }
 
             mutableListOf<MenuData>().apply {
-//--- пока не актуально
-//                val langSubMenus = mutableListOf<MenuData>()
-//                LanguageEnum.entries.forEach { lang ->
-//                    langSubMenus += MenuData(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
-//                }
-//                add(MenuData(caption = LanguageEnum.entries.joinToString(" / "), alSubMenu = langSubMenus))
+                val langSubMenus = mutableListOf<MenuData>()
+                LanguageEnum.entries.forEach { lang ->
+                    langSubMenus += MenuData(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
+                }
+                add(MenuData(caption = LanguageEnum.entries.joinToString(" / "), subMenuDatas = langSubMenus))
 
                 addMenuItem(
                     alMenu = this,

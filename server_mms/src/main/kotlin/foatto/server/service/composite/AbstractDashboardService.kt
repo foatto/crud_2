@@ -17,6 +17,8 @@ import foatto.core.model.response.composite.CompositeResponse
 import foatto.core.model.response.xy.scheme.SchemeResponse
 import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.DashboardSensorTypeEnum
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
@@ -26,6 +28,7 @@ import foatto.server.entity.DeviceEntity
 import foatto.server.entity.ObjectEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.getEnabledUserIds
+import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
@@ -110,13 +113,13 @@ abstract class AbstractDashboardService(
         val compositeLayoutDatas = userConfig.userProperties[layoutSaveKey]?.let { propertyValue ->
             try {
                 Json.decodeFromString<Map<Int, CompositeLayoutData>>(propertyValue)
-            } catch (iae: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 null
             }
         }
 
         val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
-        val rows = getHeaderRows(objectEntity, deviceEntity)
+        val rows = getHeaderRows(userConfig, objectEntity, deviceEntity)
 
         val sensorEntities = mutableListOf<Pair<DashboardSensorTypeEnum, SensorEntity>>()
         addSensors(
@@ -154,9 +157,11 @@ abstract class AbstractDashboardService(
                     sensorEntity = sensorEntity,
                 ),
                 chartResponse = getChartResponse(
+                    userConfig = userConfig,
                     sensorEntity = sensorEntity,
                 ),
                 schemeResponse = getSchemeResponse(
+                    userConfig = userConfig,
                     sensorType = sensorType,
                     sensorEntity = sensorEntity,
                 ),
@@ -232,7 +237,7 @@ abstract class AbstractDashboardService(
             }
             for (deviceEntity in filteredDeviceEntities) {
                 deviceList += CompositeListItemData(
-                    text = deviceEntity.name ?: deviceEntity.serialNo ?: deviceEntity.index?.toString() ?: "(без наименования, серийного номера и индекса)",
+                    text = deviceEntity.name ?: deviceEntity.serialNo ?: deviceEntity.index?.toString() ?: getLocalizedMMSMessage(LocalizedMMSMessages.WITHOUT_NAME_SERIAL_NUMBER_OR_INDEX, userConfig.lang),
                     itemId = deviceEntity.id,
                     itemModule = AppModuleMMS.DEVICE,
                     itemStatus = (getCurrentTimeInt() - (deviceEntity.lastSessionTime ?: 0)) < SensorConfig.CRITICAL_OFF_PERIOD,
@@ -240,7 +245,7 @@ abstract class AbstractDashboardService(
             }
 
             result += CompositeListItemData(
-                text = objectEntity.name ?: "(без наименования)",
+                text = objectEntity.name ?: getLocalizedMMSMessage(LocalizedMMSMessages.WITHOUT_NAME, userConfig.lang),
                 itemId = objectEntity.id,
                 itemModule = AppModuleMMS.ALL_OBJECT,
                 itemStatus = true,
@@ -258,23 +263,24 @@ abstract class AbstractDashboardService(
     }
 
     private fun getHeaderRows(
+        userConfig: ServerUserConfig,
         objectEntity: ObjectEntity,
         deviceEntity: DeviceEntity?,
     ): List<Pair<String, String>> = if (withObjectList()) {
         val rows = mutableListOf(
-            "Наименование объекта" to (objectEntity.name ?: "-"),
-            "Модель объекта" to (objectEntity.model ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (objectEntity.name ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_MODEL, userConfig.lang) to (objectEntity.model ?: "-"),
         )
         deviceEntity?.let {
-            rows += "Серийный номер контроллера" to (deviceEntity.serialNo ?: "-")
-            rows += "Наименование контроллера" to (deviceEntity.name ?: "-")
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_SERIAL_NUMBER, userConfig.lang) to (deviceEntity.serialNo ?: "-")
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_NAME, userConfig.lang) to (deviceEntity.name ?: "-")
         }
 
         rows
     } else {
         listOf(
-            "Наименование объекта" to (objectEntity.name ?: "-"),
-            "Модель объекта" to (objectEntity.model ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (objectEntity.name ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_MODEL, userConfig.lang) to (objectEntity.model ?: "-"),
         )
     }
 
@@ -383,6 +389,6 @@ abstract class AbstractDashboardService(
 
     protected abstract fun getCompositeBlockAction(sensorType: DashboardSensorTypeEnum, sensorEntity: SensorEntity): AppAction
 
-    protected open fun getChartResponse(sensorEntity: SensorEntity): ChartResponse? = null
-    protected open fun getSchemeResponse(sensorType: DashboardSensorTypeEnum, sensorEntity: SensorEntity): SchemeResponse? = null
+    protected open fun getChartResponse(userConfig: ServerUserConfig, sensorEntity: SensorEntity): ChartResponse? = null
+    protected open fun getSchemeResponse(userConfig: ServerUserConfig, sensorType: DashboardSensorTypeEnum, sensorEntity: SensorEntity): SchemeResponse? = null
 }

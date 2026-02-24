@@ -40,4 +40,9 @@ object AppModuleMMS {
     const val REPORT_SUMMARY: String = "report_summary"
     const val REPORT_DAY_WORK: String = "report_day_work"
     const val REPORT_WORK_SHIFT: String = "report_work_shift"
+
+    //--- отдельный набор телеграмный модулей
+
+    const val T_OBJECT: String = "t_object"
+    const val T_DEVICE: String = "t_device"
 }

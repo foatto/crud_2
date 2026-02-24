@@ -123,7 +123,7 @@ class ActionLogService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = actionLogEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName

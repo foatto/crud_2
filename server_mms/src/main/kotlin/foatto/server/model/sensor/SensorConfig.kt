@@ -1,5 +1,7 @@
 package foatto.server.model.sensor
 
+import foatto.core.i18n.LanguageEnum
+
 class SensorConfig {
 
     companion object {
@@ -109,34 +111,115 @@ class SensorConfig {
         fun isReversedChart(sensorType: Int?): Boolean = reversedChartSensorTypes.contains(sensorType)
 
         //--- названия датчиков
-        val hmSensorDescr: Map<Int, String> = mapOf(
-            SENSOR_GEO to "Гео-данные",
-            SENSOR_WORK to "Работа оборудования",
-            SENSOR_LIQUID_LEVEL to "Уровень топлива",
-            SENSOR_WEIGHT to "Вес",
-            SENSOR_TURN to "Обороты",
-            SENSOR_PRESSURE to "Давление",
-            SENSOR_TEMPERATURE to "Температура",
-            SENSOR_VOLTAGE to "Напряжение",
-            SENSOR_POWER to "Мощность",
-            SENSOR_DENSITY to "Плотность",
-            SENSOR_MASS_FLOW to "Массовый расход",
-            SENSOR_VOLUME_FLOW to "Объёмный расход",
-            SENSOR_MASS_ACCUMULATED to "Накопленная масса",
-            SENSOR_VOLUME_ACCUMULATED to "Накопленный объём",
-            SENSOR_LIQUID_USING to "Расход топлива",
-            SENSOR_ENERGO_COUNT_AD to "Электроэнергия активная прямая",
-            SENSOR_ENERGO_COUNT_AR to "Электроэнергия активная обратная",
-            SENSOR_ENERGO_COUNT_RD to "Электроэнергия реактивная прямая",
-            SENSOR_ENERGO_COUNT_RR to "Электроэнергия реактивная обратная",
-            SENSOR_ENERGO_VOLTAGE to "Электрическое напряжение фазное",
-            SENSOR_ENERGO_CURRENT to "Электрический ток фазный",
-            SENSOR_ENERGO_POWER_KOEF to "Коэффициент мощности фазный",
-            SENSOR_ENERGO_POWER_ACTIVE to "Активная мощность фазная",
-            SENSOR_ENERGO_POWER_REACTIVE to "Реактивная мощность фазная",
-            SENSOR_ENERGO_POWER_FULL to "Полная мощность фазная",
-            SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT to "Коэффициент трансформации по току",
-            SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE to "Коэффициент трансформации по напряжению",
+        val hmSensorDescr: Map<Int, Map<LanguageEnum, String>> = mapOf(
+            SENSOR_GEO to mapOf(
+                LanguageEnum.EN to "Geo-data",
+                LanguageEnum.RU to "Гео-данные"
+            ),
+            SENSOR_WORK to mapOf(
+                LanguageEnum.EN to "Equipment operation",
+                LanguageEnum.RU to "Работа оборудования"
+            ),
+            SENSOR_LIQUID_LEVEL to mapOf(
+                LanguageEnum.EN to "Fuel level",
+                LanguageEnum.RU to "Уровень топлива"
+            ),
+            SENSOR_WEIGHT to mapOf(
+                LanguageEnum.EN to "Weight",
+                LanguageEnum.RU to "Вес"
+            ),
+            SENSOR_TURN to mapOf(
+                LanguageEnum.EN to "Rotational speed",
+                LanguageEnum.RU to "Обороты вращения"
+            ),
+            SENSOR_PRESSURE to mapOf(
+                LanguageEnum.EN to "Pressure",
+                LanguageEnum.RU to "Давление"
+            ),
+            SENSOR_TEMPERATURE to mapOf(
+                LanguageEnum.EN to "Temperature",
+                LanguageEnum.RU to "Температура"
+            ),
+            SENSOR_VOLTAGE to mapOf(
+                LanguageEnum.EN to "Voltage",
+                LanguageEnum.RU to "Напряжение"
+            ),
+            SENSOR_POWER to mapOf(
+                LanguageEnum.EN to "Power",
+                LanguageEnum.RU to "Мощность"
+            ),
+            SENSOR_DENSITY to mapOf(
+                LanguageEnum.EN to "Density",
+                LanguageEnum.RU to "Плотность"
+            ),
+            SENSOR_MASS_FLOW to mapOf(
+                LanguageEnum.EN to "Mass flow rate",
+                LanguageEnum.RU to "Массовый расход"
+            ),
+            SENSOR_VOLUME_FLOW to mapOf(
+                LanguageEnum.EN to "Volumetric flow rate",
+                LanguageEnum.RU to "Объёмный расход"
+            ),
+            SENSOR_MASS_ACCUMULATED to mapOf(
+                LanguageEnum.EN to "Accumulated mass",
+                LanguageEnum.RU to "Накопленная масса"
+            ),
+            SENSOR_VOLUME_ACCUMULATED to mapOf(
+                LanguageEnum.EN to "Accumulated volume",
+                LanguageEnum.RU to "Накопленный объём"
+            ),
+            SENSOR_LIQUID_USING to mapOf(
+                LanguageEnum.EN to "Fuel consumption",
+                LanguageEnum.RU to "Расход топлива"
+            ),
+            SENSOR_ENERGO_COUNT_AD to mapOf(
+                LanguageEnum.EN to "Direct active electrical energy",
+                LanguageEnum.RU to "Электроэнергия активная прямая"
+            ),
+            SENSOR_ENERGO_COUNT_AR to mapOf(
+                LanguageEnum.EN to "Active reverse electrical energy",
+                LanguageEnum.RU to "Электроэнергия активная обратная"
+            ),
+            SENSOR_ENERGO_COUNT_RD to mapOf(
+                LanguageEnum.EN to "Direct reactive electrical energy",
+                LanguageEnum.RU to "Электроэнергия реактивная прямая"
+            ),
+            SENSOR_ENERGO_COUNT_RR to mapOf(
+                LanguageEnum.EN to "Reactive reverse electrical energy",
+                LanguageEnum.RU to "Электроэнергия реактивная обратная"
+            ),
+            SENSOR_ENERGO_VOLTAGE to mapOf(
+                LanguageEnum.EN to "Phase electric voltage",
+                LanguageEnum.RU to "Электрическое напряжение фазное"
+            ),
+            SENSOR_ENERGO_CURRENT to mapOf(
+                LanguageEnum.EN to "Phase electric current",
+                LanguageEnum.RU to "Электрический ток фазный"
+            ),
+            SENSOR_ENERGO_POWER_KOEF to mapOf(
+                LanguageEnum.EN to "Phase power factor",
+                LanguageEnum.RU to "Коэффициент мощности фазный"
+            ),
+            SENSOR_ENERGO_POWER_ACTIVE to mapOf(
+                LanguageEnum.EN to "Active phase power",
+                LanguageEnum.RU to "Активная мощность фазная"
+            ),
+            SENSOR_ENERGO_POWER_REACTIVE to mapOf(
+                LanguageEnum.EN to "Phase reactive power",
+                LanguageEnum.RU to "Реактивная мощность фазная"
+            ),
+            SENSOR_ENERGO_POWER_FULL to mapOf(
+                LanguageEnum.EN to "Full phase power",
+                LanguageEnum.RU to "Полная мощность фазная"
+            ),
+            SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT to mapOf(
+                LanguageEnum.EN to "Current transformation ratio",
+                LanguageEnum.RU to "Коэффициент трансформации по току"
+            ),
+            SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE to mapOf(
+                LanguageEnum.EN to "Voltage transformation ratio",
+                LanguageEnum.RU to "Коэффициент трансформации по напряжению"
+            ),
         )
     }
 }

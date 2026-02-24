@@ -19,10 +19,13 @@ import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.model.response.xy.map.MapResponse
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getRandomInt
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.initXyElementConfig
+import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
@@ -82,81 +85,82 @@ class MapService(
          */
     }
 
-    private fun getElementConfigs(): Map<String, XyElementConfig> = initXyElementConfig(level = 10, minScale = MAP_MIN_SCALE, maxScale = MAP_MAX_SCALE).apply {
-        this[TYPE_OBJECT_TRACE] = XyElementConfig(
-            name = TYPE_OBJECT_TRACE,
-            clientType = XyElementClientType.TRACE,
-            layer = 11,
-            scaleMin = MAP_MIN_SCALE,
-            scaleMax = MAP_MAX_SCALE,
-            descrForAction = "",
-            isRotatable = false,
-            isMoveable = false,
-            isEditablePoint = false
-        )
+    private fun getElementConfigs(userConfig: ServerUserConfig): Map<String, XyElementConfig> =
+        initXyElementConfig(level = 10, minScale = MAP_MIN_SCALE, maxScale = MAP_MAX_SCALE).apply {
+            this[TYPE_OBJECT_TRACE] = XyElementConfig(
+                name = TYPE_OBJECT_TRACE,
+                clientType = XyElementClientType.TRACE,
+                layer = 11,
+                scaleMin = MAP_MIN_SCALE,
+                scaleMax = MAP_MAX_SCALE,
+                descrForAction = "",
+                isRotatable = false,
+                isMoveable = false,
+                isEditablePoint = false
+            )
 
-        this[TYPE_OBJECT_PARKING] = XyElementConfig(
-            name = TYPE_OBJECT_PARKING,
-            clientType = XyElementClientType.TEXT,
-            layer = 12,
-            scaleMin = MAP_MIN_SCALE,
-            scaleMax = MAP_MAX_SCALE,
-            descrForAction = "",
-            isRotatable = false,
-            isMoveable = false,
-            isEditablePoint = false
-        )
+            this[TYPE_OBJECT_PARKING] = XyElementConfig(
+                name = TYPE_OBJECT_PARKING,
+                clientType = XyElementClientType.TEXT,
+                layer = 12,
+                scaleMin = MAP_MIN_SCALE,
+                scaleMax = MAP_MAX_SCALE,
+                descrForAction = "",
+                isRotatable = false,
+                isMoveable = false,
+                isEditablePoint = false
+            )
 
-        this[TYPE_OBJECT_OVER_SPEED] = XyElementConfig(
-            name = TYPE_OBJECT_OVER_SPEED,
-            clientType = XyElementClientType.TEXT,
-            layer = 13,
-            scaleMin = MAP_MIN_SCALE,
-            scaleMax = MAP_MAX_SCALE,
-            descrForAction = "",
-            isRotatable = false,
-            isMoveable = false,
-            isEditablePoint = false
-        )
+            this[TYPE_OBJECT_OVER_SPEED] = XyElementConfig(
+                name = TYPE_OBJECT_OVER_SPEED,
+                clientType = XyElementClientType.TEXT,
+                layer = 13,
+                scaleMin = MAP_MIN_SCALE,
+                scaleMax = MAP_MAX_SCALE,
+                descrForAction = "",
+                isRotatable = false,
+                isMoveable = false,
+                isEditablePoint = false
+            )
 
-        this[TYPE_OBJECT_TRACE_INFO] = XyElementConfig(
-            name = TYPE_OBJECT_TRACE_INFO,
-            clientType = XyElementClientType.TEXT,
-            layer = 14,
-            scaleMin = MAP_MIN_SCALE,
-            scaleMax = MAP_MAX_SCALE,
-            descrForAction = "",
-            isRotatable = false,
-            isMoveable = false,
-            isEditablePoint = false
-        )
+            this[TYPE_OBJECT_TRACE_INFO] = XyElementConfig(
+                name = TYPE_OBJECT_TRACE_INFO,
+                clientType = XyElementClientType.TEXT,
+                layer = 14,
+                scaleMin = MAP_MIN_SCALE,
+                scaleMax = MAP_MAX_SCALE,
+                descrForAction = "",
+                isRotatable = false,
+                isMoveable = false,
+                isEditablePoint = false
+            )
 
-        this[TYPE_OBJECT_INFO] = XyElementConfig(
-            name = TYPE_OBJECT_INFO,
-            clientType = XyElementClientType.MARKER,
-            layer = 15,
-            scaleMin = MAP_MIN_SCALE,
-            scaleMax = MAP_MAX_SCALE,
-            descrForAction = "",
-            isRotatable = false,
-            isMoveable = false,
-            isEditablePoint = false
-        )
+            this[TYPE_OBJECT_INFO] = XyElementConfig(
+                name = TYPE_OBJECT_INFO,
+                clientType = XyElementClientType.MARKER,
+                layer = 15,
+                scaleMin = MAP_MIN_SCALE,
+                scaleMax = MAP_MAX_SCALE,
+                descrForAction = "",
+                isRotatable = false,
+                isMoveable = false,
+                isEditablePoint = false
+            )
 
-        //--- прикладные топо-объекты, добавляемые пользователем вручную на карте
+            //--- прикладные топо-объекты, добавляемые пользователем вручную на карте
 
-        this[ELEMENT_TYPE_ZONE] = XyElementConfig(
-            name = ELEMENT_TYPE_ZONE,
-            clientType = XyElementClientType.ZONE,
-            layer = 10,
-            scaleMin = MAP_MIN_SCALE,
-            scaleMax = MAP_MAX_SCALE,
-            descrForAction = "Геозона",
-            isRotatable = false,
-            isMoveable = true,
-            isEditablePoint = true
-        )
-    }
+            this[ELEMENT_TYPE_ZONE] = XyElementConfig(
+                name = ELEMENT_TYPE_ZONE,
+                clientType = XyElementClientType.ZONE,
+                layer = 10,
+                scaleMin = MAP_MIN_SCALE,
+                scaleMax = MAP_MAX_SCALE,
+                descrForAction = getLocalizedMMSMessage(LocalizedMMSMessages.GEOFENCE, userConfig.lang),
+                isRotatable = false,
+                isMoveable = true,
+                isEditablePoint = true
+            )
+        }
 
     fun map(
         sessionId: Long,
@@ -177,25 +181,26 @@ class MapService(
 
         val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
         val rows = mutableListOf(
-            "Наименование объекта" to (objectEntity.name ?: "-"),
-            "Модель" to (objectEntity.model ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (objectEntity.name ?: "-"),
+            getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang) to (objectEntity.model ?: "-"),
         )
 
         if (action.timeRangeType != 0) {
-            rows += "Период" to "за последние " +
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.PERIOD, userConfig.lang) to
+                    "${getLocalizedMMSMessage(LocalizedMMSMessages.FOR_THE_LAST, userConfig.lang)} " +
                     if (action.timeRangeType % 3600 == 0) {
-                        "${action.timeRangeType / 3600} час(а,ов)"
+                        "${action.timeRangeType / 3600} ${getLocalizedMMSMessage(LocalizedMMSMessages.HOUR_S, userConfig.lang)}"
                     } else if (action.timeRangeType % 60 == 0) {
-                        "${action.timeRangeType / 60} минут"
+                        "${action.timeRangeType / 60} ${getLocalizedMMSMessage(LocalizedMMSMessages.MINUTES, userConfig.lang)}"
                     } else {
-                        "${action.timeRangeType} секунд"
+                        "${action.timeRangeType} ${getLocalizedMMSMessage(LocalizedMMSMessages.SECONDS, userConfig.lang)}"
                     }
         }
 
         return AppResponse(
             responseCode = ResponseCode.MODULE_MAP,
             map = MapResponse(
-                elementConfigs = getElementConfigs(),
+                elementConfigs = getElementConfigs(userConfig),
                 tabCaption = caption,
                 headerData = HeaderData(
                     titles = listOf(

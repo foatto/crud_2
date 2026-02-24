@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
@@ -24,6 +25,8 @@ import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.UserRelationEnum
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
@@ -76,8 +79,8 @@ class DeviceManageService(
         val rows = mutableListOf<Pair<String, String>>()
 
         getParentDeviceEntity(action)?.let { parentDeviceEntity ->
-            rows += "Серийный номер контроллера" to (parentDeviceEntity.serialNo ?: "-")
-            rows += "Наименование контроллера" to (parentDeviceEntity.name ?: "-")
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_SERIAL_NUMBER, userConfig.lang) to (parentDeviceEntity.serialNo ?: "-")
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_NAME, userConfig.lang) to (parentDeviceEntity.name ?: "-")
         }
 
         return HeaderData(
@@ -96,12 +99,12 @@ class DeviceManageService(
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
         alColumnInfo += null to "" // userId
-        alColumnInfo += null to "Примечание"
-        alColumnInfo += null to "Команда"
-        alColumnInfo += null to "Файл"
-        alColumnInfo += null to "Время создания"
-        alColumnInfo += null to "Время редактирования"
-        alColumnInfo += null to "Время отправки"
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.NOTE, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.COMMAND, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.FILE, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.CREATION_TIME, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.EDIT_TIME, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.SUBMISSION_TIME, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -155,7 +158,7 @@ class DeviceManageService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = deviceManageEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -201,7 +204,7 @@ class DeviceManageService(
             if (isFormEnabled) {
                 popupDatas += TablePopup(
                     action = formOpenAction,
-                    text = "Открыть",
+                    text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
                 )
             }
@@ -233,8 +236,8 @@ class DeviceManageService(
         val rows = mutableListOf<Pair<String, String>>()
 
         getParentDeviceEntity(action)?.let { parentDeviceEntity ->
-            rows += "Серийный номер контроллера" to (parentDeviceEntity.serialNo ?: "-")
-            rows += "Наименование контроллера" to (parentDeviceEntity.name ?: "-")
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_SERIAL_NUMBER, userConfig.lang) to (parentDeviceEntity.serialNo ?: "-")
+            rows += getLocalizedMMSMessage(LocalizedMMSMessages.CONTROLLER_NAME, userConfig.lang) to (parentDeviceEntity.name ?: "-")
         }
 
         return HeaderData(
@@ -280,20 +283,20 @@ class DeviceManageService(
         )
         formCells += FormSimpleCell(
             name = FIELD_DESCR,
-            caption = "Примечание",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.NOTE, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceManageEntity?.descr ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_COMMAND,
-            caption = "Команда",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.COMMAND, userConfig.lang),
             isEditable = changeEnabled,
             value = deviceManageEntity?.command ?: "",
             rows = 5,
         )
         formCells += FormFileCell(
             name = FIELD_FILE,
-            caption = "Файл для отправки",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.FILE_TO_SEND, userConfig.lang),
             isEditable = false, //!!! changeEnabled,
             fileId = deviceManageEntity?.fileId,
             files = getFormFileCellData(deviceManageEntity?.fileId),
@@ -302,21 +305,21 @@ class DeviceManageService(
 
         formCells += FormDateTimeCell(
             name = FIELD_CREATE_TIME,
-            caption = "Время создания",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.CREATION_TIME, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMYHMS,
             value = deviceManageEntity?.createTime,
         )
         formCells += FormDateTimeCell(
             name = FIELD_EDIT_TIME,
-            caption = "Время редактирования",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.EDIT_TIME, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMYHMS,
             value = deviceManageEntity?.editTime,
         )
         formCells += FormDateTimeCell(
             name = FIELD_SEND_TIME,
-            caption = "Время отправки",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SUBMISSION_TIME, userConfig.lang),
             isEditable = false,
             mode = FormDateTimeCellMode.DMYHMS,
             value = deviceManageEntity?.sendTime,
@@ -351,9 +354,9 @@ class DeviceManageService(
 
         val recordUserId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull() ?: 0
 
-        val command = formActionData[FIELD_COMMAND]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_COMMAND to "Не введёна команда"))
+        val command = formActionData[FIELD_COMMAND]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_COMMAND to getLocalizedMMSMessage(LocalizedMMSMessages.NO_COMMAND_ENTERED, userConfig.lang)))
         if (command.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_COMMAND to "Не введёна команда"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_COMMAND to getLocalizedMMSMessage(LocalizedMMSMessages.NO_COMMAND_ENTERED, userConfig.lang)))
         }
 
         val oldDeviceManageEntity = id?.let {

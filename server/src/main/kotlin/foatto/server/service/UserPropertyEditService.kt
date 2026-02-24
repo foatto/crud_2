@@ -87,26 +87,26 @@ class UserPropertyEditService(
         )
         formCells += FormSimpleCell(
             name = FIELD_CONTACT_INFO,
-            caption = "Контактная информация",
+            caption = getLocalizedMessage(LocalizedMessages.CONTACT_INFO, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.contactInfo ?: "",
             rows = 5,
         )
         formCells += FormBooleanCell(
             name = FIELD_USE_THOUSANDS_DIVIDER,
-            caption = "Разделять тысячи пробелами",
+            caption = getLocalizedMessage(LocalizedMessages.SEPARATE_THOUSANDS_WITH_SPACES, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.useThousandsDivider ?: true,
         )
         formCells += FormSimpleCell(
             name = FIELD_DECIMAL_SEPARATOR,
-            caption = "Разделить дробной части",
+            caption = getLocalizedMessage(LocalizedMessages.FRACTIONAL_SEPARATOR, userConfig.lang),
             isEditable = changeEnabled,
             value = userEntity?.decimalSeparator ?: ".",
         )
         formCells += FormFileCell(
             name = FIELD_FILE,
-            caption = "Файлы",
+            caption = getLocalizedMessage(LocalizedMessages.FILES, userConfig.lang),
             isEditable = changeEnabled,
             fileId = userEntity?.fileId,
             files = getFormFileCellData(userEntity?.fileId)

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import foatto.core.i18n.LanguageEnum
 
 //--- по умолчанию - тёмные иконки на светлом фоне кнопок,
 //--- но в material 3 design (да и в прочих дизайнах) - контраст к основному фону - светлые иконки/текст на тёмном фоне иконок
@@ -118,4 +119,4 @@ val singleButtonShape: Shape = RoundedCornerShape(4.dp)
 
 var colorCompositeMovedBlockBack: Color = Color.White
 
-var logonFormTitle: String = ""
+var logonFormTitles: Map<LanguageEnum, String> = emptyMap()

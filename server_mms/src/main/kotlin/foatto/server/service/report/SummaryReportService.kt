@@ -61,6 +61,7 @@ class SummaryReportService(
             offsY = addGroupTitle(sheet, offsY, getObjectGroupTitle(userConfig, objectEntity))
 
             offsY = outWorkBlock(
+                userConfig = userConfig,
                 objectEntity = objectEntity,
                 begTime = begTime,
                 endTime = endTime,

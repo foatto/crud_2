@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -14,6 +16,8 @@ import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.UserRelationEnum
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
@@ -55,8 +59,8 @@ class SensorCalibrationService(
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
-        alColumnInfo += FIELD_SENSOR_VALUE to "Значение датчика"
-        alColumnInfo += FIELD_SENSOR_DATA to "Значение измеряемой величины"
+        alColumnInfo += FIELD_SENSOR_VALUE to getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_VALUE, userConfig.lang)
+        alColumnInfo += FIELD_SENSOR_DATA to getLocalizedMMSMessage(LocalizedMMSMessages.MEASURED_VALUE, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -114,7 +118,7 @@ class SensorCalibrationService(
             if (isFormEnabled) {
                 popupDatas += TablePopup(
                     action = formOpenAction,
-                    text = "Открыть",
+                    text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
                 )
             }
@@ -171,13 +175,13 @@ class SensorCalibrationService(
 
         formCells += FormSimpleCell(
             name = FIELD_SENSOR_VALUE,
-            caption = "Значение датчика",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_VALUE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorCalibrationEntity?.sensorValue?.toString() ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_SENSOR_DATA,
-            caption = "Значение измеряемой величины",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MEASURED_VALUE, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorCalibrationEntity?.dataValue?.toString() ?: "",
         )
@@ -196,8 +200,8 @@ class SensorCalibrationService(
         val parentSensorId = formActionData[FIELD_SENSOR]?.stringValue?.toIntOrNull() ?: 0
         val parentSensorEntity = sensorRepository.findByIdOrNull(parentSensorId)!!
 
-        val sensorValue = formActionData[FIELD_SENSOR_VALUE]?.stringValue?.toDoubleOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SENSOR_VALUE to "Не введёно значение датчика"))
-        val dataValue = formActionData[FIELD_SENSOR_DATA]?.stringValue?.toDoubleOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SENSOR_DATA to "Не введёно значение измеряемой величины"))
+        val sensorValue = formActionData[FIELD_SENSOR_VALUE]?.stringValue?.toDoubleOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SENSOR_VALUE to getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_VALUE_NOT_ENTERED, userConfig.lang)))
+        val dataValue = formActionData[FIELD_SENSOR_DATA]?.stringValue?.toDoubleOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_SENSOR_DATA to getLocalizedMMSMessage(LocalizedMMSMessages.MEASURED_VALUE_NOT_ENTERED, userConfig.lang)))
 
         val recordId = id ?: getNextId { nextId -> sensorCalibrationRepository.existsById(nextId) }
         val sensorCalibrationEntity = SensorCalibrationEntity(
@@ -358,7 +362,7 @@ class cSensorCalibration : cStandart() {
             tab = aliasConfig.descr,
             alHeader = alHeader,
             columnCount = 2,
-            alFormColumn = listOf("Значение датчика", "Значение измеряемой величины"),
+            alFormColumn = listOf(getLocalizedMMSMessage(LocalizedMMSMessages.SENSOR_VALUE, userConfig.lang), getLocalizedMMSMessage(LocalizedMMSMessages.MEASURED_VALUE, userConfig.lang)),
             alFormCell = alFormCell,
             alFormButton = alFormButton,
         )

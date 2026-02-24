@@ -166,14 +166,14 @@ object MMSTelematicFunction {
         val logTime = getDateTimeYMDHMSString(timeZone, getCurrentTimeInt())
         val curLogFileName = logTime.substring(0, 13).replace('.', '-').replace(' ', '-')
 
-        var text = "$logTime $address Длительность [сек]: ${getCurrentTimeInt() - begTime} Точек записано: $dataCount "
+        var text = "$logTime $address Duration [sec]: ${getCurrentTimeInt() - begTime} Points recorded: $dataCount "
         if (dataCount > 0) {
-            text += " Время первой точки: ${getDateTimeYMDHMSString(timeZone, firstPointTime)} Время последней точки: ${getDateTimeYMDHMSString(timeZone, lastPointTime)} "
+            text += " Time of first point: ${getDateTimeYMDHMSString(timeZone, firstPointTime)} Time of last point: ${getDateTimeYMDHMSString(timeZone, lastPointTime)} "
         }
-        text += " Статус: $status "
+        text += " Status: $status "
         if (isOk || errorText.isEmpty()) {
         } else {
-            text += " Ошибка: $errorText "
+            text += " Error: $errorText "
         }
 
         val dirDeviceSessionLog = File(dirSessionLog, "device/${deviceConfig.deviceId}")
@@ -726,7 +726,7 @@ object MMSTelematicFunction {
                 maxIgnore?.let {
                     //--- classic variant: if minIgnore < maxIgnore, then ignore below minIgnore or above maxIgnore
                     if (minIgnore < maxIgnore) {
-                        sensorData < minIgnore || sensorData > maxIgnore
+                        sensorData !in minIgnore..maxIgnore
                     } else {
                         //--- alternative: if minIgnore >= maxIgnore, then ignore between minIgnore and maxIgnore,
                         //--- given the case, if minIgnore == maxIgnore, then ignore nothing

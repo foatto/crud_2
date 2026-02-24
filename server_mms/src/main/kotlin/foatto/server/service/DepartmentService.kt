@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -14,6 +16,8 @@ import foatto.core.model.response.table.TablePopup
 import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableSimpleCell
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.DepartmentEntity
@@ -55,7 +59,7 @@ class DepartmentService(
             alColumnInfo += null to "" // selector button
         }
         alColumnInfo += null to "" // userId 
-        alColumnInfo += FIELD_NAME to "Наименование"
+        alColumnInfo += FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang)
 
         return getTableColumnCaptionActions(
             action = action,
@@ -104,7 +108,7 @@ class DepartmentService(
                 type = ActionType.FORM_SELECTOR,
                 selectorData = mapOf(
                     FIELD_ID to departmentEntity.id.toString(),
-                    FIELD_NAME to (departmentEntity.name ?: "(неизвестно)"),
+                    FIELD_NAME to (departmentEntity.name ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)),
                 ),
             )
 
@@ -116,7 +120,7 @@ class DepartmentService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = departmentEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -133,7 +137,7 @@ class DepartmentService(
             if (isFormEnabled) {
                 popupDatas += TablePopup(
                     action = formAction,
-                    text = "Открыть",
+                    text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                     inNewTab = false,
                 )
             }
@@ -191,7 +195,7 @@ class DepartmentService(
         )
         formCells += FormSimpleCell(
             name = FIELD_NAME,
-            caption = "Наименование",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang),
             isEditable = changeEnabled,
             value = departmentEntity?.name ?: "",
         )
@@ -224,12 +228,12 @@ class DepartmentService(
         //TODO: общий Map со всеми ошибками
         val recordUserId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull() ?: 0
 
-        val name = formActionData[FIELD_NAME]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Не введёно наименование"))
+        val name = formActionData[FIELD_NAME]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NO_NAME_ENTERED, userConfig.lang)))
         if (name.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Не введёно наименование"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NO_NAME_ENTERED, userConfig.lang)))
         }
         if (departmentRepository.findByUserIdAndName(recordUserId, name).any { de -> de.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.THIS_NAME_ALREADY_EXISTS, userConfig.lang)))
         }
 
         val recordId = id ?: getNextId { nextId -> departmentRepository.existsById(nextId) }

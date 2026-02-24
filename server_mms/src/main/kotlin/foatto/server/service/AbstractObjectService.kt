@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -22,6 +24,8 @@ import foatto.core.model.response.table.cell.TableButtonCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.ObjectType
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
@@ -101,16 +105,16 @@ abstract class AbstractObjectService(
         }
         alColumnInfo += null to "" // userId
         if (objectType == null) {
-            alColumnInfo += FIELD_TYPE to "Тип"
+            alColumnInfo += FIELD_TYPE to getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang)
         }
-        alColumnInfo += FIELD_IS_DISABLED to "Заблокирован"
-        alColumnInfo += FIELD_NAME to "Наименование"
-        alColumnInfo += FIELD_MODEL to "Модель"
-        alColumnInfo += null to "Подразделение"
-        alColumnInfo += null to "Группа"
+        alColumnInfo += FIELD_IS_DISABLED to getLocalizedMMSMessage(LocalizedMMSMessages.LOCKED, userConfig.lang)
+        alColumnInfo += FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang)
+        alColumnInfo += FIELD_MODEL to getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.DEPARTMENT, userConfig.lang)
+        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.GROUP, userConfig.lang)
 
         if (userConfig.isAdminOnly()) {
-            alColumnInfo += null to "Файл схемы объекта"
+            alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_SCHEMA_FILE, userConfig.lang)
         }
 
         return getTableColumnCaptionActions(
@@ -162,7 +166,7 @@ abstract class AbstractObjectService(
                 type = ActionType.FORM_SELECTOR,
                 selectorData = mapOf(
                     FIELD_ID to objectEntity.id.toString(),
-                    FIELD_NAME to (objectEntity.name ?: "(неизвестно)"),
+                    FIELD_NAME to (objectEntity.name ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)),
                 ),
             )
 
@@ -172,7 +176,7 @@ abstract class AbstractObjectService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
-                userId = userConfig.id,
+                userConfig = userConfig,
                 rowUserId = objectEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
@@ -213,7 +217,7 @@ abstract class AbstractObjectService(
                         type = ActionType.FORM_SELECTOR,
                         selectorData = mapOf(
                             FIELD_ID to objectEntity.id.toString(),
-                            FIELD_NAME to (objectEntity.name ?: "(неизвестно)"),
+                            FIELD_NAME to (objectEntity.name ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)),
                         ),
                     )
                 } else if (isFormEnabled) {
@@ -245,7 +249,7 @@ abstract class AbstractObjectService(
         if (isFormEnabled) {
             alPopupData += TablePopup(
                 action = formOpenAction,
-                text = "Открыть",
+                text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                 inNewTab = false,
             )
         }
@@ -329,7 +333,7 @@ abstract class AbstractObjectService(
 
         formCells += FormComboCell(
             name = FIELD_TYPE,
-            caption = "Тип объекта",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_TYPE, userConfig.lang),
             isEditable = changeEnabled,
             value = (objectEntity?.type ?: objectType ?: ObjectType.STATIONARY).name,
             values = ObjectType.entries.map { v -> v.name to v.getDescr(userConfig.lang) },
@@ -345,13 +349,13 @@ abstract class AbstractObjectService(
         )
         formCells += FormBooleanCell(
             name = FIELD_IS_DISABLED,
-            caption = "Заблокирован",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.LOCKED, userConfig.lang),
             isEditable = changeEnabled,
             value = objectEntity?.isDisabled ?: false,
         )
         formCells += FormSimpleCell(
             name = FIELD_DISABLE_REASON,
-            caption = "Причина блокировки",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.REASON_FOR_BLOCKING, userConfig.lang),
             isEditable = changeEnabled,
             value = objectEntity?.disableReason ?: "",
             visibility = FormCellVisibility(
@@ -362,13 +366,13 @@ abstract class AbstractObjectService(
         )
         formCells += FormSimpleCell(
             name = FIELD_NAME,
-            caption = "Наименование",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang),
             isEditable = changeEnabled,
             value = objectEntity?.name ?: "",
         )
         formCells += FormSimpleCell(
             name = FIELD_MODEL,
-            caption = "Модель",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang),
             isEditable = changeEnabled,
             value = objectEntity?.model ?: "",
         )
@@ -380,12 +384,12 @@ abstract class AbstractObjectService(
         )
         formCells += FormSimpleCell(
             name = FIELD_DEPARTMENT_NAME,
-            caption = "Подразделение",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.DEPARTMENT, userConfig.lang),
             isEditable = false,
             value = if (departmentId == 0) {
                 "-"
             } else {
-                objectEntity?.department?.name ?: "(неизвестно)"
+                objectEntity?.department?.name ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)
             },
             selectorAction = if (changeEnabled) {
                 AppAction(
@@ -413,12 +417,12 @@ abstract class AbstractObjectService(
         )
         formCells += FormSimpleCell(
             name = FIELD_GROUP_NAME,
-            caption = "Группа",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.GROUP, userConfig.lang),
             isEditable = false,
             value = if (groupId == 0) {
                 "-"
             } else {
-                objectEntity?.group?.name ?: "(неизвестно)"
+                objectEntity?.group?.name ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, userConfig.lang)
             },
             selectorAction = if (changeEnabled) {
                 AppAction(
@@ -440,7 +444,7 @@ abstract class AbstractObjectService(
         )
         formCells += FormSimpleCell(
             name = FIELD_INFO,
-            caption = "Информация",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.INFORMATION, userConfig.lang),
             isEditable = changeEnabled,
             value = objectEntity?.info ?: "",
             rows = 5,
@@ -453,18 +457,18 @@ abstract class AbstractObjectService(
         )
         formCells += FormFileCell(
             name = FIELD_FILE,
-            caption = "Файл схемы объекта",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_SCHEMA_FILE, userConfig.lang),
             isEditable = changeEnabled,
             fileId = objectEntity?.fileId,
             files = getFormFileCellData(objectEntity?.fileId)
         )
 
-        addFormCells(changeEnabled, objectEntity, formCells)
+        addFormCells(userConfig, changeEnabled, objectEntity, formCells)
 
         return formCells
     }
 
-    open fun addFormCells(changeEnabled: Boolean, objectEntity: ObjectEntity?, formCells: MutableList<FormBaseCell>) {}
+    open fun addFormCells(userConfig: ServerUserConfig, changeEnabled: Boolean, objectEntity: ObjectEntity?, formCells: MutableList<FormBaseCell>) {}
 
     override fun getFormButtons(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean, deleteEnabled: Boolean): List<FormButton> {
         val id = action.id
@@ -490,12 +494,12 @@ abstract class AbstractObjectService(
 
         val recordUserId = formActionData[FIELD_USER_ID]?.stringValue?.toIntOrNull() ?: 0
 
-        val name = formActionData[FIELD_NAME]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Не введёно наименование"))
+        val name = formActionData[FIELD_NAME]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NO_NAME_ENTERED, userConfig.lang)))
         if (name.isEmpty()) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Не введёно наименование"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NO_NAME_ENTERED, userConfig.lang)))
         }
         if (objectRepository.findByUserIdAndName(recordUserId, name).any { oe -> oe.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to "Такое наименование уже существует"))
+            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.THIS_NAME_ALREADY_EXISTS, userConfig.lang)))
         }
 
         val newObjectType = formActionData[FIELD_TYPE]?.stringValue?.let { s -> ObjectType.valueOf(s) } ?: ObjectType.STATIONARY
@@ -541,7 +545,7 @@ abstract class AbstractObjectService(
                         obj = objectEntity,
                         name = "",
                         group = "",
-                        descr = SensorConfig.hmSensorDescr[SensorConfig.SENSOR_GEO],
+                        descr = SensorConfig.hmSensorDescr[SensorConfig.SENSOR_GEO]?.get(userConfig.lang),
                         portNum = SensorConfigGeo.PORT_NUM,
                         sensorType = SensorConfig.SENSOR_GEO,
                         begTime = getCurrentTimeInt(),

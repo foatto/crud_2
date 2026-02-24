@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.i18n.LanguageEnum
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.request.AppRequest
 import foatto.core.model.response.ResponseCode
 import foatto.server.OrgType
@@ -31,14 +33,16 @@ class LogonService(
         userRepository.findByLogin(login).firstOrNull()?.let { userEntity ->
             val responseCode = checkLogon(userEntity, password)
             if (responseCode == ResponseCode.LOGON_SUCCESS) {
+                val lang = userEntity.lang ?: SpringApp.defaultLang
+
                 val serverUserConfig = ServerUserConfig(
                     id = userEntity.id,
-                    currentUserName = userEntity.fullName ?: "(неизвестно)",
+                    currentUserName = userEntity.fullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, lang),
                     roles = userEntity.roles,
                     timeOffset = userEntity.timeOffset ?: (3 * 3600),
-                    lang = userEntity.lang ?: SpringApp.defaultLang,
-                    fullNames = loadFullUserNames(),
-                    shortNames = loadShortUserNames(),
+                    lang = lang,
+                    fullNames = loadFullUserNames(lang),
+                    shortNames = loadShortUserNames(lang),
                     relatedUserIds = loadRelatedUserIds(
                         userId = userEntity.id,
                         parentId = userEntity.parentId ?: 0,
@@ -86,25 +90,25 @@ class LogonService(
             ResponseCode.LOGON_SUCCESS
         }
 
-    private fun loadFullUserNames(): Map<Int, String> {
+    fun loadFullUserNames(lang: LanguageEnum): Map<Int, String> {
         val hmFullName = mutableMapOf<Int, String>()
 
         val userEntities = userRepository.findAll()
         userEntities.forEach { userEntity ->
             if (userEntity.id != 0) {
-                hmFullName[userEntity.id] = userEntity.fullName ?: "(неизвестно)"
+                hmFullName[userEntity.id] = userEntity.fullName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, lang)
             }
         }
         return hmFullName
     }
 
-    private fun loadShortUserNames(): Map<Int, String> {
+    fun loadShortUserNames(lang: LanguageEnum): Map<Int, String> {
         val hmShortName = mutableMapOf<Int, String>()
 
         val userEntities = userRepository.findAll()
         userEntities.forEach { userEntity ->
             if (userEntity.id != 0) {
-                hmShortName[userEntity.id] = userEntity.shortName ?: "(неизвестно)"
+                hmShortName[userEntity.id] = userEntity.shortName ?: getLocalizedMessage(LocalizedMessages.UNKNOWN, lang)
             }
         }
         return hmShortName

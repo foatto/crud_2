@@ -1,6 +1,8 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
+import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
@@ -14,6 +16,8 @@ import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getTimeZone
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.checkFormAddPermission
 import foatto.server.checkRowPermission
 import foatto.server.entity.DateEntity
@@ -72,7 +76,7 @@ abstract class AbstractDayWorkService(
         if (isFormEnabled) {
             alPopupData += TablePopup(
                 action = formOpenAction,
-                text = "Открыть",
+                text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                 inNewTab = false,
             )
         }
@@ -94,7 +98,13 @@ abstract class AbstractDayWorkService(
         return alPopupData
     }
 
-    override fun getFormCells(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, addEnabled: Boolean, editEnabled: Boolean): List<FormBaseCell> {
+    override fun getFormCells(
+        action: AppAction,
+        userConfig: ServerUserConfig,
+        moduleConfig: AppModuleConfig,
+        addEnabled: Boolean,
+        editEnabled: Boolean
+    ): List<FormBaseCell> {
         val formCells = mutableListOf<FormBaseCell>()
 
         val id = action.id
@@ -134,7 +144,7 @@ abstract class AbstractDayWorkService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_NAME,
-            caption = "Наименование",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang),
             isEditable = false,
             value = parentObjectEntity?.name ?: "",
             selectorAction = AppAction(
@@ -155,14 +165,14 @@ abstract class AbstractDayWorkService(
         )
         formCells += FormSimpleCell(
             name = FIELD_OBJECT_MODEL,
-            caption = "Модель",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang),
             isEditable = changeEnabled,
             value = parentObjectEntity?.model ?: "",
         )
 
         formCells += FormDateTimeCell(
             name = FIELD_DAY,
-            caption = "Дата",
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.DATE, userConfig.lang),
             isEditable = changeEnabled,
             mode = FormDateTimeCellMode.DMY,
             value = dayWorkEntity?.day?.let { dt ->
@@ -191,7 +201,7 @@ abstract class AbstractDayWorkService(
     override fun formActionSave(action: AppAction, userConfig: ServerUserConfig, moduleConfig: AppModuleConfig, formActionData: Map<String, FormActionData>): FormActionResponse {
         val id = action.id
 
-        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_OBJECT_NAME to "Не выбран объект"))
+        val parentObjectId = formActionData[FIELD_OBJECT_ID]?.stringValue?.toIntOrNull() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_OBJECT_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NO_OBJECT_SELECTED, userConfig.lang)))
         val parentObjectEntity = objectRepository.findByIdOrNull(parentObjectId)
 
         val day = getDateTimeYMDHMSInts(getTimeZone(userConfig.timeOffset), formActionData[FIELD_DAY]?.dateTimeValue ?: getCurrentTimeInt())
@@ -223,7 +233,7 @@ abstract class AbstractDayWorkService(
 
 }
 /*
-        columnRun = ColumnString(modelTableName, "_run", "Пробег [км]", STRING_COLUMN_WIDTH).apply {
+        columnRun = ColumnString(modelTableName, "_run", getLocalizedMMSMessage(LocalizedMMSMessages.MILEAGE_UNITS, userConfig.lang), STRING_COLUMN_WIDTH).apply {
             isVirtual = true
             isSearchable = false
         }

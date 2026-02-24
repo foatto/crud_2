@@ -1,8 +1,10 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LanguageEnum
 import foatto.core_mms.AppModuleMMS
 import foatto.server.OrgType
+import foatto.server.SpringApp
 import foatto.server.entity.UserEntity
 import foatto.server.getEnabledUserIds
 import foatto.server.model.ObjectDataResponse
@@ -34,9 +36,14 @@ class APIService(
         start: String?,
         duration: Int?,
     ): ObjectDataResponse {
+        val userEntity = getUser(token) ?: return ObjectDataResponse(errorMessage = "A user with this login and password was not found")
+        if (userEntity.isDisabled == true) {
+            return ObjectDataResponse(errorMessage = "User has been blocked")
+        }
+
         duration?.let {
             if (duration > 86_400) {
-                return ObjectDataResponse(errorMessage = "Длительность периода не может быть более 1 суток")
+                return ObjectDataResponse(errorMessage = "The period cannot be longer than 1 day")
             }
         }
 
@@ -44,11 +51,6 @@ class APIService(
         // 2023-01-02T23:40:57Z
         val begTime = start?.let { Instant.parse(start).epochSeconds.toInt() }
         val endTime = begTime?.let { begTime + (duration ?: 86_400) }
-
-        val userEntity = getUser(token) ?: return ObjectDataResponse(errorMessage = "Пользователь с таким логином и паролём не найден")
-        if (userEntity.isDisabled == true) {
-            return ObjectDataResponse(errorMessage = "Пользователь заблокирован")
-        }
 
         val enabledUserIds = getEnabledUserIds(
             module = AppModuleMMS.ALL_OBJECT,
@@ -63,9 +65,9 @@ class APIService(
 
         val objectEntities = objectRepository.findByUserIdInAndName(enabledUserIds, objectName)
         if (objectEntities.size > 1) {
-            return ObjectDataResponse(errorMessage = "Найдено ${objectEntities.size} объектов с таким наименованием")
+            return ObjectDataResponse(errorMessage = "${objectEntities.size} objects with this name were found")
         }
-        val objectEntity = objectEntities.firstOrNull() ?: return ObjectDataResponse(errorMessage = "Объект с таким наименованием не найден")
+        val objectEntity = objectEntities.firstOrNull() ?: return ObjectDataResponse(errorMessage = "An object with this name was not found.")
 
         val sensors = mutableListOf<ObjectDataResponseSensorInfo>()
         sensorRepository.findByObjAndPeriod(objectEntity, begTime, endTime).forEach { sensorEntity ->

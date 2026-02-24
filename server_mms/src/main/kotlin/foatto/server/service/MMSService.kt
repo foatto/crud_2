@@ -1,12 +1,15 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TablePopup
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core_mms.AppModuleMMS
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.model.ServerUserConfig
@@ -57,7 +60,7 @@ abstract class MMSService(
     ) {
         getTablePopupData(
             userConfig = userConfig,
-            group = "Отчёты",
+            group = getLocalizedMMSMessage(LocalizedMMSMessages.REPORTS, userConfig.lang),
             actionType = ActionType.MODULE_FORM,
             childModule = childModule,
             parentModule = parentModule,
@@ -77,7 +80,7 @@ abstract class MMSService(
     ) {
         getTablePopupData(
             userConfig = userConfig,
-            group = "Контрольные панели",
+            group = getLocalizedMMSMessage(LocalizedMMSMessages.DASHBOARDS, userConfig.lang),
             actionType = ActionType.MODULE_COMPOSITE,
             childModule = childModule,
             parentModule = parentModule,
@@ -97,7 +100,7 @@ abstract class MMSService(
     ) {
         getTablePopupData(
             userConfig = userConfig,
-            group = "Графики",
+            group = getLocalizedMMSMessage(LocalizedMMSMessages.CHARTS, userConfig.lang),
             actionType = ActionType.MODULE_CHART,
             childModule = childModule,
             parentModule = parentModule,
@@ -119,7 +122,7 @@ abstract class MMSService(
     ) {
         getTablePopupData(
             userConfig = userConfig,
-            group = "Карты",
+            group = getLocalizedMMSMessage(LocalizedMMSMessages.MAPS, userConfig.lang),
             actionType = ActionType.MODULE_MAP,
             childModule = childModule,
             parentModule = parentModule,
@@ -154,7 +157,7 @@ abstract class MMSService(
                 ),
                 text = appModuleConfigs[childModule]?.captions?.let { captions ->
                     getLocalizedMessage(captions, userConfig.lang)
-                } ?: "(неизвестный тип модуля: '$childModule')",
+                } ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_MODULE_TYPE, userConfig.lang)}: '$childModule')",
                 inNewTab = true,
             )
         }

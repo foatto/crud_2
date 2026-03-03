@@ -274,9 +274,11 @@ abstract class AbstractObjectService(
         }
 
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)
+//        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, getObjectAppModule(), objectEntity.id, alPopupData)
 
-//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ENERGO_SENSORS, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ALL_SENSORS, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
 
         if (objectEntity.type == ObjectType.MOBILE) {
             getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, getObjectAppModule(), objectEntity.id, begTime, endTime, alPopupData)
@@ -569,7 +571,7 @@ abstract class AbstractObjectService(
                         minView = 0.0,
                         maxView = 100.0,
                         minLimit = 0.0,
-                        maxLimit = 100.0,
+                        maxLimit = 0.0,
                         smoothTime = 0,
                         indicatorDelimiterCount = 4,
                         indicatorMultiplicator = 1.0,

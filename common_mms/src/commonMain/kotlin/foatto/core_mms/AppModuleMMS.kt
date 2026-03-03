@@ -23,7 +23,9 @@ object AppModuleMMS {
     const val WORK_SHIFT: String = "work_shift"
 
     const val CHART_SENSOR: String = "chart_sensor"
-//    const val CHART_LIQUID_LEVEL: String = "CHART_LIQUID_LEVEL"
+    const val CHART_ALL_SENSORS: String = "chart_all_sensors"
+    const val CHART_ENERGO_SENSORS: String = "chart_energo_sensors"
+    const val CHART_LIQUID_LEVEL: String = "chart_liquid_level"
 
     const val MAP_TRACE: String = "map_trace"
 

@@ -417,9 +417,11 @@ class WorkShiftService(
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_WORK_SHIFT, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
 
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
+//        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
 
-//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ENERGO_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ALL_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
 
         //--- maps for shift works for static objects is not exists
         //getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.OBJECT, objectId, begTime, endTime, alPopupData)

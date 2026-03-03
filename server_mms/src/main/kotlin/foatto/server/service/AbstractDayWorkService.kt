@@ -85,9 +85,11 @@ abstract class AbstractDayWorkService(
         getTableReportPopupData(userConfig, AppModuleMMS.REPORT_DAY_WORK, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
 
         getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
+//        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
 
-//        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.OBJECT, id, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ENERGO_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ALL_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
 
         getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
 

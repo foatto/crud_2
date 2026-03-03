@@ -74,10 +74,18 @@ fun addAppModuleUrls() {
         appUrl = ApiUrlMMS.CHART_SENSOR,
         chartActionUrl = ApiUrlMMS.CHART_SENSOR_ACTION,
     )
-//    appModuleUrls[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleUrl(
-//        appUrl = ApiUrlMMS.CHART_LIQUID_LEVEL,
-//        chartActionUrl = ApiUrlMMS.CHART_LIQUID_LEVEL_ACTION,
-//    )
+    appModuleUrls[AppModuleMMS.CHART_ALL_SENSORS] = AppModuleUrl(
+        appUrl = ApiUrlMMS.CHART_ALL_SENSORS,
+        chartActionUrl = ApiUrlMMS.CHART_ALL_SENSORS_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.CHART_ENERGO_SENSORS] = AppModuleUrl(
+        appUrl = ApiUrlMMS.CHART_ENERGO_SENSORS,
+        chartActionUrl = ApiUrlMMS.CHART_ENERGO_SENSORS_ACTION,
+    )
+    appModuleUrls[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleUrl(
+        appUrl = ApiUrlMMS.CHART_LIQUID_LEVEL,
+        chartActionUrl = ApiUrlMMS.CHART_LIQUID_LEVEL_ACTION,
+    )
 
     appModuleUrls[AppModuleMMS.MAP_TRACE] = AppModuleUrl(
         appUrl = ApiUrlMMS.MAP_TRACE,

@@ -51,8 +51,14 @@ object ApiUrlMMS {
     const val CHART_SENSOR: String = "${ApiUrl.URL_BASE}/chart_sensor/${ApiUrl.CURRENT_VERSION}"
     const val CHART_SENSOR_ACTION: String = "${ApiUrl.URL_BASE}/chart_sensor_action/${ApiUrl.CURRENT_VERSION}"
 
-//    const val CHART_LIQUID_LEVEL: String = "${ApiUrl.URL_BASE}/chart_liquid_level/${ApiUrl.CURRENT_VERSION}"
-//    const val CHART_LIQUID_LEVEL_ACTION: String = "${ApiUrl.URL_BASE}/chart_liquid_level_action/${ApiUrl.CURRENT_VERSION}"
+    const val CHART_ALL_SENSORS: String = "${ApiUrl.URL_BASE}/chart_all_sensors/${ApiUrl.CURRENT_VERSION}"
+    const val CHART_ALL_SENSORS_ACTION: String = "${ApiUrl.URL_BASE}/chart_all_sensors_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val CHART_ENERGO_SENSORS: String = "${ApiUrl.URL_BASE}/chart_energo_sensors/${ApiUrl.CURRENT_VERSION}"
+    const val CHART_ENERGO_SENSORS_ACTION: String = "${ApiUrl.URL_BASE}/chart_energo_sensors_action/${ApiUrl.CURRENT_VERSION}"
+
+    const val CHART_LIQUID_LEVEL: String = "${ApiUrl.URL_BASE}/chart_liquid_level/${ApiUrl.CURRENT_VERSION}"
+    const val CHART_LIQUID_LEVEL_ACTION: String = "${ApiUrl.URL_BASE}/chart_liquid_level_action/${ApiUrl.CURRENT_VERSION}"
 
     const val MAP_TRACE: String = "${ApiUrl.URL_BASE}/map_trace/${ApiUrl.CURRENT_VERSION}"
     const val MAP_TRACE_ACTION: String = "${ApiUrl.URL_BASE}/map_trace_action/${ApiUrl.CURRENT_VERSION}"

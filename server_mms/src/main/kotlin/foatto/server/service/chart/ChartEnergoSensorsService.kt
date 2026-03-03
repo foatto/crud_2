@@ -2,6 +2,7 @@ package foatto.server.service.chart
 
 import foatto.core.model.response.chart.ChartData
 import foatto.server.entity.ObjectEntity
+import foatto.server.entity.SensorEntity
 import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
@@ -10,7 +11,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 
 @Service
-class ChartLiquidLevelService(
+class ChartEnergoSensorsService(
     private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
@@ -21,13 +22,15 @@ class ChartLiquidLevelService(
 ) {
 
     companion object {
-        val liquidBasedSensorTypes = setOf(
-            SensorConfig.SENSOR_LIQUID_LEVEL,
-            SensorConfig.SENSOR_WEIGHT,
-            SensorConfig.SENSOR_TEMPERATURE,
-            SensorConfig.SENSOR_DENSITY,
-            SensorConfig.SENSOR_MASS_FLOW,
-            SensorConfig.SENSOR_VOLUME_FLOW,
+        val phasedSensorTypes = listOf(
+            SensorConfig.SENSOR_ENERGO_VOLTAGE,
+            SensorConfig.SENSOR_ENERGO_CURRENT,
+            SensorConfig.SENSOR_ENERGO_POWER_KOEF,
+            SensorConfig.SENSOR_ENERGO_POWER_ACTIVE,
+            SensorConfig.SENSOR_ENERGO_POWER_REACTIVE,
+            SensorConfig.SENSOR_ENERGO_POWER_FULL,
+            SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT,
+            SensorConfig.SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE,
         )
     }
 
@@ -44,17 +47,19 @@ class ChartLiquidLevelService(
             .findByObj(objectEntity)
             .groupBy { sensorEntity -> sensorEntity.group }
             .forEach { (group, entities) ->
-                val liquidBasedSensorEntities = entities.filter { sensorEntity -> sensorEntity.sensorType in liquidBasedSensorTypes }
-                if (liquidBasedSensorEntities.isNotEmpty()) {
-                    charts += getCombinedSensorChart(
-                        userConfig = userConfig,
-                        chartTitle = group ?: "-",
-                        sensorEntities = liquidBasedSensorEntities,
-                        begTime = begTime,
-                        endTime = endTime,
-                        viewWidth = viewWidth,
-                        viewHeight = viewHeight,
-                    )
+                phasedSensorTypes.forEach { sensorType ->
+                    val phasedEnergoSensorEntities = entities.filter { sensorEntity -> sensorEntity.sensorType == sensorType }
+                    if (phasedEnergoSensorEntities.isNotEmpty()) {
+                        charts += getCombinedSensorChart(
+                            userConfig = userConfig,
+                            chartTitle = group ?: "-",
+                            sensorEntities = phasedEnergoSensorEntities,
+                            begTime = begTime,
+                            endTime = endTime,
+                            viewWidth = viewWidth,
+                            viewHeight = viewHeight,
+                        )
+                    }
                 }
             }
 
@@ -75,4 +80,7 @@ class ChartLiquidLevelService(
 //                    )
 //                }
     }
+
+    override fun getAxisTitle(sensorEntity: SensorEntity): String =
+        "${sensorEntity.descr ?: "-"} (${SensorConfig.hmPhaseDescr[sensorEntity.phase] ?: "(фаза не указана)"}) [${sensorEntity.dim ?: "-"}]"
 }

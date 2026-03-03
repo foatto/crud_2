@@ -508,14 +508,24 @@ class MMSSpringApp : SpringApp() {
 
         appModuleConfigs[AppModuleMMS.CHART_SENSOR] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "Chart by sensor", LanguageEnum.RU to "График по датчику"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+        )
+        appModuleConfigs[AppModuleMMS.CHART_ALL_SENSORS] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Charts for all sensors", LanguageEnum.RU to "Графики по всем датчикам"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+        )
+        appModuleConfigs[AppModuleMMS.CHART_ENERGO_SENSORS] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Charts for energo sensors", LanguageEnum.RU to "Графики по электросчётчикам"),
+            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
+            disabledAccessRoles = mutableSetOf(),
+        )
+        appModuleConfigs[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleConfig(
+            captions = mapOf(LanguageEnum.EN to "Combined charts for fuel tanks", LanguageEnum.RU to "Комбинированные графики уровня топлива"),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
         )
-//        appModuleConfigs[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleConfig(
-//            caption = "Графики уровня топлива",
-//            enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
-//            disabledAccessRoles = mutableSetOf(),
-//        )
 
         appModuleConfigs[AppModuleMMS.MAP_TRACE] = AppModuleConfig(
             captions = mapOf(LanguageEnum.EN to "Trajectory on the map", LanguageEnum.RU to "Траектория на карте"),
@@ -624,14 +634,14 @@ class MMSSpringApp : SpringApp() {
                     iconUrl = "/images/icons8-dashboard-gauge-24.png",
                     iconSize = 24,
                 )
-                addMenuItem(
-                    alMenu = this,
-                    serverUserConfig = serverUserConfig,
-                    module = AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD,
-                    actionType = ActionType.MODULE_COMPOSITE,
-                    iconUrl = "/images/icons8-combo-chart-24.png",
-                    iconSize = 24,
-                )
+//                addMenuItem(
+//                    alMenu = this,
+//                    serverUserConfig = serverUserConfig,
+//                    module = AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD,
+//                    actionType = ActionType.MODULE_COMPOSITE,
+//                    iconUrl = "/images/icons8-combo-chart-24.png",
+//                    iconSize = 24,
+//                )
 
                 if (size > 0) {
                     alMenu += MenuData(

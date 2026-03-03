@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -58,7 +57,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
-import kotlin.io.println
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max
@@ -83,10 +81,12 @@ class ChartControl(
         private val COLOR_CHART_DATA_BACK = hsl(60.0f, 1.0f, 0.5f)   // 0.7f
         private const val COLOR_CHART_LINE_WIDTH = 1.0f
 
-        private const val MARGIN_LEFT = 100     // на каждую ось Y
+        private const val MARGIN_LEFT = 100.0f     // на каждую ось Y
         private const val MARGIN_RIGHT = 20.0f
-        private const val MARGIN_TOP = 40
-        private const val MARGIN_BOTTOM = 60
+        private const val MARGIN_TOP = 40.0f
+        private const val MARGIN_BOTTOM = 60.0f
+
+        private const val CHART_MIN_HEIGHT = 300.0f
 
         private const val MIN_GRID_STEP_X = 40  // минимальный шаг между линиями сетки в пикселях
         private const val MIN_GRID_STEP_Y = 40  // минимальный шаг между линиями сетки в пикселях
@@ -94,8 +94,8 @@ class ChartControl(
         private const val MIN_SCALE_X = 15 * 60     // минимальный разрешённый масштаб - диапазон не менее 15 мин
         private const val MAX_SCALE_X = 32 * 86400  // максимальный разрешённый масштаб - диапазон не более 32 дней (чуть более месяца)
 
-        private const val GRAPHIC_TEXT_HEIGHT = 20              // высота текстового блока
-        private const val GRAPHIC_TEXT_MIN_VISIBLE_WIDTH = 4    // минимальная ширина видимого текстового блока
+        private const val TEXT_DATA_HEIGHT = 20              // высота текстового блока
+        private const val TEXT_DATA_MIN_VISIBLE_WIDTH = 4    // минимальная ширина видимого текстового блока
 
         private val arrGridStepX = arrayOf(
             1, 5, 15,                           // 1 - 5 - 15 seconds
@@ -145,12 +145,15 @@ class ChartControl(
     private var legendCanvasWidth: Float by mutableFloatStateOf(0.0f)
 
     private var screenOffsetX: Float by mutableFloatStateOf(0.0f)
+    private var screenOffsetY: Float by mutableFloatStateOf(0.0f)
 
     //--- нужен для извлечения/показа величин на графике
     private val chartDatas = mutableListOf<ChartData>()
 
     private val chartDrawDatas = mutableStateListOf<ChartDrawData>()
     private val yDrawDatas = mutableListOf<ChartYData>()
+
+    private var allChartsHeight: Float by mutableFloatStateOf(0.0f)
 
     private val mouseRect = MouseRectData()     // contains state-fields
 
@@ -274,9 +277,9 @@ class ChartControl(
                         canvasWidth = axisCanvasWidth,
                         canvasHeight = canvasHeight,
                         x1 = axisLine.x1,
-                        y1 = axisLine.y1,
+                        y1 = axisLine.y1 + screenOffsetY,
                         x2 = axisLine.x2,
-                        y2 = axisLine.y2,
+                        y2 = axisLine.y2 + screenOffsetY,
                         color = axisLine.strokeColor,
                         strokeWidth = axisLine.strokeWidth,
                         strokeDash = axisLine.strokeDash,
@@ -292,7 +295,7 @@ class ChartControl(
                         fontSize = 12,
                         textIsBold = false,
                         x = axisText.x,
-                        y = axisText.y,
+                        y = axisText.y + screenOffsetY,
                         textLimitWidth = null,
                         textLimitHeight = null,
                         rotateDegree = axisText.rotateDegree,
@@ -336,7 +339,7 @@ class ChartControl(
                     fontSize = 12,
                     textIsBold = false,
                     x = chartGroup.title.x + screenOffsetX,
-                    y = chartGroup.title.y,
+                    y = chartGroup.title.y + screenOffsetY,
                     textLimitWidth = null,
                     textLimitHeight = null,
                     rotateDegree = null,
@@ -351,7 +354,7 @@ class ChartControl(
                 for (graphicBack in chartGroup.chartBacks) {
                     drawRectOnCanvas(
                         x = graphicBack.x + screenOffsetX,
-                        y = graphicBack.y,
+                        y = graphicBack.y + screenOffsetY,
                         width = graphicBack.width,
                         height = graphicBack.height,
                         fillColor = graphicBack.fillColor,
@@ -366,9 +369,9 @@ class ChartControl(
                         canvasWidth = bodyCanvasWidth,
                         canvasHeight = canvasHeight,
                         x1 = axisLine.x1 + screenOffsetX,
-                        y1 = axisLine.y1,
+                        y1 = axisLine.y1 + screenOffsetY,
                         x2 = axisLine.x2 + screenOffsetX,
-                        y2 = axisLine.y2,
+                        y2 = axisLine.y2 + screenOffsetY,
                         color = axisLine.strokeColor,
                         strokeWidth = axisLine.strokeWidth,    // 2.dp.toPx()
                         strokeDash = axisLine.strokeDash,
@@ -384,7 +387,7 @@ class ChartControl(
                         fontSize = 12,
                         textIsBold = false,
                         x = axisText.x + screenOffsetX,
-                        y = axisText.y,
+                        y = axisText.y + screenOffsetY,
                         textLimitWidth = null,
                         textLimitHeight = null,
                         rotateDegree = null,
@@ -422,9 +425,9 @@ class ChartControl(
                         canvasWidth = bodyCanvasWidth,
                         canvasHeight = canvasHeight,
                         x1 = graphicLine.x1 + screenOffsetX,
-                        y1 = graphicLine.y1,
+                        y1 = graphicLine.y1 + screenOffsetY,
                         x2 = graphicLine.x2 + screenOffsetX,
-                        y2 = graphicLine.y2,
+                        y2 = graphicLine.y2 + screenOffsetY,
                         color = graphicLine.strokeColor,
                         strokeWidth = graphicLine.strokeWidth,    // 2.dp.toPx()
                         strokeDash = graphicLine.strokeDash,
@@ -446,7 +449,7 @@ class ChartControl(
                         fontSize = 12,
                         textIsBold = false,
                         x = graphicText.x + screenOffsetX,
-                        y = graphicText.y,
+                        y = graphicText.y + screenOffsetY,
                         textLimitWidth = graphicText.textLimitWidth,
                         textLimitHeight = graphicText.textLimitHeight,
                         rotateDegree = null,
@@ -728,8 +731,9 @@ class ChartControl(
             val oneChartHeight = if (chartDatas.isEmpty()) {
                 0.0f
             } else {
-                canvasHeight / chartDatas.size * root.scaleKoef
+                max(CHART_MIN_HEIGHT, canvasHeight / chartDatas.size) * root.scaleKoef
             }
+            allChartsHeight = oneChartHeight * chartDatas.size
 
             chartDrawDatas.clear()
             yDrawDatas.clear()
@@ -917,10 +921,10 @@ class ChartControl(
                     val drawX1 = bodyCanvasWidth * (gtd.x1 - t1) / (t2 - t1)
                     val drawX2 = bodyCanvasWidth * (gtd.x2 - t1) / (t2 - t1)
                     val drawWidth = drawX2 - drawX1
-                    val drawHeight = GRAPHIC_TEXT_HEIGHT * root.scaleKoef
+                    val drawHeight = TEXT_DATA_HEIGHT * root.scaleKoef
 
                     //--- смысла нет показывать коротенькие блоки
-                    if (drawWidth <= GRAPHIC_TEXT_MIN_VISIBLE_WIDTH * root.scaleKoef) {
+                    if (drawWidth <= TEXT_DATA_MIN_VISIBLE_WIDTH * root.scaleKoef) {
                         continue
                     }
 
@@ -1325,7 +1329,21 @@ class ChartControl(
 
         when (curMode) {
             ChartWorkMode.PAN -> {
-                screenOffsetX += dragAmount.x
+                //--- чтобы убрать раздражающую диагональную прокрутку - нормализуем dx и dy - выбираем только один из них
+                if (allChartsHeight <= canvasHeight || abs(dragAmount.x) >= abs(dragAmount.y)) {
+                    screenOffsetX += dragAmount.x
+                } else {
+                    val newScreenOffsetY = screenOffsetY + dragAmount.y
+                    val maxOffsetY = allChartsHeight - canvasHeight
+
+                    screenOffsetY = if (newScreenOffsetY > 0) {
+                        0.0f
+                    } else if (newScreenOffsetY < -maxOffsetY) {
+                        -maxOffsetY
+                    } else {
+                        newScreenOffsetY
+                    }
+                }
             }
 
             ChartWorkMode.ZOOM_BOX -> {

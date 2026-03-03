@@ -164,14 +164,14 @@ abstract class AbstractControl(
                 },
             )
         } catch (t: Throwable) {
-            println("--- AbstractControl.drawLineOnCanvas.drawLine error:")
-            println("canvasWidth = $canvasWidth")
-            println("canvasHeight = $canvasHeight")
-            println("x1 = $x1")
-            println("y1 = $y1")
-            println("x2 = $x2")
-            println("y2 = $y2")
-            println("---")
+//            println("--- AbstractControl.drawLineOnCanvas.drawLine error:")
+//            println("canvasWidth = $canvasWidth")
+//            println("canvasHeight = $canvasHeight")
+//            println("x1 = $x1")
+//            println("y1 = $y1")
+//            println("x2 = $x2")
+//            println("y2 = $y2")
+//            println("---")
         }
     }
 
@@ -344,6 +344,7 @@ abstract class AbstractControl(
 //                    println("--- TEXT = '$text'")
 //                    println("--- x = $textX")
 //                    println("--- y = $textY")
+//                    println("--- color = ${textStyle.color}")
                     drawText(
                         textMeasurer = textMeasurer,
                         topLeft = Offset(textX, textY),
@@ -391,22 +392,22 @@ abstract class AbstractControl(
                         },
                     )
                 } catch (t: Throwable) {
-                    println("--- AbstractControl.drawTextOnCanvas.drawText error:")
-                    println("text = '$text'")
-                    println("canvasWidth = $canvasWidth")
-                    println("canvasHeight = $canvasHeight")
-                    println("x = $textX")
-                    println("y = $textY")
-                    println(
-                        "size = ${
-                            if (isTextSizeLimited) {
-                                textSize
-                            } else {
-                                Size.Unspecified
-                            }
-                        }"
-                    )
-                    println("---")
+//                    println("--- AbstractControl.drawTextOnCanvas.drawText error:")
+//                    println("text = '$text'")
+//                    println("canvasWidth = $canvasWidth")
+//                    println("canvasHeight = $canvasHeight")
+//                    println("x = $textX")
+//                    println("y = $textY")
+//                    println(
+//                        "size = ${
+//                            if (isTextSizeLimited) {
+//                                textSize
+//                            } else {
+//                                Size.Unspecified
+//                            }
+//                        }"
+//                    )
+//                    println("---")
                 }
             }
         }

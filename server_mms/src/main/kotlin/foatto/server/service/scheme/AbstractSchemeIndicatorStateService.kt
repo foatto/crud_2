@@ -139,13 +139,14 @@ abstract class AbstractSchemeIndicatorStateService(
 
     protected abstract fun getElements(userConfig: ServerUserConfig, sensorId: Int, scale: Float): List<XyElement>
 
-    protected fun getErrorText(sensorId: Int): Pair<Int?, String?> {
+    protected fun getErrorCode(sensorId: Int): Pair<Int?, Int?> {
         var errorTime: Int? = null
-        var errorValue: String? = null
+        var errorCode: Int? = null
         ApplicationService.withConnection(entityManager) { conn ->
+            // type_0 - тип сообщения - пока никого не интересует - он всегда == ERROR
             val rs = conn.executeQuery(
                 """
-                    SELECT ontime_1, message_0
+                    SELECT ontime_1 , code_0
                     FROM MMS_text_${sensorId}
                     WHERE ontime_1 = (
                         SELECT MAX(ontime_1) FROM MMS_text_${sensorId} 
@@ -154,12 +155,12 @@ abstract class AbstractSchemeIndicatorStateService(
             )
             if (rs.next()) {
                 errorTime = rs.getInt(1)
-                errorValue = rs.getString(2)
+                errorCode = rs.getInt(2)
             }
             rs.close()
         }
 
-        return errorTime to errorValue
+        return errorTime to errorCode
     }
 
     protected fun addTitleElement(

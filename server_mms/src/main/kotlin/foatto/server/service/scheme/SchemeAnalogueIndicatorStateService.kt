@@ -6,9 +6,8 @@ import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.util.getPrecision
 import foatto.core.util.getRandomInt
 import foatto.core.util.getSplittedDouble
-import foatto.core_mms.i18n.LocalizedMMSMessages
-import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.calc.DataValueStateEnum
+import foatto.server.ds.MMSTelematicFunction
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
@@ -109,7 +108,7 @@ class SchemeAnalogueIndicatorStateService(
             rs.close()
         }
 
-        val (errorTime, errorMessage) = getErrorText(sensorEntity.id)
+        val (errorTime, errorCode) = getErrorCode(sensorEntity.id)
         val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
 
         val dataValueStateEnum = sensorValue?.let { value ->
@@ -404,7 +403,7 @@ class SchemeAnalogueIndicatorStateService(
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.LT
             text = if (isErrorStatus) {
-                errorMessage ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_ERROR, userConfig.lang)
+                MMSTelematicFunction.getText(errorCode, userConfig.lang)
             } else {
                 valueText
             }

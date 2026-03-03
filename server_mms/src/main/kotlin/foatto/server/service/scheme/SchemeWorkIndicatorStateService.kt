@@ -79,7 +79,7 @@ class SchemeWorkIndicatorStateService(
             rs.close()
         }
 
-        val (errorTime, errorMessage) = getErrorText(sensorEntity.id)
+        val (errorTime, errorCode) = getErrorCode(sensorEntity.id)
         val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
 
         val x0 = 6 * GRID_STEP

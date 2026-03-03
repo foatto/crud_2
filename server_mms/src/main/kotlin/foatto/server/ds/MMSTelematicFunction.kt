@@ -1,9 +1,12 @@
 package foatto.server.ds
 
+import foatto.core.i18n.LanguageEnum
 import foatto.core.model.model.xy.XyProjection
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeYMDHMSInts
 import foatto.core.util.getDateTimeYMDHMSString
+import foatto.core_mms.i18n.LocalizedMMSMessages
+import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.entity.SensorEntity
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.model.sensor.SensorConfigWork
@@ -16,6 +19,7 @@ import kotlinx.datetime.TimeZone
 import java.io.File
 import java.util.SortedMap
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.get
 import kotlin.math.max
 
 object MMSTelematicFunction {
@@ -23,22 +27,30 @@ object MMSTelematicFunction {
     const val DEVICE_TYPE_GALILEO: Int = 1
     const val DEVICE_TYPE_PULSAR_DATA: Int = 3
 
-    private const val ERROR_CODE_NO_DATA: Double = -1.0E-12
-    private const val ERROR_CODE_MEASURE_ERROR: Double = -2.0E-12
-
-    private const val TEXT_TYPE_ERROR: Int = 1
+    private const val SENSOR_ERROR_VALUE_NO_DATA: Double = -1.0E-12
+    private const val SENSOR_ERROR_VALUE_MEASURE_ERROR: Double = -2.0E-12
 
     private const val TEXT_CODE_NO_DATA: Int = 1
     private const val TEXT_CODE_MEASURE_ERROR: Int = 2
 
-    private val errorCodes: Map<Double, Int> = mapOf(
-        ERROR_CODE_NO_DATA to TEXT_CODE_NO_DATA,
-        ERROR_CODE_MEASURE_ERROR to TEXT_CODE_MEASURE_ERROR,
+    private const val TEXT_TYPE_UNKNOWN: Int = 0
+    private const val TEXT_TYPE_ERROR: Int = 1
+
+    private val textCodes: Map<Double, Int> = mapOf(
+        SENSOR_ERROR_VALUE_NO_DATA to TEXT_CODE_NO_DATA,
+        SENSOR_ERROR_VALUE_MEASURE_ERROR to TEXT_CODE_MEASURE_ERROR,
     )
-    private val errorDescrs: Map<Int, String> = mapOf(
-        TEXT_CODE_NO_DATA to "Датчик не отвечает",
-        TEXT_CODE_MEASURE_ERROR to "Ошибка измерения",
+    private val textTypes: Map<Int, Int> = mapOf(
+        TEXT_CODE_NO_DATA to TEXT_TYPE_ERROR,
+        TEXT_CODE_MEASURE_ERROR to TEXT_TYPE_ERROR,
     )
+
+    private val texts: Map<Int, Map<LanguageEnum, String>> = mapOf(
+        TEXT_CODE_NO_DATA to mapOf(LanguageEnum.EN to "The sensor is not responding", LanguageEnum.RU to "Датчик не отвечает"),
+        TEXT_CODE_MEASURE_ERROR to mapOf(LanguageEnum.EN to "Measurement error", LanguageEnum.RU to "Ошибка измерения"),
+    )
+    fun getText(textCode: Int?, lang: LanguageEnum): String =
+        texts[textCode]?.get(lang) ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_ERROR, lang)
 
     private val chmLastDayWork = ConcurrentHashMap<Int, List<Int>>()
     private val chmLastWorkShift = ConcurrentHashMap<Int, Int>()
@@ -681,7 +693,7 @@ object MMSTelematicFunction {
         sensorTime: Int,
         sensorValue: Double,
     ): Boolean {
-        return errorCodes[sensorValue]?.let { errorCode ->
+        return textCodes[sensorValue]?.let { textCode ->
             var rs = conn.executeQuery(" SELECT MAX(ontime_1) FROM MMS_agg_$sensorId ")
             val lastAggTime = if (rs.next()) {
                 rs.getInt(1)
@@ -690,7 +702,13 @@ object MMSTelematicFunction {
             }
             rs.close()
 
-            rs = conn.executeQuery(" SELECT MAX(ontime_1) FROM MMS_text_$sensorId ")
+            rs = conn.executeQuery(
+                """" 
+                    SELECT MAX(ontime_1) 
+                    FROM MMS_text_$sensorId 
+                    WHERE code_0 = $textCode 
+                """
+            )
             val lastTextTime = if (rs.next()) {
                 rs.getInt(1)
             } else {
@@ -707,12 +725,15 @@ object MMSTelematicFunction {
                     """
                 )
             } else {
-                val errorDescr = errorDescrs[errorCode]
                 conn.executeUpdate(
                     """
-                        INSERT INTO MMS_text_$sensorId ( ontime_0 , ontime_1 , type_0 , code_0 , message_0 , text_0 )
-                        VALUES ( $sensorTime , $sensorTime , $TEXT_TYPE_ERROR , $errorCode , '$errorDescr' , '$errorDescr' )
+                        INSERT INTO MMS_text_$sensorId ( ontime_0 , ontime_1 , type_0 , code_0 )
+                        VALUES ( $sensorTime , $sensorTime , ${textTypes[textCode] ?: TEXT_TYPE_UNKNOWN} , $textCode )
                     """
+//                    """
+//                        INSERT INTO MMS_text_$sensorId ( ontime_0 , ontime_1 , type_0 , code_0 , message_0 , text_0 )
+//                        VALUES ( $sensorTime , $sensorTime , $TEXT_TYPE_ERROR , $errorCode , null , null )
+//                    """
                 )
             }
             true

@@ -221,5 +221,13 @@ class SensorConfig {
                 LanguageEnum.RU to "Коэффициент трансформации по напряжению"
             ),
         )
+
+        val hmPhaseDescr: Map<Int, String> = mapOf(
+            0 to "ABC",
+            1 to "A",
+            2 to "B",
+            3 to "C",
+        )
+
     }
 }

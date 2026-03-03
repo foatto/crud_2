@@ -416,7 +416,6 @@ class SensorService(
                         parentModule = action.module,
                         parentId = sensorEntity.id,
                         timeRangeType = 24 * 60 * 60,   // графики за последние 24 часа
-                        //!!! где-то здесь надо передавать конкретный тип аналогового датчика (пока будем выводить графики по всем аналоговым датчикам сразу)
                     ),
                     text = appModuleConfigs[AppModuleMMS.CHART_SENSOR]?.captions?.let { captions ->
                         getLocalizedMessage(captions, userConfig.lang)
@@ -796,7 +795,9 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = analogSensorTypes,
+                //--- geoSensorType - для графика скорости
+                //--- counterAndSummarySensorTypes - в отладочных целях (для диагностики вылетов значений счётчиков)
+                values = geoSensorType + analogSensorTypes + counterAndSummarySensorTypes,
             ),
         )
         formCells += FormSimpleCell(
@@ -807,7 +808,9 @@ class SensorService(
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
-                values = analogSensorTypes,
+                //--- geoSensorType - для графика скорости
+                //--- counterAndSummarySensorTypes - в отладочных целях (для диагностики вылетов значений счётчиков)
+                values = geoSensorType + analogSensorTypes + counterAndSummarySensorTypes,
             ),
         )
         formCells += FormSimpleCell(
@@ -826,7 +829,7 @@ class SensorService(
             name = FIELD_MAX_LIMIT,
             caption = "-",
             isEditable = changeEnabled,
-            value = sensorEntity?.maxLimit?.toString() ?: "100.0",
+            value = sensorEntity?.maxLimit?.toString() ?: "0.0",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -1033,7 +1036,7 @@ class SensorService(
             minView = formActionData[FIELD_MIN_VIEW]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxView = formActionData[FIELD_MAX_VIEW]?.stringValue?.toDoubleOrNull() ?: 100.0,
             minLimit = formActionData[FIELD_MIN_LIMIT]?.stringValue?.toDoubleOrNull() ?: 0.0,
-            maxLimit = formActionData[FIELD_MAX_LIMIT]?.stringValue?.toDoubleOrNull() ?: 100.0,
+            maxLimit = formActionData[FIELD_MAX_LIMIT]?.stringValue?.toDoubleOrNull() ?: 0.0,
             smoothTime = formActionData[FIELD_SMOOTH_TIME]?.stringValue?.toIntOrNull() ?: 0,
             indicatorDelimiterCount = formActionData[FIELD_INDICATOR_DELIMITER_COUNT]?.stringValue?.toIntOrNull() ?: 4,
             indicatorMultiplicator = formActionData[FIELD_INDICATOR_MILTIPLICATOR]?.stringValue?.toDoubleOrNull() ?: 1.0,

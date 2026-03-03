@@ -55,7 +55,17 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
     )
     fun findByObjAndPeriod(obj: ObjectEntity, begTime: Int?, endTime: Int?): List<SensorEntity>
 
-//    fun findByObjAndSensorType(obj: ObjectEntity, sensorType: Int): List<SensorEntity>
+    @Query(
+        """
+            SELECT se
+            FROM SensorEntity se
+            LEFT JOIN se.obj oe
+            WHERE se.id <> 0
+                AND oe = ?1
+                AND se.sensorType = ?2
+        """
+    )
+    fun findByObjAndSensorType(obj: ObjectEntity, sensorType: Int): List<SensorEntity>
 
     @Query(
         """

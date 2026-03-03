@@ -6,6 +6,7 @@ import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.util.getPrecision
 import foatto.core.util.getRandomInt
 import foatto.core.util.getSplittedDouble
+import foatto.server.ds.MMSTelematicFunction
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ObjectRepository
@@ -74,7 +75,7 @@ class SchemeCounterIndicatorStateService(
             rs.close()
         }
 
-        val (errorTime, errorMessage) = getErrorText(sensorEntity.id)
+        val (errorTime, errorCode) = getErrorCode(sensorEntity.id)
         val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
 
         val x0 = 6 * GRID_STEP
@@ -107,7 +108,7 @@ class SchemeCounterIndicatorStateService(
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
             text = if (isErrorStatus) {
-                " $errorMessage "
+                " ${MMSTelematicFunction.getText(errorCode, userConfig.lang)} "
             } else {
                 " $valueText "
             }

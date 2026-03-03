@@ -270,6 +270,8 @@ class FormControl(
     private var showFileLinkLifeTimeInputDialog by mutableStateOf(false)
     private var copyFileRef: Long = 0
 
+    private var autoFileClick: (() -> Unit)? = null
+
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
     @Composable
     override fun Body() {
@@ -903,6 +905,13 @@ class FormControl(
                                                         if (isFileAddInProgress) {
                                                             CircularProgressIndicator()
                                                         } else {
+                                                            if (gridData.data.autoClick) {
+                                                                autoFileClick = {
+                                                                    fileGridData = gridData
+                                                                    filePickerLauncher.launch()
+                                                                    autoFileClick = null
+                                                                }
+                                                            }
                                                             ImageOrTextFromNameControl(
                                                                 name = "/images/ic_add_${getStyleOtherIconNameSuffix()}.png",
                                                                 iconSize = styleOtherIconSize,
@@ -1147,6 +1156,7 @@ class FormControl(
             if (isFocusRequesterDefined) {
                 focusRequester.requestFocus()
             }
+            autoFileClick?.invoke()
         }
     }
 

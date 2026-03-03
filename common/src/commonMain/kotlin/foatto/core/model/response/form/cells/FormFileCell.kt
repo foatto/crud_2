@@ -19,4 +19,6 @@ class FormFileCell(
     val fileId: Int?,
     val files: List<FormFileData>,
     val maxFileCount: Int = Int.MAX_VALUE,
+
+    val autoClick: Boolean = false,
 ) : FormBaseCell()

@@ -1,38 +1,38 @@
-package foatto.server.controller
+package foatto.server.controller.scheme
 
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.SchemeActionRequest
 import foatto.core.model.response.AppResponse
 import foatto.core.model.response.SchemeActionResponse
 import foatto.core_mms.ApiUrlMMS
-import foatto.server.service.scheme.SchemeAnalogueIndicatorStateService
+import foatto.server.service.scheme.SchemeCounterIndicatorStateService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class SchemeAnalogueIndicatorStateController(
-    private val schemeAnalogueIndicatorStateService: SchemeAnalogueIndicatorStateService,
+class SchemeCounterIndicatorStateController(
+    private val schemeCounterIndicatorStateService: SchemeCounterIndicatorStateService,
 ) {
 
-    @PostMapping(ApiUrlMMS.SCHEME_ANALOGUE_INDICATOR_STATE)
+    @PostMapping(ApiUrlMMS.SCHEME_COUNTER_INDICATOR_STATE)
     @Transactional
     fun scheme(
         @RequestBody
         appRequest: AppRequest
-    ): AppResponse = schemeAnalogueIndicatorStateService.scheme(
+    ): AppResponse = schemeCounterIndicatorStateService.scheme(
         sessionId = appRequest.sessionId,
         action = appRequest.action,
     )
 
-    @PostMapping(ApiUrlMMS.SCHEME_ANALOGUE_INDICATOR_STATE_ACTION)
+    @PostMapping(ApiUrlMMS.SCHEME_COUNTER_INDICATOR_STATE_ACTION)
     @Transactional
     fun schemeAction(
         @RequestBody
         schemeActionRequest: SchemeActionRequest
-    ): SchemeActionResponse = schemeAnalogueIndicatorStateService.schemeAction(
-        schemeActionRequest = schemeActionRequest,
+    ): SchemeActionResponse = schemeCounterIndicatorStateService.schemeAction(
+        schemeActionRequest = schemeActionRequest
     )
 
 }

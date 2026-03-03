@@ -1,4 +1,4 @@
-package foatto.server.controller
+package foatto.server.controller.scheme
 
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.SchemeActionRequest

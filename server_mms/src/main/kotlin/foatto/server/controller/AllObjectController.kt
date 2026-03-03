@@ -5,15 +5,15 @@ import foatto.core.model.request.FormActionRequest
 import foatto.core.model.response.AppResponse
 import foatto.core.model.response.FormActionResponse
 import foatto.core_mms.ApiUrlMMS
-import foatto.server.service.AnyObjectService
+import foatto.server.service.AllObjectService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class AnyObjectController(
-    private val anyObjectService: AnyObjectService,
+class AllObjectController(
+    private val allObjectService: AllObjectService,
 ) {
 
     @PostMapping(ApiUrlMMS.ALL_OBJECT)
@@ -22,7 +22,7 @@ class AnyObjectController(
         @RequestBody
         appRequest: AppRequest
     ): AppResponse {
-        return anyObjectService.app(
+        return allObjectService.app(
             sessionId = appRequest.sessionId,
             action = appRequest.action,
         )
@@ -34,7 +34,7 @@ class AnyObjectController(
         @RequestBody
         formActionRequest: FormActionRequest
     ): FormActionResponse {
-        return anyObjectService.formAction(
+        return allObjectService.formAction(
             sessionId = formActionRequest.sessionId,
             action = formActionRequest.action,
             formActionData = formActionRequest.formActionData,

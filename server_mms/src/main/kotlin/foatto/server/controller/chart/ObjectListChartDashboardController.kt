@@ -1,37 +1,37 @@
-package foatto.server.controller
+package foatto.server.controller.chart
 
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.CompositeActionRequest
 import foatto.core.model.response.AppResponse
 import foatto.core.model.response.CompositeActionResponse
 import foatto.core_mms.ApiUrlMMS
-import foatto.server.service.composite.ObjectSchemeDashboardService
+import foatto.server.service.composite.ObjectListChartDashboardService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class ObjectSchemeDashboardController(
-    private val objectSchemeDashboardService: ObjectSchemeDashboardService,
+class ObjectListChartDashboardController(
+    private val objectListChartDashboardService: ObjectListChartDashboardService,
 ) {
 
-    @PostMapping(ApiUrlMMS.OBJECT_SCHEME_DASHBOARD)
+    @PostMapping(ApiUrlMMS.OBJECT_LIST_CHART_DASHBOARD)
     @Transactional
     fun compositeObjectDashboard(
         @RequestBody
         appRequest: AppRequest
-    ): AppResponse = objectSchemeDashboardService.composite(
+    ): AppResponse = objectListChartDashboardService.composite(
         sessionId = appRequest.sessionId,
         action = appRequest.action,
     )
 
-    @PostMapping(ApiUrlMMS.OBJECT_SCHEME_DASHBOARD_ACTION)
+    @PostMapping(ApiUrlMMS.OBJECT_LIST_CHART_DASHBOARD_ACTION)
     @Transactional
     fun compositeAction(
         @RequestBody
         compositeActionRequest: CompositeActionRequest,
-    ): CompositeActionResponse = objectSchemeDashboardService.compositeAction(
+    ): CompositeActionResponse = objectListChartDashboardService.compositeAction(
         sessionId = compositeActionRequest.sessionId,
         compositeActionRequest = compositeActionRequest,
     )

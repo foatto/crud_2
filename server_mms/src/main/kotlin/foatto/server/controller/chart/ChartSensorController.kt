@@ -1,4 +1,4 @@
-package foatto.server.controller
+package foatto.server.controller.chart
 
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.ChartActionRequest

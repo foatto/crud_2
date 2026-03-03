@@ -20,7 +20,7 @@ import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 
 @Service
-class AnyObjectService(
+class AllObjectService(
     private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
     private val departmentRepository: DepartmentRepository,

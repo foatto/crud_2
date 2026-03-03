@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.net.URLConnection
+import java.net.URLEncoder
 
 @RestController
 class FileStoreController(
@@ -27,7 +28,7 @@ class FileStoreController(
 
     companion object {
 
-        fun download(response: HttpServletResponse, path: String) {
+        fun download(response: HttpServletResponse, path: String, isStorageFile: Boolean) {
             val file = File(path.replace("..", "").replace("//", ""))
             val mimeType = if (path.endsWith(".wasm", true)) {
                 "application/wasm"
@@ -35,6 +36,9 @@ class FileStoreController(
                 URLConnection.guessContentTypeFromName(file.name)
             }
 
+            if (isStorageFile) {
+                response.setHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(file.name, "UTF-8").replace("+", "%20"))
+            }
             response.contentType = mimeType
             response.setContentLength(file.length().toInt())
             response.outputStream.write(file.readBytes())
@@ -49,7 +53,7 @@ class FileStoreController(
 
     @GetMapping(value = ["/"])
     fun downloadRoot(response: HttpServletResponse) {
-        download(response, "${rootDirName}/web_2/index.html")
+        download(response, "${rootDirName}/web_2/index.html", isStorageFile = false)
     }
 
     @PostMapping(ApiUrl.GET_SHORT_FILE_LINK)
@@ -86,11 +90,12 @@ class FileStoreController(
                     val mimeType = URLConnection.guessContentTypeFromName(fileStoreData.name)
                     val byteArray = minioProxy.loadFileAsByteArray(fileStoreData.dir)
 
+                    response.setHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(fileStoreData.name, "UTF-8").replace("+", "%20"))
                     response.contentType = mimeType
                     response.setContentLength(byteArray.size)
                     response.outputStream.write(byteArray)
                 } ?: run {
-                    download(response, "$rootDirName/${fileStoreService.getFilePath(fileStoreData.dir, fileStoreData.name)}")
+                    download(response, "$rootDirName/${fileStoreService.getFilePath(fileStoreData.dir, fileStoreData.name)}", isStorageFile = true)
                 }
             } ?: run {
                 response.status = 403   // forbidden
@@ -106,7 +111,7 @@ class FileStoreController(
         @PathVariable("fileName")
         fileName: String
     ) {
-        download(response, "${rootDirName}/reports/$fileName")
+        download(response, "${rootDirName}/reports/$fileName", isStorageFile = false)
     }
 
 }

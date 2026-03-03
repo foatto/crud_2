@@ -25,6 +25,7 @@ class FileStoreService(
 
         private val chmRefData = ConcurrentHashMap<Long, FileStoreData>()
         private val chmRefTime = ConcurrentHashMap<Long, Int>()
+        private val chmRefIsTemporary = ConcurrentHashMap<Long, Boolean>()
     }
 
     @Value("\${root_dir}")
@@ -57,6 +58,13 @@ class FileStoreService(
         return chmRefData[copyRef]?.let { fileStoreData ->
             chmRefData[newRef] = fileStoreData
             chmRefTime[newRef] = getCurrentTimeInt() + hour * 3600
+            chmRefIsTemporary[newRef] = true
+
+            if (chmRefIsTemporary[copyRef] == true ) {
+                chmRefData.remove(copyRef)
+                chmRefTime.remove(copyRef)
+                chmRefIsTemporary.remove(copyRef)
+            }
 
             serverUrl + "/" + getFileRefUrl(newRef)
         } ?: "(file not found!)"

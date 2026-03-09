@@ -17,6 +17,7 @@ import foatto.core_mms.i18n.LocalizedMMSMessages
 import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
+import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.SensorRepository
 import jakarta.persistence.EntityManager
@@ -35,7 +36,8 @@ class SensorDataService(
 ) {
 
     companion object {
-        private const val PAGE_SIZE_IN_SEC = 3600  // 10_800 // 21_600 // 43_200 // 86_400
+        private const val PAGE_SIZE_IN_SEC_WORK = 10_800 // 21_600 // 43_200 // 86_400 - записи работы оборудования гораздо реже
+        private const val PAGE_SIZE_IN_SEC_OTHER = 3600  // 10_800 // 21_600 // 43_200 // 86_400
     }
 
     override fun isDateTimeIntervalPanelVisible(): Boolean = true
@@ -121,9 +123,14 @@ class SensorDataService(
             }
         }
 
-        val currentTimedPageNo = lastTimeUTC / PAGE_SIZE_IN_SEC - action.pageNo
-        val begPageTime = currentTimedPageNo * PAGE_SIZE_IN_SEC
-        val endPageTime = begPageTime + PAGE_SIZE_IN_SEC
+        val currentPageSizeInSec = if (parentSensorEntity.sensorType == SensorConfig.SENSOR_WORK) {
+            PAGE_SIZE_IN_SEC_WORK
+        } else {
+            PAGE_SIZE_IN_SEC_OTHER
+        }
+        val currentTimedPageNo = lastTimeUTC / currentPageSizeInSec - action.pageNo
+        val begPageTime = currentTimedPageNo * currentPageSizeInSec
+        val endPageTime = begPageTime + currentPageSizeInSec
 
         queryNativeSql(
             entityManager,
@@ -150,31 +157,35 @@ class SensorDataService(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     name = getDateTimeDMYHMSString(zoneUTC, ontime0)
                 )
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     name = getDateTimeDMYHMSString(zoneUser, ontime0)
                 )
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     name = getDateTimeDMYHMSString(zoneUTC, ontime1)
                 )
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
                     dataRow = row,
+                    minWidth = 100,
                     name = getDateTimeDMYHMSString(zoneUser, ontime1)
                 )
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = type0.toString())
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value0.toString())
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value1.toString())
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value2.toString())
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = value3.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = type0.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = value0.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = value1.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = value2.toString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = value3.toString())
 
                 tableRows += TableRow(
                     rowAction = null,
@@ -186,7 +197,7 @@ class SensorDataService(
         }
 
         getTableTimedPageButtons(
-            pageSizeInSec = PAGE_SIZE_IN_SEC,
+            pageSizeInSec = currentPageSizeInSec,
             action = action,
             zoneUser = zoneUser,
             firstTimeUTC = firstTimeUTC,

@@ -147,9 +147,9 @@ abstract class AbstractSchemeIndicatorStateService(
             val rs = conn.executeQuery(
                 """
                     SELECT ontime_1 , code_0
-                    FROM MMS_text_${sensorId}
+                    FROM MMS_text_$sensorId
                     WHERE ontime_1 = (
-                        SELECT MAX(ontime_1) FROM MMS_text_${sensorId} 
+                        SELECT MAX(ontime_1) FROM MMS_text_$sensorId 
                     )
                 """
             )

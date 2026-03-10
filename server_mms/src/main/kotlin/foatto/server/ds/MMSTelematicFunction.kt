@@ -703,7 +703,7 @@ object MMSTelematicFunction {
             rs.close()
 
             rs = conn.executeQuery(
-                """" 
+                """ 
                     SELECT MAX(ontime_1) 
                     FROM MMS_text_$sensorId 
                     WHERE code_0 = $textCode 

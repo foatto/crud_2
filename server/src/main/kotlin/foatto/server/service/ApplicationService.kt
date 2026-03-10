@@ -45,7 +45,6 @@ import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.sql.SpringConnection
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.hibernate.Session
 import org.springframework.beans.factory.annotation.Value
@@ -313,14 +312,14 @@ abstract class ApplicationService(
         return PageRequest.of(
             action.pageNo,
             pageSize,
-            action.sortName?.let {
+            action.sortName?.let { sortName ->
                 Sort.by(
                     if (action.isSortAsc) {
                         Sort.Direction.ASC
                     } else {
                         Sort.Direction.DESC
                     },
-                    action.sortName,
+                    sortName,
                 )
             } ?: Sort.by(*orders)
         )

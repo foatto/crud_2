@@ -148,7 +148,6 @@ import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
 import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core.util.getLocalDateTime
-import foatto.core.util.getRandomInt
 import foatto.core.util.getRandomLong
 import foatto.core.util.getTimeZone
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
@@ -280,7 +279,7 @@ class FormControl(
         val coroutineScope = rememberCoroutineScope()
 
         val filePickerLauncher = rememberFilePickerLauncher(
-            title = getLocalizedMessage(LocalizedMessages.FILE_SELECT, root.appUserConfig.lang),
+            //title = getLocalizedMessage(LocalizedMessages.FILE_SELECT, root.appUserConfig.lang), - неприменимо в новой версии?
             dialogSettings = filePickerDialogSettings,
         ) { platformFile ->
             platformFile?.let {

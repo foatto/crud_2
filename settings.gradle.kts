@@ -35,6 +35,9 @@ pluginManagement {
         id("org.springframework.boot").version(springBootVersion)
     }
 }
+//plugins {
+//    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+//}
 
 include(
     ":common",

@@ -18,7 +18,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = getLocalizedMMSMessage(LocalizedMMSMessages.TITLE, root.appUserConfig.lang),
     ) {
-        filePickerDialogSettings = FileKitDialogSettings(this.window)
+        filePickerDialogSettings = FileKitDialogSettings(parentWindow = this.window)
         root.Content()
     }
     GlobalScope.launch(applicationDispatcher) {

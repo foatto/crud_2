@@ -9,6 +9,7 @@ val kotlinApiVersion: String by project
 val kotlinJvmTarget: String by project
 
 val composeVersion: String by project
+val material3Version: String by project
 val materialIconsCoreVersion: String by project
 
 val androidCompileSdk: String by project
@@ -58,12 +59,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(compose.runtime)
-            api(compose.foundation)
-            api(compose.ui)
-            api(compose.material3)
-            api(compose.components.resources)
-            api(compose.components.uiToolingPreview)
+            api("org.jetbrains.compose.runtime:runtime:$composeVersion")
+            api("org.jetbrains.compose.foundation:foundation:$composeVersion")
+            api("org.jetbrains.compose.ui:ui:$composeVersion")
+            api("org.jetbrains.compose.material3:material3:$material3Version")
+//            api("org.jetbrains.compose.components:resources:$composeVersion")
+            api("org.jetbrains.compose.ui:ui-tooling-preview:$composeVersion")
             api("org.jetbrains.compose.material:material-icons-core:$materialIconsCoreVersion")
 
             api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
@@ -112,11 +113,11 @@ android {
         minSdk = androidMinSdk.toInt()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
 
     composeOptions {

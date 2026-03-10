@@ -637,9 +637,6 @@ class UserService(
         if (fullName.isEmpty()) {
             return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.ERROR_FULL_NAME_NOT_ENTERED, userConfig.lang)))
         }
-        if (userRepository.findByFullName(fullName).any { ue -> ue.id != id }) {
-            return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_FULL_NAME to getLocalizedMessage(LocalizedMessages.THIS_FULL_NAME_ALREADY_EXISTS, userConfig.lang)))
-        }
 
         val login = formActionData[FIELD_LOGIN]?.stringValue?.trim() ?: return FormActionResponse(responseCode = ResponseCode.ERROR, errors = mapOf(FIELD_LOGIN to getLocalizedMessage(LocalizedMessages.ERROR_LOGIN_NOT_ENTERED, userConfig.lang)))
         if (login.isEmpty()) {

@@ -37,6 +37,7 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DeviceManageRepository
 import foatto.server.repository.DeviceRepository
+import foatto.server.repository.UserRepository
 import foatto.server.util.getNextId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
@@ -49,11 +50,13 @@ import kotlin.time.ExperimentalTime
 class DeviceManageService(
     private val deviceManageRepository: DeviceManageRepository,
     private val deviceRepository: DeviceRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
-    fileStoreService = fileStoreService,
+    private val fileStoreService: FileStoreService,
+) : MMSService(
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
     companion object {
         private const val FIELD_USER_ID = "userId"
@@ -129,9 +132,12 @@ class DeviceManageService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.DESC, FIELD_CREATE_TIME))
         val findText = action.findText?.trim() ?: ""
 
+        val parentUserIds = getParentUserIds(action)
+
         val parentDeviceEntity = getParentDeviceEntity(action) ?: return null
 
-        val page: Page<DeviceManageEntity> = deviceManageRepository.findByDeviceAndFilter(
+        val page: Page<DeviceManageEntity> = deviceManageRepository.findByParentUserIdAndDeviceAndFilter(
+            parentUserIds = parentUserIds,
             device = parentDeviceEntity,
             findText = findText,
             timeOffset = userConfig.timeOffset,
@@ -269,9 +275,7 @@ class DeviceManageService(
 
         val changeEnabled = id?.let { editEnabled && deviceManageEntity?.sendTime == null } ?: addEnabled
 
-        val userId = deviceManageEntity?.let {
-            deviceManageEntity.userId
-        } ?: userConfig.id
+        val userId = deviceManageEntity?.let { deviceManageEntity.userId } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         fillFormUserCells(
             fieldUserId = FIELD_USER_ID,

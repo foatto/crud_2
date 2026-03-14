@@ -20,6 +20,7 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.UserRepository
 import jakarta.persistence.EntityManager
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -28,11 +29,13 @@ import org.springframework.stereotype.Service
 class SensorDataService(
     private val entityManager: EntityManager,
     private val sensorRepository: SensorRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {

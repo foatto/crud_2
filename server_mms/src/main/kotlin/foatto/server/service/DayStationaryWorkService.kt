@@ -22,13 +22,13 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.repository.UserRepository
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import kotlin.collections.get
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -37,14 +37,16 @@ class DayStationaryWorkService(
     private val dayWorkRepository: DayWorkRepository,
     private val objectRepository: ObjectRepository,
     private val calcService: CalcService,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : AbstractDayWorkService(
     dayWorkRepository = dayWorkRepository,
     objectRepository = objectRepository,
     calcService = calcService,
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
@@ -97,32 +99,31 @@ class DayStationaryWorkService(
         )
         val findText = action.findText?.trim() ?: ""
 
-        val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
+        val parentUserIds = getParentUserIds(action)
 
         val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
 
-        val page: Page<DayWorkEntity> = parentObjectEntity?.let {
-            dayWorkRepository.findByObjAndUserIdInAndFilter(
-                obj = parentObjectEntity,
-                userIds = enabledUserIds,
-                findText = findText,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        } ?: run {
-            dayWorkRepository.findByUserIdInAndFilter(
-                objectType = ObjectType.STATIONARY,
-                userIds = enabledUserIds,
-                findText = findText,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        }
+        val enabledUserIds = getEnabledUserIds(
+            module = action.module,
+            actionType = action.type,
+            relatedUserIds = userConfig.relatedUserIds,
+            roles = userConfig.roles
+        )
+
+        val page: Page<DayWorkEntity> = dayWorkRepository.findByParentUserIdAndObjAndUserIdInAndFilter(
+            parentUserIds = parentUserIds,
+            obj = parentObjectEntity,
+            objectType = ObjectType.STATIONARY,
+            userIds = enabledUserIds,
+            findText = findText,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
+
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val dayWorkEntities = page.content
 

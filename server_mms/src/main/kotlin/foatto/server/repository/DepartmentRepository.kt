@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface DepartmentRepository : JpaRepository<DepartmentEntity, Int> {
 
+    fun findByUserId(userId: Int): List<DepartmentEntity>
     fun findByUserIdAndName(userId: Int, name: String): List<DepartmentEntity>
 
     @Query(
@@ -15,12 +16,21 @@ interface DepartmentRepository : JpaRepository<DepartmentEntity, Int> {
             SELECT de
             FROM DepartmentEntity de
             WHERE de.id <> 0
-                AND de.userId IN ?1
                 AND (
-                       ?2 = ''
-                    OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
+                       ?1 IS NULL
+                    OR de.userId IN ?1
+                )
+                AND de.userId IN ?2
+                AND (
+                       ?3 = ''
+                    OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                 )
         """
     )
-    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, pageRequest: Pageable): Page<DepartmentEntity>
+    fun findByParentUserIdAndUserIdInAndFilter(
+        parentUserIds: List<Int>?,
+        userIds: List<Int>,
+        findText: String,
+        pageRequest: Pageable
+    ): Page<DepartmentEntity>
 }

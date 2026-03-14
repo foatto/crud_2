@@ -7,6 +7,7 @@ import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.response.MenuData
+import foatto.core.model.response.table.TablePopup
 import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.addAppModuleUrls
 import foatto.core_mms.i18n.LocalizedMMSMessages
@@ -14,6 +15,15 @@ import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.AppRoleConfig
 import foatto.server.model.Permission
+import foatto.server.model.ServerUserConfig
+import foatto.server.repository.DayWorkRepository
+import foatto.server.repository.DepartmentRepository
+import foatto.server.repository.DeviceManageRepository
+import foatto.server.repository.DeviceRepository
+import foatto.server.repository.GroupRepository
+import foatto.server.repository.ObjectRepository
+import foatto.server.repository.WorkShiftRepository
+import foatto.server.service.UserService
 import foatto.server.util.AdvancedLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -24,7 +34,15 @@ import org.springframework.context.event.EventListener
 @SpringBootApplication(
     scanBasePackages = ["foatto.server"],
 )
-class MMSSpringApp : SpringApp() {
+class MMSSpringApp(
+    private val objectRepository: ObjectRepository,
+    private val departmentRepository: DepartmentRepository,
+    private val groupRepository: GroupRepository,
+    private val deviceRepository: DeviceRepository,
+    private val dayWorkRepository: DayWorkRepository,
+    private val workShiftRepository: WorkShiftRepository,
+    private val deviceManageRepository: DeviceManageRepository,
+) : SpringApp() {
 
     companion object {
         @JvmStatic
@@ -50,6 +68,7 @@ class MMSSpringApp : SpringApp() {
         //--- строго после addAppModuleUrls
         initAppRoleConfigs()
         initAppModuleConfigs()
+        setServicesCustomFuns()
         initMenuInit()
     }
 
@@ -617,6 +636,58 @@ class MMSSpringApp : SpringApp() {
             captions = mapOf(LanguageEnum.EN to "Devices", LanguageEnum.RU to "Приборы"),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
+        )
+    }
+
+    private fun setServicesCustomFuns() {
+        UserService.addCustomTablePopups = { userConfig: ServerUserConfig,
+                                             userId: Int,
+                                             popupDatas: MutableList<TablePopup> ->
+
+            addPopupData(LocalizedMMSMessages.OBJECTS, AppModuleMMS.ALL_OBJECT, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.OBJECTS, AppModuleMMS.MOBILE_OBJECT, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.OBJECTS, AppModuleMMS.STATIONARY_OBJECT, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.WORK_LOGS, AppModuleMMS.DAY_ALL_WORK, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.WORK_LOGS, AppModuleMMS.DAY_MOBILE_WORK, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.WORK_LOGS, AppModuleMMS.DAY_STATIONARY_WORK, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.WORK_LOGS, AppModuleMMS.WORK_SHIFT, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.REFERENCES, AppModuleMMS.DEPARTMENT, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.REFERENCES, AppModuleMMS.GROUP, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.DEVICES, AppModuleMMS.DEVICE, userConfig, userId, popupDatas)
+            addPopupData(LocalizedMMSMessages.DEVICES, AppModuleMMS.DEVICE_MANAGE, userConfig, userId, popupDatas)
+        }
+        UserService.checkCustomDepencies = { userId: Int ->
+            objectRepository.findByUserId(userId).isNotEmpty() ||
+                    departmentRepository.findByUserId(userId).isNotEmpty() ||
+                    groupRepository.findByUserId(userId).isNotEmpty() ||
+                    deviceRepository.findByUserId(userId).isNotEmpty()
+        }
+        UserService.customActionDelete = { userId: Int ->
+            dayWorkRepository.deleteByUserId(userId)
+            workShiftRepository.deleteByUserId(userId)
+            deviceManageRepository.deleteByUserId(userId)
+        }
+    }
+
+    private fun addPopupData(
+        group: LocalizedMMSMessages?,
+        childModule: String,
+        userConfig: ServerUserConfig,
+        userId: Int,
+        popupDatas: MutableList<TablePopup>
+    ) {
+        popupDatas += TablePopup(
+            group = group?.let { getLocalizedMMSMessage(group, userConfig.lang) },
+            action = AppAction(
+                type = ActionType.MODULE_TABLE,
+                module = childModule,
+                parentModule = AppModule.USER,
+                parentId = userId,
+            ),
+            text = appModuleConfigs[childModule]?.captions?.let { captions ->
+                getLocalizedMessage(captions, userConfig.lang)
+            } ?: "(неизвестный тип модуля: '$childModule')",
+            inNewTab = true,
         )
     }
 

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface GroupRepository : JpaRepository<GroupEntity, Int> {
 
+    fun findByUserId(userId: Int): List<GroupEntity>
     fun findByUserIdAndName(userId: Int, name: String): List<GroupEntity>
 
     @Query(
@@ -15,12 +16,21 @@ interface GroupRepository : JpaRepository<GroupEntity, Int> {
             SELECT ge
             FROM GroupEntity ge
             WHERE ge.id <> 0
-                AND ge.userId IN ?1
                 AND (
-                       ?2 = ''
-                    OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
+                       ?1 IS NULL
+                    OR ge.userId IN ?1
+                )
+                AND ge.userId IN ?2
+                AND (
+                       ?3 = ''
+                    OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
                 )
         """
     )
-    fun findByUserIdInAndFilter(userIds: List<Int>, findText: String, pageRequest: Pageable): Page<GroupEntity>
+    fun findByParentUserIdAndUserIdInAndFilter(
+        parentUserIds: List<Int>?,
+        userIds: List<Int>,
+        findText: String,
+        pageRequest: Pageable
+    ): Page<GroupEntity>
 }

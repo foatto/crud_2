@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.AppModule
 import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
@@ -10,22 +11,48 @@ import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.i18n.LocalizedMMSMessages
 import foatto.core_mms.i18n.getLocalizedMMSMessage
+import foatto.server.OrgType
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
+import foatto.server.repository.UserRepository
 import kotlinx.datetime.FixedOffsetTimeZone
 import kotlinx.datetime.TimeZone
+import org.springframework.data.repository.findByIdOrNull
 
 abstract class MMSService(
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : ApplicationService(
     fileStoreService = fileStoreService,
     actionLogRepository = actionLogRepository,
 ) {
 
-    protected fun getParentObjectId(action: AppAction) =
+    protected fun getParentUserIds(action: AppAction): List<Int>? =
+        if (action.parentModule == AppModule.USER) {
+            val result = action.parentId?.let { parentId ->
+                mutableListOf(parentId)
+            } ?: mutableListOf()
+
+            var pos = 0
+            while (pos < result.size) {
+                val userId = result[pos]
+                userRepository.findByIdOrNull(userId)?.let { userEntity ->
+                    if (userEntity.orgType == OrgType.ORG_TYPE_DIVISION) {
+                        result += userRepository.findByParentId(userId).map { subUserEntity -> subUserEntity.id}
+                    }
+                }
+                pos++
+            }
+
+            result
+        } else {
+            null
+        }
+
+    protected fun getParentObjectId(action: AppAction): Int? =
         if (action.parentModule in setOf(AppModuleMMS.ALL_OBJECT, AppModuleMMS.MOBILE_OBJECT, AppModuleMMS.STATIONARY_OBJECT)) {
             action.parentId
         } else {

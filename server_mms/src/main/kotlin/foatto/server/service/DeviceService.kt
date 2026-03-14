@@ -51,6 +51,7 @@ import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.UserRepository
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
 import kotlinx.datetime.LocalDateTime
@@ -71,11 +72,13 @@ class DeviceService(
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {
@@ -639,6 +642,8 @@ class DeviceService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_SERIAL_NO))
         val findText = action.findText?.trim() ?: ""
 
+        val parentUserIds = getParentUserIds(action)
+
         val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
@@ -651,26 +656,17 @@ class DeviceService(
             roles = userConfig.roles,
         )
 
-        val page: Page<DeviceEntity> = parentObjectEntity?.let {
-            deviceRepository.findByObjAndUserIdInAndFilter(
-                obj = parentObjectEntity,
-                userIds = enabledUserIds,
-                findText = findText,
-                timeOffset = userConfig.timeOffset,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        } ?: run {
-            deviceRepository.findByUserIdInAndFilter(
-                userIds = enabledUserIds,
-                findText = findText,
-                timeOffset = userConfig.timeOffset,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        }
+        val page: Page<DeviceEntity> = deviceRepository.findByParentUserIdAndObjAndUserIdInAndFilter(
+            parentUserIds = parentUserIds,
+            obj = parentObjectEntity,
+            userIds = enabledUserIds,
+            findText = findText,
+            timeOffset = userConfig.timeOffset,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
+
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val deviceEntities = page.content
 
@@ -722,7 +718,7 @@ class DeviceService(
                 row = row,
                 col = col++,
                 dataRow = row,
-                name = "${cellOwnerNames[deviceEntity.cellOwner] ?: "-"}\n${cellOwnerNames[deviceEntity.cellOwner2] ?: "-"}"
+                name = "${cellOwnerNames[deviceEntity.cellOwner]?.get(userConfig.lang) ?: "-"}\n${cellOwnerNames[deviceEntity.cellOwner2]?.get(userConfig.lang) ?: "-"}"
             )
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellNumber ?: "-"}\n${deviceEntity.cellNumber2 ?: "-"}")
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellIcc ?: "-"}\n${deviceEntity.cellIcc2 ?: "-"}")
@@ -805,9 +801,7 @@ class DeviceService(
             deviceRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val userId = deviceEntity?.let {
-            deviceEntity.userId
-        } ?: userConfig.id
+        val userId = deviceEntity?.let { deviceEntity.userId } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         val parentObjectId = deviceEntity?.let {
             deviceEntity.obj?.id

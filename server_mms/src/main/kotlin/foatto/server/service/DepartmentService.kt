@@ -27,6 +27,7 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DepartmentRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.repository.UserRepository
 import foatto.server.util.getNextId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
@@ -37,11 +38,13 @@ import org.springframework.stereotype.Service
 class DepartmentService(
     private val departmentRepository: DepartmentRepository,
     private val objectRepository: ObjectRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
-    fileStoreService = fileStoreService,
+    private val fileStoreService: FileStoreService,
+) : MMSService(
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {
@@ -82,6 +85,8 @@ class DepartmentService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
 
+        val parentUserIds = getParentUserIds(action)
+
         val enabledUserIds = getEnabledUserIds(
             module = action.module,
             actionType = action.type,
@@ -89,7 +94,13 @@ class DepartmentService(
             roles = userConfig.roles,
         )
 
-        val page: Page<DepartmentEntity> = departmentRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
+        val page: Page<DepartmentEntity> = departmentRepository.findByParentUserIdAndUserIdInAndFilter(
+            parentUserIds = parentUserIds,
+            userIds = enabledUserIds,
+            findText = findText,
+            pageRequest = pageRequest,
+        )
+
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val departmentEntities = page.content
 
@@ -179,9 +190,7 @@ class DepartmentService(
             departmentRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val userId = departmentEntity?.let {
-            departmentEntity.userId
-        } ?: userConfig.id
+        val userId = departmentEntity?.let { departmentEntity.userId } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         val changeEnabled = action.id?.let { editEnabled } ?: addEnabled
 

@@ -45,6 +45,7 @@ import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.UserRepository
 import foatto.server.sql.CoreAdvancedConnection
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
@@ -62,11 +63,13 @@ class SensorService(
     private val sensorRepository: SensorRepository,
     private val objectRepository: ObjectRepository,
     private val sensorCalibrationRepository: SensorCalibrationRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {

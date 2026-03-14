@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface ObjectRepository : JpaRepository<ObjectEntity, Int> {
 
+    fun findByUserId(userId: Int): List<ObjectEntity>
     fun findByUserIdAndName(userId: Int, name: String): List<ObjectEntity>
     fun findByUserIdInAndName(userIds: List<Int>, name: String): List<ObjectEntity>
 
@@ -52,18 +53,28 @@ interface ObjectRepository : JpaRepository<ObjectEntity, Int> {
             WHERE oe.id <> 0
                 AND (
                        ?1 IS NULL
-                    OR oe.type = ?1
+                    OR oe.userId IN ?1
                 )
-                AND oe.userId IN ?2
                 AND (
-                        ?3 = ''
-                     OR LOWER(oe.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
-                     OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
-                     OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
-                     OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?3, '%' ) )
+                       ?2 IS NULL
+                    OR oe.type = ?2
+                )
+                AND oe.userId IN ?3
+                AND (
+                        ?4 = ''
+                     OR LOWER(oe.name) LIKE LOWER( CONCAT( '%', ?4, '%' ) )
+                     OR LOWER(oe.model) LIKE LOWER( CONCAT( '%', ?4, '%' ) )
+                     OR LOWER(de.name) LIKE LOWER( CONCAT( '%', ?4, '%' ) )
+                     OR LOWER(ge.name) LIKE LOWER( CONCAT( '%', ?4, '%' ) )
                 )
         """
     )
-    fun findByTypeAndUserIdInAndFilter(type: ObjectType?, userIds: List<Int>, findText: String, pageRequest: Pageable): Page<ObjectEntity>
+    fun findByParentUserIdAndTypeAndUserIdInAndFilter(
+        parentUserIds: List<Int>?,
+        type: ObjectType?,
+        userIds: List<Int>,
+        findText: String,
+        pageRequest: Pageable
+    ): Page<ObjectEntity>
 
 }

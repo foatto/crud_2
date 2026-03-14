@@ -34,6 +34,7 @@ import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.repository.UserRepository
 import foatto.server.repository.WorkShiftRepository
 import foatto.server.util.getNextId
 import org.springframework.data.domain.Page
@@ -48,11 +49,13 @@ class WorkShiftService(
     private val workShiftRepository: WorkShiftRepository,
     private val objectRepository: ObjectRepository,
     private val calcService: CalcService,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
     companion object {
         private const val FIELD_USER_ID = "userId"
@@ -119,33 +122,31 @@ class WorkShiftService(
         )
         val findText = action.findText?.trim() ?: ""
 
-        val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
+        val parentUserIds = getParentUserIds(action)
 
         val parentObjectId = getParentObjectId(action)
         val parentObjectEntity = parentObjectId?.let {
             objectRepository.findByIdOrNull(parentObjectId)
         }
 
-        val page: Page<WorkShiftEntity> = parentObjectEntity?.let {
-            workShiftRepository.findByObjAndUserIdInAndFilter(
-                obj = parentObjectEntity,
-                userIds = enabledUserIds,
-                findText = findText,
-                timeOffset = userConfig.timeOffset,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        } ?: run {
-            workShiftRepository.findByUserIdInAndFilter(
-                userIds = enabledUserIds,
-                findText = findText,
-                timeOffset = userConfig.timeOffset,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        }
+        val enabledUserIds = getEnabledUserIds(
+            module = action.module,
+            actionType = action.type,
+            relatedUserIds = userConfig.relatedUserIds,
+            roles = userConfig.roles
+        )
+
+        val page: Page<WorkShiftEntity> = workShiftRepository.findByParentUserIdAndObjAndUserIdInAndFilter(
+            parentUserIds = parentUserIds,
+            obj = parentObjectEntity,
+            userIds = enabledUserIds,
+            findText = findText,
+            timeOffset = userConfig.timeOffset,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
+
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val workShiftEntities = page.content
 
@@ -454,7 +455,7 @@ class WorkShiftService(
             workShiftEntity.userId
         } ?: parentObjectEntity?.let {
             parentObjectEntity.userId
-        } ?: userConfig.id
+        } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         fillFormUserCells(
             fieldUserId = FIELD_USER_ID,

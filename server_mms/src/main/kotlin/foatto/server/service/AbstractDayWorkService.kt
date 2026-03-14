@@ -27,6 +27,7 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.DayWorkRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.repository.UserRepository
 import foatto.server.util.getNextId
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
@@ -38,11 +39,13 @@ abstract class AbstractDayWorkService(
     private val dayWorkRepository: DayWorkRepository,
     private val objectRepository: ObjectRepository,
     private val calcService: CalcService,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {
@@ -127,7 +130,7 @@ abstract class AbstractDayWorkService(
             dayWorkEntity.userId
         } ?: parentObjectEntity?.let {
             parentObjectEntity.userId
-        } ?: userConfig.id
+        } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         fillFormUserCells(
             fieldUserId = FIELD_USER_ID,

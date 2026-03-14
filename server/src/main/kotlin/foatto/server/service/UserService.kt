@@ -98,10 +98,22 @@ class UserService(
 
         private const val FIELD_OWNER_FULL_NAME = "ownerFullName"   // псевдополе для селектора
         private const val FIELD_PARENT_FULL_NAME = "parentFullName"   // псевдополе для селектора
-    }
 
-    //--- на самом деле пока никому не нужно. Просто сделал, чтобы не потерять практики.
-    //override fun isDateTimeIntervalPanelVisible(): Boolean = true
+        var addCustomTablePopups: (
+            userConfig: ServerUserConfig,
+            userId: Int,
+            popupDatas: MutableList<TablePopup>,
+        ) -> Unit = { _, _, _ -> }
+
+        var customFormActionSave: (
+            formActionData: Map<String, FormActionData>,
+            userEntity: UserEntity
+        ) -> Unit = { _, _ -> }
+
+        var checkCustomDepencies: (userId: Int) -> Boolean = { _ -> false }
+
+        var customActionDelete: (userId: Int) -> Unit = { _ -> }
+    }
 
     override fun getTableHeaderData(
         action: AppAction,
@@ -341,6 +353,7 @@ class UserService(
                     inNewTab = true,
                 )
             }
+            addCustomTablePopups(userConfig, userEntity.id, popupDatas)
 
             tableRows += TableRow(
                 rowAction = if (userEntity.orgType == OrgType.ORG_TYPE_DIVISION) {
@@ -615,12 +628,11 @@ class UserService(
 
         val isExistsDepencies: Boolean = if (deleteEnabled) {
             id?.let {
-                userRepository.findByParentId(id).isNotEmpty()
+                userRepository.findByParentId(id).isNotEmpty() || checkCustomDepencies(id)
             } ?: false
         } else {
             false
         }
-
         return super.getFormButtons(action, userConfig, moduleConfig, addEnabled, editEnabled, deleteEnabled && !isExistsDepencies)
     }
 
@@ -710,6 +722,8 @@ class UserService(
         )
         userRepository.saveAndFlush(userEntity)
 
+        customFormActionSave(formActionData, userEntity)
+
         return FormActionResponse(
             responseCode = ResponseCode.OK,
             nextAction = action.prevAction?.copy(id = recordId),
@@ -720,6 +734,8 @@ class UserService(
         userRepository.findByIdOrNull(id)?.let { userEntity ->
             fileStoreService.deleteFile(userEntity.fileId, null)
         }
+        actionLogRepository.deleteByUserId(id)
+        customActionDelete(id)
         userRepository.deleteById(id)
         return FormActionResponse(responseCode = ResponseCode.OK)
     }

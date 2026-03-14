@@ -92,24 +92,14 @@ class ActionLogService(
             null
         }
 
-        val page: Page<ActionLogEntity> = parentUserId?.let {
-            actionLogRepository.findByParentUserIdAndFilter(
-                parentUserId = parentUserId,
-                findText = findText,
-                timeOffset = userConfig.timeOffset,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        } ?: run {
-            actionLogRepository.findByFilter(
-                findText = findText,
-                timeOffset = userConfig.timeOffset,
-                begDateTime = action.begDateTimeValue ?: -1,
-                endDateTime = action.endDateTimeValue ?: -1,
-                pageRequest = pageRequest,
-            )
-        }
+        val page: Page<ActionLogEntity> = actionLogRepository.findByParentUserIdAndFilter(
+            parentUserId = parentUserId,
+            findText = findText,
+            timeOffset = userConfig.timeOffset,
+            begDateTime = action.begDateTimeValue ?: -1,
+            endDateTime = action.endDateTimeValue ?: -1,
+            pageRequest = pageRequest,
+        )
 
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val actionLogEntities = page.content

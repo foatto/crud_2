@@ -16,6 +16,7 @@ import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.UserRepository
 import foatto.server.repository.WorkShiftRepository
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
@@ -31,8 +32,9 @@ class StationaryObjectService(
     private val deviceRepository: DeviceRepository,
     private val dayWorkRepository: DayWorkRepository,
     private val workShiftRepository: WorkShiftRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : AbstractObjectService(
     entityManager = entityManager,
     objectRepository = objectRepository,
@@ -43,8 +45,9 @@ class StationaryObjectService(
     deviceRepository = deviceRepository,
     dayWorkRepository = dayWorkRepository,
     workShiftRepository = workShiftRepository,
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
     objectType = ObjectType.STATIONARY,
 ) {
     companion object {

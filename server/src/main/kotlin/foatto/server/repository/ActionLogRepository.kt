@@ -8,11 +8,16 @@ import org.springframework.data.jpa.repository.Query
 
 interface ActionLogRepository : JpaRepository<ActionLogEntity, Int> {
 
+    fun deleteByUserId(userId: Int)
+
     @Query(
         """
             SELECT ale
             FROM ActionLogEntity ale
-            WHERE ale.userId = ?1
+            WHERE (
+                       ?1 IS NULL
+                    OR ale.userId = ?1
+                )
                 AND (
                         ?2 = ''
                      OR LOWER(ale.type) LIKE LOWER( CONCAT( '%', ?2, '%' ) )
@@ -43,7 +48,7 @@ interface ActionLogRepository : JpaRepository<ActionLogEntity, Int> {
         """
     )
     fun findByParentUserIdAndFilter(
-        parentUserId: Int,
+        parentUserId: Int?,
         findText: String,
         timeOffset: Int,
         begDateTime: Int,
@@ -51,46 +56,4 @@ interface ActionLogRepository : JpaRepository<ActionLogEntity, Int> {
         pageRequest: Pageable,
     ): Page<ActionLogEntity>
 
-    @Query(
-        """
-            SELECT ale
-            FROM ActionLogEntity ale
-            WHERE 
-                (
-                        ?1 = ''
-                     OR LOWER(ale.type) LIKE LOWER( CONCAT( '%', ?1, '%' ) )
-                     OR LOWER(ale.module) LIKE LOWER( CONCAT( '%', ?1, '%' ) )
-                     OR LOWER(ale.parentModule) LIKE LOWER( CONCAT( '%', ?1, '%' ) )
-                     OR LOWER(ale.action) LIKE LOWER( CONCAT( '%', ?1, '%' ) )
-                     OR CAST(ale.recordId AS String) LIKE CONCAT( '%', ?1, '%' )
-                     OR CAST(ale.parentId AS String) LIKE CONCAT( '%', ?1, '%' )
-                     OR (
-                            ale.onTime IS NOT NULL
-                        AND TO_CHAR(MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ale.onTime second + ?2 second, 'DD.MM.YYYY HH24:MI:SS') LIKE CONCAT( '%', ?1, '%' )
-                     )
-                )
-                AND (
-                        ?3 = -1
-                     OR (
-                            ale.onTime IS NOT NULL
-                        AND ale.onTime >= ?3
-                     )
-                )
-                AND (
-                        ?4 = -1
-                     OR (
-                            ale.onTime IS NOT NULL
-                        AND ale.onTime <= ?4
-                     )
-                )
-        """
-    )
-    fun findByFilter(
-        findText: String,
-        timeOffset: Int,
-        begDateTime: Int,
-        endDateTime: Int,
-        pageRequest: Pageable,
-    ): Page<ActionLogEntity>
-    
 }

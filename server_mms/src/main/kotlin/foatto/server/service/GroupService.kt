@@ -27,6 +27,7 @@ import foatto.server.model.ServerUserConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
+import foatto.server.repository.UserRepository
 import foatto.server.util.getNextId
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
@@ -37,11 +38,13 @@ import org.springframework.stereotype.Service
 class GroupService(
     private val groupRepository: GroupRepository,
     private val objectRepository: ObjectRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
-) : ApplicationService(
-    fileStoreService = fileStoreService,
+    private val fileStoreService: FileStoreService,
+) : MMSService(
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {
@@ -82,6 +85,8 @@ class GroupService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
 
+        val parentUserIds = getParentUserIds(action)
+
         val enabledUserIds = getEnabledUserIds(
             module = action.module,
             actionType = action.type,
@@ -89,7 +94,12 @@ class GroupService(
             roles = userConfig.roles,
         )
 
-        val page: Page<GroupEntity> = groupRepository.findByUserIdInAndFilter(enabledUserIds, findText, pageRequest)
+        val page: Page<GroupEntity> = groupRepository.findByParentUserIdAndUserIdInAndFilter(
+            parentUserIds = parentUserIds,
+            userIds = enabledUserIds,
+            findText = findText,
+            pageRequest = pageRequest
+        )
         fillTablePageButtons(action, page.totalPages, pageButtons)
         val groupEntities = page.content
 
@@ -185,9 +195,7 @@ class GroupService(
             groupRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val userId = groupEntity?.let {
-            groupEntity.userId
-        } ?: userConfig.id
+        val userId = groupEntity?.let { groupEntity.userId } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         val changeEnabled = action.id?.let { editEnabled } ?: addEnabled
 

@@ -46,6 +46,7 @@ import foatto.server.repository.GroupRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.UserRepository
 import foatto.server.repository.WorkShiftRepository
 import foatto.server.service.SensorService.Companion.checkAndCreateSensorTables
 import foatto.server.util.getNextId
@@ -66,12 +67,14 @@ abstract class AbstractObjectService(
     private val deviceRepository: DeviceRepository,
     private val dayWorkRepository: DayWorkRepository,
     private val workShiftRepository: WorkShiftRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
     private val objectType: ObjectType?,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
     companion object {
         const val FIELD_ID: String = "id"
@@ -138,9 +141,12 @@ abstract class AbstractObjectService(
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
 
+        val parentUserIds = getParentUserIds(action)
+
         val enabledUserIds = getEnabledUserIds(action.module, action.type, userConfig.relatedUserIds, userConfig.roles)
 
-        val page: Page<ObjectEntity> = objectRepository.findByTypeAndUserIdInAndFilter(
+        val page: Page<ObjectEntity> = objectRepository.findByParentUserIdAndTypeAndUserIdInAndFilter(
+            parentUserIds = parentUserIds,
             type = objectType,
             userIds = enabledUserIds,
             findText = findText,
@@ -307,9 +313,7 @@ abstract class AbstractObjectService(
             objectRepository.findByIdOrNull(id) ?: return emptyList()
         }
 
-        val userId = objectEntity?.let {
-            objectEntity.userId
-        } ?: userConfig.id
+        val userId = objectEntity?.let { objectEntity.userId } ?: getParentUserIds(action)?.singleOrNull() ?: userConfig.id
 
         val departmentId = objectEntity?.let {
             objectEntity.department?.id

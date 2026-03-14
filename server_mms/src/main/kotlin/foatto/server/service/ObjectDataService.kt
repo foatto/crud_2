@@ -23,6 +23,7 @@ import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ActionLogRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.repository.UserRepository
 import foatto.server.util.AdvancedByteBuffer
 import foatto.server.util.byteToHex
 import jakarta.persistence.EntityManager
@@ -35,11 +36,13 @@ class ObjectDataService(
     private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
-    private val fileStoreService: FileStoreService,
+    private val userRepository: UserRepository,
     private val actionLogRepository: ActionLogRepository,
+    private val fileStoreService: FileStoreService,
 ) : MMSService(
-    fileStoreService = fileStoreService,
+    userRepository = userRepository,
     actionLogRepository = actionLogRepository,
+    fileStoreService = fileStoreService,
 ) {
 
     companion object {

@@ -75,6 +75,7 @@ import foatto.core.model.response.LogoffResponse
 import io.kamel.core.getOrElse
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 var defaultStartModule: String? = null
@@ -95,7 +96,7 @@ open class Root {
 
     var defaultLang: LanguageEnum = LanguageEnum.RU
 
-    var appUserConfig: AppUserConfig by mutableStateOf(
+    var appUserConfig: MutableStateFlow<AppUserConfig> = MutableStateFlow(
         AppUserConfig(
             currentUserName = "",
             isAdmin = false,
@@ -124,8 +125,8 @@ open class Root {
     var dialogContent by mutableStateOf<@Composable (() -> Unit)>({})
     var showDialogCancel by mutableStateOf(false)
     var showDialog by mutableStateOf(false)
-    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, appUserConfig.lang))
-    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, appUserConfig.lang))
+    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, appUserConfig.value.lang))
+    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, appUserConfig.value.lang))
 
     private var showPasswordChangeDialog by mutableStateOf(false)
 
@@ -184,7 +185,7 @@ open class Root {
                                     Text(
                                         modifier = Modifier.weight(1.0f),
                                         color = colorUserName,
-                                        text = appUserConfig.currentUserName,
+                                        text = appUserConfig.value.currentUserName,
                                         softWrap = false,
                                         overflow = TextOverflow.Ellipsis,
                                     )
@@ -225,12 +226,12 @@ open class Root {
 
                 if (showPasswordChangeDialog) {
                     PasswordChangeDialog(
-                        lang = appUserConfig.lang,
+                        lang = appUserConfig.value.lang,
                         onOkClick = { newPassword ->
                             showPasswordChangeDialog = false
                             coroutineScope.launch {
-                                invokeRequest(ChangePasswordRequest(encodePassword(newPassword))) { changePasswordResponse: ChangePasswordResponse ->
-                                    showAlert(getLocalizedMessage(LocalizedMessages.PASSWORD_CHANGED_SUCCESSFULLY, appUserConfig.lang))
+                                invokeRequest(ChangePasswordRequest(encodePassword(newPassword))) { _: ChangePasswordResponse ->
+                                    showAlert(getLocalizedMessage(LocalizedMessages.PASSWORD_CHANGED_SUCCESSFULLY, appUserConfig.value.lang))
                                 }
                             }
                         },
@@ -376,7 +377,7 @@ open class Root {
                     tabInfos.clear()
                     controls.clear()
 
-                    appUserConfig = AppUserConfig(
+                    appUserConfig.value = AppUserConfig(
                         currentUserName = "",
                         isAdmin = false,
                         timeOffset = 0,
@@ -392,8 +393,8 @@ open class Root {
                 action.module?.let { module ->
                     val lang = LanguageEnum.valueOf(module)
 
-                    invokeRequest(ChangeLanguageRequest(lang)) { changeLanguageResponse: ChangeLanguageResponse ->
-                        appUserConfig.lang = lang
+                    invokeRequest(ChangeLanguageRequest(lang)) { _: ChangeLanguageResponse ->
+                        appUserConfig.value.lang = lang
                     }
                 }
             }
@@ -454,7 +455,7 @@ open class Root {
 
         alMenuDataClient.clear()
         alMenuDataClient.addAll(alMenuData)
-        alMenuDataClient.addAll(getClientSubMenus(appUserConfig, scaledWindowWidth, scaleKoef))
+        alMenuDataClient.addAll(getClientSubMenus(appUserConfig.value, scaledWindowWidth, scaleKoef))
 
         isTabPanelVisible = true
     }

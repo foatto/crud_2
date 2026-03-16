@@ -994,7 +994,7 @@ class ChartControl(
         axisLines: MutableList<ChartLineDrawData>,
         axisTexts: MutableList<ChartTextDrawData>,
     ) {
-        val timeOffset = root.appUserConfig.timeOffset
+        val timeOffset = root.appUserConfig.value.timeOffset
 
         val timeWidth = t2 - t1
 
@@ -1455,7 +1455,7 @@ class ChartControl(
 
         timeLabelData.isVisible.value = true
         timeLabelData.x.value = x
-        timeLabelData.text.value = getDateTimeDMYHMSString(root.appUserConfig.timeOffset, cursorTime).replace(" ", "\n  ")
+        timeLabelData.text.value = getDateTimeDMYHMSString(root.appUserConfig.value.timeOffset, cursorTime).replace(" ", "\n  ")
     }
 
     //--- в double и обратно из-за ошибок округления

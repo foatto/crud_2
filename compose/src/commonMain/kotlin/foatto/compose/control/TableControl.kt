@@ -210,7 +210,7 @@ class TableControl(
             }
             TableToolBar(
                 isWideScreen = root.isWideScreen,
-                lang = root.appUserConfig.lang,
+                lang = root.appUserConfig.value.lang,
                 isSelectorMode = tableAction.isSelectorMode,
                 selectorCancelAction = if (tableAction.isSelectorMode) {
                     { closeSelector() }
@@ -220,7 +220,7 @@ class TableControl(
                 isFindTextVisible = tableResponse.isFindPanelVisible,
                 findText = findText,
                 onFindInput = { newText: String -> findText = newText },
-                timeOffset = root.appUserConfig.timeOffset,
+                timeOffset = root.appUserConfig.value.timeOffset,
                 isDateTimeIntervalPanelVisible = tableResponse.isDateTimeIntervalPanelVisible,
                 withTime = tableResponse.withTime,
                 begDateTimeValue = begDateTimeValue,
@@ -948,7 +948,7 @@ class TableControl(
     }
 
     private fun clientAction(action: AppAction) {
-        tableClientActionFun(root.appUserConfig.lang, action, this)
+        tableClientActionFun(root.appUserConfig.value.lang, action, this)
     }
 
     private suspend fun doKeyEnter() {

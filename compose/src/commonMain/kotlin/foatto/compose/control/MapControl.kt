@@ -115,7 +115,7 @@ class MapControl(
 
             MapToolBar(
                 isWideScreen = root.isWideScreen,
-                lang = root.appUserConfig.lang,
+                lang = root.appUserConfig.value.lang,
                 isToolBarsVisible = isToolBarsVisible,
                 isPanButtonEnabled = isPanButtonEnabled,
                 isZoomButtonEnabled = isZoomButtonEnabled,

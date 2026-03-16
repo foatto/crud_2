@@ -72,7 +72,7 @@ class AppControl(
                         isWideScreen = root.isWideScreen,
                         lang = root.defaultLang,
                         errorText = if (responseCode == ResponseCode.LOGON_FAILED) {
-                            getLocalizedMessage(LocalizedMessages.INCORRECT_LOGIN_OR_PASSWORD, root.appUserConfig.lang)
+                            getLocalizedMessage(LocalizedMessages.INCORRECT_LOGIN_OR_PASSWORD, root.appUserConfig.value.lang)
                         } else {
                             null
                         },
@@ -92,11 +92,11 @@ class AppControl(
                         },
                         logon = {
                             if (login.isBlank()) {
-                                loginError = getLocalizedMessage(LocalizedMessages.EMPTY_LOGIN, root.appUserConfig.lang)
+                                loginError = getLocalizedMessage(LocalizedMessages.EMPTY_LOGIN, root.appUserConfig.value.lang)
                                 passwordError = null
                             } else if (password.isBlank()) {
                                 loginError = null
-                                passwordError = getLocalizedMessage(LocalizedMessages.EMPTY_PASSWORD, root.appUserConfig.lang)
+                                passwordError = getLocalizedMessage(LocalizedMessages.EMPTY_PASSWORD, root.appUserConfig.value.lang)
                             } else {
                                 loginError = null
                                 passwordError = null
@@ -111,7 +111,7 @@ class AppControl(
                 ResponseCode.LOGON_SYSTEM_BLOCKED -> {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = getLocalizedMessage(LocalizedMessages.USER_BLOCKED_BY_SYSTEM, root.appUserConfig.lang),
+                        text = getLocalizedMessage(LocalizedMessages.USER_BLOCKED_BY_SYSTEM, root.appUserConfig.value.lang),
                         color = Color.Red,
                         fontWeight = FontWeight.Bold,
                     )
@@ -120,7 +120,7 @@ class AppControl(
                 ResponseCode.LOGON_ADMIN_BLOCKED -> {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = getLocalizedMessage(LocalizedMessages.USER_BLOCKED_BY_ADMIN, root.appUserConfig.lang),
+                        text = getLocalizedMessage(LocalizedMessages.USER_BLOCKED_BY_ADMIN, root.appUserConfig.value.lang),
                         color = Color.Red,
                         fontWeight = FontWeight.Bold,
                     )
@@ -297,7 +297,7 @@ class AppControl(
 //                            if( appResponse.code == Code.LOGON_SUCCESS_BUT_OLD )
 //                                showWarning( "Система безопасности", "Срок действия пароля истек.\nПожалуйста, смените пароль." )
                 logonResponse.appUserConfig?.let { appUserConfig ->
-                    root.appUserConfig = appUserConfig
+                    root.appUserConfig.value = appUserConfig
                 }
                 logonResponse.menuDatas?.let { menuDatas ->
                     root.setMenuBarData(

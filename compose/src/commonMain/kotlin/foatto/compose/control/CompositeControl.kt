@@ -165,7 +165,7 @@ class CompositeControl(
                                     filterListItems()
                                 },
                                 //label = { Text("Поиск...") }, - появляется паразитный белый фон вокруг рамки
-                                placeholder = { Text("${getLocalizedMessage(LocalizedMessages.SEARCH, root.appUserConfig.lang)}...") },
+                                placeholder = { Text("${getLocalizedMessage(LocalizedMessages.SEARCH, root.appUserConfig.value.lang)}...") },
                                 singleLine = true,
                             )
                             FilledIconButton(
@@ -266,7 +266,7 @@ class CompositeControl(
                                         ?: block.schemeBlock?.getXyElementTemplate(false)
                                         ?: block.tableBlock?.TableBody(Modifier)
                                         ?: run {
-                                            Text(text = "${getLocalizedMessage(LocalizedMessages.BLOCK_TYPE_NOT_SPECIFIED, root.appUserConfig.lang)}!")
+                                            Text(text = "${getLocalizedMessage(LocalizedMessages.BLOCK_TYPE_NOT_SPECIFIED, root.appUserConfig.value.lang)}!")
                                         }
                                 }
                             }
@@ -295,7 +295,7 @@ class CompositeControl(
                                     ?: block.schemeBlock?.getXyElementTemplate(false)
                                     ?: block.tableBlock?.TableBody(Modifier)
                                     ?: run {
-                                        Text(text = "${getLocalizedMessage(LocalizedMessages.BLOCK_TYPE_NOT_SPECIFIED, root.appUserConfig.lang)}!")
+                                        Text(text = "${getLocalizedMessage(LocalizedMessages.BLOCK_TYPE_NOT_SPECIFIED, root.appUserConfig.value.lang)}!")
                                     }
                             }
                         }
@@ -1000,10 +1000,10 @@ class CompositeControl(
                     value = Json.encodeToString(compositeLayoutDatas),
                 )
             ) { _: SaveUserPropertyResponse ->
-                root.showAlert(getLocalizedMessage(LocalizedMessages.MANUAL_BLOCK_PLACEMENT_SAVED, root.appUserConfig.lang))
+                root.showAlert(getLocalizedMessage(LocalizedMessages.MANUAL_BLOCK_PLACEMENT_SAVED, root.appUserConfig.value.lang))
             }
         }
-//            root.appUserConfig.userProperties[propertyName] = propertyValue
+//            root.appUserConfig.value.userProperties[propertyName] = propertyValue
 //        }
     }
 
@@ -1015,10 +1015,10 @@ class CompositeControl(
                     value = "",
                 )
             ) { _: SaveUserPropertyResponse ->
-                root.showAlert(getLocalizedMessage(LocalizedMessages.MANUAL_BLOCK_PLACEMENT_CLEARED, root.appUserConfig.lang))
+                root.showAlert(getLocalizedMessage(LocalizedMessages.MANUAL_BLOCK_PLACEMENT_CLEARED, root.appUserConfig.value.lang))
             }
         }
-//            root.appUserConfig.userProperties[propertyName] = propertyValue
+//            root.appUserConfig.value.userProperties[propertyName] = propertyValue
 //        }
     }
 

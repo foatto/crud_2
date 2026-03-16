@@ -16,7 +16,7 @@ fun main() = application {
     val root = MMSRoot()
     Window(
         onCloseRequest = ::exitApplication,
-        title = getLocalizedMMSMessage(LocalizedMMSMessages.TITLE, root.appUserConfig.lang),
+        title = getLocalizedMMSMessage(LocalizedMMSMessages.TITLE, root.appUserConfig.value.lang),
     ) {
         filePickerDialogSettings = FileKitDialogSettings(parentWindow = this.window)
         root.Content()

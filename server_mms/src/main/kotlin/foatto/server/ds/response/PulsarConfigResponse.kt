@@ -1,9 +1,9 @@
-package foatto.server.ds
+package foatto.server.ds.response
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PulsarConfigResult(
+class PulsarConfigResponse(
     //--- код ошибки:
     // 0 - без ошибок
     // 1 - не найден контроллер с заданным серийным номером

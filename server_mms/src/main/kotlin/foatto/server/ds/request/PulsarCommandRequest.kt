@@ -1,4 +1,4 @@
-package foatto.server.ds
+package foatto.server.ds.request
 
 import kotlinx.serialization.Serializable
 

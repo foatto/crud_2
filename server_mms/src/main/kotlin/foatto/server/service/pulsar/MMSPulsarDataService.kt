@@ -1,4 +1,4 @@
-package foatto.server.service
+package foatto.server.service.pulsar
 
 import foatto.core.util.getCurrentTimeInt
 import foatto.server.ds.CoreTelematicFunction
@@ -10,6 +10,7 @@ import foatto.server.entity.SensorEntity
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.service.ApplicationService
 import foatto.server.util.AdvancedByteBuffer
 import foatto.server.util.AdvancedLogger
 import jakarta.persistence.EntityManager
@@ -153,7 +154,7 @@ class MMSPulsarDataService(
         val serialNo: String = headerData.deviceID!!
 
         var dc: DeviceConfig? = null
-        ApplicationService.withConnection(entityManager) { conn ->
+        ApplicationService.Companion.withConnection(entityManager) { conn ->
             dc = DeviceConfig.getDeviceConfig(conn, serialNo)
         }
 
@@ -275,7 +276,7 @@ class MMSPulsarDataService(
                         outDataParseError(serialNo, "Vals is null")
                     }
 
-                    ApplicationService.withConnection(entityManager) { conn ->
+                    ApplicationService.Companion.withConnection(entityManager) { conn ->
                         val bbData = AdvancedByteBuffer(CoreTelematicFunction.MAX_PORT_PER_DEVICE * 8)
 
                         MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmGalileoCount, PortNumbers.GALILEO_COUNT_110, bbData)
@@ -418,7 +419,7 @@ class MMSPulsarDataService(
             }
         }
 
-        ApplicationService.withConnection(entityManager) { conn ->
+        ApplicationService.Companion.withConnection(entityManager) { conn ->
             status += " DataRead; Ok."
 
             //--- данные успешно переданы - теперь можно завершить транзакцию

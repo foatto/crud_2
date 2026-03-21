@@ -1,17 +1,17 @@
-package foatto.server.service
+package foatto.server.service.pulsar
 
 import foatto.core.util.getCurrentTimeInt
 import foatto.server.ds.CoreTelematicFunction
 import foatto.server.ds.PortNumbers
-import foatto.server.ds.PulsarConfig
-import foatto.server.ds.PulsarConfigResult
+import foatto.server.ds.request.PulsarConfigRequest
+import foatto.server.ds.response.PulsarConfigResponse
 import foatto.server.entity.SensorCalibrationEntity
 import foatto.server.entity.SensorEntity
 import foatto.server.model.sensor.SensorConfig
-import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.SensorCalibrationRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.service.SensorService
 import foatto.server.util.getNextId
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
@@ -24,12 +24,12 @@ class MMSPulsarConfigService(
     private val sensorCalibrationRepository: SensorCalibrationRepository,
 ) {
 
-    fun storePulsarConfig(pulsarConfig: PulsarConfig): PulsarConfigResult {
+    fun storePulsarConfig(pulsarConfigRequest: PulsarConfigRequest): PulsarConfigResponse {
 
-        val deviceEntity = deviceRepository.findBySerialNo(pulsarConfig.serialNo).firstOrNull() ?: return PulsarConfigResult(1)
-        val objectEntity = deviceEntity.obj ?: return PulsarConfigResult(2)
+        val deviceEntity = deviceRepository.findBySerialNo(pulsarConfigRequest.serialNo).firstOrNull() ?: return PulsarConfigResponse(1)
+        val objectEntity = deviceEntity.obj ?: return PulsarConfigResponse(2)
 
-        deviceEntity.name = pulsarConfig.name
+        deviceEntity.name = pulsarConfigRequest.name
         deviceRepository.saveAndFlush(deviceEntity)
 
         val deviceIndex = deviceEntity.index ?: 0
@@ -39,7 +39,7 @@ class MMSPulsarConfigService(
             startPort = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE,
             endPort = (deviceIndex + 1) * CoreTelematicFunction.MAX_PORT_PER_DEVICE - 1,
         ).forEach { oldSensorEntity ->
-            SensorService.deleteSensor(
+            SensorService.Companion.deleteSensor(
                 entityManager = entityManager,
                 sensorRepository = sensorRepository,
                 sensorCalibrationRepository = sensorCalibrationRepository,
@@ -47,11 +47,11 @@ class MMSPulsarConfigService(
             )
         }
 
-        pulsarConfig.sensors.forEach { sensor ->
+        pulsarConfigRequest.sensors.forEach { sensor ->
             val sensorId: Int = try {
                 sensor.id.substring(startIndex = 2).toInt(radix = 16)
             } catch (_: Throwable) {
-                return PulsarConfigResult(3)
+                return PulsarConfigResponse(3)
             }
             val (sensorType, localPortNum, sensorIndex) = when (sensorId) {
                 in 0x0100..0x010F -> Triple(SensorConfig.SENSOR_LIQUID_LEVEL, PortNumbers.LLS_LEVEL_120, sensorId - 0x0100)
@@ -108,7 +108,7 @@ class MMSPulsarConfigService(
                 in 0x0830..0x083F -> Triple(SensorConfig.SENSOR_WEIGHT, PortNumbers.PMP_MASS_600, sensorId - 0x0830)
                 in 0x0840..0x084F -> Triple(SensorConfig.SENSOR_DENSITY, PortNumbers.PMP_DENSITY_620, sensorId - 0x0840)
 
-                else -> return PulsarConfigResult(4)
+                else -> return PulsarConfigResponse(4)
             }
 
             val portNum = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE + localPortNum + sensorIndex
@@ -177,11 +177,11 @@ class MMSPulsarConfigService(
                 sensorCalibrationRepository.save(sensorCalibrationEntity)
             }
 
-            SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+            SensorService.Companion.checkAndCreateSensorTables(entityManager, sensorEntity.id)
         }
         sensorRepository.flush()
         sensorCalibrationRepository.flush()
 
-        return PulsarConfigResult(0)
+        return PulsarConfigResponse(0)
     }
 }

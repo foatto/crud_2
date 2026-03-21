@@ -1,8 +1,8 @@
-package foatto.server.service
+package foatto.server.service.pulsar
 
 import foatto.core.util.getCurrentTimeInt
-import foatto.server.ds.PulsarCommandRequest
-import foatto.server.ds.PulsarCommandResult
+import foatto.server.ds.request.PulsarCommandRequest
+import foatto.server.ds.response.PulsarCommandResponse
 import foatto.server.repository.DeviceManageRepository
 import foatto.server.repository.DeviceRepository
 import org.springframework.stereotype.Service
@@ -13,8 +13,8 @@ class MMSPulsarManageService(
     private val deviceManageRepository: DeviceManageRepository,
 ) {
 
-    fun getPulsarCommand(pulsarCommandRequest: PulsarCommandRequest): PulsarCommandResult {
-        val deviceEntity = deviceRepository.findBySerialNo(pulsarCommandRequest.serialNo).firstOrNull() ?: return PulsarCommandResult(errorCode = 1)
+    fun getPulsarCommand(pulsarCommandRequest: PulsarCommandRequest): PulsarCommandResponse {
+        val deviceEntity = deviceRepository.findBySerialNo(pulsarCommandRequest.serialNo).firstOrNull() ?: return PulsarCommandResponse(errorCode = 1)
 
         return deviceManageRepository.findByDevice(deviceEntity)
             .filter { deviceManageEntity ->
@@ -27,7 +27,7 @@ class MMSPulsarManageService(
                 deviceManageEntity.sendTime = getCurrentTimeInt()
                 deviceManageRepository.saveAndFlush(deviceManageEntity)
 
-                PulsarCommandResult(errorCode = 0, command = deviceManageEntity.command)
-            } ?: PulsarCommandResult(errorCode = 0, command = null)
+                PulsarCommandResponse(errorCode = 0, command = deviceManageEntity.command)
+            } ?: PulsarCommandResponse(errorCode = 0, command = null)
     }
 }

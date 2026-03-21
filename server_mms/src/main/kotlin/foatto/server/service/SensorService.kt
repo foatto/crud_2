@@ -6,7 +6,9 @@ import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
 import foatto.core.model.request.FormActionData
 import foatto.core.model.response.FormActionResponse
+import foatto.core.model.response.HeaderData
 import foatto.core.model.response.ResponseCode
+import foatto.core.model.response.TitleData
 import foatto.core.model.response.form.FormCellCaption
 import foatto.core.model.response.form.FormCellVisibility
 import foatto.core.model.response.form.FormDateTimeCellMode
@@ -256,6 +258,32 @@ class SensorService(
     @Value("\${data_server_ini_file}")
     val dataServerIniFileName: String = ""
 
+    override fun getTableHeaderData(
+        action: AppAction,
+        userConfig: ServerUserConfig,
+        moduleConfig: AppModuleConfig
+    ): HeaderData {
+        val rows = mutableListOf<Pair<String, String>>()
+
+        getParentObjectId(action)?.let { parentObjectId ->
+            objectRepository.findByIdOrNull(parentObjectId)?.let { parentObjectEntity ->
+                rows += getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (parentObjectEntity.name ?: "-")
+                rows += getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_MODEL, userConfig.lang) to (parentObjectEntity.model ?: "-")
+            }
+        }
+
+        return HeaderData(
+            titles = listOf(
+                TitleData(
+                    action = null,
+                    text = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
+                    isBold = true,
+                )
+            ),
+            rows = rows,
+        )
+    }
+
     override fun getTableColumnCaptions(action: AppAction, userConfig: ServerUserConfig): List<TableCaption> {
         val alColumnInfo = mutableListOf<Pair<String?, String>>()
 
@@ -444,6 +472,32 @@ class SensorService(
             row++
         }
         return currentRowNo
+    }
+
+    override fun getFormHeaderData(
+        action: AppAction,
+        userConfig: ServerUserConfig,
+        moduleConfig: AppModuleConfig
+    ): HeaderData {
+        val rows = mutableListOf<Pair<String, String>>()
+
+        getParentObjectId(action)?.let { parentObjectId ->
+            objectRepository.findByIdOrNull(parentObjectId)?.let { parentObjectEntity ->
+                rows += getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_NAME, userConfig.lang) to (parentObjectEntity.name ?: "-")
+                rows += getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_MODEL, userConfig.lang) to (parentObjectEntity.model ?: "-")
+            }
+        }
+
+        return HeaderData(
+            titles = listOf(
+                TitleData(
+                    action = null,
+                    text = getLocalizedMessage(moduleConfig.captions, userConfig.lang),
+                    isBold = true,
+                )
+            ),
+            rows = rows,
+        )
     }
 
     override fun getFormCells(

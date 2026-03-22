@@ -160,6 +160,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import androidx.compose.runtime.collectAsState
 
 var filePickerDialogSettings: FileKitDialogSettings = FileKitDialogSettings.createDefault()
 var formComboCellPreSetFun: ((lang: LanguageEnum, formCell: FormComboCell) -> Unit)? = null
@@ -263,8 +264,8 @@ class FormControl(
     private var dialogQuestion by mutableStateOf("")
     private var showDialogCancel by mutableStateOf(false)
     private var showDialog by mutableStateOf(false)
-    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.value.lang))
-    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.value.lang))
+    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.lang))
+    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.lang))
 
     private var showFileLinkLifeTimeInputDialog by mutableStateOf(false)
     private var copyFileRef: Long = 0
@@ -279,7 +280,7 @@ class FormControl(
         val coroutineScope = rememberCoroutineScope()
 
         val filePickerLauncher = rememberFilePickerLauncher(
-            //title = getLocalizedMessage(LocalizedMessages.FILE_SELECT, root.appUserConfig.value.lang), - неприменимо в новой версии?
+            //title = getLocalizedMessage(LocalizedMessages.FILE_SELECT, root.appUserConfig.lang), - неприменимо в новой версии?
             dialogSettings = filePickerDialogSettings,
         ) { platformFile ->
             platformFile?.let {
@@ -317,12 +318,12 @@ class FormControl(
                         colors = colorTextButtonDefault ?: ButtonDefaults.textButtonColors(),
                         onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                dateTimeData.current.value = (millis / 1000).toInt() - root.appUserConfig.value.timeOffset
+                                dateTimeData.current.value = (millis / 1000).toInt() - root.appUserConfig.timeOffset
                             }
                             datePickerData = null
                         }
                     ) {
-                        Text(text = getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.value.lang))
+                        Text(text = getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.lang))
                     }
                 },
                 dismissButton = {
@@ -333,7 +334,7 @@ class FormControl(
                             datePickerData = null
                         }
                     ) {
-                        Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.value.lang))
+                        Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.lang))
                     }
                 },
             )
@@ -342,8 +343,8 @@ class FormControl(
         timePickerData?.let { dateTimeData ->
             val localDateTime = getLocalDateTime(
                 timeOffset = when (dateTimeData.data.mode) {
-                    FormDateTimeCellMode.DMY -> root.appUserConfig.value.timeOffset
-                    FormDateTimeCellMode.DMYHMS -> root.appUserConfig.value.timeOffset
+                    FormDateTimeCellMode.DMY -> root.appUserConfig.timeOffset
+                    FormDateTimeCellMode.DMYHMS -> root.appUserConfig.timeOffset
                     FormDateTimeCellMode.HM -> 0
                     FormDateTimeCellMode.HMS -> 0
                 },
@@ -381,8 +382,8 @@ class FormControl(
                             ).toInstant(
                                 getTimeZone(
                                     when (dateTimeData.data.mode) {
-                                        FormDateTimeCellMode.DMY -> root.appUserConfig.value.timeOffset
-                                        FormDateTimeCellMode.DMYHMS -> root.appUserConfig.value.timeOffset
+                                        FormDateTimeCellMode.DMY -> root.appUserConfig.timeOffset
+                                        FormDateTimeCellMode.DMYHMS -> root.appUserConfig.timeOffset
                                         FormDateTimeCellMode.HM -> 0
                                         FormDateTimeCellMode.HMS -> 0
                                     }
@@ -391,7 +392,7 @@ class FormControl(
                             timePickerData = null
                         }
                     ) {
-                        Text(text = getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.value.lang))
+                        Text(text = getLocalizedMessage(LocalizedMessages.OK, root.appUserConfig.lang))
                     }
                 },
                 dismissButton = {
@@ -402,7 +403,7 @@ class FormControl(
                             timePickerData = null
                         }
                     ) {
-                        Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.value.lang))
+                        Text(text = getLocalizedMessage(LocalizedMessages.CANCEL, root.appUserConfig.lang))
                     }
                 },
             )
@@ -424,7 +425,7 @@ class FormControl(
 
         if (showFileLinkLifeTimeInputDialog) {
             FileLinkLifeTimeInputDialog(
-                lang = root.appUserConfig.value.lang,
+                lang = root.appUserConfig.lang,
                 onOkClick = { hour ->
                     showFileLinkLifeTimeInputDialog = false
                     coroutineScope.launch {
@@ -432,7 +433,7 @@ class FormControl(
                             clipboardManager.setText(AnnotatedString(getShortFileLinkResponse.url))
 
                             dialogActionFun = {}
-                            dialogQuestion = getLocalizedMessage(LocalizedMessages.NEW_URL_COPIED_TO_CLIPBOARD, root.appUserConfig.value.lang)
+                            dialogQuestion = getLocalizedMessage(LocalizedMessages.NEW_URL_COPIED_TO_CLIPBOARD, root.appUserConfig.lang)
                             showDialogCancel = false
                             showDialog = true
                         }
@@ -647,8 +648,8 @@ class FormControl(
                                                     val (dateString, timeString) = gridData.current.value?.let { curDateTimeValue ->
                                                         val dateTimeString = getDateTimeDMYHMSString(
                                                             timeOffset = when (gridData.data.mode) {
-                                                                FormDateTimeCellMode.DMY -> root.appUserConfig.value.timeOffset
-                                                                FormDateTimeCellMode.DMYHMS -> root.appUserConfig.value.timeOffset
+                                                                FormDateTimeCellMode.DMY -> root.appUserConfig.timeOffset
+                                                                FormDateTimeCellMode.DMYHMS -> root.appUserConfig.timeOffset
                                                                 FormDateTimeCellMode.HM -> 0
                                                                 FormDateTimeCellMode.HMS -> 0
                                                             },
@@ -711,7 +712,7 @@ class FormControl(
                                                                                     gridData.current.value?.let { seconds ->
                                                                                         seconds * 1000L
                                                                                     } ?: Clock.System.now().toEpochMilliseconds()
-                                                                                    ) + (root.appUserConfig.value.timeOffset * 1000L)
+                                                                                    ) + (root.appUserConfig.timeOffset * 1000L)
 
                                                                             datePickerState.displayedMonthMillis = curDateTime
                                                                             datePickerState.selectedDateMillis = curDateTime
@@ -838,7 +839,7 @@ class FormControl(
                                                             colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
                                                             value = gridData.values.find { (value, _) ->
                                                                 gridData.current == value
-                                                            }?.second ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_VALUE, root.appUserConfig.value.lang)})",
+                                                            }?.second ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_VALUE, root.appUserConfig.lang)})",
                                                             onValueChange = {},
                                                             readOnly = !gridData.data.isEditable,
                                                             //!!! label = { Text("Имя") }, - использовать для мобильной версии без FormCellTypeClient.LABEL
@@ -1635,7 +1636,7 @@ class FormControl(
             }
 
             is FormComboCell -> {
-                formComboCellPreSetFun?.invoke(root.appUserConfig.value.lang, formCell)
+                formComboCellPreSetFun?.invoke(root.appUserConfig.lang, formCell)
                 FormComboCellClient(
                     cellName = formCell.name,
                     minWidth = formCell.minWidth,
@@ -1880,7 +1881,7 @@ class FormControl(
             }
         }
 
-        formActionPreInvokeFun?.invoke(root.appUserConfig.value.lang, formButton, formActionData)?.let { errors ->
+        formActionPreInvokeFun?.invoke(root.appUserConfig.lang, formButton, formActionData)?.let { errors ->
             prepareErrors(errors)
             return
         }

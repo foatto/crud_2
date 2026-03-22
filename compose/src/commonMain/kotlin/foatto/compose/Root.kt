@@ -96,7 +96,7 @@ open class Root {
 
     var defaultLang: LanguageEnum = LanguageEnum.RU
 
-    var appUserConfig: MutableStateFlow<AppUserConfig> = MutableStateFlow(
+    var appUserConfig: AppUserConfig by mutableStateOf(
         AppUserConfig(
             currentUserName = "",
             isAdmin = false,
@@ -125,8 +125,8 @@ open class Root {
     var dialogContent by mutableStateOf<@Composable (() -> Unit)>({})
     var showDialogCancel by mutableStateOf(false)
     var showDialog by mutableStateOf(false)
-    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, appUserConfig.value.lang))
-    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, appUserConfig.value.lang))
+    private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, appUserConfig.lang))
+    private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, appUserConfig.lang))
 
     private var showPasswordChangeDialog by mutableStateOf(false)
 
@@ -185,7 +185,7 @@ open class Root {
                                     Text(
                                         modifier = Modifier.weight(1.0f),
                                         color = colorUserName,
-                                        text = appUserConfig.value.currentUserName,
+                                        text = appUserConfig.currentUserName,
                                         softWrap = false,
                                         overflow = TextOverflow.Ellipsis,
                                     )
@@ -226,12 +226,12 @@ open class Root {
 
                 if (showPasswordChangeDialog) {
                     PasswordChangeDialog(
-                        lang = appUserConfig.value.lang,
+                        lang = appUserConfig.lang,
                         onOkClick = { newPassword ->
                             showPasswordChangeDialog = false
                             coroutineScope.launch {
                                 invokeRequest(ChangePasswordRequest(encodePassword(newPassword))) { _: ChangePasswordResponse ->
-                                    showAlert(getLocalizedMessage(LocalizedMessages.PASSWORD_CHANGED_SUCCESSFULLY, appUserConfig.value.lang))
+                                    showAlert(getLocalizedMessage(LocalizedMessages.PASSWORD_CHANGED_SUCCESSFULLY, appUserConfig.lang))
                                 }
                             }
                         },
@@ -377,7 +377,7 @@ open class Root {
                     tabInfos.clear()
                     controls.clear()
 
-                    appUserConfig.value = AppUserConfig(
+                    appUserConfig = AppUserConfig(
                         currentUserName = "",
                         isAdmin = false,
                         timeOffset = 0,
@@ -394,7 +394,7 @@ open class Root {
                     val lang = LanguageEnum.valueOf(module)
 
                     invokeRequest(ChangeLanguageRequest(lang)) { _: ChangeLanguageResponse ->
-                        appUserConfig.value.lang = lang
+                        appUserConfig.lang = lang
                     }
                 }
             }
@@ -455,7 +455,7 @@ open class Root {
 
         alMenuDataClient.clear()
         alMenuDataClient.addAll(alMenuData)
-        alMenuDataClient.addAll(getClientSubMenus(appUserConfig.value, scaledWindowWidth, scaleKoef))
+        alMenuDataClient.addAll(getClientSubMenus(appUserConfig, scaledWindowWidth, scaleKoef))
 
         isTabPanelVisible = true
     }

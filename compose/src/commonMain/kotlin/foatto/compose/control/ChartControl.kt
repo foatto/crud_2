@@ -684,7 +684,7 @@ class ChartControl(
             ChartActionRequest(
                 action = chartAction.copy(type = ActionType.GET_ELEMENTS),
                 times = Pair(chartViewCoord.t1, chartViewCoord.t2),
-                viewSize = bodyCanvasWidth / root.scaleKoef to canvasHeight / root.scaleKoef,
+                viewSize = canvasWidth / root.scaleKoef to canvasHeight / root.scaleKoef,
             )
         ) { chartActionResponse: ChartActionResponse ->
 
@@ -994,7 +994,7 @@ class ChartControl(
         axisLines: MutableList<ChartLineDrawData>,
         axisTexts: MutableList<ChartTextDrawData>,
     ) {
-        val timeOffset = root.appUserConfig.value.timeOffset
+        val timeOffset = root.appUserConfig.timeOffset
 
         val timeWidth = t2 - t1
 
@@ -1455,7 +1455,7 @@ class ChartControl(
 
         timeLabelData.isVisible.value = true
         timeLabelData.x.value = x
-        timeLabelData.text.value = getDateTimeDMYHMSString(root.appUserConfig.value.timeOffset, cursorTime).replace(" ", "\n  ")
+        timeLabelData.text.value = getDateTimeDMYHMSString(root.appUserConfig.timeOffset, cursorTime).replace(" ", "\n  ")
     }
 
     //--- в double и обратно из-за ошибок округления

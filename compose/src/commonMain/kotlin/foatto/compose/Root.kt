@@ -28,6 +28,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +76,6 @@ import foatto.core.model.response.LogoffResponse
 import io.kamel.core.getOrElse
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 var defaultStartModule: String? = null
@@ -330,7 +330,10 @@ open class Root {
                     },
                 )
             }
-            controls.getOrNull(selectedTabIndex)?.Body()
+            //--- bugfix/workaround for incorrect event handling
+            key(selectedTabIndex) {
+                controls.getOrNull(selectedTabIndex)?.Body()
+            }
         }
     }
 

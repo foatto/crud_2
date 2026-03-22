@@ -10,7 +10,7 @@ class ServerUserConfig(
     val currentUserName: String,
     val roles: Set<String>,
     val timeOffset: Int,
-    val lang: LanguageEnum,
+    var lang: LanguageEnum,
     val fullNames: Map<Int, String>,
     val shortNames: Map<Int, String>,
     val relatedUserIds: Map<Int, UserRelationEnum>,

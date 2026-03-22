@@ -16,6 +16,8 @@ class ChangeLanguageService(
         lang: LanguageEnum,
     ) {
         SpringApp.getSessionData(sessionId)?.serverUserConfig?.let { serverUserConfig ->
+            serverUserConfig.lang = lang
+
             userRepository.findByIdOrNull(serverUserConfig.id)?.let { userEntity ->
                 userEntity.lang = lang
                 userRepository.saveAndFlush(userEntity)

@@ -7,5 +7,5 @@ enum class LanguageEnum(
     val descr: String
 ) {
     EN("En"),
-    RU("Ru"),
+    RU("Рус"),
 }

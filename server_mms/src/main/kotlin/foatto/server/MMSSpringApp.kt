@@ -923,7 +923,7 @@ class MMSSpringApp(
                 LanguageEnum.entries.forEach { lang ->
                     langSubMenus += MenuData(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
                 }
-                add(MenuData(caption = LanguageEnum.entries.joinToString(" / "), subMenuDatas = langSubMenus))
+                add(MenuData(caption = LanguageEnum.entries.joinToString(separator = " / ") { le -> le.descr }, subMenuDatas = langSubMenus))
 
                 addMenuItem(
                     alMenu = this,

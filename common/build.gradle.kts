@@ -11,6 +11,8 @@ val kotlinJvmTarget: String by project
 val kotlinxSerializationVersion: String by project
 val kotlinxDatetimeVersion: String by project
 
+val cryptographyVersion: String by project
+
 val androidCompileSdk: String by project
 val androidMinSdk: String by project
 
@@ -49,6 +51,8 @@ kotlin {
         commonMain.dependencies {
             api("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
             api("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
+            api("dev.whyoleg.cryptography:cryptography-core:$cryptographyVersion")
+            api("dev.whyoleg.cryptography:cryptography-provider-optimal:$cryptographyVersion")
         }
         jvmMain.dependencies {
             api(kotlin("reflect"))

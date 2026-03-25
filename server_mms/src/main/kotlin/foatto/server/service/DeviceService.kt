@@ -638,6 +638,7 @@ class DeviceService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_SERIAL_NO))
         val findText = action.findText?.trim() ?: ""
@@ -667,7 +668,7 @@ class DeviceService(
             pageRequest = pageRequest,
         )
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val deviceEntities = page.content
 
         for (deviceEntity in deviceEntities) {
@@ -686,6 +687,7 @@ class DeviceService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = deviceEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
@@ -694,46 +696,47 @@ class DeviceService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = deviceEntity.type?.let { type ->
                     deviceTypes[type] ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_SENSOR_TYPE, userConfig.lang)
                 } ?: "-",
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.index?.toString() ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.serialNo ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.index?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.serialNo ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.name ?: "-")
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = deviceEntity.obj?.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.obj?.name ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.obj?.model ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.obj?.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.obj?.model ?: "-")
 
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellImei ?: "-"}\n${deviceEntity.cellImei2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "${deviceEntity.cellImei ?: "-"}\n${deviceEntity.cellImei2 ?: "-"}")
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = "${cellOwnerNames[deviceEntity.cellOwner]?.get(userConfig.lang) ?: "-"}\n${cellOwnerNames[deviceEntity.cellOwner2]?.get(userConfig.lang) ?: "-"}"
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellNumber ?: "-"}\n${deviceEntity.cellNumber2 ?: "-"}")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellIcc ?: "-"}\n${deviceEntity.cellIcc2 ?: "-"}")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "${deviceEntity.cellOperator ?: "-"}\n${deviceEntity.cellOperator2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "${deviceEntity.cellNumber ?: "-"}\n${deviceEntity.cellNumber2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "${deviceEntity.cellIcc ?: "-"}\n${deviceEntity.cellIcc2 ?: "-"}")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "${deviceEntity.cellOperator ?: "-"}\n${deviceEntity.cellOperator2 ?: "-"}")
 
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.fwVersion ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.fwVersion ?: "-")
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = deviceEntity.lastSessionTime?.let { lastSessionTime -> getDateTimeDMYHMSString(zoneLocal, lastSessionTime) } ?: "-",
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionStatus ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceEntity.lastSessionError ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = getDateEntityDMYString(deviceEntity.usingStartDate))
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.lastSessionStatus ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceEntity.lastSessionError ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = getDateEntityDMYString(deviceEntity.usingStartDate))
 
             val formOpenAction = action.copy(
                 type = ActionType.MODULE_FORM,
@@ -778,7 +781,10 @@ class DeviceService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
         return currentRowNo
     }

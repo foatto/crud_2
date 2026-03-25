@@ -113,6 +113,7 @@ class WorkShiftService(
     ): Int? {
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(
             action,
@@ -147,7 +148,7 @@ class WorkShiftService(
             pageRequest = pageRequest,
         )
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val workShiftEntities = page.content
 
         val groupColSpan = getTableColumnCaptions(action, userConfig).size
@@ -201,7 +202,7 @@ class WorkShiftService(
                     row = row,
                     col = col,
                     colSpan = groupColSpan,
-                    dataRow = row,
+                    dataRow = dataRow,
                     name = groupName,
                     backColorType = TableCellBackColorType.GROUP_0,
                     isBoldText = true,
@@ -210,11 +211,12 @@ class WorkShiftService(
                 tableRows += TableRow()
                 row++
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "", backColorType = TableCellBackColorType.GROUP_0)
 
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = workShiftEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
@@ -224,14 +226,14 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = getDateTimeDMYHMString(timeOffset = userConfig.timeOffset, seconds = endTime)
             )
 
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = (objectEntity.name ?: "-") +
                         "\n${objectEntity.model ?: "-"}" +
                         "\n${objectEntity.department?.name ?: "-"}" +
@@ -241,14 +243,14 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = works.joinToString("\n") { wcd -> wcd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} ${getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_HOUR, userConfig.lang)}" },
                 align = TableCellAlign.LEFT,
             )
@@ -256,14 +258,14 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = usings.joinToString("\n") { ccd -> ccd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = usings.joinToString("\n") { ccd -> getSplittedDouble(ccd.value) + (ccd.sensorEntity.dim ?: "") },
                 align = TableCellAlign.LEFT,
             )
@@ -271,14 +273,14 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = energos.joinToString("\n") { ccd -> ccd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = energos.joinToString("\n") { ccd -> getSplittedDouble(ccd.value) + (ccd.sensorEntity.dim ?: "") },
                 align = TableCellAlign.LEFT,
             )
@@ -286,21 +288,21 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = liquidLevels.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = liquidLevels.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = liquidLevels.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
@@ -308,21 +310,21 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = temperatures.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = temperatures.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = temperatures.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
@@ -330,21 +332,21 @@ class WorkShiftService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = densities.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = densities.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = densities.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
@@ -377,7 +379,10 @@ class WorkShiftService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
 //println("works = $worksTime")
 //println("usings = $usingsTime")

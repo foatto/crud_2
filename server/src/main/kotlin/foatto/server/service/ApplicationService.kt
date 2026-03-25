@@ -325,10 +325,10 @@ abstract class ApplicationService(
         )
     }
 
-    protected fun getTableSelectorButtonCell(row: Int, col: Int, selectorAction: AppAction): TableBaseCell = TableButtonCell(
+    protected fun getTableSelectorButtonCell(row: Int, col: Int, dataRow: Int, selectorAction: AppAction): TableBaseCell = TableButtonCell(
         row = row,
         col = col,
-        dataRow = row,
+        dataRow = dataRow,
         values = listOf(
             TableButtonCellData(
                 name = IconName.SELECT,
@@ -340,6 +340,7 @@ abstract class ApplicationService(
     protected fun getTableUserNameCell(
         row: Int,
         col: Int,
+        dataRow: Int,
         userConfig: ServerUserConfig,
         rowUserId: Int?,
         rowOwnerShortName: String?,
@@ -347,7 +348,7 @@ abstract class ApplicationService(
     ): TableBaseCell = TableSimpleCell(
         row = row,
         col = col,
-        dataRow = row,
+        dataRow = dataRow,
         name = if (rowUserId == null) {
             "-"
         } else if (rowUserId == 0) {
@@ -377,18 +378,23 @@ abstract class ApplicationService(
     )
 
     protected fun fillTablePageButtons(
+        userConfig: ServerUserConfig,
         action: AppAction,
         pageCount: Int,
         pageButtons: MutableList<TablePageButton>,
     ) {
-        val NEAR_PAGE_BUTTON_COUNT = 9
+        val nearPageButtonCount = if (userConfig.isWideScreen) {
+            9
+        } else {
+            1
+        }
         val pageNo = action.pageNo
 
         //--- current page
         pageButtons += getPageButton(null, pageNo)
 
         //--- previous pages
-        for (i in 1..NEAR_PAGE_BUTTON_COUNT) {
+        for (i in 1..nearPageButtonCount) {
             val prevPageNo = pageNo - i
             if (prevPageNo >= 0) {
                 pageButtons.add(0, getPageButton(action, prevPageNo))
@@ -398,18 +404,18 @@ abstract class ApplicationService(
         }
 
         //--- previous pages / left side
-        if (pageNo - NEAR_PAGE_BUTTON_COUNT > 2) {
+        if (pageNo - nearPageButtonCount > 2) {
             pageButtons.add(0, TablePageButton(null, "..."))
             pageButtons.add(0, getPageButton(action, 0))
-        } else if (pageNo - NEAR_PAGE_BUTTON_COUNT > 1) {
+        } else if (pageNo - nearPageButtonCount > 1) {
             pageButtons.add(0, getPageButton(action, 1))
             pageButtons.add(0, getPageButton(action, 0))
-        } else if (pageNo - NEAR_PAGE_BUTTON_COUNT > 0) {
+        } else if (pageNo - nearPageButtonCount > 0) {
             pageButtons.add(0, getPageButton(action, 0))
         }
 
         //--- next pages
-        for (i in 1..NEAR_PAGE_BUTTON_COUNT) {
+        for (i in 1..nearPageButtonCount) {
             val nextPageNo = pageNo + i
             if (nextPageNo <= pageCount - 1) {
                 pageButtons += getPageButton(action, nextPageNo)
@@ -419,13 +425,13 @@ abstract class ApplicationService(
         }
 
         //--- next pages / right side
-        if (pageNo + NEAR_PAGE_BUTTON_COUNT < pageCount - 3) {
+        if (pageNo + nearPageButtonCount < pageCount - 3) {
             pageButtons += TablePageButton(null, "...")
             pageButtons += getPageButton(action, pageCount - 1)
-        } else if (pageNo + NEAR_PAGE_BUTTON_COUNT < pageCount - 2) {
+        } else if (pageNo + nearPageButtonCount < pageCount - 2) {
             pageButtons += getPageButton(action, pageCount - 2)
             pageButtons += getPageButton(action, pageCount - 1)
-        } else if (pageNo + NEAR_PAGE_BUTTON_COUNT < pageCount - 1) {
+        } else if (pageNo + nearPageButtonCount < pageCount - 1) {
             pageButtons += getPageButton(action, pageCount - 1)
         }
     }

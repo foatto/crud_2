@@ -128,6 +128,7 @@ class DeviceManageService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.DESC, FIELD_CREATE_TIME))
         val findText = action.findText?.trim() ?: ""
@@ -145,7 +146,7 @@ class DeviceManageService(
             endDateTime = action.endDateTimeValue ?: -1,
             pageRequest = pageRequest,
         )
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val deviceManageEntities = page.content
 
         for (deviceManageEntity in deviceManageEntities) {
@@ -164,38 +165,39 @@ class DeviceManageService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = deviceManageEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceManageEntity.descr ?: "-", minWidth = 200)
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = deviceManageEntity.command ?: "-", minWidth = 200)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceManageEntity.descr ?: "-", minWidth = 200)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = deviceManageEntity.command ?: "-", minWidth = 200)
             tableCells += TableButtonCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 values = getTableFileButtonCellData(deviceManageEntity.fileId),
             )
 
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = deviceManageEntity.createTime?.let { time -> getDateTimeDMYHMSString(zoneLocal, time) } ?: "-",
                 minWidth = 200,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = deviceManageEntity.editTime?.let { time -> getDateTimeDMYHMSString(zoneLocal, time) } ?: "-",
                 minWidth = 200,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = deviceManageEntity.sendTime?.let { time -> getDateTimeDMYHMSString(zoneLocal, time) } ?: "-",
                 minWidth = 200,
             )
@@ -229,7 +231,10 @@ class DeviceManageService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
         return currentRowNo
     }

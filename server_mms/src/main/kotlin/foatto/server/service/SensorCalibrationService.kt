@@ -92,7 +92,7 @@ class SensorCalibrationService(
 
         val page: Page<SensorCalibrationEntity> = sensorCalibrationRepository.findBySensorAndFilter(parentSensorEntity, findText, pageRequest)
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val sensorCalibrationEntities = page.content
 
         for (sensorCalibrationEntity in sensorCalibrationEntities) {

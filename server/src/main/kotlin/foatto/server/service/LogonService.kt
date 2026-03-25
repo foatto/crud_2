@@ -29,6 +29,7 @@ class LogonService(
         sessionId: Long,
         login: String,
         password: String,
+        isWideScreen: Boolean,
     ): LogonResult =
         userRepository.findByLogin(login).firstOrNull()?.let { userEntity ->
             val responseCode = checkLogon(userEntity, password)
@@ -41,6 +42,7 @@ class LogonService(
                     roles = userEntity.roles,
                     timeOffset = userEntity.timeOffset ?: (3 * 3600),
                     lang = lang,
+                    isWideScreen = isWideScreen,
                     fullNames = loadFullUserNames(lang),
                     shortNames = loadShortUserNames(lang),
                     relatedUserIds = loadRelatedUserIds(

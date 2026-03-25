@@ -81,6 +81,7 @@ class GroupService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
@@ -100,7 +101,7 @@ class GroupService(
             findText = findText,
             pageRequest = pageRequest
         )
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val groupEntities = page.content
 
         for (groupEntity in groupEntities) {
@@ -125,17 +126,18 @@ class GroupService(
             )
 
             if (action.isSelectorMode) {
-                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, dataRow = dataRow, selectorAction = selectorAction)
             }
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = groupEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = groupEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = groupEntity.name ?: "-")
 
             val formAction = action.copy(
                 type = ActionType.MODULE_FORM,
@@ -174,7 +176,10 @@ class GroupService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
         return currentRowNo
     }

@@ -87,6 +87,7 @@ class DayAllWorkService(
     ): Int? {
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val timeZone = getTimeZone(userConfig.timeOffset)
 
@@ -124,7 +125,7 @@ class DayAllWorkService(
             pageRequest = pageRequest,
         )
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val dayWorkEntities = page.content
 
         val groupColSpan = getTableColumnCaptions(action, userConfig).size
@@ -187,7 +188,7 @@ class DayAllWorkService(
                     row = row,
                     col = col,
                     colSpan = groupColSpan,
-                    dataRow = row,
+                    dataRow = dataRow,
                     name = groupName,
                     backColorType = TableCellBackColorType.GROUP_0,
                     isBoldText = true,
@@ -196,11 +197,12 @@ class DayAllWorkService(
                 tableRows += TableRow()
                 row++
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = "", backColorType = TableCellBackColorType.GROUP_0)
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "", backColorType = TableCellBackColorType.GROUP_0)
 
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = dayWorkEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
@@ -210,7 +212,7 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = (objectEntity.name ?: "-") +
                         "\n${objectEntity.model ?: "-"}" +
                         "\n${objectEntity.department?.name ?: "-"}" +
@@ -220,7 +222,7 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = "${getSplittedDouble(run / 1000.0)} ${getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_KM, userConfig.lang)}",
                 align = TableCellAlign.LEFT,
             )
@@ -228,14 +230,14 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = works.joinToString("\n") { wcd -> wcd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = works.joinToString("\n") { wcd -> "${getSplittedDouble(wcd.onTime / 3600.0)} ${getLocalizedMMSMessage(LocalizedMMSMessages.UNIT_HOUR, userConfig.lang)}" },
                 align = TableCellAlign.LEFT,
             )
@@ -243,14 +245,14 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = usings.joinToString("\n") { ccd -> ccd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = usings.joinToString("\n") { ccd -> getSplittedDouble(ccd.value) + (ccd.sensorEntity.dim ?: "") },
                 align = TableCellAlign.LEFT,
             )
@@ -258,14 +260,14 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = energos.joinToString("\n") { ccd -> ccd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = energos.joinToString("\n") { ccd -> getSplittedDouble(ccd.value) + (ccd.sensorEntity.dim ?: "") },
                 align = TableCellAlign.LEFT,
             )
@@ -273,21 +275,21 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = liquidLevels.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = liquidLevels.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = liquidLevels.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
@@ -295,21 +297,21 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = temperatures.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = temperatures.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = temperatures.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
@@ -317,21 +319,21 @@ class DayAllWorkService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = densities.joinToString("\n") { acd -> acd.sensorEntity.descr?.let { descr -> "$descr = " } ?: "-" },
                 align = TableCellAlign.RIGHT,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = densities.joinToString("\n") { acd -> acd.begValue?.let { begValue -> getSplittedDouble(begValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.CENTER,
             )
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = densities.joinToString("\n") { acd -> acd.endValue?.let { endValue -> getSplittedDouble(endValue) + (acd.sensorEntity.dim ?: "") } ?: "-" },
                 align = TableCellAlign.LEFT,
             )
@@ -364,7 +366,10 @@ class DayAllWorkService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
 //println("works = $worksTime")
 //println("usings = $usingsTime")

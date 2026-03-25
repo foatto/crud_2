@@ -334,7 +334,7 @@ class SensorService(
             pageRequest = pageRequest,
         )
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val sensorEntities = page.content
 
         var prevGroupName: String? = null

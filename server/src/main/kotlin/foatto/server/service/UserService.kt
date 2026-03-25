@@ -217,6 +217,7 @@ class UserService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_ORG_TYPE), Sort.Order(Sort.Direction.ASC, FIELD_FULL_NAME))
         val findText = action.findText?.trim() ?: ""
@@ -243,7 +244,7 @@ class UserService(
             endDateTime = action.endDateTimeValue ?: -1,
             pageRequest = pageRequest,
         )
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val userEntities = page.content
 
         for (userEntity in userEntities) {
@@ -268,11 +269,12 @@ class UserService(
             )
 
             if (action.isSelectorMode) {
-                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, dataRow = dataRow, selectorAction = selectorAction)
             }
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = userEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
@@ -281,7 +283,7 @@ class UserService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = when (userEntity.orgType) {
                     OrgType.ORG_TYPE_DIVISION -> IconName.DIVISION
                     OrgType.ORG_TYPE_BOSS -> IconName.BOSS
@@ -290,39 +292,39 @@ class UserService(
                 }
             )
             tableCells += if (userEntity.orgType == OrgType.ORG_TYPE_DIVISION) {
-                TableSimpleCell(row = row, col = col++, dataRow = row, name = "")
+                TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "")
             } else {
-                TableBooleanCell(row = row, col = col++, dataRow = row, value = userEntity.isDisabled ?: false)
+                TableBooleanCell(row = row, col = col++, dataRow = dataRow, value = userEntity.isDisabled ?: false)
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.login ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.shortName ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.fullName ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.login ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.shortName ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.fullName ?: "-")
             if (userConfig.isAdminOnly()) {
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.roles.joinToString())
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.roles.joinToString())
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.eMail ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.telegram ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.contactInfo ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.eMail ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.telegram ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.contactInfo ?: "-")
             if (userConfig.isAdminOnly()) {
                 tableCells += TableButtonCell(
                     row = row,
                     col = col++,
-                    dataRow = row,
+                    dataRow = dataRow,
                     minWidth = 100,
                     values = getTableFileButtonCellData(userEntity.fileId),
                 )
             }
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.timeOffset?.toString() ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.lang?.descr ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.timeOffset?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.lang?.descr ?: "-")
             if (userConfig.isAdminOnly()) {
                 tableCells += TableSimpleCell(
                     row = row,
                     col = col++,
-                    dataRow = row,
+                    dataRow = dataRow,
                     minWidth = 100,
                     name = getDateTimeEntityDMYHMSString(userEntity.lastLoginDateTime)
                 )
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = userEntity.lastIP?.removePrefix("/") ?: "-")
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = userEntity.lastIP?.removePrefix("/") ?: "-")
             }
 
             val formAction = action.copy(
@@ -379,7 +381,10 @@ class UserService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
         return currentRowNo
     }

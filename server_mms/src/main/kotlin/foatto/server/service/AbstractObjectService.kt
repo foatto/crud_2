@@ -21,6 +21,7 @@ import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
 import foatto.core.model.response.table.cell.TableBooleanCell
 import foatto.core.model.response.table.cell.TableButtonCell
+import foatto.core.model.response.table.cell.TableCellAlign
 import foatto.core.model.response.table.cell.TableSimpleCell
 import foatto.core.util.getCurrentTimeInt
 import foatto.core_mms.AppModuleMMS
@@ -92,7 +93,7 @@ abstract class AbstractObjectService(
 
         //        private const val FIELD_LAST_ALERT_TIME = "lastAlertTime"
 
-        private const val FIELD_OWNER_FULL_NAME = "_ownerFullName"   // псевдополе для селектора
+        private const val FIELD_OWNER_FULL_NAME = "_ownerFullName"    // псевдополе для селектора
         private const val FIELD_DEPARTMENT_NAME = "_departmentName"   // псевдополе для селектора
         private const val FIELD_GROUP_NAME = "_groupName"             // псевдополе для селектора
     }
@@ -106,18 +107,23 @@ abstract class AbstractObjectService(
         if (action.isSelectorMode) {
             alColumnInfo += null to "" // selector button
         }
-        alColumnInfo += null to "" // userId
-        if (objectType == null) {
-            alColumnInfo += FIELD_TYPE to getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang)
-        }
-        alColumnInfo += FIELD_IS_DISABLED to getLocalizedMMSMessage(LocalizedMMSMessages.LOCKED, userConfig.lang)
-        alColumnInfo += FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang)
-        alColumnInfo += FIELD_MODEL to getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang)
-        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.DEPARTMENT, userConfig.lang)
-        alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.GROUP, userConfig.lang)
+        if (userConfig.isWideScreen) {
+            alColumnInfo += null to "" // userId
+            if (objectType == null) {
+                alColumnInfo += FIELD_TYPE to getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang)
+            }
+            alColumnInfo += FIELD_IS_DISABLED to getLocalizedMMSMessage(LocalizedMMSMessages.LOCKED, userConfig.lang)
+            alColumnInfo += FIELD_NAME to getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang)
+            alColumnInfo += FIELD_MODEL to getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang)
+            alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.DEPARTMENT, userConfig.lang)
+            alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.GROUP, userConfig.lang)
 
-        if (userConfig.isAdminOnly()) {
-            alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_SCHEMA_FILE, userConfig.lang)
+            if (userConfig.isAdminOnly()) {
+                alColumnInfo += null to getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_SCHEMA_FILE, userConfig.lang)
+            }
+        } else {
+            alColumnInfo += null to ""
+            alColumnInfo += null to ""
         }
 
         return getTableColumnCaptionActions(
@@ -137,6 +143,7 @@ abstract class AbstractObjectService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
@@ -152,7 +159,7 @@ abstract class AbstractObjectService(
             findText = findText,
             pageRequest = pageRequest,
         )
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val objectEntities = page.content
 
         for (objectEntity in objectEntities) {
@@ -177,32 +184,87 @@ abstract class AbstractObjectService(
             )
 
             if (action.isSelectorMode) {
-                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, dataRow = dataRow, selectorAction = selectorAction)
             }
-            tableCells += getTableUserNameCell(
-                row = row,
-                col = col++,
-                userConfig = userConfig,
-                rowUserId = objectEntity.userId,
-                rowOwnerShortName = rowOwnerShortName,
-                rowOwnerFullName = rowOwnerFullName
-            )
-            if (objectType == null) {
-                tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.type?.getDescr(userConfig.lang) ?: "-")
-            }
-            tableCells += TableBooleanCell(row = row, col = col++, dataRow = row, minWidth = 100, value = objectEntity.isDisabled ?: false)
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.name ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.model ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.department?.name ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = objectEntity.group?.name ?: "-")
-            if (userConfig.isAdminOnly()) {
-                tableCells += TableButtonCell(
+            if (userConfig.isWideScreen) {
+                tableCells += getTableUserNameCell(
                     row = row,
                     col = col++,
-                    dataRow = row,
-                    minWidth = 100,
-                    values = getTableFileButtonCellData(objectEntity.fileId),
+                    dataRow = dataRow,
+                    userConfig = userConfig,
+                    rowUserId = objectEntity.userId,
+                    rowOwnerShortName = rowOwnerShortName,
+                    rowOwnerFullName = rowOwnerFullName
                 )
+                if (objectType == null) {
+                    tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = objectEntity.type?.getDescr(userConfig.lang) ?: "-")
+                }
+                tableCells += TableBooleanCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, value = objectEntity.isDisabled ?: false)
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = objectEntity.name ?: "-")
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = objectEntity.model ?: "-")
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = objectEntity.department?.name ?: "-")
+                tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = objectEntity.group?.name ?: "-")
+                if (userConfig.isAdminOnly()) {
+                    tableCells += TableButtonCell(
+                        row = row,
+                        col = col++,
+                        dataRow = dataRow,
+                        minWidth = 100,
+                        values = getTableFileButtonCellData(objectEntity.fileId),
+                    )
+                }
+            } else {
+                tableCells += TableSimpleCell(row = row, col = col, dataRow = dataRow, minWidth = 100, name = getLocalizedMessage(LocalizedMessages.OWNER, userConfig.lang))
+                tableCells += getTableUserNameCell(
+                    row = row,
+                    col = col + 1,
+                    dataRow = dataRow,
+                    userConfig = userConfig,
+                    rowUserId = objectEntity.userId,
+                    rowOwnerShortName = rowOwnerShortName,
+                    rowOwnerFullName = rowOwnerFullName
+                )
+                row++
+                if (objectType == null) {
+                    tableCells += TableSimpleCell(row = row, col = col, dataRow = dataRow, minWidth = 100, name = getLocalizedMMSMessage(LocalizedMMSMessages.TYPE, userConfig.lang))
+                    tableCells += TableSimpleCell(row = row, col = col + 1, dataRow = dataRow, minWidth = 100, name = objectEntity.type?.getDescr(userConfig.lang) ?: "-")
+                    row++
+                }
+                tableCells += TableSimpleCell(row = row, col = col, dataRow = dataRow, minWidth = 100, name = getLocalizedMMSMessage(LocalizedMMSMessages.LOCKED, userConfig.lang))
+                tableCells += TableBooleanCell(row = row, col = col + 1, dataRow = dataRow, minWidth = 100, align = TableCellAlign.LEFT, value = objectEntity.isDisabled ?: false)
+                row++
+                tableCells += TableSimpleCell(
+                    row = row,
+                    col = col,
+                    dataRow = dataRow,
+                    minWidth = 100,
+                    name = getLocalizedMMSMessage(LocalizedMMSMessages.NAME, userConfig.lang) + "\n" +
+                            getLocalizedMMSMessage(LocalizedMMSMessages.MODEL, userConfig.lang) + "\n" +
+                            getLocalizedMMSMessage(LocalizedMMSMessages.DEPARTMENT, userConfig.lang) + "\n" +
+                            getLocalizedMMSMessage(LocalizedMMSMessages.GROUP, userConfig.lang),
+                )
+                tableCells += TableSimpleCell(
+                    row = row,
+                    col = col + 1,
+                    dataRow = dataRow,
+                    minWidth = 100,
+                    name = (objectEntity.name ?: "-") + "\n" +
+                            (objectEntity.model ?: "-") + "\n" +
+                            (objectEntity.department?.name ?: "-") + "\n" +
+                            (objectEntity.group?.name ?: "-"),
+                )
+                row++
+                if (userConfig.isAdminOnly()) {
+                    tableCells += TableSimpleCell(row = row, col = col, dataRow = dataRow, minWidth = 100, name = getLocalizedMMSMessage(LocalizedMMSMessages.OBJECT_SCHEMA_FILE, userConfig.lang))
+                    tableCells += TableButtonCell(
+                        row = row,
+                        col = col + 1,
+                        dataRow = dataRow,
+                        minWidth = 100,
+                        values = getTableFileButtonCellData(objectEntity.fileId),
+                    )
+                    row++
+                }
             }
 
             val formOpenAction = action.copy(
@@ -239,7 +301,10 @@ abstract class AbstractObjectService(
                 currentRowNo = row
             }
 
-            row++
+            if (userConfig.isWideScreen) {
+                row++
+            }
+            dataRow++
         }
         return currentRowNo
     }

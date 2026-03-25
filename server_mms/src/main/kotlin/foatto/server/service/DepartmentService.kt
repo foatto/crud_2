@@ -81,6 +81,7 @@ class DepartmentService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.ASC, FIELD_NAME))
         val findText = action.findText?.trim() ?: ""
@@ -101,7 +102,7 @@ class DepartmentService(
             pageRequest = pageRequest,
         )
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val departmentEntities = page.content
 
         for (departmentEntity in departmentEntities) {
@@ -126,17 +127,18 @@ class DepartmentService(
             var col = 0
 
             if (action.isSelectorMode) {
-                tableCells += getTableSelectorButtonCell(row = row, col = col++, selectorAction = selectorAction)
+                tableCells += getTableSelectorButtonCell(row = row, col = col++, dataRow = dataRow, selectorAction = selectorAction)
             }
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = departmentEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
                 rowOwnerFullName = rowOwnerFullName
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, name = departmentEntity.name ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = departmentEntity.name ?: "-")
 
             val formAction = action.copy(
                 type = ActionType.MODULE_FORM,
@@ -169,7 +171,10 @@ class DepartmentService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
         return currentRowNo
     }

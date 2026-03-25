@@ -82,6 +82,7 @@ class ActionLogService(
 
         var currentRowNo: Int? = null
         var row = 0
+        var dataRow = 0
 
         val pageRequest = getTableSortedPageRequest(action, Sort.Order(Sort.Direction.DESC, FIELD_ON_TIME))
         val findText = action.findText?.trim() ?: ""
@@ -101,7 +102,7 @@ class ActionLogService(
             pageRequest = pageRequest,
         )
 
-        fillTablePageButtons(action, page.totalPages, pageButtons)
+        fillTablePageButtons(userConfig, action, page.totalPages, pageButtons)
         val actionLogEntities = page.content
 
         for (actionLogEntity in actionLogEntities) {
@@ -113,6 +114,7 @@ class ActionLogService(
             tableCells += getTableUserNameCell(
                 row = row,
                 col = col++,
+                dataRow = dataRow,
                 userConfig = userConfig,
                 rowUserId = actionLogEntity.userId,
                 rowOwnerShortName = rowOwnerShortName,
@@ -121,15 +123,15 @@ class ActionLogService(
             tableCells += TableSimpleCell(
                 row = row,
                 col = col++,
-                dataRow = row,
+                dataRow = dataRow,
                 name = actionLogEntity.onTime?.let { onTime -> getDateTimeDMYHMSString(zoneLocal, onTime) } ?: "-",
             )
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = actionLogEntity.type ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = actionLogEntity.module ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = actionLogEntity.recordId?.toString() ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = actionLogEntity.parentModule ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = actionLogEntity.parentId?.toString() ?: "-")
-            tableCells += TableSimpleCell(row = row, col = col++, dataRow = row, minWidth = 100, name = actionLogEntity.action ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = actionLogEntity.type ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = actionLogEntity.module ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = actionLogEntity.recordId?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = actionLogEntity.parentModule ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = actionLogEntity.parentId?.toString() ?: "-")
+            tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, minWidth = 100, name = actionLogEntity.action ?: "-")
 
             tableRows += TableRow(
                 rowAction = action.copy(
@@ -142,7 +144,10 @@ class ActionLogService(
                 currentRowNo = row
             }
 
-            row++
+            //if (userConfig.isWideScreen) {
+                row++
+            //}
+            dataRow++
         }
         return currentRowNo
     }

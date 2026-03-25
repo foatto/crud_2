@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 class LogonRequest(
     val login: String,
     val password: String,
+    val isWideScreen: Boolean,
 ) : BaseRequest(
     url = ApiUrl.LOGON,
 )

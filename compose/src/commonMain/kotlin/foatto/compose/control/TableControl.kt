@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +33,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -61,14 +63,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Dp.Companion
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.colorBottomBar
 import foatto.compose.colorCheckBox
 import foatto.compose.colorIconButton
-import foatto.compose.colorMainBack0
 import foatto.compose.colorMainText
 import foatto.compose.colorScrollBarBack
 import foatto.compose.colorScrollBarFore
@@ -98,6 +101,7 @@ import foatto.compose.invokeRequest
 import foatto.compose.model.MenuDataClient
 import foatto.compose.singleButtonShape
 import foatto.compose.styleOtherIconSize
+import foatto.compose.textSizeTableText
 import foatto.compose.utils.maxDp
 import foatto.core.ActionType
 import foatto.core.i18n.LanguageEnum
@@ -119,6 +123,7 @@ import foatto.core.model.response.table.cell.TableCellBackColorType
 import foatto.core.model.response.table.cell.TableGridCell
 import foatto.core.model.response.table.cell.TableSimpleCell
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -145,8 +150,23 @@ class TableControl(
     companion object {
         private val SCROLL_BAR_TICKNESS = 16.dp
 
-        private val TABLE_ROW_BOTTOM_PADDING = 2.dp
-        private val TABLE_CELL_PADDING = 16.dp
+        private val TABLE_ROW_PADDING = 2.dp
+    }
+
+    private val tableCellPadding = if (root.isWideScreen) {
+        16.dp
+    } else {
+        4.dp
+    }
+    private val pageButtonPadding = if (root.isWideScreen) {
+        2.dp
+    } else {
+        0.dp
+    }
+    val dragMultiplier = if (root.isWideScreen) {
+        1.0f
+    } else {
+        2.0f
     }
 
     private var findText by mutableStateOf(tableResponse.findText)
@@ -187,6 +207,7 @@ class TableControl(
     private val verticalScrollState = ScrollState(0)
     private val horizontalScrollState = ScrollState(0)
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     override fun Body() {
         val density = LocalDensity.current
@@ -236,49 +257,52 @@ class TableControl(
                 tableAction = tableAction,
                 clientAction = { action: AppAction -> clientAction(action) },
             ) { action: AppAction, inNewTab: Boolean -> coroutineScope.launch { call(action, inNewTab) } }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(colorTableCaptionBar)
-                    .padding(end = SCROLL_BAR_TICKNESS)
-                    .horizontalScroll(state = horizontalScrollState)
-            ) {
-                captions.forEachIndexed { col, captionData ->
-                    TextButton(
-                        contentPadding = PaddingValues(0.dp),
-                        shape = RoundedCornerShape(0.dp),   // чтобы получился сплошной ряд заголовков
-                        colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
-                        modifier = Modifier.then(
-                            hmColumnMaxWidth[col]?.let { maxColWidth ->
-                                Modifier.width(maxColWidth)
-                            } ?: Modifier
-                        ),
-                        onClick = {
-                            captionData.action?.let { action ->
-                                coroutineScope.launch {
-                                    call(action, false)
+
+            if (root.isWideScreen) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colorTableCaptionBar)
+                        .padding(end = SCROLL_BAR_TICKNESS)
+                        .horizontalScroll(state = horizontalScrollState)
+                ) {
+                    captions.forEachIndexed { col, captionData ->
+                        TextButton(
+                            contentPadding = PaddingValues(0.dp),
+                            shape = RoundedCornerShape(0.dp),   // чтобы получился сплошной ряд заголовков
+                            colors = colorTextButton ?: ButtonDefaults.textButtonColors(),
+                            modifier = Modifier.then(
+                                hmColumnMaxWidth[col]?.let { maxColWidth ->
+                                    Modifier.width(maxColWidth)
+                                } ?: Modifier
+                            ),
+                            onClick = {
+                                captionData.action?.let { action ->
+                                    coroutineScope.launch {
+                                        call(action, false)
+                                    }
                                 }
                             }
-                        }
-                    ) {
-                        captionData.action?.let { action ->
-                            if (captionData.action?.sortName == tableAction.sortName) {
-                                Icon(
-                                    imageVector = if (action.isSortAsc) {
-                                        Icons.Filled.KeyboardArrowDown
-                                    } else {
-                                        Icons.Filled.KeyboardArrowUp
-                                    },
-                                    contentDescription = null,
-                                    tint = colorTableCaptionSortCurrent,
-                                )
+                        ) {
+                            captionData.action?.let { action ->
+                                if (captionData.action?.sortName == tableAction.sortName) {
+                                    Icon(
+                                        imageVector = if (action.isSortAsc) {
+                                            Icons.Filled.KeyboardArrowDown
+                                        } else {
+                                            Icons.Filled.KeyboardArrowUp
+                                        },
+                                        contentDescription = null,
+                                        tint = colorTableCaptionSortCurrent,
+                                    )
+                                }
                             }
+                            Text(
+                                text = captionData.name,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
-                        Text(
-                            text = captionData.name,
-                            softWrap = false,
-                            overflow = TextOverflow.Ellipsis,
-                        )
                     }
                 }
             }
@@ -296,7 +320,18 @@ class TableControl(
                 ) {
                     for (pageButton in tablePageButtonData) {
                         TextButton(
-                            modifier = Modifier.padding(2.dp),
+                            modifier = Modifier.padding(pageButtonPadding).then(
+                                if (root.isWideScreen) {
+                                    Modifier.defaultMinSize(minWidth = Dp.Unspecified, minHeight= Dp.Unspecified)
+                                } else {
+                                    Modifier.defaultMinSize(minWidth = 24.dp, minHeight= 24.dp) // default = 48.dp
+                                }
+                            ),
+                            contentPadding = if (root.isWideScreen) {
+                                ButtonDefaults.TextButtonContentPadding
+                            } else {
+                                ButtonDefaults.ExtraSmallContentPadding
+                            },
                             shape = singleButtonShape,
                             colors = colorTablePageButton ?: ButtonDefaults.textButtonColors(),
                             enabled = pageButton.action != null,
@@ -310,7 +345,13 @@ class TableControl(
                             }
                         ) {
                             Text(
+                                //modifier = Modifier.padding(1.dp), - не помогает тоже
                                 text = pageButton.text,
+                                fontSize = if (root.isWideScreen) {
+                                    TextUnit.Unspecified
+                                } else {
+                                    textSizeTableText
+                                },
                                 fontWeight = pageButton.action?.let { _ -> FontWeight.Normal } ?: FontWeight.Bold
                             )
                         }
@@ -362,7 +403,9 @@ class TableControl(
                             .verticalScroll(state = verticalScrollState)
                             .horizontalScroll(state = horizontalScrollState)
                     ) {
+                        var prevDataRow: Int? = null
                         gridRows.forEachIndexed { index, gridRow ->
+                            val currentDataRow = gridRow.firstOrNull { tbcc -> tbcc?.dataRow != null }?.dataRow
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -370,7 +413,22 @@ class TableControl(
                                     //--- чтобы ячейки занимали всю отведённую им (общую) высоту (работает только совместно с .fillMaxHeight())
                                     .height(intrinsicSize = IntrinsicSize.Max)
                                     .background(color = colorTableCellBorder)
-                                    .padding(bottom = TABLE_ROW_BOTTOM_PADDING)
+                                    .padding(
+                                        top = if (root.isWideScreen) {
+                                            0.dp
+                                        } else {
+                                            if (currentDataRow == prevDataRow) {
+                                                0.dp
+                                            } else {
+                                                TABLE_ROW_PADDING
+                                            }
+                                        },
+                                        bottom = if (root.isWideScreen) {
+                                            TABLE_ROW_PADDING
+                                        } else {
+                                            0.dp
+                                        }
+                                    )
                                     .onSizeChanged { size ->
                                         rowHeights[index] = size.height.toFloat()
                                     }
@@ -392,8 +450,11 @@ class TableControl(
                                             .draggable2D(
                                                 state = rememberDraggable2DState { delta ->
                                                     coroutineScope.launch {
-                                                        horizontalScrollState.scrollBy(-delta.x)
-                                                        verticalScrollState.scrollBy(-delta.y)
+                                                        if (abs(delta.x) > abs(delta.y)) {
+                                                            horizontalScrollState.scrollBy(-delta.x * dragMultiplier)
+                                                        } else {
+                                                            verticalScrollState.scrollBy(-delta.y * dragMultiplier)
+                                                        }
                                                     }
                                                 },
                                             )
@@ -476,7 +537,7 @@ class TableControl(
                                         when (gridData) {
                                             is TableBooleanCellClient -> {
                                                 Checkbox(
-                                                    modifier = Modifier.padding(TABLE_CELL_PADDING),    //.background(Color.Transparent), - и без этого хорошо
+                                                    modifier = Modifier.padding(tableCellPadding),    //.background(Color.Transparent), - и без этого хорошо
                                                     colors = colorCheckBox ?: CheckboxDefaults.colors(),
                                                     checked = gridData.value,
                                                     onCheckedChange = null,
@@ -485,24 +546,26 @@ class TableControl(
 
                                             is TableSimpleCellClient -> {
                                                 TableImageOrTextCell(
+                                                    isWideScreen = root.isWideScreen,
                                                     baseCellData = gridData,
                                                     cellData = gridData.data,
                                                     //--- less width for empty "group" cell
                                                     modifier = Modifier.padding(
-                                                        start = TABLE_CELL_PADDING,
+                                                        start = tableCellPadding,
                                                         end = if (gridData.backColor in setOf(colorTableGroupBack0, colorTableGroupBack1)) {
                                                             0.dp
                                                         } else {
-                                                            TABLE_CELL_PADDING
+                                                            tableCellPadding
                                                         },
-                                                        top = TABLE_CELL_PADDING,
-                                                        bottom = TABLE_CELL_PADDING
+                                                        top = tableCellPadding,
+                                                        bottom = tableCellPadding
                                                     ),
                                                 )
                                             }
+
                                             is TableButtonCellClient -> {
                                                 Column(
-                                                    modifier = Modifier.padding(TABLE_CELL_PADDING),
+                                                    modifier = Modifier.padding(tableCellPadding),
                                                 ) {
                                                     gridData.data.forEach { cellData ->
                                                         ImageOrTextFromNameControl(
@@ -538,6 +601,11 @@ class TableControl(
                                                                     Text(
                                                                         text = caption,
 //                                                                color = gridData.textColor,
+                                                                        fontSize = if (root.isWideScreen) {
+                                                                            TextUnit.Unspecified
+                                                                        } else {
+                                                                            textSizeTableText
+                                                                        },
                                                                         fontWeight = if (gridData.isBoldText) {
                                                                             FontWeight.Bold
                                                                         } else {
@@ -553,7 +621,7 @@ class TableControl(
 
                                             is TableGridCellClient -> {
                                                 Column(
-                                                    modifier = Modifier.padding(TABLE_CELL_PADDING),
+                                                    modifier = Modifier.padding(tableCellPadding),
                                                 ) {
                                                     gridData.data.forEach { alRow ->
                                                         Row(
@@ -564,11 +632,12 @@ class TableControl(
                                                                     Spacer(modifier = Modifier.weight(1.0f))
                                                                 }
                                                                 val modifier = if (index > 0) {
-                                                                    Modifier.padding(start = TABLE_CELL_PADDING)
+                                                                    Modifier.padding(start = tableCellPadding)
                                                                 } else {
                                                                     Modifier
                                                                 }
                                                                 TableImageOrTextCell(
+                                                                    isWideScreen = root.isWideScreen,
                                                                     baseCellData = gridData,
                                                                     cellData = cellData,
                                                                     modifier = modifier,
@@ -610,6 +679,7 @@ class TableControl(
                                     }
                                 }
                             }
+                            prevDataRow = currentDataRow
                         }
                     }
                     VerticalScrollBody()

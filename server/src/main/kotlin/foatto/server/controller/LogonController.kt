@@ -23,6 +23,7 @@ class LogonController(
             sessionId = logonRequest.sessionId,
             login = logonRequest.login,
             password = logonRequest.password,
+            isWideScreen = logonRequest.isWideScreen,
         )
         return if (result.responseCode == ResponseCode.LOGON_SUCCESS) {
             LogonResponse(

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import foatto.core.i18n.LanguageEnum
 
 //--- по умолчанию - тёмные иконки на светлом фоне кнопок,
@@ -110,6 +111,7 @@ var textSizeMainMenuFolder: TextUnit = TextUnit.Unspecified
 var textSizeMainMenuItem: TextUnit = TextUnit.Unspecified
 var textSizePopupMenuFolder: TextUnit = TextUnit.Unspecified
 var textSizePopupMenuItem: TextUnit = TextUnit.Unspecified
+val textSizeTableText: TextUnit = 12.sp
 
 var textWeightMainMenuFolder: FontWeight = FontWeight.Bold
 var textWeightPopupMenuFolder: FontWeight = FontWeight.Bold

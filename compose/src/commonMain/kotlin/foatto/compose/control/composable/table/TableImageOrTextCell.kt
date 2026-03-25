@@ -7,14 +7,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import foatto.compose.composable.ImageOrTextFromNameControl
 import foatto.compose.control.model.table.cell.TableBaseCellClient
 import foatto.compose.control.model.table.cell.TableCellDataClient
 import foatto.compose.styleOtherIconSize
+import foatto.compose.textSizeTableText
 
 @Composable
 fun TableImageOrTextCell(
+    isWideScreen: Boolean,
     baseCellData: TableBaseCellClient,
     cellData: TableCellDataClient,
     modifier: Modifier = Modifier,
@@ -37,6 +40,11 @@ fun TableImageOrTextCell(
                 modifier = modifier,
                 text = caption,
                 color = baseCellData.textColor,
+                fontSize = if (isWideScreen) {
+                    TextUnit.Unspecified
+                } else {
+                    textSizeTableText
+                },
                 fontWeight = if (baseCellData.isBoldText) {
                     FontWeight.Bold
                 } else {

@@ -25,7 +25,6 @@ import foatto.compose.model.MenuDataClient
 import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
 import foatto.compose.utils.SETTINGS_PASSWORD
-import foatto.compose.utils.encodePassword
 import foatto.compose.utils.settings
 import foatto.core.ActionType
 import foatto.core.SESSION_EXPIRE_TIME
@@ -38,7 +37,9 @@ import foatto.core.model.response.AppResponse
 import foatto.core.model.response.LogonResponse
 import foatto.core.model.response.MenuData
 import foatto.core.model.response.ResponseCode
+import foatto.core.util.encodePassword2
 import foatto.core.util.getCurrentTimeInt
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 
 class AppControl(
@@ -183,6 +184,7 @@ class AppControl(
                                 LogonRequest(
                                     login = savedLogin,
                                     password = savedPassword,
+                                    isWideScreen = root.isWideScreen,
 //                            fillSystemProperties(logonRequest.hmSystemProperties)
                                 )
                             )
@@ -267,8 +269,9 @@ class AppControl(
         }
     }
 
-    private fun getLogonRequest(): LogonRequest {
-        val encodedPassword = encodePassword(password)
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun getLogonRequest(): LogonRequest {
+        val encodedPassword = encodePassword2(password)
 
         if (isRememberMe) {
             settings.putString(SETTINGS_LOGIN, login)
@@ -279,10 +282,10 @@ class AppControl(
             settings.remove(SETTINGS_PASSWORD)
             settings.remove(SETTINGS_LOGON_EXPIRE)
         }
-
         return LogonRequest(
             login = login,
             password = encodedPassword,
+            isWideScreen = root.isWideScreen,
 //        fillSystemProperties(logonRequest.hmSystemProperties)
         )
     }

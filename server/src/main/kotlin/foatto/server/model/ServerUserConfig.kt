@@ -11,6 +11,7 @@ class ServerUserConfig(
     val roles: Set<String>,
     val timeOffset: Int,
     var lang: LanguageEnum,
+    val isWideScreen: Boolean,
     val fullNames: Map<Int, String>,
     val shortNames: Map<Int, String>,
     val relatedUserIds: Map<Int, UserRelationEnum>,

@@ -29,7 +29,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Bean
 import org.springframework.context.event.EventListener
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @SpringBootApplication(
     scanBasePackages = ["foatto.server"],
@@ -50,6 +53,13 @@ class MMSSpringApp(
             runApplication<MMSSpringApp>(*args)
         }
     }
+
+//    @Bean
+//    fun corsConfigurer() = object : WebMvcConfigurer {
+//        override fun addCorsMappings(registry: CorsRegistry) {
+//            registry.addMapping("/**").allowedOrigins("http://localhost:3000")  // .allowedOrigins("*").allowedHeaders("*")
+//        }
+//    }
 
     @Value("\${log_dir}")
     val logDir: String = ""

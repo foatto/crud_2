@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class AppUserConfig(
+    val id: Int,
     val currentUserName: String,
     val isAdmin: Boolean,
     val timeOffset: Int,

@@ -32,6 +32,7 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     api("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
+    api("org.springframework.boot:spring-boot-starter-websocket:${springBootVersion}")
 
     api("org.telegram:telegrambots-spring-boot-starter:$telegramBotsSpringVersion")
     api("org.telegram:telegrambotsextensions:$telegramBotsSpringVersion")

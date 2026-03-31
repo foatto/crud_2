@@ -1,10 +1,13 @@
 package foatto.core
 
+//--- Don't turn to lowercase role values!!! Theis writted in SYSTEM_action
+
 object ActionType {
     const val NOTHING: String = "NOTHING"
 
     const val FILE: String = "FILE"
 
+    const val SEND_MESSAGE: String = "SEND_MESSAGE"
     const val CHANGE_PASSWORD: String = "CHANGE_PASSWORD"
     const val LOGOFF: String = "LOGOFF"
     const val SET_LANGUAGE: String = "SET_LANGUAGE"

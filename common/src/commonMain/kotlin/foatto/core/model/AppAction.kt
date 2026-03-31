@@ -41,6 +41,9 @@ data class AppAction(
 
     val question: String? = null,
 
+    val fromUserId: Int? = null,
+    val toUserId: Int? = null,
+
     val params: MutableMap<String, String> = mutableMapOf(),
 )
 

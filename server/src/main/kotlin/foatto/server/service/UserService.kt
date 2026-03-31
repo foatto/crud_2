@@ -355,6 +355,17 @@ class UserService(
                     inNewTab = true,
                 )
             }
+            if (userConfig.isAdminOnly()) {
+                popupDatas += TablePopup(
+                    action = AppAction(
+                        type = ActionType.SEND_MESSAGE,
+                        fromUserId = userConfig.id,
+                        toUserId = userEntity.id,
+                    ),
+                    text = getLocalizedMessage(LocalizedMessages.SEND_MESSAGE, userConfig.lang),
+                    inNewTab = true,    // true is urgent
+                )
+            }
             addCustomTablePopups(userConfig, userEntity.id, popupDatas)
 
             tableRows += TableRow(

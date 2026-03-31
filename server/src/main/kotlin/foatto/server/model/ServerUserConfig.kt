@@ -20,6 +20,7 @@ class ServerUserConfig(
     fun isAdminOnly(): Boolean = roles.size == 1 && roles.contains(AppRole.ADMIN)
 
     fun toAppUserConfig(): AppUserConfig = AppUserConfig(
+        id = id,
         currentUserName = currentUserName,
         isAdmin = roles.contains(AppRole.ADMIN),
         timeOffset = timeOffset,

@@ -25,6 +25,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import foatto.compose.composable.GenerateMenuBody
 import foatto.compose.composable.MainMenu
+import foatto.compose.composable.MessageDialog
 import foatto.compose.composable.PasswordChangeDialog
 import foatto.compose.composable.StardartDialog
 import foatto.compose.composable.TabPanel
@@ -56,7 +59,6 @@ import foatto.compose.model.TabInfo
 import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
 import foatto.compose.utils.SETTINGS_PASSWORD
-import foatto.compose.utils.encodePassword
 import foatto.compose.utils.getFullUrl
 import foatto.compose.utils.getScaledWindowWidth
 import foatto.compose.utils.openFileByUrl
@@ -66,6 +68,7 @@ import foatto.core.i18n.LanguageEnum
 import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
+import foatto.core.model.AppMessage
 import foatto.core.model.AppUserConfig
 import foatto.core.model.request.ChangeLanguageRequest
 import foatto.core.model.request.ChangePasswordRequest
@@ -90,7 +93,7 @@ open class Root {
 
     var scaledWindowWidth: Int = 0
         private set
-    var isWideScreen: Boolean by mutableStateOf(false)
+    var isWideScreen: Boolean by mutableStateOf(true)
         private set
     var scaleKoef: Float = 1.0f
         private set
@@ -99,6 +102,7 @@ open class Root {
 
     var appUserConfig: AppUserConfig by mutableStateOf(
         AppUserConfig(
+            id = 0,
             currentUserName = "",
             isAdmin = false,
             timeOffset = 0,
@@ -129,9 +133,14 @@ open class Root {
     private val dialogButtonOkText by mutableStateOf(getLocalizedMessage(LocalizedMessages.OK, appUserConfig.lang))
     private val dialogButtonCancelText by mutableStateOf(getLocalizedMessage(LocalizedMessages.CANCEL, appUserConfig.lang))
 
+    var appMessage: AppMessage = AppMessage(fromUserId = 0, toUserId = 0, message = "")
+    private var showMessageDialog by mutableStateOf(false)
+
     private var showPasswordChangeDialog by mutableStateOf(false)
 
     private val mainMenuVerticalScrollState = ScrollState(0)
+
+    val snackbarHostState = SnackbarHostState()
 
     @Composable
     fun Content() {
@@ -225,6 +234,20 @@ open class Root {
                 }
                 selectorControl?.Body()
 
+                if (showMessageDialog) {
+                    MessageDialog(
+                        lang = appUserConfig.lang,
+                        onOkClick = { message ->
+                            appMessage.message = message
+                            showMessageDialog = false
+                            val result = wsMessageStore.trySend(appMessage)
+                        },
+                        onCancelClick = {
+                            showMessageDialog = false
+                        }
+                    )
+                }
+
                 if (showPasswordChangeDialog) {
                     PasswordChangeDialog(
                         lang = appUserConfig.lang,
@@ -241,6 +264,7 @@ open class Root {
                         }
                     )
                 }
+
                 if (waitCount > 0) {
                     Box(
                         modifier = Modifier
@@ -255,6 +279,7 @@ open class Root {
                         )
                     }
                 }
+
                 if (showDialog) {
                     StardartDialog(
                         content = dialogContent,
@@ -270,6 +295,13 @@ open class Root {
                         onCancelClick = { showDialog = false },
                     )
                 }
+
+                SnackbarHost(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    hostState = snackbarHostState,
+                )
             }
         }
     }
@@ -361,6 +393,19 @@ open class Root {
                 }
             }
 
+            ActionType.SEND_MESSAGE -> {
+                action.fromUserId?.let { fromUserId ->
+                    action.toUserId?.let { toUserId ->
+                        appMessage = AppMessage(
+                            fromUserId = fromUserId,
+                            toUserId = toUserId,
+                            message = "",
+                        )
+                        showMessageDialog = true
+                    }
+                }
+            }
+
             ActionType.CHANGE_PASSWORD -> {
                 showPasswordChangeDialog = true
             }
@@ -370,7 +415,7 @@ open class Root {
                 settings.remove(SETTINGS_PASSWORD)
                 settings.remove(SETTINGS_LOGON_EXPIRE)
 
-                invokeRequest(LogoffRequest()) { logoffResponse: LogoffResponse ->
+                invokeRequest(LogoffRequest()) { _: LogoffResponse ->
                     isShowMainMenuButton = false
                     isShowMainMenu = false
 
@@ -382,6 +427,7 @@ open class Root {
                     controls.clear()
 
                     appUserConfig = AppUserConfig(
+                        id = 0,
                         currentUserName = "",
                         isAdmin = false,
                         timeOffset = 0,

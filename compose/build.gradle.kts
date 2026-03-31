@@ -72,6 +72,7 @@ kotlin {
             api("io.ktor:ktor-client-cio:$ktorVersion")
             api("io.ktor:ktor-client-content-negotiation:$ktorVersion")
             api("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+            api("io.ktor:ktor-client-websockets:$ktorVersion")
 
             api("com.russhwolf:multiplatform-settings:$multiplatformSettingsVersion")
             api("com.russhwolf:multiplatform-settings-no-arg:$multiplatformSettingsVersion")

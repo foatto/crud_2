@@ -21,18 +21,18 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
             WHERE se.id <> 0
                 AND oe = ?1
                 AND (
-                       se.endTime IS NULL
-                    OR ?2 IS NULL
-                    OR ?2 <= se.endTime
+                       ?2 = -1
+                    OR se.endTime IS NULL 
+                    OR se.endTime >= ?2
                 )
                 AND (
-                       se.begTime IS NULL
-                    OR ?2 IS NULL 
-                    OR ?2 >= se.begTime
+                       ?2 = -1
+                    OR se.begTime IS NULL  
+                    OR se.begTime <= ?2
                 )
         """
     )
-    fun findByObjAndTime(obj: ObjectEntity, time: Int?): List<SensorEntity>
+    fun findByObjAndTime(obj: ObjectEntity, time: Int): List<SensorEntity>
 
     @Query(
         """
@@ -42,18 +42,18 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
             WHERE se.id <> 0
                 AND oe = ?1
                 AND (
-                       se.endTime IS NULL
-                    OR ?2 IS NULL
-                    OR ?2 <= se.endTime
+                       ?2 = -1
+                    OR se.endTime IS NULL 
+                    OR se.endTime >= ?2
                 )
                 AND (
-                       se.begTime IS NULL
-                    OR ?3 IS NULL 
-                    OR ?3 >= se.begTime
+                       ?3 = -1
+                    OR se.begTime IS NULL  
+                    OR se.begTime <= ?3
                 )
         """
     )
-    fun findByObjAndPeriod(obj: ObjectEntity, begTime: Int?, endTime: Int?): List<SensorEntity>
+    fun findByObjAndPeriod(obj: ObjectEntity, begTime: Int, endTime: Int): List<SensorEntity>
 
     @Query(
         """
@@ -76,18 +76,18 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                 AND oe = ?1
                 AND se.sensorType = ?2
                 AND (
-                       se.endTime IS NULL
-                    OR ?3 IS NULL
-                    OR ?3 <= se.endTime
+                       ?3 = -1
+                    OR se.endTime IS NULL 
+                    OR se.endTime >= ?3
                 )
                 AND (
-                       se.begTime IS NULL
-                    OR ?3 IS NULL 
-                    OR ?3 >= se.begTime
+                       ?3 = -1
+                    OR se.begTime IS NULL  
+                    OR se.begTime <= ?3
                 )
         """
     )
-    fun findByObjAndSensorTypeAndTime(obj: ObjectEntity, sensorType: Int, time: Int?): List<SensorEntity>
+    fun findByObjAndSensorTypeAndTime(obj: ObjectEntity, sensorType: Int, time: Int): List<SensorEntity>
 
     @Query(
         """
@@ -98,56 +98,18 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                 AND oe = ?1
                 AND se.sensorType = ?2
                 AND (
-                       se.endTime IS NULL
-                    OR ?3 IS NULL
-                    OR ?3 <= se.endTime
+                       ?3 = -1
+                    OR se.endTime IS NULL 
+                    OR se.endTime >= ?3
                 )
                 AND (
-                       se.begTime IS NULL
-                    OR ?4 IS NULL 
-                    OR ?4 >= se.begTime
+                       ?4 = -1
+                    OR se.begTime IS NULL  
+                    OR se.begTime <= ?4
                 )
         """
     )
-    fun findByObjAndSensorTypeAndPeriod(obj: ObjectEntity, sensorType: Int, begTime: Int?, endTime: Int?): List<SensorEntity>
-
-    //    @Query(
-//        """
-//            SELECT se
-//            FROM SensorEntity se
-//            LEFT JOIN se.obj oe
-//            WHERE se.id <> 0
-//                AND oe = ?1
-//                AND se.group = ?2
-//                AND se.sensorType IN ?3
-//        """
-//    )
-//    fun findByObjAndGroupAndSensorTypeIn(obj: ObjectEntity, group: String?, sensorTypes: Collection<Int>): List<SensorEntity>
-
-//    @Query(
-//        """
-//            SELECT se
-//            FROM SensorEntity se
-//            LEFT JOIN se.obj oe
-//            WHERE se.id <> 0
-//                AND oe = ?1
-//                AND se.group = ?2
-//                AND se.sensorType IN ?3
-//                AND (
-//                       se.endTime IS NULL
-//                    OR ?4 IS NULL
-//                    OR ?4 <= se.endTime
-//                )
-//                AND (
-//                       se.begTime IS NULL
-//                    OR ?5 IS NULL
-//                    OR ?5 >= se.begTime
-//                )
-//        """
-//    )
-//    fun findByObjAndGroupAndSensorTypeInAndPeriod(obj: ObjectEntity, group: String?, sensorTypes: Collection<Int>, begTime: Int?, endTime: Int?): List<SensorEntity>
-
-//    fun findByObjAndDescr(obj: ObjectEntity, descr: String): List<SensorEntity>
+    fun findByObjAndSensorTypeAndPeriod(obj: ObjectEntity, sensorType: Int, begTime: Int, endTime: Int): List<SensorEntity>
 
     fun findByObjAndPortNumBetween(obj: ObjectEntity, startPort: Int, endPort: Int): List<SensorEntity>
 
@@ -176,25 +138,13 @@ interface SensorRepository : JpaRepository<SensorEntity, Int> {
                 )
                 AND (
                         ?4 = -1
-                     OR (
-                            se.begTime IS NOT NULL
-                        AND se.begTime >= ?4
-                     )
-                     OR (
-                            se.endTime IS NOT NULL
-                        AND se.endTime >= ?4
-                     )
+                     OR se.endTime IS NULL
+                     OR se.endTime >= ?4
                 )
                 AND (
                         ?5 = -1
-                     OR (
-                            se.begTime IS NOT NULL
-                        AND se.begTime <= ?5
-                     )
-                     OR (
-                            se.endTime IS NOT NULL
-                        AND se.endTime <= ?5
-                     )
+                     OR se.begTime IS NULL
+                     OR se.begTime <= ?5
                 )
         """
     )

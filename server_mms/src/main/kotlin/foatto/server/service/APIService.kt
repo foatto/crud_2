@@ -70,7 +70,7 @@ class APIService(
         val objectEntity = objectEntities.firstOrNull() ?: return ObjectDataResponse(errorMessage = "An object with this name was not found.")
 
         val sensors = mutableListOf<ObjectDataResponseSensorInfo>()
-        sensorRepository.findByObjAndPeriod(objectEntity, begTime, endTime).forEach { sensorEntity ->
+        sensorRepository.findByObjAndPeriod(objectEntity, begTime ?: -1, endTime ?: -1).forEach { sensorEntity ->
             val data = mutableListOf<Map<String, String>>()
 
             SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)

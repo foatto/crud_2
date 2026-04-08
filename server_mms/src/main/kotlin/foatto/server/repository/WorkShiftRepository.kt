@@ -25,25 +25,13 @@ interface WorkShiftRepository : JpaRepository<WorkShiftEntity, Int> {
                 AND wse.userId IN ?2
                 AND (
                         ?3 = -1
-                     OR (
-                            wse.begTime IS NOT NULL
-                        AND wse.begTime >= ?3
-                     )
-                     OR (
-                            wse.endTime IS NOT NULL
-                        AND wse.endTime >= ?3
-                     )
+                     OR wse.endTime IS NULL
+                     OR wse.endTime > ?3
                 )
                 AND (
                         ?4 = -1
-                     OR (
-                            wse.begTime IS NOT NULL
-                        AND wse.begTime <= ?4
-                     )
-                     OR (
-                            wse.endTime IS NOT NULL
-                        AND wse.endTime <= ?4
-                     )
+                     OR wse.begTime IS NULL
+                     OR wse.begTime < ?4
                 )
             ORDER BY wse.begTime, wse.endTime
         """
@@ -89,25 +77,13 @@ interface WorkShiftRepository : JpaRepository<WorkShiftEntity, Int> {
                 )
                 AND (
                         ?6 = -1
-                     OR (
-                            wse.begTime IS NOT NULL
-                        AND wse.begTime >= ?6
-                     )
-                     OR (
-                            wse.endTime IS NOT NULL
-                        AND wse.endTime >= ?6
-                     )
+                     OR wse.endTime IS NULL
+                     OR wse.endTime > ?6
                 )
                 AND (
                         ?7 = -1
-                     OR (
-                            wse.begTime IS NOT NULL
-                        AND wse.begTime <= ?7
-                     )
-                     OR (
-                            wse.endTime IS NOT NULL
-                        AND wse.endTime <= ?7
-                     )
+                     OR wse.begTime IS NULL
+                     OR wse.begTime < ?7
                 )
         """
     )

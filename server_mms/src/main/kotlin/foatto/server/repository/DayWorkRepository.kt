@@ -39,7 +39,7 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                             dwe.day.ye IS NOT NULL
                         AND dwe.day.mo IS NOT NULL
                         AND dwe.day.da IS NOT NULL
-                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) < ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?4 second )
                      )
                 )
             ORDER BY dwe.day.ye , dwe.day.mo , dwe.day.da  
@@ -101,7 +101,7 @@ interface DayWorkRepository : JpaRepository<DayWorkEntity, Int> {
                             dwe.day.ye IS NOT NULL
                         AND dwe.day.mo IS NOT NULL
                         AND dwe.day.da IS NOT NULL
-                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?7 second )
+                        AND MAKE_TIMESTAMP(dwe.day.ye, dwe.day.mo, dwe.day.da, 0, 0, 0) < ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?7 second )
                      )
                 )
         """

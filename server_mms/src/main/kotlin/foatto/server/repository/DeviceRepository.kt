@@ -99,7 +99,7 @@ interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
                             de.usingStartDate.ye IS NOT NULL
                         AND de.usingStartDate.mo IS NOT NULL
                         AND de.usingStartDate.da IS NOT NULL
-                        AND MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0) <= ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?7 second )
+                        AND MAKE_TIMESTAMP(de.usingStartDate.ye, de.usingStartDate.mo, de.usingStartDate.da, 0, 0, 0) < ( MAKE_TIMESTAMP(1970, 1, 1, 0, 0, 0) + ?7 second )
                      )
                 )
         """

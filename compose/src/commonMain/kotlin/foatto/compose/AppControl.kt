@@ -25,6 +25,7 @@ import foatto.compose.model.MenuDataClient
 import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
 import foatto.compose.utils.SETTINGS_PASSWORD
+import foatto.compose.utils.encodePassword
 import foatto.compose.utils.settings
 import foatto.core.ActionType
 import foatto.core.SESSION_EXPIRE_TIME
@@ -37,7 +38,6 @@ import foatto.core.model.response.AppResponse
 import foatto.core.model.response.LogonResponse
 import foatto.core.model.response.MenuData
 import foatto.core.model.response.ResponseCode
-import foatto.core.util.encodePassword2
 import foatto.core.util.getCurrentTimeInt
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
@@ -49,7 +49,7 @@ class AppControl(
 ) {
 
     private var responseCode by mutableStateOf(ResponseCode.LOGON_SUCCESS)
-    private var curControl by mutableStateOf<AbstractControl>(EmptyControl())
+    private var curControl by mutableStateOf<AbstractControl>(EmptyControl(root))
 
     private var loginError by mutableStateOf<String?>(null)
     private var passwordError by mutableStateOf<String?>(null)
@@ -271,7 +271,7 @@ class AppControl(
 
     @OptIn(DelicateCoroutinesApi::class)
     private suspend fun getLogonRequest(): LogonRequest {
-        val encodedPassword = encodePassword2(password)
+        val encodedPassword = encodePassword(password)
 
         if (isRememberMe) {
             settings.putString(SETTINGS_LOGIN, login)

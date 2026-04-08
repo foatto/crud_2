@@ -59,6 +59,7 @@ import foatto.compose.model.TabInfo
 import foatto.compose.utils.SETTINGS_LOGIN
 import foatto.compose.utils.SETTINGS_LOGON_EXPIRE
 import foatto.compose.utils.SETTINGS_PASSWORD
+import foatto.compose.utils.encodePassword
 import foatto.compose.utils.getFullUrl
 import foatto.compose.utils.getScaledWindowWidth
 import foatto.compose.utils.openFileByUrl
@@ -76,7 +77,6 @@ import foatto.core.model.request.LogoffRequest
 import foatto.core.model.response.ChangeLanguageResponse
 import foatto.core.model.response.ChangePasswordResponse
 import foatto.core.model.response.LogoffResponse
-import foatto.core.util.encodePassword2
 import io.kamel.core.getOrElse
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
@@ -254,7 +254,7 @@ open class Root {
                         onOkClick = { newPassword ->
                             showPasswordChangeDialog = false
                             coroutineScope.launch {
-                                invokeRequest(ChangePasswordRequest(encodePassword2(newPassword))) { _: ChangePasswordResponse ->
+                                invokeRequest(ChangePasswordRequest(encodePassword(newPassword))) { _: ChangePasswordResponse ->
                                     showAlert(getLocalizedMessage(LocalizedMessages.PASSWORD_CHANGED_SUCCESSFULLY, appUserConfig.lang))
                                 }
                             }

@@ -1,15 +1,17 @@
 package foatto.server.service
 
 import foatto.core.ActionType
-import foatto.core.i18n.LanguageEnum
+import foatto.core.util.getDateTimeDMYHMSString
 import foatto.core_mms.AppModuleMMS
 import foatto.server.OrgType
-import foatto.server.SpringApp
 import foatto.server.entity.UserEntity
 import foatto.server.getEnabledUserIds
+import foatto.server.model.DevicesStatusResponse
+import foatto.server.model.DevicesStatusResponseDeviceInfo
 import foatto.server.model.ObjectDataResponse
 import foatto.server.model.ObjectDataResponseSensorInfo
 import foatto.server.model.sensor.SensorConfig
+import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
 import foatto.server.repository.UserRepository
@@ -28,6 +30,7 @@ class APIService(
     private val userRepository: UserRepository,
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
+    private val deviceRepository: DeviceRepository,
 ) {
 
     fun getObjectData(
@@ -171,6 +174,39 @@ class APIService(
         return ObjectDataResponse(sensors = sensors)
     }
 
+    fun getDevicesStatus(
+        token: String,
+    ): DevicesStatusResponse {
+        val userEntity = getUser(token) ?: return DevicesStatusResponse(errorMessage = "A user with this login and password was not found")
+        if (userEntity.isDisabled == true) {
+            return DevicesStatusResponse(errorMessage = "User has been blocked")
+        }
+
+        val enabledUserIds = getEnabledUserIds(
+            module = AppModuleMMS.DEVICE,
+            actionType = ActionType.MODULE_TABLE,
+            relatedUserIds = logonService.loadRelatedUserIds(
+                userId = userEntity.id,
+                parentId = userEntity.parentId ?: 0,
+                orgType = userEntity.orgType ?: OrgType.ORG_TYPE_WORKER,
+            ),
+            roles = userEntity.roles,
+        )
+
+        val devices = mutableListOf<DevicesStatusResponseDeviceInfo>()
+        deviceRepository.findByUserIdIn(enabledUserIds).forEach { deviceEntity ->
+            devices += DevicesStatusResponseDeviceInfo(
+                serialNo = deviceEntity.serialNo,
+                objectName = deviceEntity.obj?.name,
+                lastSessionTime = getDateTimeDMYHMSString(userEntity.timeOffset ?: 0, deviceEntity.lastSessionTime ?: 0),
+                lastSessionStatus = deviceEntity.lastSessionStatus,
+                lastSessionError = deviceEntity.lastSessionError,
+            )
+        }
+
+        return DevicesStatusResponse(devices = devices)
+    }
+
     private fun getUser(token: String): UserEntity? {
         val tokens = token.split(" ")
         if (tokens.size != 2) {
@@ -184,232 +220,3 @@ class APIService(
         return null
     }
 }
-
-/*
-    @PostMapping(value = ["/$URL_API_BASE/$URL_DEVICES/$URL_API_VERSION"])
-    @Transactional
-    fun devices(
-        @RequestBody
-        request: DevicesRequest,
-    ): List<DevicesResponse> {
-        val devices = mutableMapOf<Int, DevicesResponse>()
-
-        val conn = AdvancedConnection(CoreSpringApp.dbConfig)
-
-        getUserId(conn, request.token)?.let { userId ->
-            val userConfig = getUserConfig(conn, userId)
-            val objectPermissions = userConfig.userPermission["ts_object"] ?: emptySet()
-
-            val deviceInfos = getDeviceInfos(conn, request.companyId, request.type)
-
-            deviceInfos.forEach { deviceInfo ->
-                if (checkPerm(userConfig, objectPermissions, deviceInfo.userId)) {
-
-                    val devicesResponse = devices.getOrPut(deviceInfo.userId) {
-                        DevicesResponse(
-                            companyId = deviceInfo.userId,
-                            companyName = deviceInfo.userName,
-                            uds110 = mutableListOf(),
-                            uds101 = mutableListOf(),
-                            skk311 = mutableListOf(),
-                        )
-                    }
-                    when (deviceInfo.deviceType) {
-                        TSHandler.DEVICE_TYPE_UDS -> devicesResponse.uds110 += deviceInfo.serialNo
-                        TSHandler.DEVICE_TYPE_UDS_OLD -> devicesResponse.uds101 += deviceInfo.serialNo
-                        TSHandler.DEVICE_TYPE_SKK -> devicesResponse.skk311 += deviceInfo.serialNo
-                    }
-                }
-            }
-        } ?: run {
-            devices[0] = DevicesResponse(
-                companyId = 0,
-                companyName = "",
-                uds110 = mutableListOf(),
-                uds101 = mutableListOf(),
-                skk311 = mutableListOf(),
-            )
-
-        }
-
-        conn.commit()
-        conn.close()
-
-        return devices.values.toList()
-    }
-
-    @PostMapping(value = ["/$URL_API_BASE/$URL_DEVICES_DETAIL/$URL_API_VERSION"])
-    @Transactional
-    fun devicesDetail(
-        @RequestBody
-        request: DevicesDetailRequest,
-    ): List<DevicesDetailResponse> {
-        val devices = mutableMapOf<Int, DevicesDetailResponse>()
-
-        val conn = AdvancedConnection(CoreSpringApp.dbConfig)
-
-        getUserId(conn, request.token)?.let { userId ->
-            val userConfig = getUserConfig(conn, userId)
-            val objectPermissions = userConfig.userPermission["ts_object"] ?: emptySet()
-
-            val deviceInfos = getDeviceInfos(conn, request.companyId, request.type)
-
-            deviceInfos.forEach { deviceInfo ->
-                if (checkPerm(userConfig, objectPermissions, deviceInfo.userId)) {
-                    var sensorData: DeviceSensorShortData? = null
-
-                    val rs = conn.executeQuery(
-                        """
-                            SELECT ontime , sensor_data
-                            FROM TS_data_${deviceInfo.objectId}
-                            WHERE ontime = ( SELECT MAX(ontime) FROM TS_data_${deviceInfo.objectId} )
-                        """
-                    )
-                    while (rs.next()) {
-                        val curTime = rs.getInt(1)
-                        val bbIn = rs.getByteBuffer(2, ByteOrder.BIG_ENDIAN)
-
-                        sensorData = DeviceSensorShortData(
-                            onTime = Instant.ofEpochSecond(curTime.toLong()).toString(),
-                            depth = AbstractObjectStateCalc.getSensorData(1, bbIn)?.toDouble(),
-                            speed = AbstractObjectStateCalc.getSensorData(2, bbIn)?.toDouble(),
-                            force = AbstractObjectStateCalc.getSensorData(3, bbIn)?.toDouble(),
-                        )
-                    }
-                    rs.close()
-
-                    val devicesDetailResponse = devices.getOrPut(deviceInfo.userId) {
-                        DevicesDetailResponse(
-                            companyId = deviceInfo.userId,
-                            companyName = deviceInfo.userName,
-                            uds110 = mutableMapOf(),
-                            uds101 = mutableMapOf(),
-                            skk311 = mutableMapOf(),
-                        )
-                    }
-                    when (deviceInfo.deviceType) {
-                        TSHandler.DEVICE_TYPE_UDS -> devicesDetailResponse.uds110[deviceInfo.serialNo] = sensorData
-                        TSHandler.DEVICE_TYPE_UDS_OLD -> devicesDetailResponse.uds101[deviceInfo.serialNo] = sensorData
-                        TSHandler.DEVICE_TYPE_SKK -> devicesDetailResponse.skk311[deviceInfo.serialNo] = sensorData
-                    }
-                }
-            }
-        } ?: run {
-            devices[0] = DevicesDetailResponse(
-                companyId = 0,
-                companyName = "",
-                uds110 = mutableMapOf(),
-                uds101 = mutableMapOf(),
-                skk311 = mutableMapOf(),
-            )
-        }
-
-        conn.commit()
-        conn.close()
-
-        return devices.values.toList()
-    }
-
-    private fun getDeviceInfos(conn: CoreAdvancedConnection, companyId: Int?, deviceType: String?): List<DeviceInfo> {
-        val deviceInfos = mutableListOf<DeviceInfo>()
-
-        val rs = conn.executeQuery(
-            """
-                SELECT SYSTEM_users.id, SYSTEM_users.full_name,
-                       TS_device.type, TS_device.serial_no, TS_device.fw_version, TS_device.imei,
-                       TS_object.id
-                FROM TS_device, TS_object, SYSTEM_users
-                WHERE TS_device.object_id = TS_object.id
-                    AND TS_object.user_id = SYSTEM_users.id
-                    AND TS_device.id <> 0
-                    AND TS_object.id <> 0
-            """ +
-                (companyId?.let { " AND SYSTEM_users.id = $companyId " } ?: "") +
-                (deviceType?.let { " AND TS_device.type = ${requestTypeToDeviceType[deviceType] ?: 0} " } ?: "")
-        )
-        while (rs.next()) {
-            var pos = 1
-
-            deviceInfos += DeviceInfo(
-                userId = rs.getInt(pos++),
-                userName = rs.getString(pos++),
-                deviceType = rs.getInt(pos++),
-                serialNo = rs.getString(pos++),
-                fwVersion = rs.getString(pos++),
-                imei = rs.getString(pos++),
-                objectId = rs.getInt(pos++),
-            )
-        }
-        rs.close()
-
-        return deviceInfos
-    }
-
-    private fun getDeviceInfo(conn: CoreAdvancedConnection, serialNo: String, deviceType: String): DeviceInfo? {
-        var deviceInfo: DeviceInfo? = null
-
-        val rs = conn.executeQuery(
-            """
-                SELECT SYSTEM_users.id, SYSTEM_users.full_name,
-                       TS_device.type, TS_device.serial_no, TS_device.fw_version, TS_device.imei,
-                       TS_object.id
-                FROM TS_device, TS_object, SYSTEM_users
-                WHERE TS_device.object_id = TS_object.id
-                    AND TS_object.user_id = SYSTEM_users.id
-                    AND TS_device.id <> 0
-                    AND TS_object.id <> 0
-                    AND TS_device.serial_no = '$serialNo'
-                    AND TS_device.type = ${requestTypeToDeviceType[deviceType] ?: 0}
-            """
-        )
-        while (rs.next()) {
-            var pos = 1
-
-            deviceInfo = DeviceInfo(
-                userId = rs.getInt(pos++),
-                userName = rs.getString(pos++),
-                deviceType = rs.getInt(pos++),
-                serialNo = rs.getString(pos++),
-                fwVersion = rs.getString(pos++),
-                imei = rs.getString(pos++),
-                objectId = rs.getInt(pos++),
-            )
-        }
-        rs.close()
-
-        return deviceInfo
-    }
-
-    private fun checkPerm(userConfig: UserConfig, hsPermission: Set<String>, userId: Int): Boolean {
-        for ((relName, _) in UserRelation.arrNameDescr) {
-            if (userConfig.getUserIDList(relName).contains(userId)) {
-                return hsPermission.contains("table_$relName")
-            }
-        }
-        return hsPermission.contains("table_${UserRelation.OTHER}")
-    }
-
-    private fun getDateTimeFromYMD(date: String): Int {
-        val tokens = date.split("-").filter { it.isNotEmpty() }
-        if (tokens.size != 3) {
-            return 0
-        }
-        val ye = tokens[0].toIntOrNull() ?: return 0
-        val mo = tokens[1].toIntOrNull() ?: return 0
-        val da = tokens[2].toIntOrNull() ?: return 0
-
-        return ZonedDateTime.of(ye, mo, da, 0, 0, 0, 0, zoneId0).toEpochSecond().toInt()
-    }
-
-}
-
-private class DeviceInfo(
-    val userId: Int,
-    val userName: String,
-    val deviceType: Int,
-    val serialNo: String,
-    val fwVersion: String,
-    val imei: String,
-    val objectId: Int,
-)
- */

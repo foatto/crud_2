@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query
 interface DeviceRepository : JpaRepository<DeviceEntity, Int> {
 
     fun findByUserId(userId: Int): List<DeviceEntity>
+    fun findByUserIdIn(userIds: List<Int>): List<DeviceEntity>
     fun findBySerialNo(serialNo: String): List<DeviceEntity>
 
     @Query(

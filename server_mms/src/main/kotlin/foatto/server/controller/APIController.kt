@@ -1,5 +1,7 @@
 package foatto.server.controller
 
+import foatto.server.model.DevicesStatusRequest
+import foatto.server.model.DevicesStatusResponse
 import foatto.server.model.ObjectDataRequest
 import foatto.server.model.ObjectDataResponse
 import foatto.server.service.APIService
@@ -13,16 +15,7 @@ class APIController(
     private val apiService: APIService,
 ) {
 
-    companion object {
-        private const val URL_API_BASE = "ext"
-        private const val URL_API_VERSION = "v1"
-
-        //        private const val URL_DEVICES = "devices"
-//        private const val URL_DEVICES_DETAIL = "devices_detail"
-        private const val URL_OBJECT_DATA = "object_data"
-    }
-
-    @PostMapping(value = ["/$URL_API_BASE/$URL_OBJECT_DATA/$URL_API_VERSION"])
+    @PostMapping(value = ["/ext/object_data/v1"])
     @Transactional
     fun getObjectData(
         @RequestBody
@@ -32,5 +25,14 @@ class APIController(
         objectName = request.name,
         start = request.start,
         duration = request.duration,
+    )
+
+    @PostMapping(value = ["/ext/devices_status/v1"])
+    @Transactional
+    fun getDevicesStatus(
+        @RequestBody
+        request: DevicesStatusRequest,
+    ): DevicesStatusResponse = apiService.getDevicesStatus(
+        token = request.token,
     )
 }

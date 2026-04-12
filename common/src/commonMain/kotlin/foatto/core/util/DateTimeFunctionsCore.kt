@@ -52,6 +52,8 @@ fun getDateTimeYMDHMSInts(timeZone: TimeZone, seconds: Int): List<Int> = getDate
 fun getDateTimeDMYHMSStrings(timeZone: TimeZone, seconds: Int): List<String> = getDateTimeDMYHMSStrings(getLocalDateTime(timeZone, seconds))
 fun getDateTimeYMDHMSStrings(timeZone: TimeZone, seconds: Int): List<String> = getDateTimeYMDHMSStrings(getLocalDateTime(timeZone, seconds))
 
+//-------------------------------------------------------------------------------------------------
+
 fun getDateTimeDMYHMSInts(ldt: LocalDateTime): List<Int> = listOf(ldt.day, ldt.month.number, ldt.year, ldt.hour, ldt.minute, ldt.second)
 fun getDateTimeYMDHMSInts(ldt: LocalDateTime): List<Int> = listOf(ldt.year, ldt.month.number, ldt.day, ldt.hour, ldt.minute, ldt.second)
 fun getDateTimeDMYHMSStrings(ldt: LocalDateTime): List<String> = listOf(getDigit(ldt.day), getDigit(ldt.month.number), getDigit(ldt.year), getDigit(ldt.hour), getDigit(ldt.minute), getDigit(ldt.second))
@@ -59,6 +61,10 @@ fun getDateTimeYMDHMSStrings(ldt: LocalDateTime): List<String> = listOf(getDigit
 
 //-------------------------------------------------------------------------------------------------
 
+fun getDateTimeDMyHMSString(timeOffset: Int, seconds: Int): String {
+    val dt = getLocalDateTime(timeOffset, seconds)
+    return getDateTimeDMyHMSString(dt.year, dt.month.number, dt.day, dt.hour, dt.minute, dt.second)
+}
 fun getDateTimeDMYHMSString(timeOffset: Int, seconds: Int): String {
     val dt = getLocalDateTime(timeOffset, seconds)
     return getDateTimeDMYHMSString(dt.year, dt.month.number, dt.day, dt.hour, dt.minute, dt.second)
@@ -79,6 +85,8 @@ fun getDateDMYString(timeOffset: Int, seconds: Int): String {
     val dt = getLocalDateTime(timeOffset, seconds)
     return getDateDMYString(dt.year, dt.month.number, dt.day)
 }
+
+//-------------------------------------------------------------------------------------------------
 
 fun getDateTimeDMYHMSString(timeZone: TimeZone, seconds: Int): String {
     val dt = getLocalDateTime(timeZone, seconds)
@@ -101,6 +109,8 @@ fun getDateTimeDMYString(timeZone: TimeZone, seconds: Int): String {
     return getDateDMYString(dt.year, dt.month.number, dt.day)
 }
 
+//-------------------------------------------------------------------------------------------------
+
 fun getDateTimeDMYHMSString(ldt: LocalDateTime): String =
     getDateTimeDMYHMSString(ldt.year, ldt.month.number, ldt.day, ldt.hour, ldt.minute, ldt.second)
 fun getDateTimeDMYHMString(ldt: LocalDateTime): String =
@@ -119,10 +129,14 @@ fun getDateTimeDMYHMString(alDT: List<Int>): String = getDateTimeDMYHMString(alD
 fun getDateTimeYMDHMSString(alDT: List<Int>): String = getDateTimeYMDHMSString(alDT[0], alDT[1], alDT[2], alDT[3], alDT[4], alDT[5])
 fun getDateTimeYMDHMString(alDT: List<Int>): String = getDateTimeYMDHMString(alDT[0], alDT[1], alDT[2], alDT[3], alDT[4])
 
+//-------------------------------------------------------------------------------------------------
+
 fun getDateTimeDMYHMSString(arrDT: Array<Int>): String = getDateTimeDMYHMSString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4], arrDT[5])
 fun getDateTimeDMYHMString(arrDT: Array<Int>): String = getDateTimeDMYHMString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4])
 fun getDateTimeYMDHMSString(arrDT: Array<Int>): String = getDateTimeYMDHMSString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4], arrDT[5])
 fun getDateTimeYMDHMString(arrDT: Array<Int>): String = getDateTimeYMDHMString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4])
+
+//-------------------------------------------------------------------------------------------------
 
 fun getDateTimeDMYHMSString(arrDT: IntArray): String = getDateTimeDMYHMSString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4], arrDT[5])
 fun getDateTimeDMYHMString(arrDT: IntArray): String = getDateTimeDMYHMString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4])
@@ -130,6 +144,9 @@ fun getDateTimeYMDHMSString(arrDT: IntArray): String = getDateTimeYMDHMSString(a
 fun getDateTimeYMDHMString(arrDT: IntArray): String = getDateTimeYMDHMString(arrDT[0], arrDT[1], arrDT[2], arrDT[3], arrDT[4])
 
 //-------------------------------------------------------------------------------------------------
+
+fun getDateTimeDMyHMSString(ye: Int, mo: Int, da: Int, ho: Int, mi: Int, se: Int): String =
+    "${getDigit(da)}.${getDigit(mo)}.${getDigit(ye % 100)} ${getDigit(ho)}:${getDigit(mi)}:${getDigit(se)}"
 
 fun getDateTimeDMYHMSString(ye: Int, mo: Int, da: Int, ho: Int, mi: Int, se: Int): String =
     "${getDigit(da)}.${getDigit(mo)}.${getDigit(ye)} ${getDigit(ho)}:${getDigit(mi)}:${getDigit(se)}"

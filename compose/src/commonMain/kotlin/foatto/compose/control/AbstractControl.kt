@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import foatto.compose.Root
 import foatto.compose.colorHeader
 import foatto.compose.colorTextButton
 import foatto.core.model.AppAction
@@ -43,6 +44,7 @@ import foatto.core.model.response.HeaderData
 import kotlin.math.max
 
 abstract class AbstractControl(
+    protected val root: Root,
     protected val tabId: Int,
 ) {
 
@@ -105,7 +107,13 @@ abstract class AbstractControl(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(
-                        modifier = Modifier.weight(1.0f)
+                        modifier = Modifier.weight(
+                            if (root.isWideScreen) {
+                                1.0f
+                            } else {
+                                0.5f
+                            }
+                        )
                     ) {
                         Text(modifier = Modifier.align(Alignment.End), text = label)
                     }

@@ -20,7 +20,9 @@ import foatto.compose.getStyleToolbarIconNameSuffix
 internal fun ChartToolBar(
     isWideScreen: Boolean,
     isPanButtonEnabled: Boolean,
-    isZoomButtonEnabled: Boolean,
+    isZoomBoxButtonEnabled: Boolean,
+    isZoomInButtonEnabled: Boolean,
+    isZoomOutButtonEnabled: Boolean,
     refreshInterval: Int,
     setMode: (chartWorkMode: ChartWorkMode) -> Unit,
     zoomIn: () -> Unit,
@@ -55,7 +57,7 @@ internal fun ChartToolBar(
                 setMode(ChartWorkMode.PAN)
             }
             ToolBarIconButton(
-                isEnabled = isZoomButtonEnabled && refreshInterval == 0,
+                isEnabled = isZoomBoxButtonEnabled && refreshInterval == 0,
                 name = "/images/ic_search_${getStyleToolbarIconNameSuffix()}.png",
             ) {
                 setMode(ChartWorkMode.ZOOM_BOX)
@@ -63,13 +65,13 @@ internal fun ChartToolBar(
         }
         ToolBarBlock {
             ToolBarIconButton(
-                isEnabled = refreshInterval == 0,
+                isEnabled = isZoomInButtonEnabled && refreshInterval == 0,
                 name = "/images/ic_zoom_in_${getStyleToolbarIconNameSuffix()}.png",
             ) {
                 zoomIn()
             }
             ToolBarIconButton(
-                isEnabled = refreshInterval == 0,
+                isEnabled = isZoomOutButtonEnabled && refreshInterval == 0,
                 name = "/images/ic_zoom_out_${getStyleToolbarIconNameSuffix()}.png",
             ) {
                 zoomOut()

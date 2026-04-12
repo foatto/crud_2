@@ -140,12 +140,15 @@ var tableClientActionFun: (
 
 @OptIn(ExperimentalFoundationApi::class)
 class TableControl(
-    private val root: Root,
+    root: Root,
     private val appControl: AppControl,
     private val tableAction: AppAction,
     private val tableResponse: TableResponse,
     tabId: Int,
-) : AbstractControl(tabId) {
+) : AbstractControl(
+    root = root,
+    tabId = tabId,
+) {
 
     companion object {
         private val SCROLL_BAR_TICKNESS = 16.dp

@@ -219,12 +219,15 @@ errors?.forEach { entry ->
  */
 
 class FormControl(
-    private val root: Root,
+    root: Root,
     private val appControl: AppControl,
     private val formAction: AppAction,
     private val formResponse: FormResponse,
     tabId: Int,
-) : AbstractControl(tabId) {
+) : AbstractControl(
+    root = root,
+    tabId = tabId,
+) {
 
     companion object {
         private val SCROLL_BAR_TICKNESS = 16.dp

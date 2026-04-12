@@ -51,6 +51,7 @@ import foatto.core.model.response.chart.ChartResponse
 import foatto.core.model.response.xy.geom.XyRect
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getDateTimeDMYHMSString
+import foatto.core.util.getDateTimeDMyHMSString
 import foatto.core.util.getSplittedDouble
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -65,12 +66,15 @@ import kotlin.math.round
 import kotlin.math.roundToInt
 
 class ChartControl(
-    private val root: Root,
+    root: Root,
     private val appControl: AppControl,
     private val chartAction: AppAction,
     private val chartResponse: ChartResponse,
     tabId: Int,
-) : AbstractControl(tabId) {
+) : AbstractControl(
+    root = root,
+    tabId = tabId,
+) {
 
     companion object {
         private val COLOR_CHART_TIME_LINE = hsl(180.0f, 1.0f, 0.5f)
@@ -81,16 +85,6 @@ class ChartControl(
         private val COLOR_CHART_DATA_BACK = hsl(60.0f, 1.0f, 0.5f)   // 0.7f
         private const val COLOR_CHART_LINE_WIDTH = 1.0f
 
-        private const val MARGIN_LEFT = 100.0f     // на каждую ось Y
-        private const val MARGIN_RIGHT = 20.0f
-        private const val MARGIN_TOP = 40.0f
-        private const val MARGIN_BOTTOM = 60.0f
-
-        private const val CHART_MIN_HEIGHT = 300.0f
-
-        private const val MIN_GRID_STEP_X = 40  // минимальный шаг между линиями сетки в пикселях
-        private const val MIN_GRID_STEP_Y = 40  // минимальный шаг между линиями сетки в пикселях
-
         private const val MIN_SCALE_X = 15 * 60     // минимальный разрешённый масштаб - диапазон не менее 15 мин
         private const val MAX_SCALE_X = 32 * 86400  // максимальный разрешённый масштаб - диапазон не более 32 дней (чуть более месяца)
 
@@ -98,11 +92,11 @@ class ChartControl(
         private const val TEXT_DATA_MIN_VISIBLE_WIDTH = 4    // минимальная ширина видимого текстового блока
 
         private val arrGridStepX = arrayOf(
-            1, 5, 15,                           // 1 - 5 - 15 seconds
-            1 * 60, 5 * 60, 15 * 60,            // 1 - 5 - 15 minutes
-            1 * 3_600, 3 * 3_600, 6 * 3_600,    // 1 - 3 - 6 hours
-            1 * 86_400, 3 * 86_400, 9 * 86_400, // 1 - 3 - 9 days
-            27 * 86_400, 81 * 86_400            // 27 - 81 days
+            1, 5, 15, 30,                                   // 1 - 5 - 15 - 30 seconds
+            1 * 60, 5 * 60, 15 * 60, 30 * 60,               // 1 - 5 - 15 - 30 minutes
+            1 * 3_600, 2 * 3_600, 4 * 3_600, 8 * 3_600,     // 1 - 2 - 4 - 8 hours
+            1 * 86_400, 2 * 86_400, 4 * 86_400, 8 * 86_400, // 1 - 2 - 4 - 8 days
+            16 * 86_400, 32 * 86_400, 64 * 86_400           // 16 - 32 - 64 days
         )
 
         private val arrGridStepY = arrayOf(
@@ -134,8 +128,53 @@ class ChartControl(
         )
     }
 
+    private val chartMinHeight = if (root.isWideScreen) {
+        300.0f
+    } else {
+        200.0f
+    }
+
+    //--- на каждую ось Y
+    private val marginLeft = if (root.isWideScreen) {
+        100.0f
+    } else {
+        50.0f
+    }
+    private val marginRight = 20.0f
+    private val marginTop = if (root.isWideScreen) {
+        40.0f
+    } else {
+        30.0f
+    }
+    private val marginBottom = if (root.isWideScreen) {
+        60.0f
+    } else {
+        40.0f
+    }
+
+    //--- минимальный шаг между линиями сетки в условных пикселях
+    private val minGridStepX = if (root.isWideScreen) {
+        36  // (35..
+    } else {
+        26  // (25..
+    }
+    //--- минимальный шаг между линиями сетки в условных пикселях
+    private val minGridStepY = if (root.isWideScreen) {
+        30  // ..40)
+    } else {
+        25  // ..30)
+    }
+
+    private val fontSize = if (root.isWideScreen) {
+        12
+    } else {
+        10
+    }
+
     private var isPanButtonEnabled by mutableStateOf(false)
-    private var isZoomButtonEnabled by mutableStateOf(true)
+    private var isZoomBoxEnabled by mutableStateOf(true)
+    private var isZoomInEnabled by mutableStateOf(true)
+    private var isZoomOutEnabled by mutableStateOf(true)
 
     private var canvasWidth: Float by mutableFloatStateOf(0.0f)
     private var canvasHeight: Float by mutableFloatStateOf(0.0f)
@@ -195,7 +234,9 @@ class ChartControl(
             ChartToolBar(
                 isWideScreen = root.isWideScreen,
                 isPanButtonEnabled = isPanButtonEnabled,
-                isZoomButtonEnabled = isZoomButtonEnabled,
+                isZoomBoxButtonEnabled = isZoomBoxEnabled,
+                isZoomInButtonEnabled = isZoomInEnabled,
+                isZoomOutButtonEnabled = isZoomOutEnabled,
                 refreshInterval = refreshInterval,
                 setMode = { chartWorkMode: ChartWorkMode -> setMode(chartWorkMode) },
                 zoomIn = { coroutineScope.launch { zoomIn() } },
@@ -292,7 +333,7 @@ class ChartControl(
                         canvasHeight = canvasHeight,
                         textMeasurer = textMeasurer,
                         text = axisText.text,
-                        fontSize = 12,
+                        fontSize = fontSize,
                         textIsBold = false,
                         x = axisText.x,
                         y = axisText.y + screenOffsetY,
@@ -306,7 +347,6 @@ class ChartControl(
                         textAnchor = axisText.textAnchor,
                         textColor = axisText.textColor,
                     )
-//                                fontSize((1.0 * scaleKoef).cssRem)
                 }
             }
         }
@@ -336,7 +376,7 @@ class ChartControl(
                     canvasHeight = canvasHeight,
                     textMeasurer = textMeasurer,
                     text = chartGroup.title.text,
-                    fontSize = 12,
+                    fontSize = fontSize,
                     textIsBold = false,
                     x = chartGroup.title.x + screenOffsetX,
                     y = chartGroup.title.y + screenOffsetY,
@@ -350,7 +390,6 @@ class ChartControl(
                     textAnchor = chartGroup.title.textAnchor,
                     textColor = chartGroup.title.textColor,
                 )
-//                            fontSize((1.0 * scaleKoef).cssRem)
                 for (graphicBack in chartGroup.chartBacks) {
                     drawRectOnCanvas(
                         x = graphicBack.x + screenOffsetX,
@@ -384,7 +423,7 @@ class ChartControl(
                         canvasHeight = canvasHeight,
                         textMeasurer = textMeasurer,
                         text = axisText.text,
-                        fontSize = 12,
+                        fontSize = fontSize,
                         textIsBold = false,
                         x = axisText.x + screenOffsetX,
                         y = axisText.y + screenOffsetY,
@@ -398,7 +437,6 @@ class ChartControl(
                         textAnchor = axisText.textAnchor,
                         textColor = axisText.textColor,
                     )
-//                                fontSize((1.0 * scaleKoef).cssRem)
                 }
 //--- пока не используется
 //                for (graphicPoint in chartGroup.alChartPoint) {
@@ -446,7 +484,7 @@ class ChartControl(
                         canvasHeight = canvasHeight,
                         textMeasurer = textMeasurer,
                         text = graphicText.text,
-                        fontSize = 12,
+                        fontSize = fontSize,
                         textIsBold = false,
                         x = graphicText.x + screenOffsetX,
                         y = graphicText.y + screenOffsetY,
@@ -506,7 +544,7 @@ class ChartControl(
                             canvasHeight = canvasHeight,
                             textMeasurer = textMeasurer,
                             text = timeLabel.text.value,
-                            fontSize = 12,
+                            fontSize = fontSize,
                             textIsBold = false,
                             x = timeLabel.x.value,
                             y = canvasHeight,
@@ -596,7 +634,7 @@ class ChartControl(
                         canvasHeight = canvasHeight,
                         textMeasurer = textMeasurer,
                         text = legendText.text,
-                        fontSize = 12,
+                        fontSize = fontSize,
                         textIsBold = true,
                         x = legendText.x,
                         y = legendText.y,
@@ -610,7 +648,6 @@ class ChartControl(
                         textAnchor = legendText.textAnchor,
                         textColor = legendText.textColor,
                     )
-//                                fontSize((1.0 * scaleKoef).cssRem)
                 }
             }
         }
@@ -717,8 +754,8 @@ class ChartControl(
                 }
 
                 //--- переинициализировать значение левого поля
-                maxMarginLeft = max(maxMarginLeft, chartData.axises.size * MARGIN_LEFT * root.scaleKoef)
-                maxMarginRight = max(maxMarginRight, max(MARGIN_RIGHT, chartData.legends.size * getLegendWidth(root.scaleKoef)))
+                maxMarginLeft = max(maxMarginLeft, chartData.axises.size * marginLeft * root.scaleKoef)
+                maxMarginRight = max(maxMarginRight, max(marginRight, chartData.legends.size * getLegendWidth(root.scaleKoef)))
             }
 
 
@@ -731,7 +768,7 @@ class ChartControl(
             val oneChartHeight = if (chartDatas.isEmpty()) {
                 0.0f
             } else {
-                max(CHART_MIN_HEIGHT, canvasHeight / chartDatas.size) * root.scaleKoef
+                max(chartMinHeight, canvasHeight / chartDatas.size) * root.scaleKoef
             }
             allChartsHeight = oneChartHeight * chartDatas.size
 
@@ -769,6 +806,9 @@ class ChartControl(
             if (withWait) {
                 root.setWait(false)
             }
+
+            isZoomInEnabled = isZoomInEnabled().first
+            isZoomOutEnabled = isZoomOutEnabled().first
         }
     }
 
@@ -782,9 +822,9 @@ class ChartControl(
         pixStartY: Float,
     ) {
         //--- maxMarginLeft уходит на левую панель, к оси Y
-        val pixDrawHeight = oneChartHeight - (MARGIN_TOP + MARGIN_BOTTOM) * root.scaleKoef
-        val pixDrawY0 = pixStartY + oneChartHeight - MARGIN_BOTTOM * root.scaleKoef   // "нулевая" ось Y
-        val pixDrawTopY = pixStartY + MARGIN_TOP * root.scaleKoef  // верхний край графика
+        val pixDrawHeight = oneChartHeight - (marginTop + marginBottom) * root.scaleKoef
+        val pixDrawY0 = pixStartY + oneChartHeight - marginBottom * root.scaleKoef   // "нулевая" ось Y
+        val pixDrawTopY = pixStartY + marginTop * root.scaleKoef  // верхний край графика
 
         val yAxisLines = mutableListOf<ChartLineDrawData>()
         val yAxisTexts = mutableListOf<ChartTextDrawData>()
@@ -800,7 +840,7 @@ class ChartControl(
         //--- заголовок
 
         val titleData = ChartTextDrawData(
-            x = MIN_GRID_STEP_X * root.scaleKoef,
+            x = minGridStepX * root.scaleKoef,
             y = pixDrawTopY - 4 * root.scaleKoef,
             textAnchor = Alignment.BottomStart,
             text = chartData.title,
@@ -961,7 +1001,6 @@ class ChartControl(
                             strokeWidth = 1 * root.scaleKoef,
                             //radius = (2 * scaleKoef).px,
                             textColor = Color(gtd.textColor),
-//                                fontSize ((1.0 * scaleKoef).cssRem)
 //                                userSelect ("none")
                             tooltip = gtd.text,
                         )
@@ -999,7 +1038,7 @@ class ChartControl(
         val timeWidth = t2 - t1
 
         //--- сетка, насечки, надписи по оси X
-        val minStepX: Int = (timeWidth * MIN_GRID_STEP_X * root.scaleKoef / pixWidth).roundToInt()
+        val minStepX: Int = (timeWidth * minGridStepX * root.scaleKoef / pixWidth).roundToInt()
         var notchStepX = 0   // шаг насечек
         var labelStepX = 0   // шаг подписей под насечками
         for (i in arrGridStepX.indices) {
@@ -1044,7 +1083,7 @@ class ChartControl(
 
             //--- текст метки по оси X
             if ((notchX + timeOffset) % labelStepX == 0) {
-                val text = getDateTimeDMYHMSString(timeOffset, notchX).replace(" ", "\n  ")
+                val text = getDateTimeDMyHMSString(timeOffset, notchX).replace(" ", "\n")
                 axisTexts.add(
                     ChartTextDrawData(
                         x = pixDrawX,
@@ -1093,10 +1132,10 @@ class ChartControl(
     ): Int {
         val ayd = element.axises[axisIndex]
         val grHeight = ayd.max - ayd.min
-        val axisX = pixDrawWidth - axisIndex * MARGIN_LEFT * root.scaleKoef
+        val axisX = pixDrawWidth - axisIndex * marginLeft * root.scaleKoef
 
         //--- сетка, насечки, надписи по оси Y
-        val minGraphicStepY = grHeight * MIN_GRID_STEP_Y * root.scaleKoef / pixDrawHeight
+        val minGraphicStepY = grHeight * minGridStepY * root.scaleKoef / pixDrawHeight
         var notchGraphicStepY = 0.0f   // шаг насечек
         var labelGraphicStepY = 0.0f   // шаг подписей под насечками
         var precY = 0
@@ -1132,7 +1171,11 @@ class ChartControl(
 
             //--- горизонтальная линия сетки, переходящая в насечку
             val line = ChartLineDrawData(
-                x1 = axisX - MARGIN_LEFT * root.scaleKoef / 2,
+                x1 = axisX - marginLeft * root.scaleKoef / if (root.isWideScreen) {
+                    2.0f
+                } else {
+                    1.1f
+                },
                 y1 = drawY,
                 x2 = /*if( axisIndex == 0 ) pixDrawWidth else*/ axisX,
                 y2 = drawY,
@@ -1189,18 +1232,19 @@ class ChartControl(
         alAxisLine.add(line)
 
         //--- подпись оси Y - подпись отодвинем подальше от цифр, чтобы не перекрывались
-        val axisTextX = axisX - (MARGIN_LEFT * root.scaleKoef * 5 / 6).roundToInt()
-        val axisTextY = pixDrawY0 - pixDrawHeight / 2
-        val axisText = ChartTextDrawData(
-            x = axisTextX,
-            y = axisTextY,
-            text = ayd.title,
-            textColor = Color(ayd.color),
-            textAnchor = Alignment.TopCenter,
-            rotateDegree = -90.0f,
-        )
-
-        alAxisText.add(axisText)
+        if (root.isWideScreen) {
+            val axisTextX = axisX - (marginLeft * root.scaleKoef * 5 / 6).roundToInt()
+            val axisTextY = pixDrawY0 - pixDrawHeight / 2
+            val axisText = ChartTextDrawData(
+                x = axisTextX,
+                y = axisTextY,
+                text = ayd.title,
+                textColor = Color(ayd.color),
+                textAnchor = Alignment.TopCenter,
+                rotateDegree = -90.0f,
+            )
+            alAxisText.add(axisText)
+        }
 
         return precY
     }
@@ -1253,12 +1297,12 @@ class ChartControl(
         when (newMode) {
             ChartWorkMode.PAN -> {
                 isPanButtonEnabled = false
-                isZoomButtonEnabled = true
+                isZoomBoxEnabled = true
             }
 
             ChartWorkMode.ZOOM_BOX -> {
                 isPanButtonEnabled = true
-                isZoomButtonEnabled = false
+                isZoomBoxEnabled = false
             }
         }
         curMode = newMode
@@ -1267,27 +1311,17 @@ class ChartControl(
     }
 
     private suspend fun zoomIn() {
-        val t1 = chartViewCoord.t1
-        val t2 = chartViewCoord.t2
-        val grWidth = chartViewCoord.width
+        val (isZoomInEnabled, newT1, newT2) = isZoomInEnabled()
 
-        val newT1 = t1 + grWidth / 4
-        val newT2 = t2 - grWidth / 4
-
-        if (newT2 - newT1 >= MIN_SCALE_X) {
+        if (isZoomInEnabled) {
             chartRefreshView(ChartViewCoord(newT1, newT2))
         }
-
     }
 
     private suspend fun zoomOut() {
-        val t1 = chartViewCoord.t1
-        val t2 = chartViewCoord.t2
-        val grWidth = chartViewCoord.width
+        val (isZoomOutEnabled, newT1, newT2) = isZoomOutEnabled()
 
-        val newT1 = t1 - grWidth / 2
-        val newT2 = t2 + grWidth / 2
-        if (newT2 - newT1 <= MAX_SCALE_X) {
+        if (isZoomOutEnabled) {
             chartRefreshView(ChartViewCoord(newT1, newT2))
         }
     }
@@ -1463,6 +1497,26 @@ class ChartControl(
     //--- в double и обратно из-за ошибок округления
     private fun getTimeFromX(pixX: Float, pixWidth: Float, timeStart: Int, timeWidth: Int): Int = (1.0 * timeWidth * pixX / pixWidth + timeStart).roundToInt()
 
+    private fun isZoomInEnabled(): Triple<Boolean, Int, Int> {
+        val t1 = chartViewCoord.t1
+        val t2 = chartViewCoord.t2
+        val grWidth = chartViewCoord.width
+
+        val newT1 = t1 + grWidth / 4
+        val newT2 = t2 - grWidth / 4
+
+        return Triple(newT2 - newT1 >= MIN_SCALE_X, newT1, newT2)
+    }
+
+    private fun isZoomOutEnabled(): Triple<Boolean, Int, Int> {
+        val t1 = chartViewCoord.t1
+        val t2 = chartViewCoord.t2
+        val grWidth = chartViewCoord.width
+
+        val newT1 = t1 - grWidth / 2
+        val newT2 = t2 + grWidth / 2
+        return Triple(newT2 - newT1 <= MAX_SCALE_X, newT1, newT2)
+    }
 }
 
 /*

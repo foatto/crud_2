@@ -92,11 +92,14 @@ import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
 
 class CompositeControl(
-    protected val root: Root,
+    root: Root,
     private val appControl: AppControl,
     protected val compositeResponse: CompositeResponse,
     tabId: Int,
-) : AbstractControl(tabId) {
+) : AbstractControl(
+    root = root,
+    tabId = tabId,
+) {
 
     private var isPanButtonEnabled by mutableStateOf(false)
     private var isLayoutButtonEnabled by mutableStateOf(true)

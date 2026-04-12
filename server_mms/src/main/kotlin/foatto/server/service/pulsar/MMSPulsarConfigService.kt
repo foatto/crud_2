@@ -39,7 +39,7 @@ class MMSPulsarConfigService(
             startPort = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE,
             endPort = (deviceIndex + 1) * CoreTelematicFunction.MAX_PORT_PER_DEVICE - 1,
         ).forEach { oldSensorEntity ->
-            SensorService.Companion.deleteSensor(
+            SensorService.deleteSensor(
                 entityManager = entityManager,
                 sensorRepository = sensorRepository,
                 sensorCalibrationRepository = sensorCalibrationRepository,
@@ -177,7 +177,7 @@ class MMSPulsarConfigService(
                 sensorCalibrationRepository.save(sensorCalibrationEntity)
             }
 
-            SensorService.Companion.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+            SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
         }
         sensorRepository.flush()
         sensorCalibrationRepository.flush()

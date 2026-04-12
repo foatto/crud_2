@@ -44,11 +44,14 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 abstract class AbstractXyControl(
-    protected val root: Root,
+    root: Root,
     private val appControl: AppControl,
     protected val elementConfigs: Map<String, XyElementConfig>,
     tabId: Int,
-) : AbstractControl(tabId) {
+) : AbstractControl(
+    root = root,
+    tabId = tabId,
+) {
 
     companion object {
         val COLOR_XY_LABEL_BACK = Color.hsl(60.0f, 1.0f, 0.5f)

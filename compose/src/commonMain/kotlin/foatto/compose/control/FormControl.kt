@@ -95,6 +95,7 @@ import foatto.compose.colorCheckBox
 import foatto.compose.colorControlBack
 import foatto.compose.colorDatePicker
 import foatto.compose.colorFormBack
+import foatto.compose.colorFormNarrowLabelCellBack
 import foatto.compose.colorIconButton
 import foatto.compose.colorOutlinedTextInput
 import foatto.compose.colorRadioButton
@@ -117,10 +118,12 @@ import foatto.compose.control.model.form.cell.FormFileCellClient
 import foatto.compose.control.model.form.cell.FormLabelCellClient
 import foatto.compose.control.model.form.cell.FormSimpleCellClient
 import foatto.compose.getStyleOtherIconNameSuffix
+import foatto.compose.getStyleOtherIconNameSuffixNarrow
 import foatto.compose.invokeRequest
 import foatto.compose.invokeUploadFormFile
 import foatto.compose.singleButtonShape
 import foatto.compose.styleOtherIconSize
+import foatto.compose.styleOtherIconSizeNarrow
 import foatto.compose.utils.maxDp
 import foatto.core.IconName
 import foatto.core.i18n.LanguageEnum
@@ -160,7 +163,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import androidx.compose.runtime.collectAsState
 
 var filePickerDialogSettings: FileKitDialogSettings = FileKitDialogSettings.createDefault()
 var formComboCellPreSetFun: ((lang: LanguageEnum, formCell: FormComboCell) -> Unit)? = null
@@ -488,7 +490,11 @@ class FormControl(
                                     }
                                 },
                             ),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                        horizontalAlignment = if (root.isWideScreen) {
+                            Alignment.CenterHorizontally
+                        } else {
+                            Alignment.Start
+                        },
                     ) {
                         gridRows.forEachIndexed { index, gridRow ->
                             Row(
@@ -503,12 +509,39 @@ class FormControl(
                                 gridRow.forEachIndexed { col, gridData ->
                                     //--- специальное хитрое условие: показывать если gridData == null или isVisible == true
                                     if (gridData?.isVisible?.value != false) {
+                                        val topPadding = if (root.isWideScreen) {
+                                            16.dp
+                                        } else {
+                                            if (gridData is FormLabelCellClient) 8.dp else 2.dp
+                                        }
+                                        val bottomPadding = if (root.isWideScreen) {
+                                            16.dp
+                                        } else {
+                                            if (gridData is FormLabelCellClient) 2.dp else 8.dp
+                                        }
+
                                         Row(
-                                            horizontalArrangement = gridData?.align ?: Arrangement.Center,
+                                            horizontalArrangement = if (root.isWideScreen) {
+                                                gridData?.align ?: Arrangement.Center
+                                            } else {
+                                                Arrangement.Start
+                                            },
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
                                                 .fillMaxHeight()    // работает только совместно с .height(intrinsicSize = IntrinsicSize.Max)
-                                                .padding(16.dp)
+                                                .then(
+                                                    if (!root.isWideScreen && gridData is FormLabelCellClient) {
+                                                        Modifier.background(colorFormNarrowLabelCellBack)
+                                                    } else {
+                                                        Modifier
+                                                    }
+                                                )
+                                                .padding(
+                                                    start = if (root.isWideScreen) 16.dp else 4.dp,
+                                                    end = if (root.isWideScreen) 16.dp else 4.dp,
+                                                    top = topPadding,
+                                                    bottom = bottomPadding,
+                                                )
                                                 .onSizeChanged { size ->
                                                     gridData?.let {
                                                         val componentWidth = with(density) {
@@ -1019,19 +1052,35 @@ class FormControl(
                                                 .width(
                                                     //--- чтобы не образовалась пустота между меткой и полями ввода
                                                     if (gridData is FormLabelCellClient) {
-                                                        0.dp
+                                                        if (root.isWideScreen) 0.dp else 128.dp
                                                     } else {
-                                                        128.dp
+                                                        128.dp   // don't change!
                                                     }
                                                 )
                                                 .fillMaxHeight()
-                                                .padding(horizontal = 0.dp, vertical = 16.dp)
+                                                .then(
+                                                    if (!root.isWideScreen && gridData is FormLabelCellClient) {
+                                                        Modifier.background(colorFormNarrowLabelCellBack)
+                                                    } else {
+                                                        Modifier
+                                                    }
+                                                )
+                                                .padding(
+                                                    start = 0.dp,
+                                                    end = 0.dp,
+                                                    top = topPadding,
+                                                    bottom = bottomPadding,
+                                                )
                                         ) {
                                             if (gridData is FormSimpleCellClient) {
                                                 gridData.data.selectorAction?.let { selectorAction ->
                                                     ImageOrTextFromNameControl(
-                                                        name = "/images/ic_reply_${getStyleOtherIconNameSuffix()}.png",
-                                                        iconSize = styleOtherIconSize,
+                                                        name = if (root.isWideScreen) {
+                                                            "/images/ic_reply_${getStyleOtherIconNameSuffix()}.png"
+                                                        } else {
+                                                            "/images/ic_reply_${getStyleOtherIconNameSuffixNarrow()}.png"
+                                                        },
+                                                        iconSize = if (root.isWideScreen) styleOtherIconSize else styleOtherIconSizeNarrow,
                                                         imageButton = { func ->
                                                             FilledIconButton(
                                                                 shape = singleButtonShape,
@@ -1052,8 +1101,12 @@ class FormControl(
 //                                                doKeyUp(gridData, syntheticKeyboardEvent)
 
                                                     ImageOrTextFromNameControl(
-                                                        name = "/images/ic_delete_forever_${getStyleOtherIconNameSuffix()}.png",
-                                                        iconSize = styleOtherIconSize,
+                                                        name = if (root.isWideScreen) {
+                                                            "/images/ic_delete_forever_${getStyleOtherIconNameSuffix()}.png"
+                                                        } else {
+                                                            "/images/ic_delete_forever_${getStyleOtherIconNameSuffixNarrow()}.png"
+                                                        },
+                                                        iconSize = if (root.isWideScreen) styleOtherIconSize else styleOtherIconSizeNarrow,
                                                         imageButton = { func ->
                                                             FilledIconButton(
                                                                 shape = singleButtonShape,
@@ -1335,9 +1388,7 @@ class FormControl(
                     //--- добавим разделитель для отвязки от предыдущего блока полей ввода
                     rowIndex++
 //!!!                    val emptyCell = getFormEmptyCell(gridCellId, rowIndex)
-
 //!!!                    alGridData.add(emptyCell)
-
                     rowIndex++
                 }
 
@@ -1396,13 +1447,6 @@ class FormControl(
                     is FormFileCell -> {}
                 }
 
-                //--- если это широкий экран
-                if (root.isWideScreen) {
-                    colIndex++
-                } else {
-                    rowIndex++
-                }
-
                 //--- определим visible-зависимости
                 formCell.visibility?.let { formCellVisibility ->
                     val hmFCVI = hmFormCellVisible.getOrPut(formCellVisibility.name) { mutableMapOf() }
@@ -1431,7 +1475,7 @@ class FormControl(
                     }
                 }
 
-                maxColCount = max(maxColCount, colIndex - 1)
+                maxColCount = max(maxColCount, colIndex)
             }
         }
 
@@ -2071,12 +2115,12 @@ class FormControl(
         }
     }
 
-    private fun getFocusId(gridId: Int, subGridId: Int? = null): String =
-        subGridId?.let {
-            "i_${tabId}_${gridId}_${subGridId}"
-        } ?: run {
-            "i_${tabId}_${gridId}"
-        }
+//    private fun getFocusId(gridId: Int, subGridId: Int? = null): String =
+//        subGridId?.let {
+//            "i_${tabId}_${gridId}_${subGridId}"
+//        } ?: run {
+//            "i_${tabId}_${gridId}"
+//        }
 
 //    private fun setFocus(focusElementId: String): Boolean {
 //        document.getElementById(focusElementId)?.let { element ->
@@ -2088,10 +2132,10 @@ class FormControl(
 //        return false
 //    }
 
-    private fun getStyleFormEditBoxColumn(initSize: Int) = if (root.isWideScreen) {
-        min(initSize, root.scaledWindowWidth / 19)
-    } else {
-        min(initSize, 30)
-    }
+//    private fun getStyleFormEditBoxColumn(initSize: Int) = if (root.isWideScreen) {
+//        min(initSize, root.scaledWindowWidth / 19)
+//    } else {
+//        min(initSize, 30)
+//    }
 
 }

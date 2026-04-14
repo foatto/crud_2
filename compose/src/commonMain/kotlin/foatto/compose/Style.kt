@@ -25,14 +25,16 @@ var styleTableRowDarkIcon: Boolean = true
 var styleOtherDarkIcon: Boolean = true
 
 //--- по умолчанию - иконки размером 36dp (пока только на toolbar'ах, в остальных местах 48)
-var styleToolbarIconSize: Int = 36
-var styleTableRowIconSize: Int = 36 //!!! хорошо бы попробовать 24, но надо загрузить все 24-размерные варианты иконок
-var styleOtherIconSize: Int = 48
+const val styleToolbarIconSize: Int = 36
+const val styleTableRowIconSize: Int = 36 //!!! хорошо бы попробовать 24, но надо загрузить все 24-размерные варианты иконок
+const val styleOtherIconSize: Int = 48
+const val styleOtherIconSizeNarrow: Int = 36
 
 //--- суффикс наименовани типовой иконки material design
 fun getStyleToolbarIconNameSuffix(): String = (if (styleToolbarDarkIcon) "black" else "white") + "_" + styleToolbarIconSize + "dp"
 fun getStyleTableRowIconNameSuffix(): String = (if (styleTableRowDarkIcon) "black" else "white") + "_" + styleTableRowIconSize + "dp"
 fun getStyleOtherIconNameSuffix(): String = (if (styleOtherDarkIcon) "black" else "white") + "_" + styleOtherIconSize + "dp"
+fun getStyleOtherIconNameSuffixNarrow(): String = (if (styleOtherDarkIcon) "black" else "white") + "_" + styleOtherIconSizeNarrow + "dp"
 
 //--- different gray tones by default
 private const val MAIN_BACK_LIGHTNESS_0 = 0.97f
@@ -96,6 +98,8 @@ var colorTableRowBack1: Color = colorMainBack1
 var colorTableCurrentRow: Color = colorMainBack4    // по дефолту - максимальмо мрачный цвет, чтобы сразу переделать захотелось
 val colorTableSelectorBack: Color = colorMainBack0  //.copy(alpha = 0.9f)
 var colorTablePageButton: ButtonColors? = null
+
+var colorFormNarrowLabelCellBack: Color = colorMainBack1
 
 @OptIn(ExperimentalMaterial3Api::class)
 var colorDatePicker: DatePickerColors? = null

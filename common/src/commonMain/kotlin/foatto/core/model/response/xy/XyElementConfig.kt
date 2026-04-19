@@ -9,10 +9,10 @@ class XyElementConfig(
     val layer: Int,
     val scaleMin: Int,
     val scaleMax: Int,
-    val descrForAction: String,
-    val isRotatable: Boolean,
-    val isMoveable: Boolean,
+//    val descrForAction: String,
+//    val isRotatable: Boolean,
+//    val isMoveable: Boolean,
 //    val isCopyable: Boolean,
-    val isEditablePoint: Boolean
+//    val isEditablePoint: Boolean
 //    val isEditableText: Boolean,
 )

@@ -118,6 +118,7 @@ internal fun MapToolBar(
                 }
             }
         }
+/*
         ToolBarBlock {
             if (isAddElementButtonVisible) {
                 if (alAddEC.isNotEmpty()) {
@@ -139,6 +140,7 @@ internal fun MapToolBar(
                 }
             }
         }
+*/
         ToolBarBlock {
             ToolBarIconButton(
                 isVisible = isEditPointButtonVisible && refreshInterval == 0,

@@ -98,10 +98,10 @@ class MapTraceService(
                 layer = 11,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
-                descrForAction = "",
-                isRotatable = false,
-                isMoveable = false,
-                isEditablePoint = false
+//                descrForAction = "",
+//                isRotatable = false,
+//                isMoveable = false,
+//                isEditablePoint = false
             )
 
             this[TYPE_OBJECT_PARKING] = XyElementConfig(
@@ -110,10 +110,10 @@ class MapTraceService(
                 layer = 12,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
-                descrForAction = "",
-                isRotatable = false,
-                isMoveable = false,
-                isEditablePoint = false
+//                descrForAction = "",
+//                isRotatable = false,
+//                isMoveable = false,
+//                isEditablePoint = false
             )
 
             this[TYPE_OBJECT_OVER_SPEED] = XyElementConfig(
@@ -122,10 +122,10 @@ class MapTraceService(
                 layer = 13,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
-                descrForAction = "",
-                isRotatable = false,
-                isMoveable = false,
-                isEditablePoint = false
+//                descrForAction = "",
+//                isRotatable = false,
+//                isMoveable = false,
+//                isEditablePoint = false
             )
 
             this[TYPE_OBJECT_TRACE_INFO] = XyElementConfig(
@@ -134,10 +134,10 @@ class MapTraceService(
                 layer = 14,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
-                descrForAction = "",
-                isRotatable = false,
-                isMoveable = false,
-                isEditablePoint = false
+//                descrForAction = "",
+//                isRotatable = false,
+//                isMoveable = false,
+//                isEditablePoint = false
             )
 
             this[TYPE_OBJECT_INFO] = XyElementConfig(
@@ -146,10 +146,10 @@ class MapTraceService(
                 layer = 15,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
-                descrForAction = "",
-                isRotatable = false,
-                isMoveable = false,
-                isEditablePoint = false
+//                descrForAction = "",
+//                isRotatable = false,
+//                isMoveable = false,
+//                isEditablePoint = false
             )
 
             //--- прикладные топо-объекты, добавляемые пользователем вручную на карте
@@ -160,10 +160,10 @@ class MapTraceService(
                 layer = 10,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
-                descrForAction = getLocalizedMMSMessage(LocalizedMMSMessages.GEOFENCE, userConfig.lang),
-                isRotatable = false,
-                isMoveable = true,
-                isEditablePoint = true
+//                descrForAction = getLocalizedMMSMessage(LocalizedMMSMessages.GEOFENCE, userConfig.lang),
+//                isRotatable = false,
+//                isMoveable = true,
+//                isEditablePoint = true
             )
         }
 
@@ -214,9 +214,6 @@ class MapTraceService(
                     ),
                     rows = rows,
                 ),
-//                timeRangeType = action.timeRangeType,
-//                begTime = action.begTime ?: 0,
-//                endTime = action.endTime ?: 0,
             )
         )
     }
@@ -249,12 +246,10 @@ class MapTraceService(
     }
 
     private fun getCoords(mapActionRequest: MapActionRequest): MapActionResponse {
-        val appAction = mapActionRequest.action
-
         var minPoint: XyPoint? = null
         var maxPoint: XyPoint? = null
 
-        val (begTime, endTime) = getBegEndTime(appAction)
+        val (begTime, endTime) = getBegEndTime(mapActionRequest.action)
 
         getGeoSensorEntity(mapActionRequest.action, begTime, endTime)?.let { sensorEntity ->
             SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
@@ -352,7 +347,6 @@ class MapTraceService(
         getObjectEntity(action)?.let { objectEntity ->
             sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()
         }
-
 
     private fun getBegEndTime(action: AppAction): Pair<Int, Int> {
         val endTime = if (action.timeRangeType == 0) {

@@ -35,11 +35,11 @@ data class AppAction(
     val url: String? = null,
     val isAutoClose: Boolean = false,
 
+    val question: String? = null,
+
     val timeRangeType: Int = 0,
     val begTime: Int? = null,
     val endTime: Int? = null,
-
-    val question: String? = null,
 
     val fromUserId: Int? = null,
     val toUserId: Int? = null,

@@ -12,10 +12,10 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         layer = 0,
         scaleMin = minScale,
         scaleMax = maxScale,
-        descrForAction = "",
-        isRotatable = false,
-        isMoveable = true,
-        isEditablePoint = false
+//        descrForAction = "",
+//        isRotatable = false,
+//        isMoveable = true,
+//        isEditablePoint = false
     )
 
     hmElementConfig[XyElementType.ICON.name] = XyElementConfig(
@@ -24,10 +24,10 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
-        descrForAction = "",
-        isRotatable = true,
-        isMoveable = true,
-        isEditablePoint = false
+//        descrForAction = "",
+//        isRotatable = true,
+//        isMoveable = true,
+//        isEditablePoint = false
     )
 
     hmElementConfig[XyElementType.MARKER.name] = XyElementConfig(
@@ -36,10 +36,10 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
-        descrForAction = "",
-        isRotatable = true,
-        isMoveable = true,
-        isEditablePoint = false
+//        descrForAction = "",
+//        isRotatable = true,
+//        isMoveable = true,
+//        isEditablePoint = false
     )
 
     hmElementConfig[XyElementType.POLY.name] = XyElementConfig(
@@ -48,10 +48,10 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
-        descrForAction = "",
-        isRotatable = false,
-        isMoveable = true,
-        isEditablePoint = true
+//        descrForAction = "",
+//        isRotatable = false,
+//        isMoveable = true,
+//        isEditablePoint = true
     )
 
     hmElementConfig[XyElementType.TEXT.name] = XyElementConfig(
@@ -60,10 +60,10 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
-        descrForAction = "",
-        isRotatable = true,
-        isMoveable = true,
-        isEditablePoint = false
+//        descrForAction = "",
+//        isRotatable = true,
+//        isMoveable = true,
+//        isEditablePoint = false
     )
 
     hmElementConfig[XyElementType.TRACE.name] = XyElementConfig(
@@ -72,10 +72,10 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
-        descrForAction = "",
-        isRotatable = false,
-        isMoveable = true,
-        isEditablePoint = true
+//        descrForAction = "",
+//        isRotatable = false,
+//        isMoveable = true,
+//        isEditablePoint = true
     )
 
     return hmElementConfig

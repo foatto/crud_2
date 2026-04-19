@@ -80,13 +80,13 @@ internal fun MapToolBar(
                 ) {
                     setMode(MapWorkMode.PAN)
                 }
-                ToolBarIconButton(
-                    isEnabled = isZoomButtonEnabled && refreshInterval == 0,
-                    name = "/images/ic_search_${getStyleToolbarIconNameSuffix()}.png",
-                ) {
-                    setMode(MapWorkMode.ZOOM_BOX)
-                }
                 if (isWideScreen) {
+                    ToolBarIconButton(
+                        isEnabled = isZoomButtonEnabled && refreshInterval == 0,
+                        name = "/images/ic_search_${getStyleToolbarIconNameSuffix()}.png",
+                    ) {
+                        setMode(MapWorkMode.ZOOM_BOX)
+                    }
                     ToolBarIconButton(
                         isEnabled = isDistancerButtonEnabled && refreshInterval == 0,
                         name = "/images/ic_linear_scale_${getStyleToolbarIconNameSuffix()}.png",

@@ -10,7 +10,7 @@ import foatto.core.model.response.HeaderData
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.SchemeActionResponse
 import foatto.core.model.response.TitleData
-import foatto.core.model.response.xy.XyElementClientType
+import foatto.core.model.response.xy.XyElementType
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.model.response.xy.scheme.SchemeResponse
@@ -176,7 +176,7 @@ abstract class AbstractSchemeIndicatorStateService(
         val isErrorStatus = errorTime != null && errorTime > (sensorTime ?: 0)
         XyElement(elementType, -getRandomInt(), sensorEntity.id).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x, y))
+            points = listOf(XyPoint(x, y))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
             text = sensorEntity.descr ?: "-"
@@ -222,7 +222,7 @@ abstract class AbstractSchemeIndicatorStateService(
         lastDataTime?.let {
             XyElement(elementType, -getRandomInt(), sensorId).apply {
                 isReadOnly = true
-                alPoint = listOf(XyPoint(x, y))
+                points = listOf(XyPoint(x, y))
                 anchorX = XyElement.Anchor.CC
                 anchorY = XyElement.Anchor.LT
                 text = getDateTimeDMYHMSString(userConfig.timeOffset, lastDataTime)
@@ -251,7 +251,7 @@ abstract class AbstractSchemeIndicatorStateService(
 
     protected fun getArcConfig(name: String, layer: Int) = XyElementConfig(
         name = name,
-        clientType = XyElementClientType.ARC,
+        type = XyElementType.ARC,
         layer = layer,
         scaleMin = MIN_SCALE,
         scaleMax = MAX_SCALE,
@@ -263,7 +263,7 @@ abstract class AbstractSchemeIndicatorStateService(
 
     protected fun getIconConfig(name: String, layer: Int) = XyElementConfig(
         name = name,
-        clientType = XyElementClientType.ICON,
+        type = XyElementType.ICON,
         layer = layer,
         scaleMin = MIN_SCALE,
         scaleMax = MAX_SCALE,
@@ -275,7 +275,7 @@ abstract class AbstractSchemeIndicatorStateService(
 
     protected fun getLineConfig(name: String, layer: Int) = XyElementConfig(
         name = name,
-        clientType = XyElementClientType.POLY,
+        type = XyElementType.POLY,
         layer = layer,
         scaleMin = MIN_SCALE,
         scaleMax = MAX_SCALE,
@@ -287,7 +287,7 @@ abstract class AbstractSchemeIndicatorStateService(
 
     protected fun getTextConfig(name: String, layer: Int) = XyElementConfig(
         name = name,
-        clientType = XyElementClientType.TEXT,
+        type = XyElementType.TEXT,
         layer = layer,
         scaleMin = MIN_SCALE,
         scaleMax = MAX_SCALE,

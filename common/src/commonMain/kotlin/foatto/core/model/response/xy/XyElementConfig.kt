@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class XyElementConfig(
     val name: String,
-    val clientType: XyElementClientType,
+    val type: XyElementType,
     val layer: Int,
     val scaleMin: Int,
     val scaleMax: Int,

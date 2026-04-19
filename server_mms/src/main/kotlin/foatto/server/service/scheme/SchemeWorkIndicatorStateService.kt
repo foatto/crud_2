@@ -100,7 +100,7 @@ class SchemeWorkIndicatorStateService(
 
         XyElement(TYPE_SCHEME_WI_VALUE, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, y0))
+            points = listOf(XyPoint(x0, y0))
             radius = 2 * GRID_STEP
             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
             startAngle = 180
@@ -148,7 +148,7 @@ class SchemeWorkIndicatorStateService(
         }
         XyElement(TYPE_SCHEME_WI_ICON, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, y0))
+            points = listOf(XyPoint(x0, y0))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.CC
             imageName = "/images/icons8-engine-$iconSize.png"

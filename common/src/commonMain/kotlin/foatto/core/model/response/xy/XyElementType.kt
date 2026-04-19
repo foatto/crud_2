@@ -3,7 +3,7 @@ package foatto.core.model.response.xy
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class XyElementClientType {
+enum class XyElementType {
     ARC,
     BITMAP,
     ICON,

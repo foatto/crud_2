@@ -1,6 +1,6 @@
 package foatto.compose.control.model.xy
 
-enum class XyElementDataType {
+enum class XyDrawType {
     ARC,
     CIRCLE,
     ELLIPSE,

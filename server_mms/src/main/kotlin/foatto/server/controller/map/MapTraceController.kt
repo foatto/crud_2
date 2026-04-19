@@ -1,19 +1,19 @@
-package foatto.server.controller
+package foatto.server.controller.map
 
 import foatto.core.model.request.AppRequest
 import foatto.core.model.request.MapActionRequest
 import foatto.core.model.response.AppResponse
 import foatto.core.model.response.MapActionResponse
 import foatto.core_mms.ApiUrlMMS
-import foatto.server.service.MapService
+import foatto.server.service.map.MapTraceService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class MapController(
-    private val mapService: MapService,
+class MapTraceController(
+    private val mapTraceService: MapTraceService,
 ) {
 
     @PostMapping(ApiUrlMMS.MAP_TRACE)
@@ -21,7 +21,7 @@ class MapController(
     fun map(
         @RequestBody
         appRequest: AppRequest
-    ): AppResponse = mapService.map(
+    ): AppResponse = mapTraceService.map(
         sessionId = appRequest.sessionId,
         action = appRequest.action,
     )
@@ -31,7 +31,7 @@ class MapController(
     fun mapAction(
         @RequestBody
         mapActionRequest: MapActionRequest
-    ): MapActionResponse = mapService.mapAction(
+    ): MapActionResponse = mapTraceService.mapAction(
         mapActionRequest = mapActionRequest,
     )
 

@@ -192,7 +192,7 @@ class SchemeAnalogueIndicatorStateService(
                     limitArcs.forEach { (startValue, endValue, valueState) ->
                         XyElement(TYPE_SCHEME_AI_ARC_LIMIT, -getRandomInt(), sensorId).apply {
                             isReadOnly = true
-                            alPoint = listOf(XyPoint(x0, y0))
+                            points = listOf(XyPoint(x0, y0))
                             radius = 4 * GRID_STEP
                             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
                             startAngle = (180 + (startValue - minView) / (maxView - minView) * 180).toInt()
@@ -216,7 +216,7 @@ class SchemeAnalogueIndicatorStateService(
 
         XyElement(TYPE_SCHEME_AI_ARC_BASE, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, y0))
+            points = listOf(XyPoint(x0, y0))
             radius = 4 * GRID_STEP
             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
             startAngle = 180
@@ -269,7 +269,7 @@ class SchemeAnalogueIndicatorStateService(
 
                         XyElement(TYPE_SCHEME_AI_ARC_VALUE, -getRandomInt(), sensorId).apply {
                             isReadOnly = true
-                            alPoint = listOf(XyPoint(x0 + dxt, y0 + dyt))
+                            points = listOf(XyPoint(x0 + dxt, y0 + dyt))
                             anchorX = if (value < avgValue) {
                                 XyElement.Anchor.RB
                             } else if (value > avgValue) {
@@ -297,7 +297,7 @@ class SchemeAnalogueIndicatorStateService(
                         }
                         XyElement(TYPE_SCHEME_AI_ARC_NOTCH, -getRandomInt(), sensorId).apply {
                             isReadOnly = true
-                            alPoint = listOf(
+                            points = listOf(
                                 XyPoint(x0 + dx1, y0 + dy1),
                                 XyPoint(x0 + dx2, y0 + dy2),
                             )
@@ -322,7 +322,7 @@ class SchemeAnalogueIndicatorStateService(
             }
             XyElement(TYPE_SCHEME_AI_MULTIPLICATOR, -getRandomInt(), sensorId).apply {
                 isReadOnly = true
-                alPoint = listOf(XyPoint(x0, y0 - GRID_STEP))
+                points = listOf(XyPoint(x0, y0 - GRID_STEP))
                 anchorX = XyElement.Anchor.CC
                 anchorY = XyElement.Anchor.RB
                 text = "x " + getSplittedDouble(valueMultiplicator, prec)
@@ -353,7 +353,7 @@ class SchemeAnalogueIndicatorStateService(
                     if (maxView - minView > 0) {
                         XyElement(TYPE_SCHEME_AI_ARROW_BASE, -getRandomInt(), sensorId).apply {
                             isReadOnly = true
-                            alPoint = listOf(XyPoint(x0, y0))
+                            points = listOf(XyPoint(x0, y0))
                             radius = GRID_STEP / 8
                             // отсчёт углов в compose - в обратную сторону (по часовой стрелке)
                             startAngle = 180
@@ -373,7 +373,7 @@ class SchemeAnalogueIndicatorStateService(
                         val dy = -sin(radian) * (GRID_STEP * 4 - GRID_STEP / 3)
                         XyElement(TYPE_SCHEME_AI_ARROW, -getRandomInt(), sensorId).apply {
                             isReadOnly = true
-                            alPoint = listOf(
+                            points = listOf(
                                 XyPoint(x0, y0),
                                 XyPoint(x0 + dx, y0 + dy),
                             )
@@ -399,7 +399,7 @@ class SchemeAnalogueIndicatorStateService(
 
         XyElement(TYPE_SCHEME_AI_CUR_VALUE, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, y0 + GRID_STEP / 4))
+            points = listOf(XyPoint(x0, y0 + GRID_STEP / 4))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.LT
             text = if (isErrorStatus) {

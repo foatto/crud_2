@@ -72,7 +72,7 @@ abstract class MMSService(
             childModule = childModule,
             parentModule = parentModule,
             parentId = parentId,
-            alPopupData = alPopupData,
+            popupDatas = alPopupData,
         )
     }
 
@@ -94,7 +94,7 @@ abstract class MMSService(
             parentId = parentId,
             begTime = begTime,
             endTime = endTime,
-            alPopupData = alPopupData,
+            popupDatas = alPopupData,
         )
     }
 
@@ -112,7 +112,7 @@ abstract class MMSService(
             childModule = childModule,
             parentModule = parentModule,
             parentId = parentId,
-            alPopupData = alPopupData,
+            popupDatas = alPopupData,
         )
     }
 
@@ -134,7 +134,7 @@ abstract class MMSService(
             parentId = parentId,
             begTime = begTime,
             endTime = endTime,
-            alPopupData = alPopupData,
+            popupDatas = alPopupData,
         )
     }
 
@@ -145,7 +145,7 @@ abstract class MMSService(
         parentId: Int,
         begTime: Int,
         endTime: Int,
-        alPopupData: MutableList<TablePopup>
+        popupDatas: MutableList<TablePopup>
     ) {
         getTablePopupData(
             userConfig = userConfig,
@@ -156,7 +156,7 @@ abstract class MMSService(
             parentId = parentId,
             begTime = begTime,
             endTime = endTime,
-            alPopupData = alPopupData,
+            popupDatas = popupDatas,
         )
     }
 
@@ -169,10 +169,10 @@ abstract class MMSService(
         parentId: Int? = null,
         begTime: Int? = null,
         endTime: Int? = null,
-        alPopupData: MutableList<TablePopup>,
+        popupDatas: MutableList<TablePopup>,
     ) {
         if (checkAccessPermission(childModule, userConfig.roles)) {
-            alPopupData += TablePopup(
+            popupDatas += TablePopup(
                 group = group,
                 action = AppAction(
                     type = actionType,

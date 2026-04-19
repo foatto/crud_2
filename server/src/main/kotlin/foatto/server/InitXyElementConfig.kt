@@ -1,14 +1,14 @@
 package foatto.server
 
-import foatto.core.model.response.xy.XyElementClientType
+import foatto.core.model.response.xy.XyElementType
 import foatto.core.model.response.xy.XyElementConfig
 
 fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<String, XyElementConfig> {
     val hmElementConfig = mutableMapOf<String, XyElementConfig>()
 
-    hmElementConfig[XyElementClientType.BITMAP.name] = XyElementConfig(
-        name = XyElementClientType.BITMAP.name,
-        clientType = XyElementClientType.BITMAP,
+    hmElementConfig[XyElementType.BITMAP.name] = XyElementConfig(
+        name = XyElementType.BITMAP.name,
+        type = XyElementType.BITMAP,
         layer = 0,
         scaleMin = minScale,
         scaleMax = maxScale,
@@ -18,9 +18,9 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         isEditablePoint = false
     )
 
-    hmElementConfig[XyElementClientType.ICON.name] = XyElementConfig(
-        name = XyElementClientType.ICON.name,
-        clientType = XyElementClientType.ICON,
+    hmElementConfig[XyElementType.ICON.name] = XyElementConfig(
+        name = XyElementType.ICON.name,
+        type = XyElementType.ICON,
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
@@ -30,9 +30,9 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         isEditablePoint = false
     )
 
-    hmElementConfig[XyElementClientType.MARKER.name] = XyElementConfig(
-        name = XyElementClientType.MARKER.name,
-        clientType = XyElementClientType.MARKER,
+    hmElementConfig[XyElementType.MARKER.name] = XyElementConfig(
+        name = XyElementType.MARKER.name,
+        type = XyElementType.MARKER,
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
@@ -42,9 +42,9 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         isEditablePoint = false
     )
 
-    hmElementConfig[XyElementClientType.POLY.name] = XyElementConfig(
-        name = XyElementClientType.POLY.name,
-        clientType = XyElementClientType.POLY,
+    hmElementConfig[XyElementType.POLY.name] = XyElementConfig(
+        name = XyElementType.POLY.name,
+        type = XyElementType.POLY,
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
@@ -54,9 +54,9 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         isEditablePoint = true
     )
 
-    hmElementConfig[XyElementClientType.TEXT.name] = XyElementConfig(
-        name = XyElementClientType.TEXT.name,
-        clientType = XyElementClientType.TEXT,
+    hmElementConfig[XyElementType.TEXT.name] = XyElementConfig(
+        name = XyElementType.TEXT.name,
+        type = XyElementType.TEXT,
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,
@@ -66,9 +66,9 @@ fun initXyElementConfig(level: Int, minScale: Int, maxScale: Int): MutableMap<St
         isEditablePoint = false
     )
 
-    hmElementConfig[XyElementClientType.TRACE.name] = XyElementConfig(
-        name = XyElementClientType.TRACE.name,
-        clientType = XyElementClientType.TRACE,
+    hmElementConfig[XyElementType.TRACE.name] = XyElementConfig(
+        name = XyElementType.TRACE.name,
+        type = XyElementType.TRACE,
         layer = level,
         scaleMin = minScale,
         scaleMax = maxScale,

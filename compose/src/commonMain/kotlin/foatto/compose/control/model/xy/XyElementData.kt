@@ -9,7 +9,7 @@ import foatto.core.model.response.xy.geom.XyPolygon
 import foatto.core.model.response.xy.geom.XyRect
 
 class XyElementData(
-    val type: XyElementDataType,
+    val type: XyDrawType,
     val elementId: Int,
     val objectId: Int,
 
@@ -23,7 +23,7 @@ class XyElementData(
     var x2: Float = 0.0f,
     var y2: Float = 0.0f,
 
-    var alPoints: MutableList<XyPoint> = mutableListOf(),
+    var points: MutableList<XyPoint> = mutableListOf(),
     val isClosed: Boolean = false,
 
     val width: Float = 0.0f,
@@ -82,10 +82,10 @@ class XyElementData(
 ) {
 
     fun getPath(): Path = Path().apply {
-        val p0 = alPoints[0]
+        val p0 = points[0]
         moveTo(p0.x.toFloat(), p0.y.toFloat())
-        for (i in 1..<alPoints.size) {
-            val p = alPoints[i]
+        for (i in 1..<points.size) {
+            val p = points[i]
             lineTo(p.x.toFloat(), p.y.toFloat())
         }
         if (isClosed) {
@@ -136,33 +136,33 @@ class XyElementData(
 
     fun isIntersects(rect: XyRect): Boolean {
         when (type) {
-            XyElementDataType.ARC -> {  //!!! временно: по упрощённой формуле, считая дугу как полный круг
+            XyDrawType.ARC -> {  //!!! временно: по упрощённой формуле, считая дугу как полный круг
                 return rect.isIntersects(XyRect(x - radius, y - radius, radius * 2, radius * 2))
             }
 
-            XyElementDataType.CIRCLE -> {
+            XyDrawType.CIRCLE -> {
                 return rect.isIntersects(XyRect(x - radius, y - radius, radius * 2, radius * 2))
             }
 
-            XyElementDataType.ELLIPSE -> {
+            XyDrawType.ELLIPSE -> {
                 return rect.isIntersects(XyRect(x - rx, y - ry, rx * 2, ry * 2))
             }
 
-            XyElementDataType.ICON,
-            XyElementDataType.IMAGE,
-            XyElementDataType.RECT -> {
+            XyDrawType.ICON,
+            XyDrawType.IMAGE,
+            XyDrawType.RECT -> {
                 return rect.isIntersects(XyRect(x, y, width, height))
             }
 
-            XyElementDataType.LINE -> {
+            XyDrawType.LINE -> {
                 return rect.isIntersects(XyLine(x1.toInt(), y1.toInt(), x2.toInt(), y2.toInt()))
             }
 
-            XyElementDataType.POLY -> {
-                if (alPoints.size >= 3) {
+            XyDrawType.POLY -> {
+                if (points.size >= 3) {
                     //--- заполненный полигон полностью снаружи прямоугольника
                     if (isClosed) {
-                        val poly = XyPolygon(alPoints)
+                        val poly = XyPolygon(points)
                         if (poly.isContains(rect.x, rect.y)) {
                             return true
                         }
@@ -177,22 +177,22 @@ class XyElementData(
                         }
                     }
                     //--- фигура полностью внутри прямоугольника
-                    alPoints.forEach {
+                    points.forEach {
                         if (rect.isContains(it)) {
                             return true
                         }
                     }
                     //--- фигура пересекается с краями прямоугольника
-                    for (i in 0..(alPoints.size - 2)) {
-                        val p1 = alPoints[i]
-                        val p2 = alPoints[i + 1]
+                    for (i in 0..(points.size - 2)) {
+                        val p1 = points[i]
+                        val p2 = points[i + 1]
                         if (rect.isIntersects(XyLine(p1, p2))) {
                             return true
                         }
                     }
                     if (isClosed) {
-                        val p1 = alPoints.first()
-                        val p2 = alPoints.last()
+                        val p1 = points.first()
+                        val p2 = points.last()
                         if (rect.isIntersects(XyLine(p1, p2))) {
                             return true
                         }
@@ -201,7 +201,7 @@ class XyElementData(
                 return false
             }
 
-            XyElementDataType.TEXT -> {
+            XyDrawType.TEXT -> {
                 return false
             }
         }
@@ -209,9 +209,9 @@ class XyElementData(
 
     fun setLastPoint(mouseX: Int, mouseY: Int) {
         when (type) {
-            XyElementDataType.POLY -> {
-                if (alPoints.isNotEmpty()) {
-                    alPoints.last().set(mouseX, mouseY)
+            XyDrawType.POLY -> {
+                if (points.isNotEmpty()) {
+                    points.last().set(mouseX, mouseY)
                 }
             }
 
@@ -222,14 +222,14 @@ class XyElementData(
     //--- применяется только в ADD_POINT
     fun addPoint(mouseX: Int, mouseY: Int): AddPointStatus {
         when (type) {
-            XyElementDataType.POLY -> {
+            XyDrawType.POLY -> {
                 //--- при первом клике при добавлении полигона добавляем сразу две точки - первая настоящая, вторая/последняя - служебная
-                if (alPoints!!.isEmpty()) {
-                    alPoints.add(XyPoint(mouseX, mouseY))
+                if (points!!.isEmpty()) {
+                    points.add(XyPoint(mouseX, mouseY))
                 }
-                alPoints.add(XyPoint(mouseX, mouseY))
+                points.add(XyPoint(mouseX, mouseY))
                 //--- последняя точка служебная, в полигон не войдёт
-                return if (alPoints.size > 3) {
+                return if (points.size > 3) {
                     AddPointStatus.COMPLETEABLE
                 } else {
                     AddPointStatus.NOT_COMPLETEABLE
@@ -244,8 +244,8 @@ class XyElementData(
     //--- применяется только в EDIT_POINT
     fun insertPoint(index: Int, mouseX: Int, mouseY: Int) {
         when (type) {
-            XyElementDataType.POLY -> {
-                alPoints.add(index, XyPoint(mouseX, mouseY))
+            XyDrawType.POLY -> {
+                points.add(index, XyPoint(mouseX, mouseY))
             }
 
             else -> {}
@@ -255,8 +255,8 @@ class XyElementData(
     //--- применяется только в EDIT_POINT
     fun setPoint(index: Int, mouseX: Int, mouseY: Int) {
         when (type) {
-            XyElementDataType.POLY -> {
-                alPoints[index] = XyPoint(mouseX, mouseY)
+            XyDrawType.POLY -> {
+                points[index] = XyPoint(mouseX, mouseY)
             }
 
             else -> {}
@@ -266,8 +266,8 @@ class XyElementData(
     //--- применяется только в EDIT_POINT
     fun removePoint(index: Int) {
         when (type) {
-            XyElementDataType.POLY -> {
-                alPoints.removeAt(index)
+            XyDrawType.POLY -> {
+                points.removeAt(index)
             }
 
             else -> {}
@@ -277,8 +277,8 @@ class XyElementData(
     //--- применяется только в Move
     fun moveRel(dx: Int, dy: Int) {
         when (type) {
-            XyElementDataType.POLY -> {
-                alPoints.forEach { p ->
+            XyDrawType.POLY -> {
+                points.forEach { p ->
                     p.x += dx
                     p.y += dy
                 }

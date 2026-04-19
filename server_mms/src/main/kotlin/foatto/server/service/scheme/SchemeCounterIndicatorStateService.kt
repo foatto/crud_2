@@ -104,7 +104,7 @@ class SchemeCounterIndicatorStateService(
 
         XyElement(TYPE_SCHEME_CI_CUR_VALUE, -getRandomInt(), sensorId).apply {
             isReadOnly = true
-            alPoint = listOf(XyPoint(x0, 5 * GRID_STEP))
+            points = listOf(XyPoint(x0, 5 * GRID_STEP))
             anchorX = XyElement.Anchor.CC
             anchorY = XyElement.Anchor.RB
             text = if (isErrorStatus) {

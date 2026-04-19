@@ -25,7 +25,7 @@ class XyElement(
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    var alPoint = listOf<XyPoint>()
+    var points = listOf<XyPoint>()
     var isClosed = false
 
     var lineWidth: Int? = null

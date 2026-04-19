@@ -31,10 +31,10 @@ import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.control.composable.onPointerEvents
 import foatto.compose.control.model.xy.XyElementData
-import foatto.compose.control.model.xy.XyElementDataType
+import foatto.compose.control.model.xy.XyDrawType
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.model.xy.XyViewCoord
-import foatto.core.model.response.xy.XyElementClientType
+import foatto.core.model.response.xy.XyElementType
 import foatto.core.model.response.xy.XyElementConfig
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.model.response.xy.geom.XyRect
@@ -114,7 +114,7 @@ abstract class AbstractXyControl(
         ) {
             for (alElement in xyElements) {
                 for (element in alElement) {
-                    if (element.type == XyElementDataType.IMAGE) {
+                    if (element.type == XyDrawType.IMAGE) {
                         KamelImage(
                             modifier = Modifier
                                 .size(
@@ -142,7 +142,7 @@ abstract class AbstractXyControl(
                 for (alElement in xyElements) {
                     for (element in alElement) {
                         when (element.type) {
-                            XyElementDataType.ARC -> {
+                            XyDrawType.ARC -> {
                                 element.fillColor?.let {
                                     drawArc(
                                         topLeft = Offset(element.x - element.radius, element.y - element.radius),
@@ -169,7 +169,7 @@ abstract class AbstractXyControl(
                                 }
                             }
 
-                            XyElementDataType.CIRCLE -> {
+                            XyDrawType.CIRCLE -> {
                                 drawCircleOnCanvas(
                                     x = element.x,
                                     y = element.y,
@@ -188,7 +188,7 @@ abstract class AbstractXyControl(
 //                                    }
                             }
 
-                            XyElementDataType.ELLIPSE -> {
+                            XyDrawType.ELLIPSE -> {
                                 element.fillColor?.let {
                                     drawOval(
                                         topLeft = Offset(element.x - element.rx, element.y - element.ry),
@@ -215,7 +215,7 @@ abstract class AbstractXyControl(
 //                                        onXyMouseOut()
 //                                    }
 
-                            XyElementDataType.ICON, XyElementDataType.IMAGE -> {
+                            XyDrawType.ICON, XyDrawType.IMAGE -> {
                                 //--- Сделано через KamelImage в нижележащем слое.
                                 //--- Compose-resource пока не готов нормально грузить карты со внешнего урла.
                                 //element.imageBitmap.value?.let { imageBitmap ->
@@ -227,7 +227,7 @@ abstract class AbstractXyControl(
                                 //}
                             }
 
-                            XyElementDataType.LINE -> {
+                            XyDrawType.LINE -> {
                                 drawLine(
                                     start = Offset(element.x1, element.y1),
                                     end = Offset(element.x2, element.y2),
@@ -250,7 +250,7 @@ abstract class AbstractXyControl(
 //                                    }
                             }
 
-                            XyElementDataType.POLY -> {
+                            XyDrawType.POLY -> {
                                 drawPathOnCanvas(
                                     path = element.getPath(),
                                     fillColor = element.fillColor,
@@ -271,7 +271,7 @@ abstract class AbstractXyControl(
 //                                    }
                             }
 
-                            XyElementDataType.RECT -> {
+                            XyDrawType.RECT -> {
                                 drawRectOnCanvas(
                                     x = element.x,
                                     y = element.y,
@@ -291,7 +291,7 @@ abstract class AbstractXyControl(
 //                                    }
                             }
 
-                            XyElementDataType.TEXT -> {
+                            XyDrawType.TEXT -> {
                                 if (element.isVisible) {
                                     drawTextOnCanvas(
                                         scaleKoef = root.scaleKoef,
@@ -346,7 +346,7 @@ abstract class AbstractXyControl(
 
             for (alElement in xyElements) {
                 for (element in alElement) {
-                    if (element.type == XyElementDataType.ICON) {
+                    if (element.type == XyDrawType.ICON) {
                         KamelImage(
                             modifier = Modifier
                                 .size(
@@ -558,13 +558,13 @@ abstract class AbstractXyControl(
         val drawColor = element.drawColor?.let { Color(it) }
         val fillColor = element.fillColor?.let { Color(it) }
 
-        when (elementConfig.clientType) {
-            XyElementClientType.ARC -> {
-                val p = element.alPoint.first()
+        when (elementConfig.type) {
+            XyElementType.ARC -> {
+                val p = element.points.first()
 
                 alLayer.add(
                     XyElementData(
-                        type = XyElementDataType.ARC,
+                        type = XyDrawType.ARC,
                         elementId = element.elementId,
                         objectId = element.objectId,
                         x = ((p.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef),
@@ -581,13 +581,13 @@ abstract class AbstractXyControl(
                 )
             }
 
-            XyElementClientType.BITMAP -> {
-                val p = element.alPoint.first()
+            XyElementType.BITMAP -> {
+                val p = element.points.first()
 
                 if (element.imageName.isBlank()) {
                     alLayer.add(
                         XyElementData(
-                            type = XyElementDataType.RECT,
+                            type = XyDrawType.RECT,
                             elementId = element.elementId,
                             objectId = element.objectId,
                             x = ((p.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef),
@@ -603,7 +603,7 @@ abstract class AbstractXyControl(
                 } else {
                     alLayer.add(
                         XyElementData(
-                            type = XyElementDataType.IMAGE,
+                            type = XyDrawType.IMAGE,
                             elementId = element.elementId,
                             objectId = element.objectId,
                             x = ((p.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef),
@@ -617,12 +617,12 @@ abstract class AbstractXyControl(
                 }
             }
 
-            XyElementClientType.ICON -> {
-                val p = element.alPoint.first()
+            XyElementType.ICON -> {
+                val p = element.points.first()
 
                 alLayer.add(
                     XyElementData(
-                        type = XyElementDataType.ICON,
+                        type = XyDrawType.ICON,
                         elementId = element.elementId,
                         objectId = element.objectId,
                         x = ((p.x - xyViewCoord.x1) / xyViewCoord.scale - element.calcAnchorXKoef() * element.imageWidth).toInt() * root.scaleKoef,
@@ -636,8 +636,8 @@ abstract class AbstractXyControl(
                 )
             }
 
-            XyElementClientType.MARKER -> {
-                val p = element.alPoint.first()
+            XyElementType.MARKER -> {
+                val p = element.points.first()
                 val x = (p.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef
                 val y = (p.y - xyViewCoord.y1) / xyViewCoord.scale * root.scaleKoef
                 val halfX = element.markerSize * root.scaleKoef / 2
@@ -648,10 +648,10 @@ abstract class AbstractXyControl(
                     XyElement.MarkerType.ARROW -> {
                         alLayer.add(
                             XyElementData(
-                                type = XyElementDataType.POLY,
+                                type = XyDrawType.POLY,
                                 elementId = element.elementId,
                                 objectId = element.objectId,
-                                alPoints = mutableListOf(
+                                points = mutableListOf(
                                     XyPoint(x - halfX / 2, y),
                                     XyPoint(x - halfX, y - halfY),
                                     XyPoint(x + halfX * 2, y),
@@ -672,7 +672,7 @@ abstract class AbstractXyControl(
                         if (element.markerSize2 == 0 || element.markerSize == element.markerSize2) {
                             alLayer.add(
                                 XyElementData(
-                                    type = XyElementDataType.CIRCLE,
+                                    type = XyDrawType.CIRCLE,
                                     elementId = element.elementId,
                                     objectId = element.objectId,
                                     x = x,
@@ -689,7 +689,7 @@ abstract class AbstractXyControl(
                         } else {
                             alLayer.add(
                                 XyElementData(
-                                    type = XyElementDataType.ELLIPSE,
+                                    type = XyDrawType.ELLIPSE,
                                     elementId = element.elementId,
                                     objectId = element.objectId,
                                     x = x,
@@ -734,10 +734,10 @@ abstract class AbstractXyControl(
                     XyElement.MarkerType.DIAMOND -> {
                         alLayer.add(
                             XyElementData(
-                                type = XyElementDataType.POLY,
+                                type = XyDrawType.POLY,
                                 elementId = element.elementId,
                                 objectId = element.objectId,
-                                alPoints = mutableListOf(
+                                points = mutableListOf(
                                     XyPoint(x, y - halfY),
                                     XyPoint(x + halfX, y),
                                     XyPoint(x, y + halfY),
@@ -782,7 +782,7 @@ abstract class AbstractXyControl(
                     XyElement.MarkerType.SQUARE -> {
                         alLayer.add(
                             XyElementData(
-                                type = XyElementDataType.RECT,
+                                type = XyDrawType.RECT,
                                 elementId = element.elementId,
                                 objectId = element.objectId,
                                 x = x - halfX,
@@ -802,10 +802,10 @@ abstract class AbstractXyControl(
                     XyElement.MarkerType.TRIANGLE -> {
                         alLayer.add(
                             XyElementData(
-                                type = XyElementDataType.POLY,
+                                type = XyDrawType.POLY,
                                 elementId = element.elementId,
                                 objectId = element.objectId,
-                                alPoints = mutableListOf(
+                                points = mutableListOf(
                                     XyPoint(x, y - halfY),
                                     XyPoint(x + halfX, y + halfY),
                                     XyPoint(x - halfX, y + halfY),
@@ -823,7 +823,7 @@ abstract class AbstractXyControl(
                 }
             }
 
-            XyElementClientType.POLY -> {
+            XyElementType.POLY -> {
 //!!!                val style: StyleScope.() -> Unit = if (!element.isReadOnly && element.isClosed) {
 //                    {
 //                        cursor("pointer")
@@ -833,10 +833,10 @@ abstract class AbstractXyControl(
 //                }
                 alLayer.add(
                     XyElementData(
-                        type = XyElementDataType.POLY,
+                        type = XyDrawType.POLY,
                         elementId = element.elementId,
                         objectId = element.objectId,
-                        alPoints = element.alPoint.map {
+                        points = element.points.map {
                             XyPoint(
                                 ((it.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef).roundToInt(),
                                 ((it.y - xyViewCoord.y1) / xyViewCoord.scale * root.scaleKoef).roundToInt(),
@@ -853,8 +853,8 @@ abstract class AbstractXyControl(
                 )
             }
 
-            XyElementClientType.TEXT -> {
-                val p = element.alPoint.first()
+            XyElementType.TEXT -> {
+                val p = element.points.first()
 
                 val x = (p.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef
                 val y = (p.y - xyViewCoord.y1) / xyViewCoord.scale * root.scaleKoef
@@ -902,7 +902,7 @@ abstract class AbstractXyControl(
 
                 alLayer.add(
                     XyElementData(
-                        type = XyElementDataType.TEXT,
+                        type = XyDrawType.TEXT,
                         elementId = element.elementId,
                         objectId = element.objectId,
                         x = x,
@@ -924,14 +924,14 @@ abstract class AbstractXyControl(
                 )
             }
 
-            XyElementClientType.TRACE -> {
-                for (i in 0 until element.alPoint.size - 1) {
-                    val p1 = element.alPoint[i]
-                    val p2 = element.alPoint[i + 1]
+            XyElementType.TRACE -> {
+                for (i in 0 until element.points.size - 1) {
+                    val p1 = element.points[i]
+                    val p2 = element.points[i + 1]
 
                     alLayer.add(
                         XyElementData(
-                            type = XyElementDataType.LINE,
+                            type = XyDrawType.LINE,
                             elementId = element.elementId,
                             objectId = element.objectId,
                             x1 = (p1.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef,
@@ -946,13 +946,13 @@ abstract class AbstractXyControl(
                 }
             }
 
-            XyElementClientType.ZONE -> {
+            XyElementType.ZONE -> {
                 alLayer.add(
                     XyElementData(
-                        type = XyElementDataType.POLY,
+                        type = XyDrawType.POLY,
                         elementId = element.elementId,
                         objectId = element.objectId,
-                        alPoints = element.alPoint.map {
+                        points = element.points.map {
                             XyPoint(
                                 ((it.x - xyViewCoord.x1) / xyViewCoord.scale * root.scaleKoef).roundToInt(),
                                 ((it.y - xyViewCoord.y1) / xyViewCoord.scale * root.scaleKoef).roundToInt(),

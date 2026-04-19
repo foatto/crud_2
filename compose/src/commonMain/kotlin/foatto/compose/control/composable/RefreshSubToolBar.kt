@@ -12,10 +12,10 @@ fun RefreshSubToolBar(
     ToolBarBlock {
         // 1s-interval shortly too for all devices
         // 5s-interval shortly too for mobile devices
-        if (!isWideScreen) {
-            listOf(0, /*1, 5,*/ 10, 30)
-        } else {
+        if (isWideScreen) {
             listOf(0, /*1,*/ 5, 10, 30)
+        } else {
+            listOf(0, /*1, 5,*/ 10, 30)
         }.forEach { interval ->
             ToolBarIconButton(
                 isEnabled = (interval == 0 || interval != refreshInterval),

@@ -74,33 +74,33 @@ abstract class AbstractDayWorkService(
         isFormEnabled: Boolean,
         formOpenAction: AppAction,
     ): List<TablePopup> {
-        val alPopupData = mutableListOf<TablePopup>()
+        val popupDatas = mutableListOf<TablePopup>()
 
         if (isFormEnabled) {
-            alPopupData += TablePopup(
+            popupDatas += TablePopup(
                 action = formOpenAction,
                 text = getLocalizedMessage(LocalizedMessages.OPEN, userConfig.lang),
                 inNewTab = false,
             )
         }
 
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
-        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_DAY_WORK, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_SUMMARY, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, popupDatas)
+        getTableReportPopupData(userConfig, AppModuleMMS.REPORT_DAY_WORK, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, popupDatas)
 
-        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
+        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_SCHEME_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, popupDatas)
 //        getTableDashboardPopupData(userConfig, AppModuleMMS.OBJECT_CHART_DASHBOARD, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
 
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ENERGO_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
-        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ALL_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_LIQUID_LEVEL, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, popupDatas)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ENERGO_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, popupDatas)
+        getTableChartPopupData(userConfig, AppModuleMMS.CHART_ALL_SENSORS, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, popupDatas)
 
-        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, alPopupData)
+        getTableMapPopupData(userConfig, AppModuleMMS.MAP_TRACE, AppModuleMMS.ALL_OBJECT, objectId, begTime, endTime, popupDatas)
 
-        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
-        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.ALL_OBJECT, objectId, alPopupData)
+        getTableTablePopupData(userConfig, AppModuleMMS.SENSOR, AppModuleMMS.ALL_OBJECT, objectId, popupDatas)
+        getTableTablePopupData(userConfig, AppModuleMMS.OBJECT_DATA, AppModuleMMS.ALL_OBJECT, objectId, popupDatas)
+        getTableTablePopupData(userConfig, AppModuleMMS.DEVICE, AppModuleMMS.ALL_OBJECT, objectId, popupDatas)
 
-        return alPopupData
+        return popupDatas
     }
 
     override fun getFormCells(

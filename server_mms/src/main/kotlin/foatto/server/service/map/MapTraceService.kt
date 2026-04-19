@@ -1,4 +1,4 @@
-package foatto.server.service
+package foatto.server.service.map
 
 import foatto.core.ActionType
 import foatto.core.i18n.getLocalizedMessage
@@ -13,22 +13,27 @@ import foatto.core.model.response.MapActionResponse
 import foatto.core.model.response.ResponseCode
 import foatto.core.model.response.TitleData
 import foatto.core.model.response.xy.XyBitmapType
-import foatto.core.model.response.xy.XyElementClientType
 import foatto.core.model.response.xy.XyElementConfig
+import foatto.core.model.response.xy.XyElementType
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.model.response.xy.map.MapResponse
 import foatto.core.util.getCurrentTimeInt
 import foatto.core.util.getRandomInt
+import foatto.core_mms.AppModuleMMS
 import foatto.core_mms.i18n.LocalizedMMSMessages
 import foatto.core_mms.i18n.getLocalizedMMSMessage
 import foatto.server.SpringApp
 import foatto.server.appModuleConfigs
 import foatto.server.checkAccessPermission
+import foatto.server.entity.ObjectEntity
+import foatto.server.entity.SensorEntity
 import foatto.server.initXyElementConfig
 import foatto.server.model.ServerUserConfig
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.ObjectRepository
 import foatto.server.repository.SensorRepository
+import foatto.server.service.ApplicationService
+import foatto.server.service.SensorService
 import jakarta.persistence.EntityManager
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -36,7 +41,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 @Service
-class MapService(
+class MapTraceService(
     private val entityManager: EntityManager,
     private val objectRepository: ObjectRepository,
     private val sensorRepository: SensorRepository,
@@ -89,7 +94,7 @@ class MapService(
         initXyElementConfig(level = 10, minScale = MAP_MIN_SCALE, maxScale = MAP_MAX_SCALE).apply {
             this[TYPE_OBJECT_TRACE] = XyElementConfig(
                 name = TYPE_OBJECT_TRACE,
-                clientType = XyElementClientType.TRACE,
+                type = XyElementType.TRACE,
                 layer = 11,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
@@ -101,7 +106,7 @@ class MapService(
 
             this[TYPE_OBJECT_PARKING] = XyElementConfig(
                 name = TYPE_OBJECT_PARKING,
-                clientType = XyElementClientType.TEXT,
+                type = XyElementType.TEXT,
                 layer = 12,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
@@ -113,7 +118,7 @@ class MapService(
 
             this[TYPE_OBJECT_OVER_SPEED] = XyElementConfig(
                 name = TYPE_OBJECT_OVER_SPEED,
-                clientType = XyElementClientType.TEXT,
+                type = XyElementType.TEXT,
                 layer = 13,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
@@ -125,7 +130,7 @@ class MapService(
 
             this[TYPE_OBJECT_TRACE_INFO] = XyElementConfig(
                 name = TYPE_OBJECT_TRACE_INFO,
-                clientType = XyElementClientType.TEXT,
+                type = XyElementType.TEXT,
                 layer = 14,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
@@ -137,7 +142,7 @@ class MapService(
 
             this[TYPE_OBJECT_INFO] = XyElementConfig(
                 name = TYPE_OBJECT_INFO,
-                clientType = XyElementClientType.MARKER,
+                type = XyElementType.MARKER,
                 layer = 15,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
@@ -151,7 +156,7 @@ class MapService(
 
             this[ELEMENT_TYPE_ZONE] = XyElementConfig(
                 name = ELEMENT_TYPE_ZONE,
-                clientType = XyElementClientType.ZONE,
+                type = XyElementType.ZONE,
                 layer = 10,
                 scaleMin = MAP_MIN_SCALE,
                 scaleMax = MAP_MAX_SCALE,
@@ -174,10 +179,8 @@ class MapService(
             return AppResponse(ResponseCode.LOGON_NEED)
         }
         val moduleConfig = appModuleConfigs[actionModule] ?: return AppResponse(ResponseCode.LOGON_NEED)
-        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
-        val objectEntity = action.parentId?.let { parentId ->
-            objectRepository.findByIdOrNull(parentId) ?: return AppResponse(ResponseCode.LOGON_NEED)
-        } ?: return AppResponse(ResponseCode.LOGON_NEED)
+
+        val objectEntity = getObjectEntity(action) ?: return AppResponse(ResponseCode.LOGON_NEED)
 
         val caption = getLocalizedMessage(moduleConfig.captions, userConfig.lang)
         val rows = mutableListOf(
@@ -196,7 +199,6 @@ class MapService(
                         "${action.timeRangeType} ${getLocalizedMMSMessage(LocalizedMMSMessages.SECONDS, userConfig.lang)}"
                     }
         }
-
         return AppResponse(
             responseCode = ResponseCode.MODULE_MAP,
             map = MapResponse(
@@ -212,9 +214,9 @@ class MapService(
                     ),
                     rows = rows,
                 ),
-                timeRangeType = action.timeRangeType,
-                begTime = action.begTime ?: 0,
-                endTime = action.endTime ?: 0,
+//                timeRangeType = action.timeRangeType,
+//                begTime = action.begTime ?: 0,
+//                endTime = action.endTime ?: 0,
             )
         )
     }
@@ -249,56 +251,39 @@ class MapService(
     private fun getCoords(mapActionRequest: MapActionRequest): MapActionResponse {
         val appAction = mapActionRequest.action
 
-        var isFound = false
-        var minPoint = XyPoint(0, 0)
-        var maxPoint = XyPoint(0, 0)
+        var minPoint: XyPoint? = null
+        var maxPoint: XyPoint? = null
 
         val (begTime, endTime) = getBegEndTime(appAction)
 
-        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
-        appAction.parentId?.let { parentId ->
-            objectRepository.findByIdOrNull(parentId)?.let { objectEntity ->
-                sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
-                    SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+        getGeoSensorEntity(mapActionRequest.action, begTime, endTime)?.let { sensorEntity ->
+            SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
-                    ApplicationService.withConnection(entityManager) { conn ->
-                        val rs = conn.executeQuery(
-                            """
+            ApplicationService.withConnection(entityManager) { conn ->
+                val rs = conn.executeQuery(
+                    """
                             SELECT COUNT(ontime_0) , MIN(value_0) , MAX(value_0) , MIN(value_1) , MAX(value_1)
                             FROM MMS_agg_${sensorEntity.id}
                             WHERE ontime_0 BETWEEN $begTime AND $endTime
                         """
-                        )
-                        if (rs.next() && rs.getInt(1) > 0) {
-                            val minWgsX = rs.getDouble(2)
-                            val maxWgsX = rs.getDouble(3)
-                            val minWgsY = rs.getDouble(4)
-                            val maxWgsY = rs.getDouble(5)
-
-                            isFound = true
-
-                            minPoint = XyProjection.wgs_pix(minWgsX, maxWgsY, minPoint)
-                            maxPoint = XyProjection.wgs_pix(maxWgsX, minWgsY, maxPoint)
-                        }
-                        rs.close()
-                    }
+                )
+                if (rs.next() && rs.getInt(1) > 0) {
+                    val minWgsX = rs.getDouble(2)
+                    val maxWgsX = rs.getDouble(3)
+                    val minWgsY = rs.getDouble(4)
+                    val maxWgsY = rs.getDouble(5)
+                    minPoint = XyProjection.wgs_pix(minWgsX, maxWgsY)
+                    maxPoint = XyProjection.wgs_pix(maxWgsX, minWgsY)
                 }
+                rs.close()
             }
         }
 
         //--- если элементы, соответствующие стартовым объектам, не нашлись, то возвращаем границы РФ
         return MapActionResponse(
             responseCode = ResponseCode.OK,
-            minCoord = if (isFound) {
-                minPoint
-            } else {
-                XyProjection.wgs_pix(20.0, 70.0)
-            },
-            maxCoord = if (isFound) {
-                maxPoint
-            } else {
-                XyProjection.wgs_pix(180.0, 40.0)
-            },
+            minCoord = minPoint ?: XyProjection.wgs_pix(20.0, 70.0),
+            maxCoord = maxPoint ?: XyProjection.wgs_pix(180.0, 40.0),
         )
     }
 
@@ -311,42 +296,37 @@ class MapService(
         val drawColors = mutableListOf<Int>()
         val fillColors = mutableListOf<Int>()
 
-        //!!! добавить проверку на соответствующий parentModule (могут быть разные!)
-        appAction.parentId?.let { parentId ->
-            objectRepository.findByIdOrNull(parentId)?.let { objectEntity ->
-                sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()?.let { sensorEntity ->
-                    SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+        getGeoSensorEntity(mapActionRequest.action, begTime, endTime)?.let { sensorEntity ->
+            SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
 
-                    ApplicationService.withConnection(entityManager) { conn ->
-                        val rs = conn.executeQuery(
-                            """
+            ApplicationService.withConnection(entityManager) { conn ->
+                val rs = conn.executeQuery(
+                    """
                             SELECT value_0 , value_1
                             FROM MMS_agg_${sensorEntity.id}
                             WHERE ontime_0 BETWEEN $begTime AND $endTime
                             ORDER BY ontime_0 
                         """
-                        )
-                        while (rs.next()) {
-                            val wgsX = rs.getDouble(1)
-                            val wgsY = rs.getDouble(2)
+                )
+                while (rs.next()) {
+                    val wgsX = rs.getDouble(1)
+                    val wgsY = rs.getDouble(2)
 
-                            points += XyProjection.wgs_pix(wgsX, wgsY)
-                            drawColors += 0xFF_00_00_FF.toInt()
-                            fillColors += 0xFF_00_FF_FF.toInt()
-                        }
-                        rs.close()
-                    }
+                    points += XyProjection.wgs_pix(wgsX, wgsY)
+                    drawColors += 0xFF_00_00_FF.toInt()
+                    fillColors += 0xFF_00_FF_FF.toInt()
                 }
+                rs.close()
             }
         }
 
         val elements = mutableListOf(
             XyElement(TYPE_OBJECT_TRACE, -getRandomInt(), appAction.parentId ?: 0).apply {
-                isReadOnly = true
-                alPoint = points
-                fillColor = null
+                this.isReadOnly = true
+                this.points = points
+                this.fillColor = null
                 //drawColor = 0xFF_00_00_FF.toInt()
-                lineWidth = 2
+                this.lineWidth = 2
                 this.drawColors = drawColors
                 this.fillColors = fillColors
             }
@@ -356,6 +336,23 @@ class MapService(
 
         return elements
     }
+
+    private fun getObjectEntity(action: AppAction): ObjectEntity? =
+        when (action.parentModule) {
+            AppModuleMMS.ALL_OBJECT, AppModuleMMS.MOBILE_OBJECT -> {
+                action.parentId?.let { parentId ->
+                    objectRepository.findByIdOrNull(parentId)
+                }
+            }
+
+            else -> null
+        }
+
+    private fun getGeoSensorEntity(action: AppAction, begTime: Int, endTime: Int): SensorEntity? =
+        getObjectEntity(action)?.let { objectEntity ->
+            sensorRepository.findByObjAndSensorTypeAndPeriod(objectEntity, SensorConfig.SENSOR_GEO, begTime, endTime).firstOrNull()
+        }
+
 
     private fun getBegEndTime(action: AppAction): Pair<Int, Int> {
         val endTime = if (action.timeRangeType == 0) {
@@ -373,11 +370,13 @@ class MapService(
         return begTime to endTime
     }
 
-    private fun outBitmapElements(bmTypeName: String, viewCoord: XyViewCoord, elements: MutableList<XyElement>?) {
+    private fun outBitmapElements(bmTypeName: String, viewCoord: XyViewCoord, elements: MutableList<XyElement>) {
         val zoomLevel = XyBitmapType.hmTypeScaleZ[bmTypeName]?.get(viewCoord.scale) ?: return
         if (zoomLevel == -1) {
             return
         }
+
+        val arrPrefixOSM = charArrayOf('a', 'b', 'c')
 
         //--- мировой размер битмапа для текущего масштаба в метрах
         val bmRealSize = XyBitmapType.BLOCK_SIZE * viewCoord.scale
@@ -402,23 +401,16 @@ class MapService(
                 //val serverURL = "${XyBitmapType.BITMAP_DIR}$bmTypeName/$zoomLevel/$blockY/$blockX.${XyBitmapType.BITMAP_EXT}"
 
                 //--- специфично для MAPNIK
-                val arrPrefixOSM = charArrayOf('a', 'b', 'c')
-                val sbServerURL = StringBuilder("http://a.tile.openstreetmap.org")
-                sbServerURL.setCharAt(7, arrPrefixOSM[getRandomInt() % 3])
-                val serverURL = "$sbServerURL/$zoomLevel/$blockX/$blockY.png"
+                val serverURL = "https://${arrPrefixOSM[getRandomInt() % 3]}.tile.openstreetmap.org/$zoomLevel/$blockX/$blockY.png"
 
                 //--- если выходной поток задан, пишем в него
                 //--- (null может быть при запуске загрузки других типов карт)
-                if (elements != null) {
-                    val imageElement = XyElement(XyElementClientType.BITMAP.name, -getRandomInt(), 0).apply {
-                        isReadOnly = true
-                        alPoint = listOf(XyPoint(x, y))
-                        imageWidth = bmRealSize
-                        imageHeight = bmRealSize
-                        imageName = serverURL
-                    }
-
-                    elements.add(imageElement)
+                elements += XyElement(XyElementType.BITMAP.name, -getRandomInt(), 0).apply {
+                    isReadOnly = true
+                    points = listOf(XyPoint(x, y))
+                    imageWidth = bmRealSize
+                    imageHeight = bmRealSize
+                    imageName = serverURL
                 }
 
                 x += bmRealSize
@@ -428,22 +420,3 @@ class MapService(
     }
 
 }
-/*
-class XyStartData(
-    val alServerActionButton: MutableList<ServerActionButton> = mutableListOf(),
-)
-
-class XyStartObjectData(
-    val objectId: Int,
-    var typeName: String = "",
-    var isStart: Boolean = false,
-    var isTimed: Boolean = false,
-    var isReadOnly: Boolean = false
-)
-
-return AppResponse(
-    map = MapResponse(
-        alServerActionButton = sd.alServerActionButton,
-    )
-)
- */

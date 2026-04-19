@@ -210,6 +210,7 @@ class WorkShiftService(
                 prevGroupName = groupName
                 tableRows += TableRow()
                 row++
+                dataRow++
             }
             tableCells += TableSimpleCell(row = row, col = col++, dataRow = dataRow, name = "", backColorType = TableCellBackColorType.GROUP_0)
 

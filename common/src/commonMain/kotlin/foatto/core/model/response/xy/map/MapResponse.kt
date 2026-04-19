@@ -11,7 +11,7 @@ class MapResponse(
     val tabCaption: String,
     val headerData: HeaderData,
 
-    val timeRangeType: Int,
-    val begTime: Int,
-    val endTime: Int,
+//    val timeRangeType: Int,
+//    val begTime: Int,
+//    val endTime: Int,
 )

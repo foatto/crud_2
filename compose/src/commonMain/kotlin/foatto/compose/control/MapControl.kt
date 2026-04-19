@@ -24,8 +24,8 @@ import foatto.compose.control.model.MouseRectData
 import foatto.compose.control.model.map.DistancerLineData
 import foatto.compose.control.model.map.DistancerTextData
 import foatto.compose.control.model.map.MapWorkMode
+import foatto.compose.control.model.xy.XyDrawType
 import foatto.compose.control.model.xy.XyElementData
-import foatto.compose.control.model.xy.XyElementDataType
 import foatto.compose.invokeRequest
 import foatto.core.ActionType
 import foatto.core.model.AppAction
@@ -209,19 +209,23 @@ class MapControl(
 //                }
 //            }
             addElement.value?.let { element ->
-                if (element.type == XyElementDataType.POLY) {
-                    drawPathOnCanvas(
-                        path = element.getPath(),
-                        fillColor = element.fillColor,
-                        fillAlpha = element.alpha,
-                        strokeColor = if (element.isSelected) {
-                            COLOR_XY_POLYGON_BORDER
-                        } else {
-                            element.strokeColor
-                        },
-                        strokeAlpha = 1.0f,
-                        strokeStyle = getElementStrokeStyle(element),
-                    )
+                when (element.type) {
+                    XyDrawType.POLY -> {
+                        drawPathOnCanvas(
+                            path = element.getPath(),
+                            fillColor = element.fillColor,
+                            fillAlpha = element.alpha,
+                            strokeColor = if (element.isSelected) {
+                                COLOR_XY_POLYGON_BORDER
+                            } else {
+                                element.strokeColor
+                            },
+                            strokeAlpha = 1.0f,
+                            strokeStyle = getElementStrokeStyle(element),
+                        )
+                    }
+
+                    else -> {}
                 }
             }
         }

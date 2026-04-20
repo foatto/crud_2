@@ -879,7 +879,7 @@ class FormControl(
                                                                 gridData.current == value
                                                             }?.second ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_VALUE, root.appUserConfig.lang)})",
                                                             onValueChange = {},
-                                                            readOnly = true,    //!gridData.data.isEditable,
+                                                            readOnly = !gridData.data.isEditable,
                                                             //!!! label = { Text("Имя") }, - использовать для мобильной версии без FormCellTypeClient.LABEL
                                                             isError = gridData.error != null,
                                                             supportingText = gridData.error?.let { error ->

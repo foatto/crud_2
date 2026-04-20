@@ -871,13 +871,15 @@ class FormControl(
                                                                     } else {
                                                                         Modifier
                                                                     }
-                                                                ),
+                                                                ).clickable {
+                                                                    isExpanded = !isExpanded
+                                                                },
                                                             colors = colorOutlinedTextInput ?: OutlinedTextFieldDefaults.colors(),
                                                             value = gridData.values.find { (value, _) ->
                                                                 gridData.current == value
                                                             }?.second ?: "(${getLocalizedMessage(LocalizedMessages.UNKNOWN_VALUE, root.appUserConfig.lang)})",
                                                             onValueChange = {},
-                                                            readOnly = !gridData.data.isEditable,
+                                                            readOnly = true,    //!gridData.data.isEditable,
                                                             //!!! label = { Text("Имя") }, - использовать для мобильной версии без FormCellTypeClient.LABEL
                                                             isError = gridData.error != null,
                                                             supportingText = gridData.error?.let { error ->

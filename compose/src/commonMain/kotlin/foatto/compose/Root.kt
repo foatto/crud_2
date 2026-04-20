@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
@@ -314,7 +315,10 @@ open class Root {
                 .fillMaxSize()
                 .background(colorMainBack0)
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().background(colorTabActive),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Column {
                     if (isShowMainMenuButton) {
                         FilledIconButton(
@@ -327,7 +331,11 @@ open class Root {
                         ) {
                             Icon(
                                 imageVector = if (isShowMainMenu) {
-                                    Icons.AutoMirrored.Default.KeyboardArrowLeft
+                                    if (isWideScreen) {
+                                        Icons.AutoMirrored.Default.KeyboardArrowLeft
+                                    } else {
+                                        Icons.Default.Close
+                                    }
                                 } else {
                                     Icons.Default.Menu
                                 },
@@ -352,6 +360,7 @@ open class Root {
                     }
                 }
                 TabPanel(
+                    isWideScreen = isWideScreen,
                     isTabPanelVisible = isTabPanelVisible,
                     selectedTabIndex = selectedTabIndex,
                     tabInfos = tabInfos,

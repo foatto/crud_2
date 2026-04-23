@@ -2,6 +2,19 @@ package foatto.server.ds
 
 object PortNumbers {
 
+    const val GALILEO_POWER_VOLTAGE_8: Int = 8
+    const val GALILEO_ACCUM_VOLTAGE_9: Int = 9
+    const val GALILEO_UNIVERSAL_10: Int = 10
+    const val GALILEO_CONTROLLER_TEMPERATURE_18: Int = 18
+    const val GALILEO_RS_485_FUEL_20: Int = 20
+    const val GALILEO_CAN_FUEL_LEVEL_36: Int = 36
+    const val GALILEO_CAN_LIQUID_TEMPERATURE_37: Int = 37
+    const val GALILEO_CAN_ENGINE_TURN_38: Int = 38
+    // port #39 skipped yet
+    const val GALILEO_RS_485_TEMPERATURE_40: Int = 40
+    const val GALILEO_EXT_TEMPERATURE_60: Int = 60
+    // port #70..99 is free yet
+    const val GALILEO_USER_DATA_100: Int = 100
     const val GALILEO_COUNT_110: Int = 110
     const val LLS_LEVEL_120: Int = 120
     const val GALILEO_VOLTAGE_140: Int = 140
@@ -42,6 +55,9 @@ object PortNumbers {
     const val MERCURY_TRANSFORM_KOEF_CURRENT_360: Int = 360
     const val MERCURY_TRANSFORM_KOEF_VOLTAGE_370: Int = 370
 
+    const val GALILEO_EXT_MODBUS_400: Int = 400
+    // port #470..499 is free yet
+
     //--- в MMSPulsarDataController приходят как EMIS_xxx
 //    const val ESD_STATUS_500: Int = 500 - не используется
     const val ESD_VOLUME_504: Int = 504
@@ -62,4 +78,7 @@ object PortNumbers {
     const val PRESSURE_640: Int = 640
     const val TURN_660: Int = 660
     const val CONSTANT_VOLTAGE_680: Int = 680
+
+    const val GALILEO_EXT_BLUETOOTH_700: Int = 700
+    // port #770..799 is free yet
 }

@@ -154,7 +154,7 @@ class MMSPulsarDataService(
         val serialNo: String = headerData.deviceID!!
 
         var dc: DeviceConfig? = null
-        ApplicationService.Companion.withConnection(entityManager) { conn ->
+        ApplicationService.withConnection(entityManager) { conn ->
             dc = DeviceConfig.getDeviceConfig(conn, serialNo)
         }
 

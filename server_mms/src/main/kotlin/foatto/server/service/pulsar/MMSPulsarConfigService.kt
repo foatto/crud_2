@@ -108,6 +108,10 @@ class MMSPulsarConfigService(
                 in 0x0830..0x083F -> Triple(SensorConfig.SENSOR_WEIGHT, PortNumbers.PMP_MASS_600, sensorId - 0x0830)
                 in 0x0840..0x084F -> Triple(SensorConfig.SENSOR_DENSITY, PortNumbers.PMP_DENSITY_620, sensorId - 0x0840)
 
+                in 0x0850..0x085F -> Triple(SensorConfig.SENSOR_PRESSURE, PortNumbers.PRESSURE_640, sensorId - 0x0850)
+                in 0x0860..0x086F -> Triple(SensorConfig.SENSOR_TURN, PortNumbers.TURN_660, sensorId - 0x0860)
+                in 0x0870..0x087F -> Triple(SensorConfig.SENSOR_VOLTAGE, PortNumbers.CONSTANT_VOLTAGE_680, sensorId - 0x0870)
+
                 else -> return PulsarConfigResponse(4)
             }
 

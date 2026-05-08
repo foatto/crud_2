@@ -4,6 +4,8 @@ import foatto.server.model.DevicesStatusRequest
 import foatto.server.model.DevicesStatusResponse
 import foatto.server.model.ObjectDataRequest
 import foatto.server.model.ObjectDataResponse
+import foatto.server.model.ObjectEventsRequest
+import foatto.server.model.ObjectEventsResponse
 import foatto.server.service.APIService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,6 +23,18 @@ class APIController(
         @RequestBody
         request: ObjectDataRequest,
     ): ObjectDataResponse = apiService.getObjectData(
+        token = request.token,
+        objectName = request.name,
+        start = request.start,
+        duration = request.duration,
+    )
+
+    @PostMapping(value = ["/ext/object_events/v1"])
+    @Transactional
+    fun getObjectEvents(
+        @RequestBody
+        request: ObjectEventsRequest,
+    ): ObjectEventsResponse = apiService.getObjectEvents(
         token = request.token,
         objectName = request.name,
         start = request.start,

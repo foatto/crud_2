@@ -10,6 +10,9 @@ import foatto.server.model.DevicesStatusResponse
 import foatto.server.model.DevicesStatusResponseDeviceInfo
 import foatto.server.model.ObjectDataResponse
 import foatto.server.model.ObjectDataResponseSensorInfo
+import foatto.server.model.ObjectEventsResponse
+import foatto.server.model.ObjectEventsResponseEventInfo
+import foatto.server.model.ObjectEventsResponseSensorInfo
 import foatto.server.model.sensor.SensorConfig
 import foatto.server.repository.DeviceRepository
 import foatto.server.repository.ObjectRepository
@@ -70,7 +73,7 @@ class APIService(
         if (objectEntities.size > 1) {
             return ObjectDataResponse(errorMessage = "${objectEntities.size} objects with this name were found")
         }
-        val objectEntity = objectEntities.firstOrNull() ?: return ObjectDataResponse(errorMessage = "An object with this name was not found.")
+        val objectEntity = objectEntities.firstOrNull() ?: return ObjectDataResponse(errorMessage = "An object with this name was not found")
 
         val sensors = mutableListOf<ObjectDataResponseSensorInfo>()
         sensorRepository.findByObjAndPeriod(objectEntity, begTime ?: -1, endTime ?: -1).forEach { sensorEntity ->
@@ -172,6 +175,105 @@ class APIService(
         }
 
         return ObjectDataResponse(sensors = sensors)
+    }
+
+    fun getObjectEvents(
+        token: String,
+        objectName: String,
+        start: String?,
+        duration: Int?,
+    ): ObjectEventsResponse {
+        val userEntity = getUser(token) ?: return ObjectEventsResponse(errorMessage = "A user with this login and password was not found")
+        if (userEntity.isDisabled == true) {
+            return ObjectEventsResponse(errorMessage = "User has been blocked")
+        }
+
+        duration?.let {
+            if (duration > 86_400) {
+                return ObjectEventsResponse(errorMessage = "The period cannot be longer than 1 day")
+            }
+        }
+
+        // 2020-08-30T18:43:00Z
+        // 2023-01-02T23:40:57Z
+        val begTime = start?.let { Instant.parse(start).epochSeconds.toInt() }
+        val endTime = begTime?.let { begTime + (duration ?: 86_400) }
+
+        val enabledUserIds = getEnabledUserIds(
+            module = AppModuleMMS.ALL_OBJECT,
+            actionType = ActionType.MODULE_TABLE,
+            relatedUserIds = logonService.loadRelatedUserIds(
+                userId = userEntity.id,
+                parentId = userEntity.parentId ?: 0,
+                orgType = userEntity.orgType ?: OrgType.ORG_TYPE_WORKER,
+            ),
+            roles = userEntity.roles,
+        )
+
+        val objectEntities = objectRepository.findByUserIdInAndName(enabledUserIds, objectName)
+        if (objectEntities.size > 1) {
+            return ObjectEventsResponse(errorMessage = "${objectEntities.size} objects with this name were found")
+        }
+        val objectEntity = objectEntities.firstOrNull() ?: return ObjectEventsResponse(errorMessage = "An object with this name was not found")
+
+        val sensors = mutableListOf<ObjectEventsResponseSensorInfo>()
+        sensorRepository.findByObjAndPeriod(objectEntity, begTime ?: -1, endTime ?: -1).forEach { sensorEntity ->
+            val data = mutableListOf<ObjectEventsResponseEventInfo>()
+
+            SensorService.checkAndCreateSensorTables(entityManager, sensorEntity.id)
+
+            ApplicationService.queryNativeSql(
+                entityManager,
+                """
+                    SELECT ontime_0 , ontime_1 , type_0 , code_0
+                    FROM MMS_text_${sensorEntity.id}
+                """ + (
+                        begTime?.let {
+                            """ 
+                                WHERE ontime_0 <= $endTime
+                                  AND ontime_1 >= $begTime
+                                ORDER BY ontime_0 ASC
+                            """
+                        } ?: """
+                                WHERE ontime_0 = ( SELECT MAX(ontime_0) FROM MMS_text_${sensorEntity.id} )
+                             """
+                        )
+            ) { rs ->
+                while (rs.next()) {
+                    var pos = 1
+
+                    val ontime0 = rs.getInt(pos++)
+                    val ontime1 = rs.getInt(pos++)
+                    val type0 = rs.getInt(pos++)
+                    val code0 = rs.getInt(pos++)
+
+                    data += ObjectEventsResponseEventInfo(
+                        begTime = Instant.fromEpochSeconds(
+                            (
+                                    begTime?.let {
+                                        max(begTime, ontime0)
+                                    } ?: ontime0
+                                    ).toLong()).toString(),
+                        endTime = Instant.fromEpochSeconds(
+                            (
+                                    endTime?.let {
+                                        min(endTime, ontime1)
+                                    } ?: ontime1
+                                    ).toLong()).toString(),
+                        type = type0,
+                        code = code0,
+                    )
+                }
+            }
+            sensors += ObjectEventsResponseSensorInfo(
+                id = sensorEntity.name,
+                name = sensorEntity.descr,
+                type = sensorEntity.sensorType,
+                data = data,
+            )
+        }
+
+        return ObjectEventsResponse(sensors = sensors)
     }
 
     fun getDevicesStatus(

@@ -30,12 +30,12 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import foatto.compose.AppControl
 import foatto.compose.Root
 import foatto.compose.control.composable.onPointerEvents
-import foatto.compose.control.model.xy.XyElementData
 import foatto.compose.control.model.xy.XyDrawType
+import foatto.compose.control.model.xy.XyElementData
 import foatto.core.model.model.xy.XyElement
 import foatto.core.model.model.xy.XyViewCoord
-import foatto.core.model.response.xy.XyElementType
 import foatto.core.model.response.xy.XyElementConfig
+import foatto.core.model.response.xy.XyElementType
 import foatto.core.model.response.xy.geom.XyPoint
 import foatto.core.model.response.xy.geom.XyRect
 import io.kamel.image.KamelImage
@@ -93,227 +93,231 @@ abstract class AbstractXyControl(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .onSizeChanged { size ->
-                    xyCanvasWidth = size.width.toFloat()
-                    xyCanvasHeight = size.height.toFloat()
-                }
-                .offset(
-                    x = with(density) { screenOffsetX.toDp() },
-                    y = with(density) { screenOffsetY.toDp() },
-                )
                 .clipToBounds()
-                .onPointerEvents(
-                    withInteractive = withInteractive,
-                    onPointerDown = { pointerInputChange -> onPointerDown(pointerInputChange) },
-                    onPointerUp = { pointerInputChange -> onPointerUp(pointerInputChange) },
-                    onDragStart = { offset -> onDragStart(offset) },
-                    onDrag = { pointerInputChange, offset -> onDrag(pointerInputChange, offset) },
-                    onDragEnd = { onDragEnd() },
-                    onDragCancel = { onDragCancel() },
-                ),
         ) {
-            for (alElement in xyElements) {
-                for (element in alElement) {
-                    if (element.type == XyDrawType.IMAGE) {
-                        KamelImage(
-                            modifier = Modifier
-                                .size(
-                                    width = with(density) { element.width.toDp() },
-                                    height = with(density) { element.height.toDp() },
-                                )
-                                .offset(
-                                    x = with(density) { element.x.toDp() },
-                                    y = with(density) { element.y.toDp() },
-                                ),
-                            resource = { asyncPainterResource(data = element.url) },
-                            contentDescription = null,
-                        )
-//                                    onMouseEnter { syntheticMouseEvent ->
-//                                        onXyMouseOver(syntheticMouseEvent, element)
-//                                    }
-//                                    onMouseLeave {
-//                                        onXyMouseOut()
-//                                    }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { size ->
+                        xyCanvasWidth = size.width.toFloat()
+                        xyCanvasHeight = size.height.toFloat()
                     }
-                }
-            }
-
-            Canvas(modifier = Modifier.fillMaxSize()) {
+                    .offset(
+                        x = with(density) { screenOffsetX.toDp() },
+                        y = with(density) { screenOffsetY.toDp() },
+                    )
+                    .onPointerEvents(
+                        withInteractive = withInteractive,
+                        onPointerDown = { pointerInputChange -> onPointerDown(pointerInputChange) },
+                        onPointerUp = { pointerInputChange -> onPointerUp(pointerInputChange) },
+                        onDragStart = { offset -> onDragStart(offset) },
+                        onDrag = { pointerInputChange, offset -> onDrag(pointerInputChange, offset) },
+                        onDragEnd = { onDragEnd() },
+                        onDragCancel = { onDragCancel() },
+                    ),
+            ) {
                 for (alElement in xyElements) {
                     for (element in alElement) {
-                        when (element.type) {
-                            XyDrawType.ARC -> {
-                                element.fillColor?.let {
-                                    drawArc(
-                                        topLeft = Offset(element.x - element.radius, element.y - element.radius),
-                                        size = Size(element.radius * 2, element.radius * 2),
-                                        startAngle = element.startAngle,
-                                        sweepAngle = element.sweepAngle,
-                                        useCenter = true,
-                                        color = element.fillColor,
-                                        alpha = element.alpha,
-                                        style = Fill
+                        if (element.type == XyDrawType.IMAGE) {
+                            KamelImage(
+                                modifier = Modifier
+                                    .size(
+                                        width = with(density) { element.width.toDp() },
+                                        height = with(density) { element.height.toDp() },
                                     )
+                                    .offset(
+                                        x = with(density) { element.x.toDp() },
+                                        y = with(density) { element.y.toDp() },
+                                    ),
+                                resource = { asyncPainterResource(data = element.url) },
+                                contentDescription = null,
+                            )
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
+                        }
+                    }
+                }
+
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    for (alElement in xyElements) {
+                        for (element in alElement) {
+                            when (element.type) {
+                                XyDrawType.ARC -> {
+                                    element.fillColor?.let {
+                                        drawArc(
+                                            topLeft = Offset(element.x - element.radius, element.y - element.radius),
+                                            size = Size(element.radius * 2, element.radius * 2),
+                                            startAngle = element.startAngle,
+                                            sweepAngle = element.sweepAngle,
+                                            useCenter = true,
+                                            color = element.fillColor,
+                                            alpha = element.alpha,
+                                            style = Fill
+                                        )
+                                    }
+                                    element.strokeColor?.let {
+                                        drawArc(
+                                            topLeft = Offset(element.x - element.radius, element.y - element.radius),
+                                            size = Size(element.radius * 2, element.radius * 2),
+                                            startAngle = element.startAngle,
+                                            sweepAngle = element.sweepAngle,
+                                            useCenter = false,
+                                            color = element.strokeColor,
+                                            alpha = element.alpha,
+                                            style = getElementStrokeStyle(element),
+                                        )
+                                    }
                                 }
-                                element.strokeColor?.let {
-                                    drawArc(
-                                        topLeft = Offset(element.x - element.radius, element.y - element.radius),
-                                        size = Size(element.radius * 2, element.radius * 2),
-                                        startAngle = element.startAngle,
-                                        sweepAngle = element.sweepAngle,
-                                        useCenter = false,
-                                        color = element.strokeColor,
-                                        alpha = element.alpha,
-                                        style = getElementStrokeStyle(element),
-                                    )
-                                }
-                            }
 
-                            XyDrawType.CIRCLE -> {
-                                drawCircleOnCanvas(
-                                    x = element.x,
-                                    y = element.y,
-                                    radius = element.radius,
-                                    fillAlpha = element.alpha,
-                                    fillColor = element.fillColor,
-                                    strokeColor = element.strokeColor,
-                                    strokeAlpha = 1.0f,
-                                    strokeStyle = getElementStrokeStyle(element),
-                                )
-//                                    onMouseEnter { syntheticMouseEvent ->
-//                                        onXyMouseOver(syntheticMouseEvent, element)
-//                                    }
-//                                    onMouseLeave {
-//                                        onXyMouseOut()
-//                                    }
-                            }
-
-                            XyDrawType.ELLIPSE -> {
-                                element.fillColor?.let {
-                                    drawOval(
-                                        topLeft = Offset(element.x - element.rx, element.y - element.ry),
-                                        size = Size(element.rx * 2, element.ry * 2),
-                                        color = element.fillColor,
-                                        alpha = element.alpha,
-                                        style = Fill
-                                    )
-                                }
-                                element.strokeColor?.let {
-                                    drawOval(
-                                        topLeft = Offset(element.x - element.rx, element.y - element.ry),
-                                        size = Size(element.rx * 2, element.ry * 2),
-                                        color = element.strokeColor,
-                                        alpha = element.alpha,
-                                        style = getElementStrokeStyle(element),
-                                    )
-                                }
-                            }
-//                                    onMouseEnter { syntheticMouseEvent ->
-//                                        onXyMouseOver(syntheticMouseEvent, element)
-//                                    }
-//                                    onMouseLeave {
-//                                        onXyMouseOut()
-//                                    }
-
-                            XyDrawType.ICON, XyDrawType.IMAGE -> {
-                                //--- Сделано через KamelImage в нижележащем слое.
-                                //--- Compose-resource пока не готов нормально грузить карты со внешнего урла.
-                                //element.imageBitmap.value?.let { imageBitmap ->
-                                //    drawImage(
-                                //        srcOffset = IntOffset(element.x.toInt(), element.y.toInt()),
-                                //        srcSize = IntSize(element.width.toInt(), element.height.toInt()),
-                                //        image = imageBitmap,
-                                //    )
-                                //}
-                            }
-
-                            XyDrawType.LINE -> {
-                                drawLine(
-                                    start = Offset(element.x1, element.y1),
-                                    end = Offset(element.x2, element.y2),
-                                    color = element.strokeColor ?: Color.Black,
-                                    alpha = element.alpha,
-                                    strokeWidth = element.strokeWidth ?: 1.0f,    // 2.dp.toPx()
-                                    pathEffect = if (element.isSelected) {
-                                        element.strokeDash?.let {
-                                            PathEffect.dashPathEffect(element.strokeDash)
-                                        }
-                                    } else {
-                                        null
-                                    },
-                                )
-//                                    onMouseEnter { syntheticMouseEvent ->
-//                                        onXyMouseOver(syntheticMouseEvent, element)
-//                                    }
-//                                    onMouseLeave {
-//                                        onXyMouseOut()
-//                                    }
-                            }
-
-                            XyDrawType.POLY -> {
-                                drawPathOnCanvas(
-                                    path = element.getPath(),
-                                    fillColor = element.fillColor,
-                                    fillAlpha = element.alpha,
-                                    strokeColor = if (element.isSelected) {
-                                        COLOR_XY_POLYGON_BORDER
-                                    } else {
-                                        element.strokeColor
-                                    },
-                                    strokeAlpha = 1.0f,
-                                    strokeStyle = getElementStrokeStyle(element),
-                                )
-//                                    onMouseEnter { syntheticMouseEvent ->
-//                                        onXyMouseOver(syntheticMouseEvent, element)
-//                                    }
-//                                    onMouseLeave {
-//                                        onXyMouseOut()
-//                                    }
-                            }
-
-                            XyDrawType.RECT -> {
-                                drawRectOnCanvas(
-                                    x = element.x,
-                                    y = element.y,
-                                    width = element.width,
-                                    height = element.height,
-                                    fillColor = element.fillColor,
-                                    fillAlpha = element.alpha,
-                                    strokeColor = element.strokeColor,
-                                    strokeAlpha = 1.0f,
-                                    strokeStyle = getElementStrokeStyle(element),
-                                )
-//                                    onMouseEnter { syntheticMouseEvent ->
-//                                        onXyMouseOver(syntheticMouseEvent, element)
-//                                    }
-//                                    onMouseLeave {
-//                                        onXyMouseOut()
-//                                    }
-                            }
-
-                            XyDrawType.TEXT -> {
-                                if (element.isVisible) {
-                                    drawTextOnCanvas(
-                                        scaleKoef = root.scaleKoef,
-                                        canvasWidth = xyCanvasWidth,
-                                        canvasHeight = xyCanvasHeight,
-                                        textMeasurer = textMeasurer,
-                                        text = element.text,
-                                        fontSize = element.textFontSize,
-                                        textIsBold = element.textIsBold,
+                                XyDrawType.CIRCLE -> {
+                                    drawCircleOnCanvas(
                                         x = element.x,
                                         y = element.y,
-                                        textLimitWidth = element.textLimitWidth,
-                                        textLimitHeight = element.textLimitHeight,
-                                        rotateDegree = null,
+                                        radius = element.radius,
+                                        fillAlpha = element.alpha,
+                                        fillColor = element.fillColor,
+                                        strokeColor = element.strokeColor,
+                                        strokeAlpha = 1.0f,
+                                        strokeStyle = getElementStrokeStyle(element),
+                                    )
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
+                                }
+
+                                XyDrawType.ELLIPSE -> {
+                                    element.fillColor?.let {
+                                        drawOval(
+                                            topLeft = Offset(element.x - element.rx, element.y - element.ry),
+                                            size = Size(element.rx * 2, element.ry * 2),
+                                            color = element.fillColor,
+                                            alpha = element.alpha,
+                                            style = Fill
+                                        )
+                                    }
+                                    element.strokeColor?.let {
+                                        drawOval(
+                                            topLeft = Offset(element.x - element.rx, element.y - element.ry),
+                                            size = Size(element.rx * 2, element.ry * 2),
+                                            color = element.strokeColor,
+                                            alpha = element.alpha,
+                                            style = getElementStrokeStyle(element),
+                                        )
+                                    }
+                                }
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
+
+                                XyDrawType.ICON, XyDrawType.IMAGE -> {
+                                    //--- Сделано через KamelImage в нижележащем слое.
+                                    //--- Compose-resource пока не готов нормально грузить карты со внешнего урла.
+                                    //element.imageBitmap.value?.let { imageBitmap ->
+                                    //    drawImage(
+                                    //        srcOffset = IntOffset(element.x.toInt(), element.y.toInt()),
+                                    //        srcSize = IntSize(element.width.toInt(), element.height.toInt()),
+                                    //        image = imageBitmap,
+                                    //    )
+                                    //}
+                                }
+
+                                XyDrawType.LINE -> {
+                                    drawLine(
+                                        start = Offset(element.x1, element.y1),
+                                        end = Offset(element.x2, element.y2),
+                                        color = element.strokeColor ?: Color.Black,
+                                        alpha = element.alpha,
+                                        strokeWidth = element.strokeWidth ?: 1.0f,    // 2.dp.toPx()
+                                        pathEffect = if (element.isSelected) {
+                                            element.strokeDash?.let {
+                                                PathEffect.dashPathEffect(element.strokeDash)
+                                            }
+                                        } else {
+                                            null
+                                        },
+                                    )
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
+                                }
+
+                                XyDrawType.POLY -> {
+                                    drawPathOnCanvas(
+                                        path = element.getPath(),
+                                        fillColor = element.fillColor,
+                                        fillAlpha = element.alpha,
+                                        strokeColor = if (element.isSelected) {
+                                            COLOR_XY_POLYGON_BORDER
+                                        } else {
+                                            element.strokeColor
+                                        },
+                                        strokeAlpha = 1.0f,
+                                        strokeStyle = getElementStrokeStyle(element),
+                                    )
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
+                                }
+
+                                XyDrawType.RECT -> {
+                                    drawRectOnCanvas(
+                                        x = element.x,
+                                        y = element.y,
+                                        width = element.width,
+                                        height = element.height,
                                         fillColor = element.fillColor,
                                         fillAlpha = element.alpha,
                                         strokeColor = element.strokeColor,
-                                        strokeWidth = element.strokeWidth,
-                                        textAnchor = element.textAnchor,
-                                        textColor = element.textColor ?: Color.Black,
+                                        strokeAlpha = 1.0f,
+                                        strokeStyle = getElementStrokeStyle(element),
                                     )
+//                                    onMouseEnter { syntheticMouseEvent ->
+//                                        onXyMouseOver(syntheticMouseEvent, element)
+//                                    }
+//                                    onMouseLeave {
+//                                        onXyMouseOut()
+//                                    }
                                 }
+
+                                XyDrawType.TEXT -> {
+                                    if (element.isVisible) {
+                                        drawTextOnCanvas(
+                                            scaleKoef = root.scaleKoef,
+                                            canvasWidth = xyCanvasWidth,
+                                            canvasHeight = xyCanvasHeight,
+                                            textMeasurer = textMeasurer,
+                                            text = element.text,
+                                            fontSize = element.textFontSize,
+                                            textIsBold = element.textIsBold,
+                                            x = element.x,
+                                            y = element.y,
+                                            textLimitWidth = element.textLimitWidth,
+                                            textLimitHeight = element.textLimitHeight,
+                                            rotateDegree = null,
+                                            fillColor = element.fillColor,
+                                            fillAlpha = element.alpha,
+                                            strokeColor = element.strokeColor,
+                                            strokeWidth = element.strokeWidth,
+                                            textAnchor = element.textAnchor,
+                                            textColor = element.textColor ?: Color.Black,
+                                        )
+                                    }
 //                                    onMouseEnter { syntheticMouseEvent ->
 //                                        onXyMouseOver(syntheticMouseEvent, element)
 //                                    }
@@ -335,41 +339,41 @@ abstract class AbstractXyControl(
 //                                        }
 //                                        syntheticTouchEvent.preventDefault()
 //                                    }
+                                }
                             }
                         }
                     }
+
+                    //--- for adding specific XY-elements
+                    addSpecificXy(this)
                 }
 
-                //--- for adding specific XY-elements
-                addSpecificXy(this)
-            }
-
-            for (alElement in xyElements) {
-                for (element in alElement) {
-                    if (element.type == XyDrawType.ICON) {
-                        KamelImage(
-                            modifier = Modifier
-                                .size(
-                                    width = with(density) { element.width.toDp() },
-                                    height = with(density) { element.height.toDp() },
-                                )
-                                .offset(
-                                    x = with(density) { element.x.toDp() },
-                                    y = with(density) { element.y.toDp() },
-                                ),
-                            resource = { asyncPainterResource(data = element.url) },
-                            contentDescription = null,
-                        )
+                for (alElement in xyElements) {
+                    for (element in alElement) {
+                        if (element.type == XyDrawType.ICON) {
+                            KamelImage(
+                                modifier = Modifier
+                                    .size(
+                                        width = with(density) { element.width.toDp() },
+                                        height = with(density) { element.height.toDp() },
+                                    )
+                                    .offset(
+                                        x = with(density) { element.x.toDp() },
+                                        y = with(density) { element.y.toDp() },
+                                    ),
+                                resource = { asyncPainterResource(data = element.url) },
+                                contentDescription = null,
+                            )
 //                                    onMouseEnter { syntheticMouseEvent ->
 //                                        onXyMouseOver(syntheticMouseEvent, element)
 //                                    }
 //                                    onMouseLeave {
 //                                        onXyMouseOut()
 //                                    }
+                        }
                     }
                 }
             }
-        }
 
 //        if (xyTooltipVisible.value) {
 //            Div(
@@ -390,6 +394,7 @@ abstract class AbstractXyControl(
 //            }
 //
 //        }
+        }
     }
 
     protected open fun addSpecificXy(drawScope: DrawScope) {}

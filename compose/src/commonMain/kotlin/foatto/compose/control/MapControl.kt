@@ -131,8 +131,8 @@ class MapControl(
                 alAddEC = alAddEC,
                 refreshInterval = refreshInterval,
                 setMode = { mapWorkMode: MapWorkMode -> setMode(mapWorkMode) },
-                zoomIn = { zoomIn() },
-                zoomOut = { zoomOut() },
+                zoomIn = { coroutineScope.launch { zoomIn() } },
+                zoomOut = { coroutineScope.launch { zoomOut() } },
                 startAdd = { elementConfig: XyElementConfig -> /*!!! startAdd(elementConfig)*/ },
                 startEditPoint = { /*!!! startEditPoint()*/ },
                 startMoveElements = { /*!!! startMoveElements()*/ },
@@ -431,34 +431,30 @@ class MapControl(
         refreshInterval = 0
     }
 
-    private fun zoomIn() {
-//!!!
-//        //--- проверить масштаб
-//        val newScale = checkXyScale(
-//            isScaleAlign = xyDocumentConfig.isScaleAlign,
-//            curScale = xyViewCoord.scale,
-//            newScale = xyViewCoord.scale / 2,
-//            isAdaptive = false,
-//        )
-//
-//        xyViewCoord.scale = newScale
-//
-//        xyRefreshView(xyViewCoord, true)
+    private suspend fun zoomIn() {
+        val newScale = checkXyScale(
+            isScaleAlign = true,
+            curScale = xyViewCoord.scale,
+            newScale = xyViewCoord.scale / 2,
+            isAdaptive = false,
+        )
+
+        xyViewCoord.scale = newScale
+
+        mapRefreshView(xyViewCoord, true)
     }
 
-    private fun zoomOut() {
-//!!!
-//        //--- проверить масштаб
-//        val newScale = checkXyScale(
-//            isScaleAlign = xyDocumentConfig.isScaleAlign,
-//            curScale = xyViewCoord.scale,
-//            newScale = xyViewCoord.scale * 2,
-//            isAdaptive = false,
-//        )
-//
-//        xyViewCoord.scale = newScale
-//
-//        xyRefreshView(xyViewCoord, true)
+    private suspend fun zoomOut() {
+        val newScale = checkXyScale(
+            isScaleAlign = true,
+            curScale = xyViewCoord.scale,
+            newScale = xyViewCoord.scale * 2,
+            isAdaptive = false,
+        )
+
+        xyViewCoord.scale = newScale
+
+        mapRefreshView(xyViewCoord, true)
     }
 
     override fun onPointerDown(pointerInputChange: PointerInputChange) {

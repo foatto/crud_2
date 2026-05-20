@@ -87,18 +87,18 @@ internal fun MapToolBar(
                     ) {
                         setMode(MapWorkMode.ZOOM_BOX)
                     }
-                    ToolBarIconButton(
-                        isEnabled = isDistancerButtonEnabled && refreshInterval == 0,
-                        name = "/images/ic_linear_scale_${getStyleToolbarIconNameSuffix()}.png",
-                    ) {
-                        setMode(MapWorkMode.DISTANCER)
-                    }
-                    ToolBarIconButton(
-                        isEnabled = isSelectButtonEnabled && refreshInterval == 0,
-                        name = "/images/ic_touch_app_${getStyleToolbarIconNameSuffix()}.png",
-                    ) {
-                        setMode(MapWorkMode.SELECT_FOR_ACTION)
-                    }
+//                    ToolBarIconButton(
+//                        isEnabled = isDistancerButtonEnabled && refreshInterval == 0,
+//                        name = "/images/ic_linear_scale_${getStyleToolbarIconNameSuffix()}.png",
+//                    ) {
+//                        setMode(MapWorkMode.DISTANCER)
+//                    }
+//                    ToolBarIconButton(
+//                        isEnabled = isSelectButtonEnabled && refreshInterval == 0,
+//                        name = "/images/ic_touch_app_${getStyleToolbarIconNameSuffix()}.png",
+//                    ) {
+//                        setMode(MapWorkMode.SELECT_FOR_ACTION)
+//                    }
                 }
             }
         }

@@ -721,19 +721,29 @@ abstract class ApplicationService(
 
     protected fun getDateEntityDMYString(dateEntity: DateEntity?): String =
         dateEntity?.let { de ->
-            if (de.ye != null && de.mo != null && de.da != null) {
-                getDateDMYString(de.ye, de.mo, de.da)
-            } else {
-                "-"
+            de.ye?.let { ye ->
+                de.mo?.let { mo ->
+                    de.da?.let { da ->
+                        getDateDMYString(ye, mo, da)
+                    }
+                }
             }
         } ?: "-"
 
     protected fun getDateTimeEntityDMYHMSString(dateTimeEntity: DateTimeEntity?): String =
         dateTimeEntity?.let { dte ->
-            if (dte.ye != null && dte.mo != null && dte.da != null && dte.ho != null && dte.mi != null && dte.se != null) {
-                getDateTimeDMYHMSString(dte.ye, dte.mo, dte.da, dte.ho, dte.mi, dte.se)
-            } else {
-                "-"
+            dte.ye?.let { ye ->
+                dte.mo?.let { mo ->
+                    dte.da?.let { da ->
+                        dte.ho?.let { ho ->
+                            dte.mi?.let { mi ->
+                                dte.se?.let { se ->
+                                    getDateTimeDMYHMSString(ye, mo, da, ho, mi, se)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         } ?: "-"
 

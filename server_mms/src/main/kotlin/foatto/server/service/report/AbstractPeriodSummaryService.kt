@@ -189,10 +189,10 @@ abstract class AbstractPeriodSummaryService(
             groupTitle += objectEntity.model + ", "
         }
         if (!objectEntity.department?.name.isNullOrBlank()) {
-            groupTitle += objectEntity.department.name + ", "
+            groupTitle += objectEntity.department?.name + ", "  // следующий котлин 2.3.21 будет ругаться на отсутствие якобы лишнего "?"
         }
         if (!objectEntity.group?.name.isNullOrBlank()) {
-            groupTitle += objectEntity.group.name + ", "
+            groupTitle += objectEntity.group?.name + ", "       // следующий котлин 2.3.21 будет ругаться на отсутствие якобы лишнего "?"
         }
 
         return groupTitle

@@ -45,8 +45,16 @@ object MMSTelematicFunction {
     )
     
     private val texts: Map<Int, Map<LanguageEnum, String>> = mapOf(
-        TEXT_CODE_NO_DATA to mapOf(LanguageEnum.EN to "The sensor is not responding", LanguageEnum.RU to "Датчик не отвечает"),
-        TEXT_CODE_MEASURE_ERROR to mapOf(LanguageEnum.EN to "Measurement error", LanguageEnum.RU to "Ошибка измерения"),
+        TEXT_CODE_NO_DATA to mapOf(
+            LanguageEnum.EN to "The sensor is not responding",
+            LanguageEnum.RU to "Датчик не отвечает",
+            LanguageEnum.KZ to "Сенсор жауап бермейді",
+        ),
+        TEXT_CODE_MEASURE_ERROR to mapOf(
+            LanguageEnum.EN to "Measurement error",
+            LanguageEnum.RU to "Ошибка измерения",
+            LanguageEnum.KZ to "Өлшеу қателігі",
+        ),
     )
     
     fun getText(textCode: Int?, lang: LanguageEnum): String =

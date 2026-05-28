@@ -134,14 +134,17 @@ class DeviceService(
             CELL_OWNER_UNKNOWN to mapOf(
                 LanguageEnum.EN to "(unknown)",
                 LanguageEnum.RU to "(неизвестно)",
+                LanguageEnum.KZ to "(белгісіз)",
             ),
             CELL_OWNER_PLA to mapOf(
                 LanguageEnum.EN to "Petroline",
                 LanguageEnum.RU to "Петролайн",
+                LanguageEnum.KZ to "Петролайн",
             ),
             CELL_OWNER_CLIENT to mapOf(
                 LanguageEnum.EN to "Client",
                 LanguageEnum.RU to "Клиент",
+                LanguageEnum.KZ to "Клиент",
             ),
         )
 
@@ -156,18 +159,22 @@ class DeviceService(
             SENSOR_NAME_EMIS to mapOf(
                 LanguageEnum.EN to "EMIS",
                 LanguageEnum.RU to "ЭМИС",
+                LanguageEnum.KZ to "ЭМИС",
             ),
             SENSOR_NAME_ESD to mapOf(
                 LanguageEnum.EN to "Euro Sens",
                 LanguageEnum.RU to "Euro Sens",
+                LanguageEnum.KZ to "Euro Sens",
             ),
             SENSOR_NAME_PMP to mapOf(
                 LanguageEnum.EN to "PMP",
                 LanguageEnum.RU to "ПМП",
+                LanguageEnum.KZ to "ПМП",
             ),
             SENSOR_NAME_MERCURY to mapOf(
                 LanguageEnum.EN to "Mercury",
                 LanguageEnum.RU to "Меркурий",
+                LanguageEnum.KZ to "Меркурий",
             ),
         )
         private val sensorInfos = mapOf(
@@ -178,6 +185,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Mass flow rate",
                         LanguageEnum.RU to "Массовый расход",
+                        LanguageEnum.KZ to "Масса ағынының жылдамдығы",
                     ),
                 ),
                 SensorInfo(
@@ -186,6 +194,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Density",
                         LanguageEnum.RU to "Плотность",
+                        LanguageEnum.KZ to "Тығыздық",
                     ),
                 ),
                 SensorInfo(
@@ -194,6 +203,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Temperature",
                         LanguageEnum.RU to "Температура",
+                        LanguageEnum.KZ to "Температура",
                     ),
                     minView = -100.0,
                     maxView = 100.0
@@ -204,6 +214,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Volumetric flow rate",
                         LanguageEnum.RU to "Объёмный расход",
+                        LanguageEnum.KZ to "Көлемдік ағын жылдамдығы",
                     ),
                 ),
                 SensorInfo(
@@ -212,6 +223,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Accumulated mass",
                         LanguageEnum.RU to "Накопленная масса",
+                        LanguageEnum.KZ to "Жиналған масса",
                     ),
                 ),
                 SensorInfo(
@@ -220,6 +232,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Accumulated volume",
                         LanguageEnum.RU to "Накопленный объём",
+                        LanguageEnum.KZ to "Жинақталған көлем",
                     ),
                 ),
             ),
@@ -230,6 +243,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Flow meter",
                         LanguageEnum.RU to "Расходомер",
+                        LanguageEnum.KZ to "Ағын өлшегіш",
                     ),
                 ),
                 SensorInfo(
@@ -238,6 +252,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Flow rate",
                         LanguageEnum.RU to "Скорость потока",
+                        LanguageEnum.KZ to "Ағын жылдамдығы",
                     ),
                 ),
                 SensorInfo(
@@ -246,6 +261,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Feed chamber flow meter",
                         LanguageEnum.RU to "Расходомер камеры подачи",
+                        LanguageEnum.KZ to "Беру камерасының ағын өлшегіші",
                     ),
                 ),
                 SensorInfo(
@@ -254,6 +270,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Feed chamber flow rate",
                         LanguageEnum.RU to "Скорость потока камеры подачи",
+                        LanguageEnum.KZ to "Беру камерасының ағын жылдамдығы",
                     ),
                 ),
                 SensorInfo(
@@ -262,6 +279,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Feed chamber temperature",
                         LanguageEnum.RU to "Температура камеры подачи",
+                        LanguageEnum.KZ to "Азықтандыру камерасының температурасы",
                     ),
                     minView = -100.0,
                     maxView = 100.0
@@ -272,6 +290,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Return chamber flow meter",
                         LanguageEnum.RU to "Расходомер камеры обратки",
+                        LanguageEnum.KZ to "Қайтару камерасының ағын өлшегіші",
                     ),
                 ),
                 SensorInfo(
@@ -279,7 +298,8 @@ class DeviceService(
                     portNum = PortNumbers.ESD_REVERSE_CAMERA_FLOW_528,
                     descr = mapOf(
                         LanguageEnum.EN to "Return chamber flow rate",
-                        LanguageEnum.RU to "Скорость потока камеры обратки"
+                        LanguageEnum.RU to "Скорость потока камеры обратки",
+                        LanguageEnum.KZ to "Қайтару камерасының ағын жылдамдығы",
                     ),
                 ),
                 SensorInfo(
@@ -288,6 +308,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Return chamber temperature",
                         LanguageEnum.RU to "Температура камеры обратки",
+                        LanguageEnum.KZ to "Қайтару камерасының температурасы",
                     ),
                     minView = -100.0,
                     maxView = 100.0
@@ -300,6 +321,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Fuel level",
                         LanguageEnum.RU to "Уровень топлива",
+                        LanguageEnum.KZ to "Отын деңгейі",
                     ),
                 ),
                 SensorInfo(
@@ -308,6 +330,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Temperature",
                         LanguageEnum.RU to "Температура",
+                        LanguageEnum.KZ to "Температура",
                     ),
                     minView = -100.0,
                     maxView = 100.0
@@ -318,6 +341,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Fuel volume",
                         LanguageEnum.RU to "Объём топлива",
+                        LanguageEnum.KZ to "Отын көлемі",
                     ),
                 ),
                 SensorInfo(
@@ -326,6 +350,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Fuel mass",
                         LanguageEnum.RU to "Масса топлива",
+                        LanguageEnum.KZ to "Отын массасы",
                     ),
                 ),
                 SensorInfo(
@@ -334,6 +359,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Density",
                         LanguageEnum.RU to "Плотность",
+                        LanguageEnum.KZ to "Тығыздық",
                     ),
                 ),
             ),
@@ -344,6 +370,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Direct active electrical energy",
                         LanguageEnum.RU to "Электроэнергия активная прямая",
+                        LanguageEnum.KZ to "Тікелей белсенді электр энергиясы",
                     ),
                 ),
                 SensorInfo(
@@ -352,6 +379,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Active reverse electrical energy",
                         LanguageEnum.RU to "Электроэнергия активная обратная",
+                        LanguageEnum.KZ to "Белсенді кері электр энергиясы",
                     ),
                 ),
                 SensorInfo(
@@ -360,6 +388,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Direct reactive electrical energy",
                         LanguageEnum.RU to "Электроэнергия реактивная прямая",
+                        LanguageEnum.KZ to "Тікелей реактивті электр энергиясы",
                     ),
                 ),
                 SensorInfo(
@@ -368,6 +397,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Reactive reverse electrical energy",
                         LanguageEnum.RU to "Электроэнергия реактивная обратная",
+                        LanguageEnum.KZ to "Реактивті кері электр энергиясы",
                     ),
                 ),
                 SensorInfo(
@@ -376,6 +406,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Voltage in phase A",
                         LanguageEnum.RU to "Напряжение по фазе A",
+                        LanguageEnum.KZ to "A фазасындағы кернеу",
                     ),
                     phase = 1,
                     minView = 0.0,
@@ -387,6 +418,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Voltage in phase B",
                         LanguageEnum.RU to "Напряжение по фазе B",
+                        LanguageEnum.KZ to "B фазасындағы кернеу",
                     ),
                     phase = 2,
                     minView = 0.0,
@@ -398,6 +430,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Voltage in phase C",
                         LanguageEnum.RU to "Напряжение по фазе C",
+                        LanguageEnum.KZ to "C фазасындағы кернеу",
                     ),
                     phase = 3,
                     minView = 0.0,
@@ -409,6 +442,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Current in phase A",
                         LanguageEnum.RU to "Ток по фазе A",
+                        LanguageEnum.KZ to "A фазасындағы ток",
                     ),
                     phase = 1
                 ),
@@ -418,6 +452,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Current in phase B",
                         LanguageEnum.RU to "Ток по фазе B",
+                        LanguageEnum.KZ to "B фазасындағы ток",
                     ),
                     phase = 2
                 ),
@@ -427,6 +462,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Current in phase C",
                         LanguageEnum.RU to "Ток по фазе C",
+                        LanguageEnum.KZ to "C фазасындағы ток",
                     ),
                     phase = 3
                 ),
@@ -436,6 +472,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Power factor in phase A",
                         LanguageEnum.RU to "Коэффициент мощности по фазе A",
+                        LanguageEnum.KZ to "A фазасындағы қуат коэффициенті",
                     ),
                     phase = 1,
                     minView = 0.0,
@@ -447,6 +484,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Power factor in phase B",
                         LanguageEnum.RU to "Коэффициент мощности по фазе B",
+                        LanguageEnum.KZ to "B фазасындағы қуат коэффициенті",
                     ),
                     phase = 2,
                     minView = 0.0,
@@ -458,6 +496,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Power factor in phase C",
                         LanguageEnum.RU to "Коэффициент мощности по фазе C",
+                        LanguageEnum.KZ to "C фазасындағы қуат коэффициенті",
                     ),
                     phase = 3,
                     minView = 0.0,
@@ -469,6 +508,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Active power in phase A",
                         LanguageEnum.RU to "Мощность активная по фазе A",
+                        LanguageEnum.KZ to "A фазасындағы белсенді қуат",
                     ),
                     phase = 1
                 ),
@@ -478,6 +518,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Active power in phase B",
                         LanguageEnum.RU to "Мощность активная по фазе B",
+                        LanguageEnum.KZ to "B фазасындағы белсенді қуат",
                     ),
                     phase = 2
                 ),
@@ -487,6 +528,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Active power in phase C",
                         LanguageEnum.RU to "Мощность активная по фазе C",
+                        LanguageEnum.KZ to "C фазасындағы белсенді қуат",
                     ),
                     phase = 3
                 ),
@@ -496,6 +538,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Reactive power in phase A",
                         LanguageEnum.RU to "Мощность реактивная по фазе A",
+                        LanguageEnum.KZ to "A фазасындағы реактивті қуат",
                     ),
                     phase = 1
                 ),
@@ -505,6 +548,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Reactive power in phase B",
                         LanguageEnum.RU to "Мощность реактивная по фазе B",
+                        LanguageEnum.KZ to "B фазасындағы реактивті қуат",
                     ),
                     phase = 2
                 ),
@@ -514,6 +558,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Reactive power in phase C",
                         LanguageEnum.RU to "Мощность реактивная по фазе C",
+                        LanguageEnum.KZ to "C фазасындағы реактивті қуат",
                     ),
                     phase = 3
                 ),
@@ -523,6 +568,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Full power in phase A",
                         LanguageEnum.RU to "Мощность полная по фазе A",
+                        LanguageEnum.KZ to "A фазасындағы толық қуат",
                     ),
                     phase = 1
                 ),
@@ -532,6 +578,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Full power in phase B",
                         LanguageEnum.RU to "Мощность полная по фазе B",
+                        LanguageEnum.KZ to "B фазасындағы толық қуат",
                     ),
                     phase = 2
                 ),
@@ -541,6 +588,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Full power in phase C",
                         LanguageEnum.RU to "Мощность полная по фазе C",
+                        LanguageEnum.KZ to "C фазасындағы толық қуат",
                     ),
                     phase = 3
                 ),
@@ -550,6 +598,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Active power in all phases",
                         LanguageEnum.RU to "Мощность активная по всем фазам",
+                        LanguageEnum.KZ to "Барлық фазалардағы белсенді қуат",
                     ),
                     phase = 0
                 ),
@@ -559,6 +608,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Reactive power in all phases",
                         LanguageEnum.RU to "Мощность реактивная по всем фазам",
+                        LanguageEnum.KZ to "Барлық фазалардағы реактивті қуат",
                     ),
                     phase = 0
                 ),
@@ -568,6 +618,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Full power in all phases",
                         LanguageEnum.RU to "Мощность полная по всем фазам",
+                        LanguageEnum.KZ to "Барлық фазаларда толық қуат",
                     ),
                     phase = 0
                 ),
@@ -577,6 +628,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Current transformation ratio",
                         LanguageEnum.RU to "Коэффициент трансформации по току",
+                        LanguageEnum.KZ to "Ағымдағы трансформация коэффициенті",
                     ),
                 ),
                 SensorInfo(
@@ -585,6 +637,7 @@ class DeviceService(
                     descr = mapOf(
                         LanguageEnum.EN to "Voltage transformation ratio",
                         LanguageEnum.RU to "Коэффициент трансформации по напряжению",
+                        LanguageEnum.KZ to "Кернеу түрлендіру коэффициенті",
                     ),
                 ),
             ),
@@ -782,7 +835,7 @@ class DeviceService(
             }
 
             //if (userConfig.isWideScreen) {
-                row++
+            row++
             //}
             dataRow++
         }

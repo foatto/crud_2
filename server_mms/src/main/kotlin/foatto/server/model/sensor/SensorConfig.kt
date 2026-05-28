@@ -114,111 +114,138 @@ class SensorConfig {
         val hmSensorDescr: Map<Int, Map<LanguageEnum, String>> = mapOf(
             SENSOR_GEO to mapOf(
                 LanguageEnum.EN to "Geo-data",
-                LanguageEnum.RU to "Гео-данные"
+                LanguageEnum.RU to "Гео-данные",
+                LanguageEnum.KZ to "Геодеректер",
             ),
             SENSOR_WORK to mapOf(
                 LanguageEnum.EN to "Equipment operation",
-                LanguageEnum.RU to "Работа оборудования"
+                LanguageEnum.RU to "Работа оборудования",
+                LanguageEnum.KZ to "Жабдықты пайдалану",
             ),
             SENSOR_LIQUID_LEVEL to mapOf(
                 LanguageEnum.EN to "Fuel level",
-                LanguageEnum.RU to "Уровень топлива"
+                LanguageEnum.RU to "Уровень топлива",
+                LanguageEnum.KZ to "Отын деңгейі",
             ),
             SENSOR_WEIGHT to mapOf(
                 LanguageEnum.EN to "Weight",
-                LanguageEnum.RU to "Вес"
+                LanguageEnum.RU to "Вес",
+                LanguageEnum.KZ to "Салмақ",
             ),
             SENSOR_TURN to mapOf(
                 LanguageEnum.EN to "Rotational speed",
-                LanguageEnum.RU to "Обороты вращения"
+                LanguageEnum.RU to "Обороты вращения",
+                LanguageEnum.KZ to "Айналу жылдамдығы",
             ),
             SENSOR_PRESSURE to mapOf(
                 LanguageEnum.EN to "Pressure",
-                LanguageEnum.RU to "Давление"
+                LanguageEnum.RU to "Давление",
+                LanguageEnum.KZ to "Қысым",
             ),
             SENSOR_TEMPERATURE to mapOf(
                 LanguageEnum.EN to "Temperature",
-                LanguageEnum.RU to "Температура"
+                LanguageEnum.RU to "Температура",
+                LanguageEnum.KZ to "Температура",
             ),
             SENSOR_VOLTAGE to mapOf(
                 LanguageEnum.EN to "Voltage",
-                LanguageEnum.RU to "Напряжение"
+                LanguageEnum.RU to "Напряжение",
+                LanguageEnum.KZ to "Вольтаж",
             ),
             SENSOR_POWER to mapOf(
                 LanguageEnum.EN to "Power",
-                LanguageEnum.RU to "Мощность"
+                LanguageEnum.RU to "Мощность",
+                LanguageEnum.KZ to "Қуат",
             ),
             SENSOR_DENSITY to mapOf(
                 LanguageEnum.EN to "Density",
-                LanguageEnum.RU to "Плотность"
+                LanguageEnum.RU to "Плотность",
+                LanguageEnum.KZ to "Тығыздық",
             ),
             SENSOR_MASS_FLOW to mapOf(
                 LanguageEnum.EN to "Mass flow rate",
-                LanguageEnum.RU to "Массовый расход"
+                LanguageEnum.RU to "Массовый расход",
+                LanguageEnum.KZ to "Масса ағынының жылдамдығы",
             ),
             SENSOR_VOLUME_FLOW to mapOf(
                 LanguageEnum.EN to "Volumetric flow rate",
-                LanguageEnum.RU to "Объёмный расход"
+                LanguageEnum.RU to "Объёмный расход",
+                LanguageEnum.KZ to "Көлемдік ағын жылдамдығы",
             ),
             SENSOR_MASS_ACCUMULATED to mapOf(
                 LanguageEnum.EN to "Accumulated mass",
-                LanguageEnum.RU to "Накопленная масса"
+                LanguageEnum.RU to "Накопленная масса",
+                LanguageEnum.KZ to "Жиналған масса",
             ),
             SENSOR_VOLUME_ACCUMULATED to mapOf(
                 LanguageEnum.EN to "Accumulated volume",
-                LanguageEnum.RU to "Накопленный объём"
+                LanguageEnum.RU to "Накопленный объём",
+                LanguageEnum.KZ to "Жинақталған көлем",
             ),
             SENSOR_LIQUID_USING to mapOf(
                 LanguageEnum.EN to "Fuel consumption",
-                LanguageEnum.RU to "Расход топлива"
+                LanguageEnum.RU to "Расход топлива",
+                LanguageEnum.KZ to "Отын шығыны",
             ),
             SENSOR_ENERGO_COUNT_AD to mapOf(
                 LanguageEnum.EN to "Direct active electrical energy",
-                LanguageEnum.RU to "Электроэнергия активная прямая"
+                LanguageEnum.RU to "Электроэнергия активная прямая",
+                LanguageEnum.KZ to "Тікелей белсенді электр энергиясы",
             ),
             SENSOR_ENERGO_COUNT_AR to mapOf(
                 LanguageEnum.EN to "Active reverse electrical energy",
-                LanguageEnum.RU to "Электроэнергия активная обратная"
+                LanguageEnum.RU to "Электроэнергия активная обратная",
+                LanguageEnum.KZ to "Белсенді кері электр энергиясы",
             ),
             SENSOR_ENERGO_COUNT_RD to mapOf(
                 LanguageEnum.EN to "Direct reactive electrical energy",
-                LanguageEnum.RU to "Электроэнергия реактивная прямая"
+                LanguageEnum.RU to "Электроэнергия реактивная прямая",
+                LanguageEnum.KZ to "Тікелей реактивті электр энергиясы",
             ),
             SENSOR_ENERGO_COUNT_RR to mapOf(
                 LanguageEnum.EN to "Reactive reverse electrical energy",
-                LanguageEnum.RU to "Электроэнергия реактивная обратная"
+                LanguageEnum.RU to "Электроэнергия реактивная обратная",
+                LanguageEnum.KZ to "Реактивті кері электр энергиясы",
             ),
             SENSOR_ENERGO_VOLTAGE to mapOf(
                 LanguageEnum.EN to "Phase electric voltage",
-                LanguageEnum.RU to "Электрическое напряжение фазное"
+                LanguageEnum.RU to "Электрическое напряжение фазное",
+                LanguageEnum.KZ to "Фазалық электр кернеуі",
             ),
             SENSOR_ENERGO_CURRENT to mapOf(
                 LanguageEnum.EN to "Phase electric current",
-                LanguageEnum.RU to "Электрический ток фазный"
+                LanguageEnum.RU to "Электрический ток фазный",
+                LanguageEnum.KZ to "Фазалық электр тогы",
             ),
             SENSOR_ENERGO_POWER_KOEF to mapOf(
                 LanguageEnum.EN to "Phase power factor",
-                LanguageEnum.RU to "Коэффициент мощности фазный"
+                LanguageEnum.RU to "Коэффициент мощности фазный",
+                LanguageEnum.KZ to "Фазалық қуат коэффициенті",
             ),
             SENSOR_ENERGO_POWER_ACTIVE to mapOf(
                 LanguageEnum.EN to "Active phase power",
-                LanguageEnum.RU to "Активная мощность фазная"
+                LanguageEnum.RU to "Активная мощность фазная",
+                LanguageEnum.KZ to "Белсенді фазалық қуат",
             ),
             SENSOR_ENERGO_POWER_REACTIVE to mapOf(
                 LanguageEnum.EN to "Phase reactive power",
-                LanguageEnum.RU to "Реактивная мощность фазная"
+                LanguageEnum.RU to "Реактивная мощность фазная",
+                LanguageEnum.KZ to "Фазалық реактивті қуат",
             ),
             SENSOR_ENERGO_POWER_FULL to mapOf(
                 LanguageEnum.EN to "Full phase power",
-                LanguageEnum.RU to "Полная мощность фазная"
+                LanguageEnum.RU to "Полная мощность фазная",
+                LanguageEnum.KZ to "Толық фазалық қуат",
             ),
             SENSOR_ENERGO_TRANSFORM_KOEF_CURRENT to mapOf(
                 LanguageEnum.EN to "Current transformation ratio",
-                LanguageEnum.RU to "Коэффициент трансформации по току"
+                LanguageEnum.RU to "Коэффициент трансформации по току",
+                LanguageEnum.KZ to "Ағымдағы трансформация коэффициенті",
             ),
             SENSOR_ENERGO_TRANSFORM_KOEF_VOLTAGE to mapOf(
                 LanguageEnum.EN to "Voltage transformation ratio",
-                LanguageEnum.RU to "Коэффициент трансформации по напряжению"
+                LanguageEnum.RU to "Коэффициент трансформации по напряжению",
+                LanguageEnum.KZ to "Кернеу түрлендіру коэффициенті",
             ),
         )
 

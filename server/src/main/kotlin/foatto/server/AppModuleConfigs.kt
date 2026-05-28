@@ -9,7 +9,11 @@ import foatto.server.model.Permission
 val appModuleConfigs: MutableMap<String, AppModuleConfig> = mutableMapOf(
 
     AppModule.ACTION_LOG to AppModuleConfig(
-        captions = mapOf(LanguageEnum.EN to "Action Log", LanguageEnum.RU to "Журнал активности"),
+        captions = mapOf(
+            LanguageEnum.EN to "Action Log",
+            LanguageEnum.RU to "Журнал активности",
+            LanguageEnum.KZ to "Әрекет журналы",
+        ),
         pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
         enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
         disabledAccessRoles = mutableSetOf(AppRole.USER),
@@ -34,7 +38,11 @@ val appModuleConfigs: MutableMap<String, AppModuleConfig> = mutableMapOf(
     ),
 
     AppModule.USER to AppModuleConfig(
-        captions = mapOf(LanguageEnum.EN to "Users", LanguageEnum.RU to "Пользователи"),
+        captions = mapOf(
+            LanguageEnum.EN to "Users",
+            LanguageEnum.RU to "Пользователи",
+            LanguageEnum.KZ to "Пайдаланушылар",
+        ),
         enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
         disabledAccessRoles = mutableSetOf(AppRole.USER),
         enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -60,7 +68,11 @@ val appModuleConfigs: MutableMap<String, AppModuleConfig> = mutableMapOf(
     ),
 
     AppModule.USER_PROPERTY_EDIT to AppModuleConfig(
-        captions = mapOf(LanguageEnum.EN to "My settings", LanguageEnum.RU to "Мои настройки"),
+        captions = mapOf(
+            LanguageEnum.EN to "My settings",
+            LanguageEnum.RU to "Мои настройки",
+            LanguageEnum.KZ to "Менің параметрлерім",
+        ),
         enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
         disabledAccessRoles = mutableSetOf(),
         disabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),

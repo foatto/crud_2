@@ -112,6 +112,7 @@ class MMSRoot : Root() {
         logonFormTitles = mapOf(
             LanguageEnum.EN to "CONTROL SYSTEM\n\nFOR PROCESS EQUIPMENT AND TRANSPORT",
             LanguageEnum.RU to "СИСТЕМА КОНТРОЛЯ\n\nТЕХНОЛОГИЧЕСКОГО ОБОРУДОВАНИЯ И ТРАНСПОРТА",
+            LanguageEnum.KZ to "БАСҚАРУ ЖҮЙЕСІ\n\nТЕХНОЛОГИЯЛЫҚ ЖАБДЫҚТАР ЖӘНЕ КӨЛІК",
         )
 
         widthLogo = 256.dp

@@ -29,10 +29,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.runApplication
-import org.springframework.context.annotation.Bean
 import org.springframework.context.event.EventListener
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @SpringBootApplication(
     scanBasePackages = ["foatto.server"],
@@ -103,7 +100,11 @@ class MMSSpringApp(
         addDisabledRoles(AppModule.USER, ActionType.FORM_DELETE, AppRoleMMS.SUPPORT)
 
         appModuleConfigs[AppModuleMMS.ALL_OBJECT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "All objects", LanguageEnum.RU to "Все объекты"),
+            captions = mapOf(
+                LanguageEnum.EN to "All objects",
+                LanguageEnum.RU to "Все объекты",
+                LanguageEnum.KZ to "Барлық нысандар",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -134,7 +135,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.MOBILE_OBJECT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Mobile objects", LanguageEnum.RU to "Мобильные объекты"),
+            captions = mapOf(
+                LanguageEnum.EN to "Mobile objects",
+                LanguageEnum.RU to "Мобильные объекты",
+                LanguageEnum.KZ to "Жылжымалы нысандар",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_MOBILE_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
@@ -165,7 +170,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.STATIONARY_OBJECT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Stationary objects", LanguageEnum.RU to "Стационарные объекты"),
+            captions = mapOf(
+                LanguageEnum.EN to "Stationary objects",
+                LanguageEnum.RU to "Стационарные объекты",
+                LanguageEnum.KZ to "Қозғалмайтын нысандар",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
@@ -196,7 +205,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.DEPARTMENT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Departments", LanguageEnum.RU to "Подразделения"),
+            captions = mapOf(
+                LanguageEnum.EN to "Departments",
+                LanguageEnum.RU to "Подразделения",
+                LanguageEnum.KZ to "Бөлімдер",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -228,7 +241,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.GROUP] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Groups", LanguageEnum.RU to "Группы"),
+            captions = mapOf(
+                LanguageEnum.EN to "Groups",
+                LanguageEnum.RU to "Группы",
+                LanguageEnum.KZ to "Топтар",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -261,7 +278,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.SENSOR] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Sensors", LanguageEnum.RU to "Датчики"),
+            captions = mapOf(
+                LanguageEnum.EN to "Sensors",
+                LanguageEnum.RU to "Датчики",
+                LanguageEnum.KZ to "Сенсорлар",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -286,7 +307,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.SENSOR_CALIBRATION] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Sensor calibration", LanguageEnum.RU to "Тарировка датчика"),
+            captions = mapOf(
+                LanguageEnum.EN to "Sensor calibration",
+                LanguageEnum.RU to "Тарировка датчика",
+                LanguageEnum.KZ to "Сенсорды калибрлеу",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -312,7 +337,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.OBJECT_DATA] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Object data", LanguageEnum.RU to "Данные по объекту"),
+            captions = mapOf(
+                LanguageEnum.EN to "Object data",
+                LanguageEnum.RU to "Данные по объекту",
+                LanguageEnum.KZ to "Нысан деректері",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
 //            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -337,7 +366,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.SENSOR_DATA] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Sensor data", LanguageEnum.RU to "Данные по датчику"),
+            captions = mapOf(
+                LanguageEnum.EN to "Sensor data",
+                LanguageEnum.RU to "Данные по датчику",
+                LanguageEnum.KZ to "Сенсор деректері",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
 //            enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -363,7 +396,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.DEVICE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Devices", LanguageEnum.RU to "Контроллеры"),
+            captions = mapOf(
+                LanguageEnum.EN to "Devices",
+                LanguageEnum.RU to "Контроллеры",
+                LanguageEnum.KZ to "Контроллерлер",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
@@ -393,7 +430,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.DEVICE_MANAGE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Device control", LanguageEnum.RU to "Управление контроллером"),
+            captions = mapOf(
+                LanguageEnum.EN to "Device control",
+                LanguageEnum.RU to "Управление контроллером",
+                LanguageEnum.KZ to "Басқару құралын басқару",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN),
@@ -419,7 +460,11 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.DAY_ALL_WORK] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Daily all works log", LanguageEnum.RU to "Журнал всех суточных работ"),
+            captions = mapOf(
+                LanguageEnum.EN to "Daily all works log",
+                LanguageEnum.RU to "Журнал всех суточных работ",
+                LanguageEnum.KZ to "Барлық күнделікті жұмыстардың журналы",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -447,7 +492,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.DAY_MOBILE_WORK] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Daily mobile works log", LanguageEnum.RU to "Журнал мобильных суточных работ"),
+            captions = mapOf(
+                LanguageEnum.EN to "Daily mobile works log",
+                LanguageEnum.RU to "Журнал мобильных суточных работ",
+                LanguageEnum.KZ to "Мобильді күнделікті жұмыс журналы",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -475,7 +524,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.DAY_STATIONARY_WORK] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Daily stationary works log", LanguageEnum.RU to "Журнал стационарных суточных работ"),
+            captions = mapOf(
+                LanguageEnum.EN to "Daily stationary works log",
+                LanguageEnum.RU to "Журнал стационарных суточных работ",
+                LanguageEnum.KZ to "Стационарлық күнделікті жұмыс журналы",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
@@ -503,7 +556,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.WORK_SHIFT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Shift work log", LanguageEnum.RU to "Журнал посменных работ"),
+            captions = mapOf(
+                LanguageEnum.EN to "Shift work log",
+                LanguageEnum.RU to "Журнал посменных работ",
+                LanguageEnum.KZ to "Ауысымдық жұмыс журналы",
+            ),
             pageSize = AppModuleConfig.DEFAULT_PAGE_SIZE,
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
@@ -536,71 +593,123 @@ class MMSSpringApp(
         )
 
         appModuleConfigs[AppModuleMMS.CHART_SENSOR] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Chart by sensor", LanguageEnum.RU to "График по датчику"),
+            captions = mapOf(
+                LanguageEnum.EN to "Chart by sensor",
+                LanguageEnum.RU to "График по датчику",
+                LanguageEnum.KZ to "Сенсор бойынша график",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.CHART_ALL_SENSORS] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Charts for all sensors", LanguageEnum.RU to "Графики по всем датчикам"),
+            captions = mapOf(
+                LanguageEnum.EN to "Charts for all sensors",
+                LanguageEnum.RU to "Графики по всем датчикам",
+                LanguageEnum.KZ to "Барлық сенсорларға арналған графиктер",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.CHART_ENERGO_SENSORS] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Charts for energo sensors", LanguageEnum.RU to "Графики по электросчётчикам"),
+            captions = mapOf(
+                LanguageEnum.EN to "Charts for energo sensors",
+                LanguageEnum.RU to "Графики по электросчётчикам",
+                LanguageEnum.KZ to "Электр есептегіштерінің кестелері",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.CHART_LIQUID_LEVEL] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Combined charts for fuel tanks", LanguageEnum.RU to "Комбинированные графики уровня топлива"),
+            captions = mapOf(
+                LanguageEnum.EN to "Combined charts for fuel tanks",
+                LanguageEnum.RU to "Комбинированные графики уровня топлива",
+                LanguageEnum.KZ to "Біріктірілген отын деңгейінің графиктері",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
         )
 
         appModuleConfigs[AppModuleMMS.MAP_TRACE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Trajectory on the map", LanguageEnum.RU to "Траектория на карте"),
+            captions = mapOf(
+                LanguageEnum.EN to "Trajectory on the map",
+                LanguageEnum.RU to "Траектория на карте",
+                LanguageEnum.KZ to "Картадағы траектория",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_MOBILE_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
         )
 
         appModuleConfigs[AppModuleMMS.SCHEME_ANALOGUE_INDICATOR_STATE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Analog indicator of the object sensor", LanguageEnum.RU to "Аналоговый индикатор датчика объекта"),
+            captions = mapOf(
+                LanguageEnum.EN to "Analog indicator of the object sensor",
+                LanguageEnum.RU to "Аналоговый индикатор датчика объекта",
+                LanguageEnum.KZ to "Нысан сенсорының аналогтық индикаторы",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.SCHEME_COUNTER_INDICATOR_STATE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Object counter sensor indicator", LanguageEnum.RU to "Индикатор счётного датчика объекта"),
+            captions = mapOf(
+                LanguageEnum.EN to "Object counter sensor indicator",
+                LanguageEnum.RU to "Индикатор счётного датчика объекта",
+                LanguageEnum.KZ to "Нысан санауыш сенсорының индикаторы",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.SCHEME_WORK_INDICATOR_STATE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Object operation sensor indicator", LanguageEnum.RU to "Индикатор датчика работы объекта"),
+            captions = mapOf(
+                LanguageEnum.EN to "Object operation sensor indicator",
+                LanguageEnum.RU to "Индикатор датчика работы объекта",
+                LanguageEnum.KZ to "Объектінің жұмыс сенсорының индикаторы",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
 
         appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_DASHBOARD] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Object control indicators: all sensors", LanguageEnum.RU to "Контрольные показатели объекта: все датчики"),
+            captions = mapOf(
+                LanguageEnum.EN to "Object control indicators: all sensors",
+                LanguageEnum.RU to "Контрольные показатели объекта: все датчики",
+                LanguageEnum.KZ to "Нысанды басқару индикаторлары: барлық сенсорлар",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.OBJECT_SCHEME_LIST_DASHBOARD] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Object control indicators", LanguageEnum.RU to "Контрольные показатели объектов"),
+            captions = mapOf(
+                LanguageEnum.EN to "Object control indicators",
+                LanguageEnum.RU to "Контрольные показатели объектов",
+                LanguageEnum.KZ to "Нысанды басқару индикаторлары",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.OBJECT_CHART_DASHBOARD] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Object control charts: all sensors", LanguageEnum.RU to "Контрольные графики объекта: все датчики"),
+            captions = mapOf(
+                LanguageEnum.EN to "Object control charts: all sensors",
+                LanguageEnum.RU to "Контрольные графики объекта: все датчики",
+                LanguageEnum.KZ to "Нысанды басқару диаграммалары: барлық сенсорлар",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.OBJECT_CHART_LIST_DASHBOARD] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Control charts of objects", LanguageEnum.RU to "Контрольные графики объектов"),
+            captions = mapOf(
+                LanguageEnum.EN to "Control charts of objects",
+                LanguageEnum.RU to "Контрольные графики объектов",
+                LanguageEnum.KZ to "Объектілердің басқару диаграммалары",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
 
         appModuleConfigs[AppModuleMMS.REPORT_SUMMARY] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Summary report", LanguageEnum.RU to "Суммарный отчёт"),
+            captions = mapOf(
+                LanguageEnum.EN to "Summary report",
+                LanguageEnum.RU to "Суммарный отчёт",
+                LanguageEnum.KZ to "Қысқаша есеп",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
@@ -612,7 +721,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.REPORT_DAY_WORK] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Day work report", LanguageEnum.RU to "Отчёт по суточным работам"),
+            captions = mapOf(
+                LanguageEnum.EN to "Day work report",
+                LanguageEnum.RU to "Отчёт по суточным работам",
+                LanguageEnum.KZ to "Күнделікті жұмыс есебі",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
@@ -624,7 +737,11 @@ class MMSSpringApp(
             ),
         )
         appModuleConfigs[AppModuleMMS.REPORT_WORK_SHIFT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Work shift report", LanguageEnum.RU to "Отчёт по рабочим сменам"),
+            captions = mapOf(
+                LanguageEnum.EN to "Work shift report",
+                LanguageEnum.RU to "Отчёт по рабочим сменам",
+                LanguageEnum.KZ to "Жұмыс ауысымы туралы есеп",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
             disabledAccessRoles = mutableSetOf(),
             enabledFormAddRoles = mutableSetOf(AppRole.ADMIN, AppRoleMMS.USER_FIXED_OBJECTS),
@@ -638,12 +755,20 @@ class MMSSpringApp(
 
         //--- упрощённая настройка телеграм-модулей - модифицируем настройки классических модулей
         appModuleConfigs[AppModuleMMS.T_OBJECT] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Objects", LanguageEnum.RU to "Объекты"),
+            captions = mapOf(
+                LanguageEnum.EN to "Objects",
+                LanguageEnum.RU to "Объекты",
+                LanguageEnum.KZ to "Нысандар",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN, AppRole.USER),
             disabledAccessRoles = mutableSetOf(),
         )
         appModuleConfigs[AppModuleMMS.T_DEVICE] = AppModuleConfig(
-            captions = mapOf(LanguageEnum.EN to "Devices", LanguageEnum.RU to "Приборы"),
+            captions = mapOf(
+                LanguageEnum.EN to "Devices",
+                LanguageEnum.RU to "Приборы",
+                LanguageEnum.KZ to "Құрылғылар",
+            ),
             enabledAccessRoles = mutableSetOf(AppRole.ADMIN),
             disabledAccessRoles = mutableSetOf(AppRole.USER),
         )
@@ -696,7 +821,7 @@ class MMSSpringApp(
             ),
             text = appModuleConfigs[childModule]?.captions?.let { captions ->
                 getLocalizedMessage(captions, userConfig.lang)
-            } ?: "(неизвестный тип модуля: '$childModule')",
+            } ?: "(unknown module type: '$childModule')",
             inNewTab = true,
         )
     }
@@ -933,7 +1058,7 @@ class MMSSpringApp(
                 LanguageEnum.entries.forEach { lang ->
                     langSubMenus += MenuData(caption = lang.descr, action = AppAction(type = ActionType.SET_LANGUAGE, module = lang.name))
                 }
-                add(MenuData(caption = LanguageEnum.entries.joinToString(separator = " / ") { le -> le.descr }, subMenuDatas = langSubMenus))
+                add(MenuData(caption = LanguageEnum.entries.joinToString(separator = " / ") { le -> le.name }, subMenuDatas = langSubMenus))
 
                 addMenuItem(
                     alMenu = this,

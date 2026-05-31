@@ -1,6 +1,7 @@
 package foatto.server.service
 
 import foatto.core.ActionType
+import foatto.core.i18n.LanguageEnum
 import foatto.core.i18n.LocalizedMessages
 import foatto.core.i18n.getLocalizedMessage
 import foatto.core.model.AppAction
@@ -11,6 +12,7 @@ import foatto.core.model.response.form.FormButton
 import foatto.core.model.response.form.FormDateTimeCellMode
 import foatto.core.model.response.form.cells.FormBaseCell
 import foatto.core.model.response.form.cells.FormBooleanCell
+import foatto.core.model.response.form.cells.FormComboCell
 import foatto.core.model.response.form.cells.FormDateTimeCell
 import foatto.core.model.response.form.cells.FormFileCell
 import foatto.core.model.response.form.cells.FormSimpleCell
@@ -18,6 +20,7 @@ import foatto.core.model.response.table.TableCaption
 import foatto.core.model.response.table.TablePageButton
 import foatto.core.model.response.table.TableRow
 import foatto.core.model.response.table.cell.TableBaseCell
+import foatto.server.SpringApp
 import foatto.server.checkRowPermission
 import foatto.server.model.AppModuleConfig
 import foatto.server.model.ServerUserConfig
@@ -42,6 +45,7 @@ class UserPropertyEditService(
 
     companion object {
         private const val FIELD_TIME_OFFSET = "timeOffset"
+        private const val FIELD_LANG = "lang"
         private const val FIELD_EMAIL = "eMail"
         private const val FIELD_TELEGRAM = "telegram"
         private const val FIELD_CONTACT_INFO = "contactInfo"
@@ -72,6 +76,14 @@ class UserPropertyEditService(
             isEditable = changeEnabled,
             mode = FormDateTimeCellMode.HM,
             value = userEntity?.timeOffset ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds,
+        )
+        formCells += FormComboCell(
+            name = FIELD_LANG,
+            caption = getLocalizedMessage(LocalizedMessages.LANG, userConfig.lang),
+            isEditable = changeEnabled,
+            value = (userEntity?.lang ?: SpringApp.defaultLang).name,
+            values = LanguageEnum.entries.map { v -> v.name to v.descr },
+            asRadioButtons = true,
         )
         formCells += FormSimpleCell(
             name = FIELD_EMAIL,
@@ -134,6 +146,7 @@ class UserPropertyEditService(
 
         userEntity.apply {
             timeOffset = formActionData[FIELD_TIME_OFFSET]?.dateTimeValue ?: TimeZone.currentSystemDefault().offsetAt(Clock.System.now()).totalSeconds
+            lang = formActionData[FIELD_LANG]?.stringValue?.let { s -> LanguageEnum.valueOf(s) } ?: SpringApp.defaultLang
             eMail = formActionData[FIELD_EMAIL]?.stringValue
             telegram = formActionData[FIELD_TELEGRAM]?.stringValue
             contactInfo = formActionData[FIELD_CONTACT_INFO]?.stringValue

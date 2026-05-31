@@ -141,7 +141,7 @@ class SensorService(
             }
         }
 
-        private fun checkAggTableIsExists(conn: CoreAdvancedConnection, sensorId: Int): Boolean {
+        fun checkAggTableIsExists(conn: CoreAdvancedConnection, sensorId: Int): Boolean {
             val rs = conn.executeQuery(getAggTableIsExistsSql(sensorId))
             val result = rs.next()
             rs.close()
@@ -165,7 +165,7 @@ class SensorService(
                 AND tablename = 'mms_agg_$sensorId'
             """
 
-        private fun checkTextTableIsExists(conn: CoreAdvancedConnection, sensorId: Int): Boolean {
+        fun checkTextTableIsExists(conn: CoreAdvancedConnection, sensorId: Int): Boolean {
             val rs = conn.executeQuery(getTextTableIsExistsSql(sensorId))
             val result = rs.next()
             rs.close()

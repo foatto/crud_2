@@ -7,29 +7,16 @@ class DBConfig(
 ) {
 
     companion object {
-        private const val CONFIG_DB_URL_ = "db_url_"
-        private const val CONFIG_DB_LOGIN_ = "db_login_"
-        private const val CONFIG_DB_PASSWORD_ = "db_password_"
+        private const val CONFIG_DB_URL = "db_url"
+        private const val CONFIG_DB_LOGIN = "db_login"
+        private const val CONFIG_DB_PASSWORD = "db_password"
 
-        fun loadConfig(hmConfig: Map<String, String>): List<DBConfig> {
-            val alDBConfig = mutableListOf<DBConfig>()
-
-            var index = 0
-            while (true) {
-                val dbUrl = hmConfig[CONFIG_DB_URL_ + index] ?: break
-
-                alDBConfig.add(
-                    DBConfig(
-                        dbUrl,
-                        hmConfig[CONFIG_DB_LOGIN_ + index]!!,
-                        hmConfig[CONFIG_DB_PASSWORD_ + index]!!,
-                    )
-                )
-                index++
-            }
-
-            return alDBConfig
-        }
+        fun loadConfig(hmConfig: Map<String, String>): DBConfig =
+            DBConfig(
+                url = hmConfig[CONFIG_DB_URL]!!,
+                login = hmConfig[CONFIG_DB_LOGIN]!!,
+                password = hmConfig[CONFIG_DB_PASSWORD]!!,
+            )
     }
 
 }

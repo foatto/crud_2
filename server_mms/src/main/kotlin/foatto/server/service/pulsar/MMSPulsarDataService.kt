@@ -276,7 +276,7 @@ class MMSPulsarDataService(
                         outDataParseError(serialNo, "Vals is null")
                     }
 
-                    ApplicationService.Companion.withConnection(entityManager) { conn ->
+                    ApplicationService.withConnection(entityManager) { conn ->
                         val bbData = AdvancedByteBuffer(CoreTelematicFunction.MAX_PORT_PER_DEVICE * 8)
 
                         MMSTelematicFunction.saveSensorData(conn, deviceConfig.deviceIndex, sensorConfigs, sensorCalibrations, pointTime, tmGalileoCount, PortNumbers.GALILEO_COUNT_110, bbData)

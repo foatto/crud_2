@@ -509,6 +509,13 @@ enum class LocalizedMMSMessages(
             LanguageEnum.KZ to "Максималды көрсету мәні",
         )
     ),
+    MAXIMUM_NO_DATA_TIME(
+        mapOf(
+            LanguageEnum.EN to "Maximum no data time",
+            LanguageEnum.RU to "Максимальное время отсутствия данных",
+            LanguageEnum.KZ to "Деректерсіз максималды уақыт",
+        )
+    ),
     MAXIMUM_OPERATING_VALUE(
         mapOf(
             LanguageEnum.EN to "Maximum operating value",

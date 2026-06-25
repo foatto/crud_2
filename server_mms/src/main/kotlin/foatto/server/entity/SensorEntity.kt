@@ -88,6 +88,9 @@ class SensorEntity(
     @Column(name = "min_over_time")
     var workMinOverTime: Int?,
 
+    @Column(name = "max_no_data_time")
+    var workMaxNoDataTime: Int?,
+
     //--- analogue sensor attributes
 
     @Column(name = "analog_min_view")
@@ -160,6 +163,7 @@ class SensorEntity(
         if (workMinOnTime != other.workMinOnTime) return false
         if (workMinIdleTime != other.workMinIdleTime) return false
         if (workMinOverTime != other.workMinOverTime) return false
+        if (workMaxNoDataTime != other.workMaxNoDataTime) return false
         if (minView != other.minView) return false
         if (maxView != other.maxView) return false
         if (minLimit != other.minLimit) return false
@@ -202,6 +206,7 @@ class SensorEntity(
         result = 31 * result + (workMinOnTime ?: 0)
         result = 31 * result + (workMinIdleTime ?: 0)
         result = 31 * result + (workMinOverTime ?: 0)
+        result = 31 * result + (workMaxNoDataTime ?: 0)
         result = 31 * result + (minView?.hashCode() ?: 0)
         result = 31 * result + (maxView?.hashCode() ?: 0)
         result = 31 * result + (minLimit?.hashCode() ?: 0)

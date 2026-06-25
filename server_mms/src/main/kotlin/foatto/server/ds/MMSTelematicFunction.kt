@@ -22,19 +22,19 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
 
 object MMSTelematicFunction {
-    
+
     const val DEVICE_TYPE_GALILEO: Int = 1
     const val DEVICE_TYPE_PULSAR_DATA: Int = 3
-    
+
     private const val SENSOR_ERROR_VALUE_NO_DATA: Double = -1.0E-12
     private const val SENSOR_ERROR_VALUE_MEASURE_ERROR: Double = -2.0E-12
-    
+
     private const val TEXT_CODE_NO_DATA: Int = 1
     private const val TEXT_CODE_MEASURE_ERROR: Int = 2
-    
+
     private const val TEXT_TYPE_UNKNOWN: Int = 0
     private const val TEXT_TYPE_ERROR: Int = 1
-    
+
     private val textCodes: Map<Double, Int> = mapOf(
         SENSOR_ERROR_VALUE_NO_DATA to TEXT_CODE_NO_DATA,
         SENSOR_ERROR_VALUE_MEASURE_ERROR to TEXT_CODE_MEASURE_ERROR,
@@ -43,7 +43,7 @@ object MMSTelematicFunction {
         TEXT_CODE_NO_DATA to TEXT_TYPE_ERROR,
         TEXT_CODE_MEASURE_ERROR to TEXT_TYPE_ERROR,
     )
-    
+
     private val texts: Map<Int, Map<LanguageEnum, String>> = mapOf(
         TEXT_CODE_NO_DATA to mapOf(
             LanguageEnum.EN to "The sensor is not responding",
@@ -56,10 +56,10 @@ object MMSTelematicFunction {
             LanguageEnum.KZ to "Өлшеу қателігі",
         ),
     )
-    
+
     fun getText(textCode: Int?, lang: LanguageEnum): String =
         texts[textCode]?.get(lang) ?: getLocalizedMMSMessage(LocalizedMMSMessages.UNKNOWN_ERROR, lang)
-    
+
     private val chmLastDayWork = ConcurrentHashMap<Int, List<Int>>()
     private val chmLastWorkShift = ConcurrentHashMap<Int, Int>()
 
@@ -99,7 +99,7 @@ object MMSTelematicFunction {
 //            """
 //        )
 //    }
-    
+
     fun addPoint(conn: CoreAdvancedConnection, deviceConfig: DeviceConfig, time: Int, bbData: AdvancedByteBuffer) {
         //--- если объект прописан, то записываем точки, иначе просто пропускаем
         if (deviceConfig.objectId != 0) {
@@ -118,7 +118,7 @@ object MMSTelematicFunction {
             }
         }
     }
-    
+
     private fun checkAndCreateDayWork(conn: CoreAdvancedConnection, deviceConfig: DeviceConfig, time: Int) {
         val arrLastDT = chmLastDayWork[deviceConfig.objectId]
         val arrDT = getDateTimeYMDHMSInts(deviceConfig.timeZone, time)
@@ -137,7 +137,7 @@ object MMSTelematicFunction {
             )
             val isExist = rsADR.next()
             rsADR.close()
-            
+
             if (!isExist) {
                 conn.executeUpdate(
                     """
@@ -149,7 +149,7 @@ object MMSTelematicFunction {
             chmLastDayWork[deviceConfig.objectId] = arrDT
         }
     }
-    
+
     private fun checkAndCreateWorkShift(conn: CoreAdvancedConnection, deviceConfig: DeviceConfig, time: Int) {
         var lastTime: Int? = chmLastWorkShift[deviceConfig.objectId]
         if (lastTime == null || lastTime < time) {
@@ -166,7 +166,7 @@ object MMSTelematicFunction {
             chmLastWorkShift[deviceConfig.objectId] = lastTime!!
         }
     }
-    
+
     fun writeSession(
         conn: CoreAdvancedConnection,
         dirSessionLog: File,
@@ -185,7 +185,7 @@ object MMSTelematicFunction {
         //--- какое д.б. имя лог-файла для текущего дня и часа
         val logTime = getDateTimeYMDHMSString(timeZone, getCurrentTimeInt())
         val curLogFileName = logTime.substring(0, 13).replace('.', '-').replace(' ', '-')
-        
+
         var text = "$logTime $address Duration [sec]: ${getCurrentTimeInt() - begTime} Points recorded: $dataCount "
         if (dataCount > 0) {
             text += " Time of first point: ${getDateTimeYMDHMSString(timeZone, firstPointTime)} Time of last point: ${getDateTimeYMDHMSString(timeZone, lastPointTime)} "
@@ -195,7 +195,7 @@ object MMSTelematicFunction {
         } else {
             text += " Error: $errorText "
         }
-        
+
         val dirDeviceSessionLog = File(dirSessionLog, "device/${deviceConfig.deviceId}")
         dirDeviceSessionLog.mkdirs()
         var out = getFileWriter(File(dirDeviceSessionLog, curLogFileName), true)
@@ -203,7 +203,7 @@ object MMSTelematicFunction {
         out.newLine()
         out.flush()
         out.close()
-        
+
         val dirObjectSessionLog = File(dirSessionLog, "object/${deviceConfig.objectId}")
         dirObjectSessionLog.mkdirs()
         out = getFileWriter(File(dirObjectSessionLog, curLogFileName), true)
@@ -211,7 +211,7 @@ object MMSTelematicFunction {
         out.newLine()
         out.flush()
         out.close()
-        
+
         conn.executeUpdate(
             """
                 UPDATE MMS_device SET 
@@ -222,10 +222,10 @@ object MMSTelematicFunction {
                 WHERE id = '${deviceConfig.deviceId}'
             """
         )
-        
+
         conn.commit()
     }
-    
+
     fun writeError(
         conn: CoreAdvancedConnection,
         dirSessionLog: File,
@@ -259,7 +259,7 @@ object MMSTelematicFunction {
         }
         AdvancedLogger.error(errorText)
     }
-    
+
     fun autoCreateWorkShift(conn: CoreAdvancedConnection, userId: Int, objectId: Int): Int? {
         //--- найдем последнюю рабочую смену
         var begTime = 0
@@ -277,7 +277,7 @@ object MMSTelematicFunction {
             while (endTime <= getCurrentTimeInt()) {
                 begTime = endTime
                 endTime += workShiftDuration
-                
+
                 conn.executeUpdate(
                     StringBuilder(
                         " INSERT INTO MMS_work_shift ( "
@@ -296,7 +296,7 @@ object MMSTelematicFunction {
             return null
         }
     }
-    
+
     fun saveSensorData(
         conn: CoreAdvancedConnection,
         deviceIndex: Int,
@@ -310,7 +310,7 @@ object MMSTelematicFunction {
     ) {
         //--- write raw data into MMS_data_XXX
         CoreTelematicFunction.putDigitalSensors(deviceIndex, tmSensorData, startPortNum, sensorDataSize, bbData)
-        
+
         //--- write smoothed/aggregated data into MMS_agg_YYY
         tmSensorData.forEach { (index, sensorValue) ->
             val portNum = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE + startPortNum + index
@@ -324,7 +324,7 @@ object MMSTelematicFunction {
             )
         }
     }
-    
+
     fun saveSensorData(
         conn: CoreAdvancedConnection,
         deviceIndex: Int,
@@ -337,7 +337,7 @@ object MMSTelematicFunction {
     ) {
         //--- write raw data into MMS_data_XXX
         CoreTelematicFunction.putDigitalSensors(deviceIndex, tmSensorData, startPortNum, bbData)
-        
+
         //--- write smoothed/aggregated data into MMS_agg_YYY
         tmSensorData.forEach { (index, sensorValue) ->
             val portNum = deviceIndex * CoreTelematicFunction.MAX_PORT_PER_DEVICE + startPortNum + index
@@ -351,7 +351,7 @@ object MMSTelematicFunction {
             )
         }
     }
-    
+
     fun saveSensorData(
         conn: CoreAdvancedConnection,
         sensorConfigs: Map<Int, List<SensorEntity>>,               // portNum to sensorEntities
@@ -377,7 +377,7 @@ object MMSTelematicFunction {
                         sensorValue = sensorValue,
                     )
                 }
-                
+
                 in SensorConfig.counterSensorTypes -> {
                     SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
                     saveCounterSensorData(
@@ -388,7 +388,7 @@ object MMSTelematicFunction {
                         sensorValue = sensorValue,
                     )
                 }
-                
+
                 SensorConfig.SENSOR_WORK -> {
                     SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
                     saveWorkSensorData(
@@ -401,7 +401,7 @@ object MMSTelematicFunction {
             }
         }
     }
-    
+
     fun saveGeoSensorData(
         conn: CoreAdvancedConnection,
         sensorEntity: SensorEntity,
@@ -412,9 +412,9 @@ object MMSTelematicFunction {
         absoluteRun: Double?,
     ) {
         SensorService.checkAndCreateSensorTables(conn, sensorEntity.id)
-        
+
         var relativeRun = 0.0
-        
+
         val rs = conn.executeQuery(
             """
                 SELECT value_0 , value_1 , value_2
@@ -426,13 +426,13 @@ object MMSTelematicFunction {
             val prevWgsX = rs.getDouble(1)
             val prevWgsY = rs.getDouble(2)
             val prevAbsoluteRun = rs.getDouble(3)
-            
+
             relativeRun = absoluteRun?.let {
                 max(absoluteRun - prevAbsoluteRun, 0.0)
             } ?: XyProjection.distance(prevWgsX, prevWgsY, wgsX, wgsY)
         }
         rs.close()
-        
+
         conn.executeUpdate(
             """
                 INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , type_0 , value_0 , value_1 , value_2 , value_3 ) 
@@ -440,7 +440,7 @@ object MMSTelematicFunction {
             """
         )
     }
-    
+
     private fun saveAnalogueSensorData(
         conn: CoreAdvancedConnection,
         sensorEntity: SensorEntity,
@@ -457,14 +457,14 @@ object MMSTelematicFunction {
         ) {
             return
         }
-        
+
         //--- ignore outbound values
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
         }
-        
+
         val dataValue = getDataValue(sensorCalibration, sensorValue)
-        
+
         val smoothPeriod = sensorEntity.smoothTime ?: 0
         val smoothValue = if (smoothPeriod > 0) {
             val values = mutableListOf(dataValue)
@@ -479,9 +479,9 @@ object MMSTelematicFunction {
                 values += rs.getDouble(1)
             }
             rs.close()
-            
+
             values.sort()
-            
+
             //--- if the number of values is odd, take exactly the middle
             if (values.size % 2 != 0) {
                 values[values.size / 2]
@@ -501,7 +501,7 @@ object MMSTelematicFunction {
 //        } else {
 //            getValueTypeForAnalogueSensors(sensorInfo, avgOntime, avgValue, prevTime)
 //        }
-        
+
         conn.executeUpdate(
             """
                 INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , value_0 , value_1 ) 
@@ -509,7 +509,7 @@ object MMSTelematicFunction {
             """
         )
     }
-    
+
     private fun saveCounterSensorData(
         conn: CoreAdvancedConnection,
         sensorEntity: SensorEntity,
@@ -526,13 +526,13 @@ object MMSTelematicFunction {
         ) {
             return
         }
-        
+
         //--- ignore outbound values
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
         }
         val dataValue = getDataValue(sensorCalibration, sensorValue)
-        
+
         var prevValue = 0.0
         if (sensorEntity.isAbsoluteCount == true) {
             val rs = conn.executeQuery(
@@ -547,13 +547,13 @@ object MMSTelematicFunction {
             }
             rs.close()
         }
-        
+
         var deltaValue = dataValue - prevValue
         //--- учитываем возможный/периодический сброс абсолютного счётчика
         if (deltaValue < 0) {
             deltaValue = 0.0
         }
-        
+
         val rs = conn.executeQuery(
             """
                 SELECT SUM(value_1)
@@ -567,7 +567,7 @@ object MMSTelematicFunction {
             0.0
         }
         rs.close()
-        
+
         conn.executeUpdate(
             """
                 INSERT INTO MMS_agg_${sensorEntity.id} ( ontime_0 , ontime_1 , value_0 , value_1 , value_2 ) 
@@ -575,7 +575,7 @@ object MMSTelematicFunction {
             """
         )
     }
-    
+
     private fun saveWorkSensorData(
         conn: CoreAdvancedConnection,
         sensorEntity: SensorEntity,
@@ -591,13 +591,14 @@ object MMSTelematicFunction {
         ) {
             return
         }
-        
+
         //--- ignore outbound values
         if (isIgnoreSensorData(sensorEntity.minIgnore, sensorEntity.maxIgnore, sensorValue)) {
             return
         }
-        
+
         val isWorkAboveBorder = sensorEntity.isWorkAboveBorder ?: true
+        val maxNoDataTime = sensorEntity.workMaxNoDataTime ?: SensorService.DEFAULT_NO_DATA_TIME_VALUE
         val workState =
             if (sensorEntity.workOverBorder != null &&
                 (isWorkAboveBorder && sensorValue > sensorEntity.workOverBorder!! ||
@@ -617,49 +618,46 @@ object MMSTelematicFunction {
             } else {
                 SensorConfigWork.STATE_WORK
             }
-        
-        val (onTime0, onTime1, prevState) = getPrevWorkState(conn, sensorEntity.id)
-        
+
+        val (prevTime0, prevTime1, prevState) = getPrevWorkState(conn, sensorEntity.id)
+
         prevState?.let {
-            if (workState == prevState) {
-                continuePrevPeriod(conn, sensorEntity.id, pointTime)
-            } else {
-                val minTime = when (prevState) {
-                    SensorConfigWork.STATE_OFF -> sensorEntity.workMinOffTime ?: 1
-                    SensorConfigWork.STATE_WORK -> sensorEntity.workMinOnTime ?: 1
-                    SensorConfigWork.STATE_IDLE -> sensorEntity.workMinIdleTime ?: 1
-                    SensorConfigWork.STATE_OVER -> sensorEntity.workMinOverTime ?: 1
-                    else -> 1
+            if (pointTime - prevTime1 >= maxNoDataTime) {
+                val prevMinTime = getPrevMinTime(sensorEntity, prevState)
+                if (prevTime1 - prevTime0 < prevMinTime) {
+                    deletePrevWorkPeriod(conn, sensorEntity, prevTime0)
                 }
-                
-                if (onTime1 - onTime0 < minTime) {
-                    conn.executeUpdate(
-                        """
-                            DELETE FROM MMS_agg_${sensorEntity.id} 
-                            WHERE ontime_0 = $onTime0 
-                        """
-                    )
-                    
-                    val (_, _, prevState2) = getPrevWorkState(conn, sensorEntity.id)
-                    
-                    prevState2?.let {
-                        if (workState == prevState2) {
-                            continuePrevPeriod(conn, sensorEntity.id, pointTime)
-                        } else {
+                createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
+            } else {
+                if (workState == prevState) {
+                    continuePrevPeriod(conn, sensorEntity.id, pointTime)
+                } else {
+                    val prevMinTime = getPrevMinTime(sensorEntity, prevState)
+
+                    if (prevTime1 - prevTime0 < prevMinTime) {
+                        deletePrevWorkPeriod(conn, sensorEntity, prevTime0)
+
+                        val (_, _, prevState2) = getPrevWorkState(conn, sensorEntity.id)
+
+                        prevState2?.let {
+                            if (workState == prevState2) {
+                                continuePrevPeriod(conn, sensorEntity.id, pointTime)
+                            } else {
+                                createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
+                            }
+                        } ?: run {
                             createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
                         }
-                    } ?: run {
+                    } else {
                         createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
                     }
-                } else {
-                    createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
                 }
             }
         } ?: run {
             createNewWorkPeriod(conn, sensorEntity.id, pointTime, workState)
         }
     }
-    
+
     private fun getPrevWorkState(conn: CoreAdvancedConnection, sensorId: Int): Triple<Int, Int, Int?> {
         val rs = conn.executeQuery(
             """
@@ -674,10 +672,27 @@ object MMSTelematicFunction {
             Triple(0, 0, null)
         }
         rs.close()
-        
+
         return result
     }
-    
+
+    private fun getPrevMinTime(sensorEntity: SensorEntity, prevState: Int): Int = when (prevState) {
+        SensorConfigWork.STATE_OFF -> sensorEntity.workMinOffTime ?: 1
+        SensorConfigWork.STATE_WORK -> sensorEntity.workMinOnTime ?: 1
+        SensorConfigWork.STATE_IDLE -> sensorEntity.workMinIdleTime ?: 1
+        SensorConfigWork.STATE_OVER -> sensorEntity.workMinOverTime ?: 1
+        else -> 1
+    }
+
+    private fun deletePrevWorkPeriod(conn: CoreAdvancedConnection, sensorEntity: SensorEntity, prevTime0: Int) {
+        conn.executeUpdate(
+            """
+                DELETE FROM MMS_agg_${sensorEntity.id} 
+                WHERE ontime_0 = $prevTime0 
+            """
+        )
+    }
+
     private fun continuePrevPeriod(conn: CoreAdvancedConnection, sensorId: Int, pointTime: Int) {
         conn.executeUpdate(
             """
@@ -687,7 +702,7 @@ object MMSTelematicFunction {
             """
         )
     }
-    
+
     private fun createNewWorkPeriod(conn: CoreAdvancedConnection, sensorId: Int, pointTime: Int, workState: Int) {
         conn.executeUpdate(
             """
@@ -696,7 +711,7 @@ object MMSTelematicFunction {
             """
         )
     }
-    
+
     //--- work with sensor errors
     private fun saveSensorError(
         conn: CoreAdvancedConnection,
@@ -712,7 +727,7 @@ object MMSTelematicFunction {
                 0
             }
             rs.close()
-            
+
             rs = conn.executeQuery(
                 """ 
                     SELECT MAX(ontime_1) 
@@ -726,7 +741,7 @@ object MMSTelematicFunction {
                 0
             }
             rs.close()
-            
+
             if (lastTextTime > lastAggTime) {
                 conn.executeUpdate(
                     """
@@ -750,7 +765,7 @@ object MMSTelematicFunction {
             true
         } ?: false
     }
-    
+
     //--- define sensor data ignoring
     private fun isIgnoreSensorData(minIgnore: Double?, maxIgnore: Double?, sensorData: Double?): Boolean =
         sensorData?.let {
@@ -773,11 +788,11 @@ object MMSTelematicFunction {
                 } ?: false
             }
         } ?: true
-    
+
     //--- calculation of the measured value by linear approximation
     private fun getDataValue(sensorCalibration: List<Pair<Double, Double>>, sensorValue: Double): Double {
         var pos = -1
-        
+
         if (sensorCalibration.isEmpty()) {
             return sensorValue
         }
@@ -793,7 +808,7 @@ object MMSTelematicFunction {
                 sensorValue / calibrationSensorValue * calibrationDataValue
             }
         }
-        
+
         if (sensorValue < sensorCalibration[0].first) {
             pos = 0
         } else if (sensorValue > sensorCalibration[sensorCalibration.lastIndex].first) {
@@ -806,11 +821,11 @@ object MMSTelematicFunction {
                 }
             }
         }
-        
+
         return (sensorValue - sensorCalibration[pos].first) /
                 (sensorCalibration[pos + 1].first - sensorCalibration[pos].first) *
                 (sensorCalibration[pos + 1].second - sensorCalibration[pos].second) +
                 sensorCalibration[pos].second
     }
-    
+
 }

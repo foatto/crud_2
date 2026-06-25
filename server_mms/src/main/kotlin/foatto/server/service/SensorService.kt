@@ -75,6 +75,8 @@ class SensorService(
 ) {
 
     companion object {
+        const val DEFAULT_NO_DATA_TIME_VALUE = 300
+
         private const val FIELD_OBJECT_ID = "obj_id"
 
         private const val FIELD_NAME = "name"
@@ -103,6 +105,7 @@ class SensorService(
         private const val FIELD_MIN_ON_TIME = "workMinOnTime"
         private const val FIELD_MIN_IDLE_TIME = "workMinIdleTime"
         private const val FIELD_MIN_OVER_TIME = "workMinOverTime"
+        private const val FIELD_MAX_NO_DATA_TIME = "workMaxNoDataTime"
 
         private const val FIELD_MIN_VIEW = "minView"
         private const val FIELD_MAX_VIEW = "maxView"
@@ -731,7 +734,7 @@ class SensorService(
             name = FIELD_MAX_IGNORE,
             caption = getLocalizedMMSMessage(LocalizedMMSMessages.IGNORE_SENSOR_READINGS_GREATER_THAN, userConfig.lang),
             isEditable = changeEnabled,
-            value = sensorEntity?.maxIgnore?.toString() ?: "1000000.0",
+            value = sensorEntity?.maxIgnore?.toString() ?: "1000000000.0",
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = false,
@@ -835,6 +838,17 @@ class SensorService(
             caption = getLocalizedMMSMessage(LocalizedMMSMessages.MINIMUM_OVERLOAD_TIME, userConfig.lang),
             isEditable = changeEnabled,
             value = sensorEntity?.workMinOverTime?.toString() ?: "1",
+            visibility = FormCellVisibility(
+                name = FIELD_SENSOR_TYPE,
+                state = true,
+                values = workSensorType,
+            ),
+        )
+        formCells += FormSimpleCell(
+            name = FIELD_MAX_NO_DATA_TIME,
+            caption = getLocalizedMMSMessage(LocalizedMMSMessages.MAXIMUM_NO_DATA_TIME, userConfig.lang),
+            isEditable = changeEnabled,
+            value = sensorEntity?.workMaxNoDataTime?.toString() ?: DEFAULT_NO_DATA_TIME_VALUE.toString(),
             visibility = FormCellVisibility(
                 name = FIELD_SENSOR_TYPE,
                 state = true,
@@ -1090,6 +1104,7 @@ class SensorService(
             workMinOnTime = formActionData[FIELD_MIN_ON_TIME]?.stringValue?.toIntOrNull() ?: 1,
             workMinIdleTime = formActionData[FIELD_MIN_IDLE_TIME]?.stringValue?.toIntOrNull() ?: 1,
             workMinOverTime = formActionData[FIELD_MIN_OVER_TIME]?.stringValue?.toIntOrNull() ?: 1,
+            workMaxNoDataTime = formActionData[FIELD_MAX_NO_DATA_TIME]?.stringValue?.toIntOrNull() ?: DEFAULT_NO_DATA_TIME_VALUE,
             minView = formActionData[FIELD_MIN_VIEW]?.stringValue?.toDoubleOrNull() ?: 0.0,
             maxView = formActionData[FIELD_MAX_VIEW]?.stringValue?.toDoubleOrNull() ?: 100.0,
             minLimit = formActionData[FIELD_MIN_LIMIT]?.stringValue?.toDoubleOrNull() ?: 0.0,

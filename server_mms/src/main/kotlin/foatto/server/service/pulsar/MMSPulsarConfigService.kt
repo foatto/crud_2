@@ -147,6 +147,7 @@ class MMSPulsarConfigService(
                 workMinOnTime = sensor.minOnTime,
                 workMinIdleTime = sensor.minIdleTime,
                 workMinOverTime = sensor.minOverTime,
+                workMaxNoDataTime = SensorService.DEFAULT_NO_DATA_TIME_VALUE,
 
                 minView = sensor.minView,
                 maxView = sensor.maxView,

@@ -637,6 +637,7 @@ abstract class AbstractObjectService(
                         workMinOnTime = 1,
                         workMinIdleTime = 1,
                         workMinOverTime = 1,
+                        workMaxNoDataTime = SensorService.DEFAULT_NO_DATA_TIME_VALUE,
                         minView = 0.0,
                         maxView = 100.0,
                         minLimit = 0.0,

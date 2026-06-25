@@ -1,13 +1,9 @@
 package foatto.server.ds
 
 import foatto.server.entity.SensorEntity
-import foatto.server.model.sensor.SensorConfigGeo
 import foatto.server.sql.CoreAdvancedConnection
 import kotlinx.datetime.TimeZone
 import java.nio.channels.SocketChannel
-import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.round
 
 abstract class MMSNioHandler : AbstractTelematicNioHandler() {
 
@@ -99,7 +95,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 SELECT port_num , id , sensor_type , beg_time , end_time ,  
                     min_moving_time , min_parking_time , min_over_speed_time , is_absolute_run , 
                     ignore_min_sensor , ignore_max_sensor , dim ,
-                    active_value , bound_value , idle_border , limit_border , min_off_time , min_on_time , min_idle_time , min_over_time ,  
+                    active_value , bound_value , idle_border , limit_border , min_off_time , min_on_time , min_idle_time , min_over_time , max_no_data_time ,  
                     analog_min_view , analog_max_view , analog_min_limit , analog_max_limit , smooth_time ,   
                     is_absolute_count , in_out_type , container_type , energo_phase
                 FROM MMS_sensor
@@ -144,6 +140,7 @@ abstract class MMSNioHandler : AbstractTelematicNioHandler() {
                 workMinOnTime = rs.getInt(pos++),
                 workMinIdleTime = rs.getInt(pos++),
                 workMinOverTime = rs.getInt(pos++),
+                workMaxNoDataTime = rs.getInt(pos++),
 
                 minView = rs.getDouble(pos++),
                 maxView = rs.getDouble(pos++),

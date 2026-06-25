@@ -1350,6 +1350,7 @@ class DeviceService(
             workMinOffTime = 1,
             workMinIdleTime = 1,
             workMinOverTime = 1,
+            workMaxNoDataTime = SensorService.DEFAULT_NO_DATA_TIME_VALUE,
 
             minView = minView,
             maxView = maxView,
